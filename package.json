@@ -4,9 +4,9 @@
   "description": "Smart contracts of Wealth of Wisdom",
   "main": "index.js",
   "scripts": {
+    "test": "npx hardhat test",
     "prepare": "husky install",
-    "pre-commit": "npx lint-staged",
-    "pre-push": "npm run test"
+    "pre-commit": "npx lint-staged"
   },
   "lint-staged": {
     "contracts/**/*.sol": [
