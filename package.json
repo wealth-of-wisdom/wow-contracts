@@ -4,7 +4,6 @@
   "description": "Smart contracts of Wealth of Wisdom",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "husky install",
     "pre-commit": "npx lint-staged",
     "pre-push": "npm run test"
