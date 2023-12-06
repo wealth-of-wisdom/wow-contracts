@@ -14,11 +14,8 @@
       "solhint -f table --max-warnings 0"
     ]
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/wealth-of-wisdom/wow-contracts.git"
-  },
-  "author": "",
+  "repository": "git+https://github.com/wealth-of-wisdom/wow-contracts.git",
+  "author": "Alina <alina.d@superhow.org>",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/wealth-of-wisdom/wow-contracts/issues"
