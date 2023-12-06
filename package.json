@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "npx hardhat test",
-    "prepare": "husky install",
-    "pre-commit": "npx lint-staged"
+    "prepare": "husky install && npm run create-hooks",
+    "pre-commit": "npx lint-staged",
+    "create-hooks": "npx husky set .husky/pre-commit \"npm run pre-commit\""
   },
   "lint-staged": {
     "contracts/**/*.sol": [
