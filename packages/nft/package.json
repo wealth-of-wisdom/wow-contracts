@@ -1,0 +1,15 @@
+{
+  "name": "@wealth-of-wisdom/nft",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^2.0.2",
+    "hardhat": "^2.19.2"
+  },
+  "scripts": {
+    "test": "forge test",
+    "build": "forge build",
+    "coverage": "forge coverage"
+  },
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT"
+}
