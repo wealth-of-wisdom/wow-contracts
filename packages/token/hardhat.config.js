@@ -1,10 +1,11 @@
 require("@nomicfoundation/hardhat-toolbox");
+require("@openzeppelin/hardhat-upgrades");
 require("dotenv").config();
 
 module.exports = {
   solidity: "0.8.20",
   etherscan: {
-    apiKey: process.env.SEPOLIA_API_KEY,
+    apiKey: process.env.SEPOLIA_APIE_KEY,
   },
   sourcify: {
     enabled: true,
