@@ -48,6 +48,17 @@ contract WOWToken is
         _mint(to, amount);
     }
 
+    function nonces(
+        address owner
+    )
+        public
+        view
+        override(ERC20PermitUpgradeable, NoncesUpgradeable)
+        returns (uint256)
+    {
+        return super.nonces(owner);
+    }
+
     function _authorizeUpgrade(
         address newImplementation
     ) internal override onlyRole(UPGRADER_ROLE) {}
@@ -60,16 +71,5 @@ contract WOWToken is
         uint256 value
     ) internal override(ERC20Upgradeable, ERC20VotesUpgradeable) {
         super._update(from, to, value);
-    }
-
-    function nonces(
-        address owner
-    )
-        public
-        view
-        override(ERC20PermitUpgradeable, NoncesUpgradeable)
-        returns (uint256)
-    {
-        return super.nonces(owner);
     }
 }
