@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
+import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 contract Vesting is Initializable, AccessControlUpgradeable {
     enum UnlockTypes {
@@ -34,7 +35,8 @@ contract Vesting is Initializable, AccessControlUpgradeable {
         uint lockedPoolTokens;
     }
 
-    ERC20Upgradeable private token;
+    using SafeERC20 for IERC20;
+    IERC20 private token;
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
     uint public constant DAY = 1 days;
     uint public constant MONTH = 30 days;
@@ -149,7 +151,7 @@ contract Vesting is Initializable, AccessControlUpgradeable {
     constructor() initializer {}
 
     function initialize(
-        ERC20Upgradeable _token,
+        IERC20 _token,
         uint _listingDate
     ) public initializer mValidListingDate(_listingDate) {
         __AccessControl_init();
@@ -322,7 +324,7 @@ contract Vesting is Initializable, AccessControlUpgradeable {
             .beneficiaries[msg.sender]
             .claimedTotalTokenAmount += unlockedTokens;
 
-        token.transfer(msg.sender, unlockedTokens);
+        token.safeTransfer(msg.sender, unlockedTokens);
 
         emit Claim(msg.sender, _poolIndex, unlockedTokens);
     }
@@ -351,12 +353,12 @@ contract Vesting is Initializable, AccessControlUpgradeable {
      * @param _tokenAmount Absolute token amount (with included decimals).
      */
     function withdrawContractTokens(
-        ERC20Upgradeable _customToken,
+        IERC20 _customToken,
         address _address,
         uint256 _tokenAmount
     ) external onlyRole(DEFAULT_ADMIN_ROLE) mAddressNotZero(_address) {
         if (_customToken == token) revert CanNotWithdrawVestedTokens();
-        _customToken.transfer(_address, _tokenAmount);
+        _customToken.safeTransfer(_address, _tokenAmount);
     }
 
     /**
@@ -488,7 +490,7 @@ contract Vesting is Initializable, AccessControlUpgradeable {
      * @notice Return claimable token address
      * @return IERC20 token.
      */
-    function getToken() external view returns (ERC20Upgradeable) {
+    function getToken() external view returns (IERC20) {
         return token;
     }
 
