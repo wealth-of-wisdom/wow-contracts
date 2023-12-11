@@ -5,11 +5,6 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-/**
- * @title Sahara Vesting Smart Contract
- * @author SAHARA
- * @notice Vesting initializable contract for beneficiary management and unlocked token claiming.
- */
 contract Vesting is Initializable, AccessControlUpgradeable {
     enum UnlockTypes {
         DAILY,
