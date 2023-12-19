@@ -11,9 +11,8 @@ contract VestingTest is VestingTester {
     event Initialized(uint8 version);
 
     uint256 listingDate = block.timestamp;
+    uint primaryPool = 0;
     WOW_Vesting internal vesting;
-
-    constructor() {}
 
     function setUp() public override {
         super.setUp();
@@ -43,13 +42,13 @@ contract VestingTest is VestingTester {
     function test_claimTokens_RevertIf_PoolDoesNotExist() public {
         vm.prank(alice);
         vm.expectRevert(WOW_Vesting.PoolDoesNotExist.selector);
-        vesting.claimTokens(0);
+        vesting.claimTokens(primaryPool);
     }
 
     function test_claimTokens_RevertIf_NotInBeneficiaryList() public {
         addVestingPool();
         vm.prank(alice);
         vm.expectRevert(WOW_Vesting.NotInBeneficiaryList.selector);
-        vesting.claimTokens(0);
+        vesting.claimTokens(primaryPool);
     }
 }
