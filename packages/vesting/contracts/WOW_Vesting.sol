@@ -120,7 +120,7 @@ contract WOW_Vesting is Initializable, AccessControlUpgradeable {
             revert PercentageDivisorZero();
         if (
             (_listingPercentageDividend * _cliffPercentageDivisor) +
-                (_cliffPercentageDividend * _listingPercentageDivisor) <=
+                (_cliffPercentageDividend * _listingPercentageDivisor) >
             (_listingPercentageDivisor * _cliffPercentageDivisor)
         ) revert ListingAndCliffPercentageOverflow();
 
@@ -152,9 +152,6 @@ contract WOW_Vesting is Initializable, AccessControlUpgradeable {
             revert ListingDateCanOnlyBeSetInFuture();
         _;
     }
-
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() initializer {}
 
     function initialize(
         IERC20 _token,

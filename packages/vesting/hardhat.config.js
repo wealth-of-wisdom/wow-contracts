@@ -3,22 +3,18 @@ require("@openzeppelin/hardhat-upgrades");
 require("dotenv").config();
 
 module.exports = {
-  solidity: "0.8.20",
-  settings: {
-    optimizer: {
-      enabled: true,
-      runs: 2000,
-      details: {
-        yul: true,
-        yulDetails: {
-          stackAllocation: true,
-          optimizerSteps: "dhfoDgvulfnTUtnIf",
-        },
+  solidity: {
+    version: "0.8.20",
+    settings: {
+      viaIR: true,
+      optimizer: {
+        enabled: true,
+        runs: 200,
       },
     },
   },
   etherscan: {
-    apiKey: process.env.SEPOLIA_APIE_KEY,
+    apiKey: process.env.SEPOLIA_API_KEY,
   },
   sourcify: {
     enabled: true,
