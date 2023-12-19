@@ -6,7 +6,7 @@ import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract Vesting is Initializable, AccessControlUpgradeable {
+contract WOW_Vesting is Initializable, AccessControlUpgradeable {
     enum UnlockTypes {
         DAILY,
         MONTHLY
@@ -16,6 +16,7 @@ contract Vesting is Initializable, AccessControlUpgradeable {
         uint listingTokenAmount;
         uint cliffTokenAmount;
         uint vestedTokenAmount;
+        uint stakedTokenAmount;
         uint claimedTotalTokenAmount;
     }
     struct Pool {
@@ -38,6 +39,8 @@ contract Vesting is Initializable, AccessControlUpgradeable {
     using SafeERC20 for IERC20;
     IERC20 private token;
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
+    bytes32 public constant DEFAULT_STAKING_ROLE =
+        keccak256("DEFAULT_STAKING_ROLE");
     uint public constant DAY = 1 days;
     uint public constant MONTH = 30 days;
 
@@ -57,18 +60,21 @@ contract Vesting is Initializable, AccessControlUpgradeable {
         uint unlockedPoolAmount
     );
     event ListingDateChanged(uint oldDate, uint newDate);
+    event UpdatedStakedTokens(uint indexed poolIndex, uint amount, bool stake);
     event VestingPoolAdded(uint indexed poolIndex, uint totalPoolTokenAmount);
 
     error ArraySizeMismatch();
     error CanNotWithdrawVestedTokens();
     error ListingDateCanOnlyBeSetInFuture();
     error ListingAndCliffPercentageOverflow();
+    error NotEnoughVestedTokensForStaking();
     error NotInBeneficiaryList();
     error NoClaimableTokens();
     error NotEnoughTokenBalance();
     error PercentageDivisorZero();
     error PoolDoesNotExist();
     error PoolWithThisNameExists();
+    error StakedTokensCanNotBeClaimed();
     error TokenAmountExeedsTotalPoolAmount();
     error TokenAmonutZero();
     error VestingDurationZero();
@@ -196,7 +202,8 @@ contract Vesting is Initializable, AccessControlUpgradeable {
         )
         mTokenNotZero(_totalPoolTokenAmount)
     {
-        Pool storage p = vestingPools[poolCount];
+        uint newIndex = poolCount;
+        Pool storage p = vestingPools[newIndex];
 
         p.name = _name;
         p.listingPercentageDividend = _listingPercentageDividend;
@@ -320,9 +327,21 @@ contract Vesting is Initializable, AccessControlUpgradeable {
         if (unlockedTokens > token.balanceOf(address(this)))
             revert NotEnoughTokenBalance();
 
-        vestingPools[_poolIndex]
-            .beneficiaries[msg.sender]
-            .claimedTotalTokenAmount += unlockedTokens;
+        Pool storage p = vestingPools[_poolIndex];
+        Beneficiary storage b = p.beneficiaries[msg.sender];
+        // NOTICE:
+        // additional staking logic requires check whether
+        // claimable tokens are not withdrawing from staked token pool
+        if (
+            b.totalTokens - (b.claimedTotalTokenAmount + unlockedTokens) <
+            b.stakedTokenAmount
+        ) {
+            revert StakedTokensCanNotBeClaimed();
+        } else {
+            unlockedTokens = unlockedTokens - b.stakedTokenAmount;
+        }
+
+        b.claimedTotalTokenAmount += unlockedTokens;
 
         token.safeTransfer(msg.sender, unlockedTokens);
 
@@ -359,6 +378,38 @@ contract Vesting is Initializable, AccessControlUpgradeable {
     ) external onlyRole(DEFAULT_ADMIN_ROLE) mAddressNotZero(_address) {
         if (_customToken == token) revert CanNotWithdrawVestedTokens();
         _customToken.safeTransfer(_address, _tokenAmount);
+    }
+
+    /**
+     * @notice Updates staked tokens via vetsing contract.
+     * @param _poolIndex Index that refers to vesting pool object.
+     * @param _address Address of the staker.
+     * @param _tokenAmount Amount used to stake or unstake from vesting pool.
+     * @param _staking Specification whether we are staking or unstaking from pool.
+     */
+    function updateVestedStakedTokens(
+        uint _poolIndex,
+        address _address,
+        uint _tokenAmount,
+        bool _staking
+    )
+        external
+        onlyRole(DEFAULT_STAKING_ROLE)
+        mPoolExists(_poolIndex)
+        mAddressNotZero(_address)
+    {
+        Pool storage p = vestingPools[_poolIndex];
+        Beneficiary storage b = p.beneficiaries[_address];
+        if (_staking) {
+            if (b.vestedTokenAmount - b.stakedTokenAmount > _tokenAmount)
+                revert NotEnoughVestedTokensForStaking();
+            b.stakedTokenAmount += _tokenAmount;
+        } else {
+            if (b.stakedTokenAmount < _tokenAmount)
+                revert NotEnoughTokenBalance();
+            b.stakedTokenAmount -= _tokenAmount;
+        }
+        emit UpdatedStakedTokens(_poolIndex, _tokenAmount, _staking);
     }
 
     /**
