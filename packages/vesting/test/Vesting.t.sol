@@ -46,10 +46,10 @@ contract VestingTest is VestingTester {
         vesting.claimTokens(0);
     }
 
-    function test_addVestingPool() public {
+    function test_claimTokens_RevertIf_NotInBeneficiaryList() public {
         addVestingPool();
         vm.prank(alice);
-        vm.expectRevert(WOW_Vesting.NoClaimableTokens.selector);
+        vm.expectRevert(WOW_Vesting.NotInBeneficiaryList.selector);
         vesting.claimTokens(0);
     }
 }
