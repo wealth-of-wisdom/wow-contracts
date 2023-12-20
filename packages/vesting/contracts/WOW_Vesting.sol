@@ -398,7 +398,7 @@ contract WOW_Vesting is Initializable, AccessControlUpgradeable {
         Pool storage p = vestingPools[_poolIndex];
         Beneficiary storage b = p.beneficiaries[_address];
         if (_staking) {
-            if (b.vestedTokenAmount - b.stakedTokenAmount > _tokenAmount)
+            if (b.totalTokens - b.stakedTokenAmount < _tokenAmount)
                 revert NotEnoughVestedTokensForStaking();
             b.stakedTokenAmount += _tokenAmount;
         } else {
