@@ -11,30 +11,41 @@ interface IVestingEvents {
                                        EVENTS
     //////////////////////////////////////////////////////////////////////////*/
 
-    event Claim(
+    event VestingPoolAdded(
         uint16 indexed poolIndex,
-        address indexed from,
-        uint256 tokenAmount
+        uint256 totalPoolTokenAmount
     );
+
     event BeneficiaryAdded(
         uint16 indexed poolIndex,
         address indexed beneficiary,
         uint256 addedTokenAmount
     );
+
     event BeneficiaryRemoved(
         uint16 indexed poolIndex,
         address indexed beneficiary,
         uint256 unlockedPoolAmount
     );
+
     event ListingDateChanged(uint32 oldDate, uint32 newDate);
-    event UpdatedStakedTokens(
+
+    event ContractTokensWithdrawn(
+        IERC20 indexed customToken,
+        address indexed recipient,
+        uint256 tokenAmount
+    );
+
+    event TokensClaimed(
+        uint16 indexed poolIndex,
+        address indexed user,
+        uint256 tokenAmount
+    );
+
+    event StakedTokensUpdated(
         uint16 indexed poolIndex,
         uint256 amount,
         bool stake
-    );
-    event VestingPoolAdded(
-        uint16 indexed poolIndex,
-        uint256 totalPoolTokenAmount
     );
 }
 
@@ -73,8 +84,8 @@ interface IVesting is IVestingEvents {
         uint16 vestingDurationInMonths;
         uint16 vestingDurationInDays;
         uint32 vestingEndDate;
-        mapping(address => Beneficiary) beneficiaries;
         UnlockTypes unlockType;
+        mapping(address => Beneficiary) beneficiaries;
         uint256 totalPoolTokenAmount;
         uint256 lockedPoolTokenAmount;
     }
@@ -82,4 +93,92 @@ interface IVesting is IVestingEvents {
     /*//////////////////////////////////////////////////////////////////////////
                                        FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
+
+    function initialize(IERC20 token, uint32 listingDate) external;
+
+    function addVestingPool(
+        string calldata name,
+        uint16 listingPercentageDividend,
+        uint16 listingPercentageDivisor,
+        uint16 cliffInDays,
+        uint16 cliffPercentageDividend,
+        uint16 cliffPercentageDivisor,
+        uint16 vestingDurationInMonths,
+        UnlockTypes unlockType,
+        uint256 totalPoolTokenAmount
+    ) external;
+
+    function addBeneficiary(
+        uint16 pid,
+        address beneficiary,
+        uint256 tokenAmount
+    ) external;
+
+    function addMultipleBeneficiaries(
+        uint16 pid,
+        address[] calldata beneficiaries,
+        uint256[] calldata tokenAmounts
+    ) external;
+
+    function changeListingDate(uint32 newListingDate) external;
+
+    function removeBeneficiary(uint16 pid, address beneficiary) external;
+
+    function withdrawContractTokens(
+        IERC20 customToken,
+        address recipient,
+        uint256 tokenAmount
+    ) external;
+
+    function claimTokens(uint16 pid) external;
+
+    function updateVestedStakedTokens(
+        uint16 pid,
+        address beneficiary,
+        uint256 tokenAmount,
+        bool isStaking
+    ) external;
+
+    function getTotalUnlockedPoolTokens(
+        uint16 pid
+    ) external view returns (uint256);
+
+    function getBeneficiaryInformation(
+        uint16 pid,
+        address _address
+    ) external view returns (uint256, uint256, uint256, uint256, uint256);
+
+    function getListingDate() external view returns (uint32);
+
+    function getPoolCount() external view returns (uint16);
+
+    function getToken() external view returns (IERC20);
+
+    function getPoolDates(
+        uint16 pid
+    ) external view returns (uint16, uint32, uint16, uint16, uint32);
+
+    function getPoolData(
+        uint16 pid
+    )
+        external
+        view
+        returns (
+            string memory,
+            uint16,
+            uint16,
+            uint16,
+            uint16,
+            UnlockTypes,
+            uint256
+        );
+
+    function getUnlockedTokenAmount(
+        uint16 pid,
+        address beneficiary
+    ) external view returns (uint256);
+
+    function getVestingPeriodsPassed(
+        uint16 pid
+    ) external view returns (uint16, uint16);
 }
