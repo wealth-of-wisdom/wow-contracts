@@ -6,156 +6,95 @@ import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract WOW_Vesting is Initializable, AccessControlUpgradeable {
-    enum UnlockTypes {
-        DAILY,
-        MONTHLY
-    }
-    struct Beneficiary {
-        uint totalTokens;
-        uint listingTokenAmount;
-        uint cliffTokenAmount;
-        uint vestedTokenAmount;
-        uint stakedTokenAmount;
-        uint claimedTotalTokenAmount;
-    }
-    struct Pool {
-        string name;
-        uint listingPercentageDividend;
-        uint listingPercentageDivisor;
-        uint cliffInDays;
-        uint cliffEndDate;
-        uint cliffPercentageDividend;
-        uint cliffPercentageDivisor;
-        uint vestingDurationInMonths;
-        uint vestingDurationInDays;
-        uint vestingEndDate;
-        mapping(address => Beneficiary) beneficiaries;
-        UnlockTypes unlockType;
-        uint totalPoolTokenAmount;
-        uint lockedPoolTokens;
-    }
+import {IVesting} from "./interfaces/IVesting.sol";
+import {Errors} from "./libraries/Errors.sol";
+
+contract WOW_Vesting is IVesting, Initializable, AccessControlUpgradeable {
+    /*//////////////////////////////////////////////////////////////////////////
+                                    LIBRARIES  
+    //////////////////////////////////////////////////////////////////////////*/
 
     using SafeERC20 for IERC20;
-    IERC20 private token;
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                PUBLIC CONSTANTS
+    //////////////////////////////////////////////////////////////////////////*/
+
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
     bytes32 public constant DEFAULT_STAKING_ROLE =
         keccak256("DEFAULT_STAKING_ROLE");
-    uint public constant DAY = 1 days;
-    uint public constant MONTH = 30 days;
+    uint32 public constant DAY = 1 days;
+    uint32 public constant MONTH = 30 days;
 
-    uint private poolCount;
-    uint private listingDate;
-    mapping(uint => Pool) private vestingPools;
+    /*//////////////////////////////////////////////////////////////////////////
+                                INTERNAL STORAGE
+    //////////////////////////////////////////////////////////////////////////*/
 
-    event Claim(address indexed from, uint indexed poolIndex, uint tokenAmount);
-    event BeneficiaryAdded(
-        uint indexed poolIndex,
-        address indexed beneficiary,
-        uint addedTokenAmount
-    );
-    event BeneficiaryRemoved(
-        uint indexed poolIndex,
-        address indexed beneficiary,
-        uint unlockedPoolAmount
-    );
-    event ListingDateChanged(uint oldDate, uint newDate);
-    event UpdatedStakedTokens(uint indexed poolIndex, uint amount, bool stake);
-    event VestingPoolAdded(uint indexed poolIndex, uint totalPoolTokenAmount);
+    IERC20 internal token;
+    mapping(uint16 => Pool) internal vestingPools;
+    uint32 internal listingDate;
+    uint16 internal poolCount;
 
-    error ArraySizeMismatch();
-    error CanNotWithdrawVestedTokens();
-    error ListingDateCanOnlyBeSetInFuture();
-    error ListingAndCliffPercentageOverflow();
-    error NotEnoughVestedTokensForStaking();
-    error NotInBeneficiaryList();
-    error NoClaimableTokens();
-    error NotEnoughTokenBalance();
-    error PercentageDivisorZero();
-    error PoolDoesNotExist();
-    error PoolWithThisNameExists();
-    error StakedTokensCanNotBeClaimed();
-    error TokenAmountExeedsTotalPoolAmount();
-    error TokenAmonutZero();
-    error VestingDurationZero();
-    error ZeroAddress();
+    /*//////////////////////////////////////////////////////////////////////////
+                                    MODIFIERS   
+    //////////////////////////////////////////////////////////////////////////*/
 
     /**
      * @notice Checks whether the address is not zero.
      */
     modifier mAddressNotZero(address _address) {
-        if (_address == address(0)) revert ZeroAddress();
+        if (_address == address(0)) {
+            revert Errors.Vesting__ZeroAddress();
+        }
         _;
     }
 
     /**
      * @notice Checks whether the address is beneficiary of the pool.
      */
-    modifier mOnlyBeneficiary(uint _poolIndex) {
-        if (vestingPools[_poolIndex].beneficiaries[msg.sender].totalTokens == 0)
-            revert NotInBeneficiaryList();
-        _;
-    }
-
-    /**
-     * @notice Checks whether new pool's name does not already exist.
-     */
-    modifier mAddPoolDataCheck(
-        string memory _name,
-        uint _listingPercentageDivisor,
-        uint _cliffPercentageDivisor,
-        uint _listingPercentageDividend,
-        uint _cliffPercentageDividend,
-        uint _vestingDurationInMonths
-    ) {
-        for (uint i = 0; i < poolCount; i++) {
-            if (
-                keccak256(abi.encodePacked(vestingPools[i].name)) ==
-                keccak256(abi.encodePacked(_name))
-            ) {
-                revert PoolWithThisNameExists();
-            }
-        }
-        if (_listingPercentageDivisor == 0 && _cliffPercentageDivisor == 0)
-            revert PercentageDivisorZero();
+    modifier mOnlyBeneficiary(uint16 _poolIndex) {
         if (
-            (_listingPercentageDividend * _cliffPercentageDivisor) +
-                (_cliffPercentageDividend * _listingPercentageDivisor) >
-            (_listingPercentageDivisor * _cliffPercentageDivisor)
-        ) revert ListingAndCliffPercentageOverflow();
-
-        if (_vestingDurationInMonths == 0) revert VestingDurationZero();
+            vestingPools[_poolIndex]
+                .beneficiaries[msg.sender]
+                .totalTokenAmount == 0
+        ) {
+            revert Errors.Vesting__NotInBeneficiaryList();
+        }
         _;
     }
 
     /**
      * @notice Checks whether the editable vesting pool exists.
      */
-    modifier mPoolExists(uint _poolIndex) {
-        if (vestingPools[_poolIndex].cliffPercentageDivisor == 0)
-            revert PoolDoesNotExist();
+    modifier mPoolExists(uint16 _poolIndex) {
+        if (vestingPools[_poolIndex].cliffPercentageDivisor == 0) {
+            revert Errors.Vesting__PoolDoesNotExist();
+        }
         _;
     }
     /**
      * @notice Checks whether token amount > 0.
      */
-    modifier mTokenNotZero(uint _tokenAmount) {
-        if (_tokenAmount <= 0) revert TokenAmonutZero();
+    modifier mTokenNotZero(uint256 _tokenAmount) {
+        if (_tokenAmount == 0) {
+            revert Errors.Vesting__TokenAmonutZero();
+        }
         _;
     }
 
     /**
      * @notice Checks whether the listing date is not in the past.
      */
-    modifier mValidListingDate(uint _listingDate) {
-        if (_listingDate < block.timestamp)
-            revert ListingDateCanOnlyBeSetInFuture();
+    modifier mValidListingDate(uint32 _listingDate) {
+        if (_listingDate < block.timestamp) {
+            revert Errors.Vesting__ListingDateCanOnlyBeSetInFuture();
+        }
         _;
     }
 
     function initialize(
         IERC20 _token,
-        uint _listingDate
+        uint32 _listingDate
     ) public initializer mValidListingDate(_listingDate) {
         __AccessControl_init();
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -178,28 +117,25 @@ contract WOW_Vesting is Initializable, AccessControlUpgradeable {
      */
     function addVestingPool(
         string memory _name,
-        uint _listingPercentageDividend,
-        uint _listingPercentageDivisor,
-        uint _cliffInDays,
-        uint _cliffPercentageDividend,
-        uint _cliffPercentageDivisor,
-        uint _vestingDurationInMonths,
+        uint16 _listingPercentageDividend,
+        uint16 _listingPercentageDivisor,
+        uint16 _cliffInDays,
+        uint16 _cliffPercentageDividend,
+        uint16 _cliffPercentageDivisor,
+        uint16 _vestingDurationInMonths,
         UnlockTypes _unlockType,
-        uint _totalPoolTokenAmount
-    )
-        public
-        onlyRole(DEFAULT_ADMIN_ROLE)
-        mAddPoolDataCheck(
+        uint256 _totalPoolTokenAmount
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) mTokenNotZero(_totalPoolTokenAmount) {
+        _validatePoolData(
             _name,
             _listingPercentageDivisor,
             _cliffPercentageDivisor,
             _listingPercentageDividend,
             _cliffPercentageDividend,
             _vestingDurationInMonths
-        )
-        mTokenNotZero(_totalPoolTokenAmount)
-    {
-        uint newIndex = poolCount;
+        );
+
+        uint16 newIndex = poolCount;
         Pool storage p = vestingPools[newIndex];
 
         p.name = _name;
@@ -221,7 +157,7 @@ contract WOW_Vesting is Initializable, AccessControlUpgradeable {
 
         poolCount++;
 
-        emit VestingPoolAdded(poolCount - 1, _totalPoolTokenAmount);
+        emit VestingPoolAdded(newIndex, _totalPoolTokenAmount);
     }
 
     /**
@@ -231,9 +167,9 @@ contract WOW_Vesting is Initializable, AccessControlUpgradeable {
      * @param _tokenAmount Purchased token absolute amount (with included decimals).
      */
     function addToBeneficiariesList(
-        uint _poolIndex,
+        uint16 _poolIndex,
         address _address,
-        uint _tokenAmount
+        uint256 _tokenAmount
     )
         public
         onlyRole(DEFAULT_ADMIN_ROLE)
@@ -243,25 +179,26 @@ contract WOW_Vesting is Initializable, AccessControlUpgradeable {
     {
         Pool storage p = vestingPools[_poolIndex];
 
-        if (p.totalPoolTokenAmount < (p.lockedPoolTokens + _tokenAmount))
-            revert TokenAmountExeedsTotalPoolAmount();
+        if (p.totalPoolTokenAmount < (p.lockedPoolTokenAmount + _tokenAmount)) {
+            revert Errors.Vesting__TokenAmountExeedsTotalPoolAmount();
+        }
 
-        p.lockedPoolTokens += _tokenAmount;
+        p.lockedPoolTokenAmount += _tokenAmount;
         Beneficiary storage b = p.beneficiaries[_address];
-        b.totalTokens += _tokenAmount;
+        b.totalTokenAmount += _tokenAmount;
         b.listingTokenAmount = getTokensByPercentage(
-            b.totalTokens,
+            b.totalTokenAmount,
             p.listingPercentageDividend,
             p.listingPercentageDivisor
         );
 
         b.cliffTokenAmount = getTokensByPercentage(
-            b.totalTokens,
+            b.totalTokenAmount,
             p.cliffPercentageDividend,
             p.cliffPercentageDivisor
         );
         b.vestedTokenAmount =
-            b.totalTokens -
+            b.totalTokenAmount -
             b.listingTokenAmount -
             b.cliffTokenAmount;
 
@@ -276,14 +213,15 @@ contract WOW_Vesting is Initializable, AccessControlUpgradeable {
      * @dev Example of parameters: ["address1","address2"], ["address1Amount", "address2Amount"].
      */
     function addToBeneficiariesListMultiple(
-        uint _poolIndex,
+        uint16 _poolIndex,
         address[] calldata _addresses,
-        uint[] calldata _tokenAmount
+        uint256[] calldata _tokenAmount
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        if (_addresses.length != _tokenAmount.length)
-            revert ArraySizeMismatch();
+        if (_addresses.length != _tokenAmount.length) {
+            revert Errors.Vesting__ArraySizeMismatch();
+        }
 
-        for (uint i = 0; i < _addresses.length; i++) {
+        for (uint16 i; i < _addresses.length; i++) {
             addToBeneficiariesList(_poolIndex, _addresses[i], _tokenAmount[i]);
         }
     }
@@ -293,12 +231,12 @@ contract WOW_Vesting is Initializable, AccessControlUpgradeable {
      * @param newListingDate new listing date.
      */
     function changeListingDate(
-        uint newListingDate
+        uint32 newListingDate
     ) external onlyRole(DEFAULT_ADMIN_ROLE) mValidListingDate(newListingDate) {
-        uint oldListingDate = listingDate;
+        uint32 oldListingDate = listingDate;
         listingDate = newListingDate;
 
-        for (uint i; i < poolCount; i++) {
+        for (uint16 i; i < poolCount; i++) {
             Pool storage p = vestingPools[i];
             p.cliffEndDate = listingDate + (p.cliffInDays * DAY);
             p.vestingEndDate = p.cliffEndDate + (p.vestingDurationInDays * DAY);
@@ -312,17 +250,22 @@ contract WOW_Vesting is Initializable, AccessControlUpgradeable {
      * if the vesting period has ended - beneficiary is transferred all unclaimed tokens.
      */
     function claimTokens(
-        uint _poolIndex
+        uint16 _poolIndex
     )
         external
         mPoolExists(_poolIndex)
         mAddressNotZero(msg.sender)
         mOnlyBeneficiary(_poolIndex)
     {
-        uint unlockedTokens = getUnlockedTokenAmount(_poolIndex, msg.sender);
-        if (unlockedTokens == 0) revert NoClaimableTokens();
-        if (unlockedTokens > token.balanceOf(address(this)))
-            revert NotEnoughTokenBalance();
+        uint256 unlockedTokens = getUnlockedTokenAmount(_poolIndex, msg.sender);
+
+        if (unlockedTokens == 0) {
+            revert Errors.Vesting__NoClaimableTokens();
+        }
+
+        if (unlockedTokens > token.balanceOf(address(this))) {
+            revert Errors.Vesting__NotEnoughTokenBalance();
+        }
 
         Pool storage p = vestingPools[_poolIndex];
         Beneficiary storage b = p.beneficiaries[msg.sender];
@@ -330,19 +273,19 @@ contract WOW_Vesting is Initializable, AccessControlUpgradeable {
         // additional staking logic requires check whether
         // claimable tokens are not withdrawing from staked token pool
         if (
-            b.totalTokens - (b.claimedTotalTokenAmount + unlockedTokens) <
+            b.totalTokenAmount - (b.claimedTokenAmount + unlockedTokens) <
             b.stakedTokenAmount
         ) {
-            revert StakedTokensCanNotBeClaimed();
-        } else {
-            unlockedTokens = unlockedTokens - b.stakedTokenAmount;
+            revert Errors.Vesting__StakedTokensCanNotBeClaimed();
         }
 
-        b.claimedTotalTokenAmount += unlockedTokens;
+        unlockedTokens = unlockedTokens - b.stakedTokenAmount;
+
+        b.claimedTokenAmount += unlockedTokens;
 
         token.safeTransfer(msg.sender, unlockedTokens);
 
-        emit Claim(msg.sender, _poolIndex, unlockedTokens);
+        emit Claim(_poolIndex, msg.sender, unlockedTokens);
     }
 
     /**
@@ -351,13 +294,13 @@ contract WOW_Vesting is Initializable, AccessControlUpgradeable {
      * @param _address Address of the beneficiary wallet.
      */
     function removeBeneficiary(
-        uint _poolIndex,
+        uint16 _poolIndex,
         address _address
     ) external onlyRole(DEFAULT_ADMIN_ROLE) mPoolExists(_poolIndex) {
         Pool storage p = vestingPools[_poolIndex];
         Beneficiary storage b = p.beneficiaries[_address];
-        uint unlockedPoolAmount = b.totalTokens - b.claimedTotalTokenAmount;
-        p.lockedPoolTokens -= unlockedPoolAmount;
+        uint256 unlockedPoolAmount = b.totalTokenAmount - b.claimedTokenAmount;
+        p.lockedPoolTokenAmount -= unlockedPoolAmount;
         delete p.beneficiaries[_address];
         emit BeneficiaryRemoved(_poolIndex, _address, unlockedPoolAmount);
     }
@@ -373,7 +316,10 @@ contract WOW_Vesting is Initializable, AccessControlUpgradeable {
         address _address,
         uint256 _tokenAmount
     ) external onlyRole(DEFAULT_ADMIN_ROLE) mAddressNotZero(_address) {
-        if (_customToken == token) revert CanNotWithdrawVestedTokens();
+        if (_customToken == token) {
+            revert Errors.Vesting__CanNotWithdrawVestedTokens();
+        }
+
         _customToken.safeTransfer(_address, _tokenAmount);
     }
 
@@ -385,9 +331,9 @@ contract WOW_Vesting is Initializable, AccessControlUpgradeable {
      * @param _staking Specification whether we are staking or unstaking from pool.
      */
     function updateVestedStakedTokens(
-        uint _poolIndex,
+        uint16 _poolIndex,
         address _address,
-        uint _tokenAmount,
+        uint256 _tokenAmount,
         bool _staking
     )
         external
@@ -397,28 +343,34 @@ contract WOW_Vesting is Initializable, AccessControlUpgradeable {
     {
         Pool storage p = vestingPools[_poolIndex];
         Beneficiary storage b = p.beneficiaries[_address];
+
         if (_staking) {
-            if (b.vestedTokenAmount - b.stakedTokenAmount > _tokenAmount)
-                revert NotEnoughVestedTokensForStaking();
+            if (b.totalTokenAmount - b.stakedTokenAmount < _tokenAmount) {
+                revert Errors.Vesting__NotEnoughVestedTokensForStaking();
+            }
+
             b.stakedTokenAmount += _tokenAmount;
         } else {
-            if (b.stakedTokenAmount < _tokenAmount)
-                revert NotEnoughTokenBalance();
+            if (b.stakedTokenAmount < _tokenAmount) {
+                revert Errors.Vesting__NotEnoughTokenBalance();
+            }
+
             b.stakedTokenAmount -= _tokenAmount;
         }
+
         emit UpdatedStakedTokens(_poolIndex, _tokenAmount, _staking);
     }
 
     /**
      * @notice Calculates unlocked and unclaimed tokens based on the days passed.
-     * @param _address Address of the beneficiary wallet.
      * @param _poolIndex Index that refers to vesting pool object.
-     * @return uint total unlocked and unclaimed tokens.
+     * @param _address Address of the beneficiary wallet.
+     * @return total unlocked and unclaimed tokens.
      */
     function getUnlockedTokenAmount(
-        uint _poolIndex,
+        uint16 _poolIndex,
         address _address
-    ) public view returns (uint) {
+    ) public view returns (uint256) {
         Pool storage p = vestingPools[_poolIndex];
         Beneficiary storage b = p.beneficiaries[_address];
 
@@ -429,21 +381,21 @@ contract WOW_Vesting is Initializable, AccessControlUpgradeable {
 
         if (block.timestamp < p.cliffEndDate) {
             // Cliff period has not ended yet. Unlocked listing tokens.
-            return b.listingTokenAmount - b.claimedTotalTokenAmount;
+            return b.listingTokenAmount - b.claimedTokenAmount;
         }
         if (block.timestamp >= p.vestingEndDate) {
             // Vesting period has ended. Unlocked all tokens.
-            return b.totalTokens - b.claimedTotalTokenAmount;
+            return b.totalTokenAmount - b.claimedTokenAmount;
         }
         // Cliff period has ended. Calculate vested tokens.
-        (uint duration, uint periodsPassed) = getVestingPeriodsPassed(
+        (uint16 duration, uint16 periodsPassed) = getVestingPeriodsPassed(
             _poolIndex
         );
-        uint unlockedTokens = b.listingTokenAmount +
+        uint256 unlockedTokens = b.listingTokenAmount +
             b.cliffTokenAmount +
             ((b.vestedTokenAmount * periodsPassed) / duration);
 
-        return unlockedTokens - b.claimedTotalTokenAmount;
+        return unlockedTokens - b.claimedTokenAmount;
     }
 
     /**
@@ -453,20 +405,23 @@ contract WOW_Vesting is Initializable, AccessControlUpgradeable {
      * @return If unlock type is daily: number of days passed, else: number of months passed.
      */
     function getVestingPeriodsPassed(
-        uint _poolIndex
-    ) public view returns (uint, uint) {
+        uint16 _poolIndex
+    ) public view returns (uint16, uint16) {
         Pool storage p = vestingPools[_poolIndex];
         // Cliff not ended yet
         if (block.timestamp < p.cliffEndDate) {
             return (p.vestingDurationInMonths, 0);
         }
 
-        uint duration = p.unlockType == UnlockTypes.DAILY
+        uint16 duration = p.unlockType == UnlockTypes.DAILY
             ? p.vestingDurationInDays
             : p.vestingDurationInMonths;
+
         // Unlock type daily or monthly
-        uint periodsPassed = (block.timestamp - p.cliffEndDate) /
-            (p.unlockType == UnlockTypes.DAILY ? DAY : MONTH);
+        uint16 periodsPassed = uint16(
+            (block.timestamp - p.cliffEndDate) /
+                (p.unlockType == UnlockTypes.DAILY ? DAY : MONTH)
+        );
 
         return (duration, periodsPassed);
     }
@@ -478,10 +433,10 @@ contract WOW_Vesting is Initializable, AccessControlUpgradeable {
      * @param divisor The number from which total amount will be divided.
      */
     function getTokensByPercentage(
-        uint totalAmount,
-        uint dividend,
-        uint divisor
-    ) internal pure returns (uint) {
+        uint256 totalAmount,
+        uint16 dividend,
+        uint16 divisor
+    ) internal pure returns (uint256) {
         return (totalAmount * dividend) / divisor;
     }
 
@@ -490,10 +445,10 @@ contract WOW_Vesting is Initializable, AccessControlUpgradeable {
      * @param _poolIndex Index that refers to vesting pool object.
      */
     function getTotalUnlockedPoolTokens(
-        uint _poolIndex
-    ) external view returns (uint) {
+        uint16 _poolIndex
+    ) external view returns (uint256) {
         Pool storage p = vestingPools[_poolIndex];
-        return p.totalPoolTokenAmount - p.lockedPoolTokens;
+        return p.totalPoolTokenAmount - p.lockedPoolTokenAmount;
     }
 
     /**
@@ -503,34 +458,34 @@ contract WOW_Vesting is Initializable, AccessControlUpgradeable {
      * @return Beneficiary structure information.
      */
     function getBeneficiaryInformation(
-        uint _poolIndex,
+        uint16 _poolIndex,
         address _address
-    ) external view returns (uint, uint, uint, uint, uint) {
+    ) external view returns (uint256, uint256, uint256, uint256, uint256) {
         Beneficiary storage b = vestingPools[_poolIndex].beneficiaries[
             _address
         ];
         return (
-            b.totalTokens,
+            b.totalTokenAmount,
             b.listingTokenAmount,
             b.cliffTokenAmount,
             b.vestedTokenAmount,
-            b.claimedTotalTokenAmount
+            b.claimedTokenAmount
         );
     }
 
     /**
      * @notice Return global listing date value (in epoch timestamp format).
-     * @return uint listing date.
+     * @return listing date.
      */
-    function getListingDate() external view returns (uint) {
+    function getListingDate() external view returns (uint32) {
         return listingDate;
     }
 
     /**
      * @notice Return number of pools in contract.
-     * @return uint pool count.
+     * @return pool count.
      */
-    function getPoolCount() external view returns (uint) {
+    function getPoolCount() external view returns (uint16) {
         return poolCount;
     }
 
@@ -548,8 +503,8 @@ contract WOW_Vesting is Initializable, AccessControlUpgradeable {
      * @return Part of the vesting pool information.
      */
     function getPoolDates(
-        uint _poolIndex
-    ) external view returns (uint, uint, uint, uint, uint) {
+        uint16 _poolIndex
+    ) external view returns (uint16, uint32, uint16, uint16, uint32) {
         Pool storage p = vestingPools[_poolIndex];
         return (
             p.cliffInDays,
@@ -566,11 +521,19 @@ contract WOW_Vesting is Initializable, AccessControlUpgradeable {
      * @return Part of the vesting pool information.
      */
     function getPoolData(
-        uint _poolIndex
+        uint16 _poolIndex
     )
         external
         view
-        returns (string memory, uint, uint, uint, uint, UnlockTypes, uint)
+        returns (
+            string memory,
+            uint16,
+            uint16,
+            uint16,
+            uint16,
+            UnlockTypes,
+            uint256
+        )
     {
         Pool storage p = vestingPools[_poolIndex];
         return (
@@ -582,5 +545,43 @@ contract WOW_Vesting is Initializable, AccessControlUpgradeable {
             p.unlockType,
             p.totalPoolTokenAmount
         );
+    }
+
+    function _validatePoolData(
+        string memory _name,
+        uint16 _listingPercentageDivisor,
+        uint16 _cliffPercentageDivisor,
+        uint16 _listingPercentageDividend,
+        uint16 _cliffPercentageDividend,
+        uint16 _vestingDurationInMonths
+    ) internal view {
+        if (bytes(_name).length == 0) {
+            revert Errors.Vesting__EmptyName();
+        }
+
+        for (uint16 i; i < poolCount; i++) {
+            if (
+                keccak256(abi.encodePacked(vestingPools[i].name)) ==
+                keccak256(abi.encodePacked(_name))
+            ) {
+                revert Errors.Vesting__PoolWithThisNameExists();
+            }
+        }
+
+        if (_listingPercentageDivisor == 0 || _cliffPercentageDivisor == 0) {
+            revert Errors.Vesting__PercentageDivisorZero();
+        }
+
+        if (
+            (_listingPercentageDividend * _cliffPercentageDivisor) +
+                (_cliffPercentageDividend * _listingPercentageDivisor) >
+            (_listingPercentageDivisor * _cliffPercentageDivisor)
+        ) {
+            revert Errors.Vesting__ListingAndCliffPercentageOverflow();
+        }
+
+        if (_vestingDurationInMonths == 0) {
+            revert Errors.Vesting__VestingDurationZero();
+        }
     }
 }
