@@ -389,6 +389,7 @@ contract WOW_Vesting is IVesting, Initializable, AccessControlUpgradeable {
             }
 
             b.stakedTokenAmount += tokenAmount;
+
         } else {
             if (tokenAmount > b.stakedTokenAmount) {
                 revert Errors.Vesting__NotEnoughTokenBalance();
