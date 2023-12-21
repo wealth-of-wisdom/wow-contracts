@@ -20,7 +20,6 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
                                 PUBLIC CONSTANTS
     //////////////////////////////////////////////////////////////////////////*/
 
-    bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
     bytes32 public constant DEFAULT_STAKING_ROLE =
         keccak256("DEFAULT_STAKING_ROLE");
     uint32 public constant DAY = 1 days;
@@ -50,7 +49,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     }
 
     /**
-     * @notice Checks whether the address is beneficiary of the pool.
+     * @notice Checks whether the address is user of the pool.
      */
     modifier mOnlyBeneficiary(uint16 pid) {
         if (
@@ -110,7 +109,6 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
 
         __AccessControl_init();
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(MANAGER_ROLE, msg.sender);
 
         s_token = token;
         s_poolCount = 0;
@@ -156,24 +154,26 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         );
 
         uint16 pid = s_poolCount;
-        Pool storage p = s_vestingPools[pid];
+        Pool storage pool = s_vestingPools[pid];
 
-        p.name = name;
-        p.listingPercentageDividend = listingPercentageDividend;
-        p.listingPercentageDivisor = listingPercentageDivisor;
+        pool.name = name;
+        pool.listingPercentageDividend = listingPercentageDividend;
+        pool.listingPercentageDivisor = listingPercentageDivisor;
 
-        p.cliffInDays = cliffInDays;
-        p.cliffEndDate = s_listingDate + (cliffInDays * DAY);
+        pool.cliffInDays = cliffInDays;
+        pool.cliffEndDate = s_listingDate + (cliffInDays * DAY);
 
-        p.cliffPercentageDividend = cliffPercentageDividend;
-        p.cliffPercentageDivisor = cliffPercentageDivisor;
+        pool.cliffPercentageDividend = cliffPercentageDividend;
+        pool.cliffPercentageDivisor = cliffPercentageDivisor;
 
-        p.vestingDurationInDays = vestingDurationInMonths * 30;
-        p.vestingDurationInMonths = vestingDurationInMonths;
-        p.vestingEndDate = p.cliffEndDate + (p.vestingDurationInDays * DAY);
+        pool.vestingDurationInDays = vestingDurationInMonths * 30;
+        pool.vestingDurationInMonths = vestingDurationInMonths;
+        pool.vestingEndDate =
+            pool.cliffEndDate +
+            (pool.vestingDurationInDays * DAY);
 
-        p.unlockType = unlockType;
-        p.totalPoolTokenAmount = totalPoolTokenAmount;
+        pool.unlockType = unlockType;
+        pool.totalPoolTokenAmount = totalPoolTokenAmount;
 
         s_poolCount++;
 
@@ -181,9 +181,9 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     }
 
     /**
-     * @notice Adds beneficiary with token amount to vesting pool.
+     * @notice Adds user with token amount to vesting pool.
      * @param pid Index that refers to vesting pool object.
-     * @param beneficiary Address of the beneficiary wallet.
+     * @param beneficiary Address of the user wallet.
      * @param tokenAmount Purchased token absolute amount (with included decimals).
      */
     function addBeneficiary(
@@ -197,36 +197,39 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         mPoolExists(pid)
         mAmountNotZero(tokenAmount)
     {
-        Pool storage p = s_vestingPools[pid];
+        Pool storage pool = s_vestingPools[pid];
 
-        if (p.totalPoolTokenAmount < (p.lockedPoolTokenAmount + tokenAmount)) {
+        if (
+            pool.totalPoolTokenAmount <
+            (pool.lockedPoolTokenAmount + tokenAmount)
+        ) {
             revert Errors.Vesting__TokenAmountExeedsTotalPoolAmount();
         }
 
-        p.lockedPoolTokenAmount += tokenAmount;
+        pool.lockedPoolTokenAmount += tokenAmount;
 
-        Beneficiary storage b = p.beneficiaries[beneficiary];
-        b.totalTokenAmount += tokenAmount;
-        b.listingTokenAmount = _getTokensByPercentage(
-            b.totalTokenAmount,
-            p.listingPercentageDividend,
-            p.listingPercentageDivisor
+        Beneficiary storage user = pool.beneficiaries[beneficiary];
+        user.totalTokenAmount += tokenAmount;
+        user.listingTokenAmount = _getTokensByPercentage(
+            user.totalTokenAmount,
+            pool.listingPercentageDividend,
+            pool.listingPercentageDivisor
         );
-        b.cliffTokenAmount = _getTokensByPercentage(
-            b.totalTokenAmount,
-            p.cliffPercentageDividend,
-            p.cliffPercentageDivisor
+        user.cliffTokenAmount = _getTokensByPercentage(
+            user.totalTokenAmount,
+            pool.cliffPercentageDividend,
+            pool.cliffPercentageDivisor
         );
-        b.vestedTokenAmount =
-            b.totalTokenAmount -
-            b.listingTokenAmount -
-            b.cliffTokenAmount;
+        user.vestedTokenAmount =
+            user.totalTokenAmount -
+            user.listingTokenAmount -
+            user.cliffTokenAmount;
 
         emit BeneficiaryAdded(pid, beneficiary, tokenAmount);
     }
 
     /**
-     * @notice Adds addresses with purchased token amount to the beneficiary list.
+     * @notice Adds addresses with purchased token amount to the user list.
      * @param pid Index that refers to vesting pool object.
      * @param beneficiaries List of whitelisted addresses.
      * @param tokenAmounts Purchased token absolute amount (with included decimals).
@@ -247,22 +250,23 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     }
 
     /**
-     * @notice Removes beneficiary from the pool.
+     * @notice Removes user from the pool.
      * @param pid Index that refers to vesting pool object.
-     * @param beneficiary Address of the beneficiary wallet.
+     * @param beneficiary Address of the user wallet.
      */
     function removeBeneficiary(
         uint16 pid,
         address beneficiary
     ) external onlyRole(DEFAULT_ADMIN_ROLE) mPoolExists(pid) {
-        Pool storage p = s_vestingPools[pid];
-        Beneficiary storage b = p.beneficiaries[beneficiary];
+        Pool storage pool = s_vestingPools[pid];
+        Beneficiary storage user = pool.beneficiaries[beneficiary];
 
-        /// @question should we remove beneficiary if he has staked tokens?
-        uint256 unlockedPoolAmount = b.totalTokenAmount - b.claimedTokenAmount;
-        p.lockedPoolTokenAmount -= unlockedPoolAmount;
+        /// @question should we remove user if he has staked tokens?
+        uint256 unlockedPoolAmount = user.totalTokenAmount -
+            user.claimedTokenAmount;
+        pool.lockedPoolTokenAmount -= unlockedPoolAmount;
 
-        delete p.beneficiaries[beneficiary];
+        delete pool.beneficiaries[beneficiary];
 
         emit BeneficiaryRemoved(pid, beneficiary, unlockedPoolAmount);
     }
@@ -278,9 +282,11 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         s_listingDate = newListingDate;
 
         for (uint16 i; i < s_poolCount; i++) {
-            Pool storage p = s_vestingPools[i];
-            p.cliffEndDate = s_listingDate + (p.cliffInDays * DAY);
-            p.vestingEndDate = p.cliffEndDate + (p.vestingDurationInDays * DAY);
+            Pool storage pool = s_vestingPools[i];
+            pool.cliffEndDate = s_listingDate + (pool.cliffInDays * DAY);
+            pool.vestingEndDate =
+                pool.cliffEndDate +
+                (pool.vestingDurationInDays * DAY);
         }
 
         emit ListingDateChanged(oldListingDate, newListingDate);
@@ -312,7 +318,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
 
     /**
      * @notice Function lets caller claim unlocked tokens from specified vesting pool.
-     * @notice if the vesting period has ended - beneficiary is transferred all unclaimed tokens.
+     * @notice if the vesting period has ended - user is transferred all unclaimed tokens.
      * @param pid Index that refers to vesting pool object.
      */
     function claimTokens(
@@ -333,17 +339,17 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
             revert Errors.Vesting__NotEnoughTokenBalance();
         }
 
-        Pool storage p = s_vestingPools[pid];
-        Beneficiary storage b = p.beneficiaries[msg.sender];
+        Pool storage pool = s_vestingPools[pid];
+        Beneficiary storage user = pool.beneficiaries[msg.sender];
 
         /**
          * @dev Additional staking logic requires check whether
          * @dev claimable tokens are not withdrawing from staked token pool
          */
 
-        uint256 availableTokens = b.totalTokenAmount -
-            b.claimedTokenAmount -
-            b.stakedTokenAmount;
+        uint256 availableTokens = user.totalTokenAmount -
+            user.claimedTokenAmount -
+            user.stakedTokenAmount;
 
         if (unlockedTokens > availableTokens) {
             revert Errors.Vesting__StakedTokensCanNotBeClaimed();
@@ -352,7 +358,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
             // unlockedTokens = availableTokens;
         }
 
-        b.claimedTokenAmount += unlockedTokens;
+        user.claimedTokenAmount += unlockedTokens;
 
         s_token.safeTransfer(msg.sender, unlockedTokens);
 
@@ -377,24 +383,26 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         mAddressNotZero(beneficiary)
         mPoolExists(pid)
     {
-        Pool storage p = s_vestingPools[pid];
-        Beneficiary storage b = p.beneficiaries[beneficiary];
+        Pool storage pool = s_vestingPools[pid];
+        Beneficiary storage user = pool.beneficiaries[beneficiary];
 
         if (isStaking) {
             if (
                 tokenAmount >
-                b.totalTokenAmount - b.stakedTokenAmount - b.claimedTokenAmount
+                user.totalTokenAmount -
+                    user.stakedTokenAmount -
+                    user.claimedTokenAmount
             ) {
                 revert Errors.Vesting__NotEnoughVestedTokensForStaking();
             }
 
-            b.stakedTokenAmount += tokenAmount;
+            user.stakedTokenAmount += tokenAmount;
         } else {
-            if (tokenAmount > b.stakedTokenAmount) {
+            if (tokenAmount > user.stakedTokenAmount) {
                 revert Errors.Vesting__NotEnoughTokenBalance();
             }
 
-            b.stakedTokenAmount -= tokenAmount;
+            user.stakedTokenAmount -= tokenAmount;
         }
 
         emit StakedTokensUpdated(pid, tokenAmount, isStaking);
@@ -411,27 +419,27 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     function getTotalUnlockedPoolTokens(
         uint16 pid
     ) external view returns (uint256) {
-        Pool storage p = s_vestingPools[pid];
-        return p.totalPoolTokenAmount - p.lockedPoolTokenAmount;
+        Pool storage pool = s_vestingPools[pid];
+        return pool.totalPoolTokenAmount - pool.lockedPoolTokenAmount;
     }
 
     /**
-     * @notice Get beneficiary details for pool.
+     * @notice Get user details for pool.
      * @param pid Index that refers to vesting pool object.
-     * @param _address Address of the beneficiary wallet.
+     * @param _address Address of the user wallet.
      * @return Beneficiary structure information.
      */
     function getBeneficiaryInformation(
         uint16 pid,
         address _address
     ) external view returns (uint256, uint256, uint256, uint256, uint256) {
-        Beneficiary storage b = s_vestingPools[pid].beneficiaries[_address];
+        Beneficiary storage user = s_vestingPools[pid].beneficiaries[_address];
         return (
-            b.totalTokenAmount,
-            b.listingTokenAmount,
-            b.cliffTokenAmount,
-            b.vestedTokenAmount,
-            b.claimedTokenAmount
+            user.totalTokenAmount,
+            user.listingTokenAmount,
+            user.cliffTokenAmount,
+            user.vestedTokenAmount,
+            user.claimedTokenAmount
         );
     }
 
@@ -467,13 +475,13 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     function getPoolDates(
         uint16 pid
     ) external view returns (uint16, uint32, uint16, uint16, uint32) {
-        Pool storage p = s_vestingPools[pid];
+        Pool storage pool = s_vestingPools[pid];
         return (
-            p.cliffInDays,
-            p.cliffEndDate,
-            p.vestingDurationInDays,
-            p.vestingDurationInMonths,
-            p.vestingEndDate
+            pool.cliffInDays,
+            pool.cliffEndDate,
+            pool.vestingDurationInDays,
+            pool.vestingDurationInMonths,
+            pool.vestingEndDate
         );
     }
 
@@ -498,15 +506,15 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         )
     {
         /// @question maybe we should return all pool data in one function?
-        Pool storage p = s_vestingPools[pid];
+        Pool storage pool = s_vestingPools[pid];
         return (
-            p.name,
-            p.listingPercentageDividend,
-            p.listingPercentageDivisor,
-            p.cliffPercentageDividend,
-            p.cliffPercentageDivisor,
-            p.unlockType,
-            p.totalPoolTokenAmount
+            pool.name,
+            pool.listingPercentageDividend,
+            pool.listingPercentageDivisor,
+            pool.cliffPercentageDividend,
+            pool.cliffPercentageDivisor,
+            pool.unlockType,
+            pool.totalPoolTokenAmount
         );
     }
 
@@ -517,38 +525,38 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     /**
      * @notice Calculates unlocked and unclaimed tokens based on the days passed.
      * @param pid Index that refers to vesting pool object.
-     * @param beneficiary Address of the beneficiary wallet.
+     * @param beneficiary Address of the user wallet.
      * @return total unlocked and unclaimed tokens.
      */
     function getUnlockedTokenAmount(
         uint16 pid,
         address beneficiary
     ) public view returns (uint256) {
-        Pool storage p = s_vestingPools[pid];
-        Beneficiary storage b = p.beneficiaries[beneficiary];
+        Pool storage pool = s_vestingPools[pid];
+        Beneficiary storage user = pool.beneficiaries[beneficiary];
 
         if (block.timestamp < s_listingDate) {
             // Listing has not begun yet. Return 0.
             return 0;
         }
 
-        if (block.timestamp < p.cliffEndDate) {
+        if (block.timestamp < pool.cliffEndDate) {
             // Cliff period has not ended yet. Unlocked listing tokens.
-            return b.listingTokenAmount - b.claimedTokenAmount;
+            return user.listingTokenAmount - user.claimedTokenAmount;
         }
 
-        if (block.timestamp >= p.vestingEndDate) {
+        if (block.timestamp >= pool.vestingEndDate) {
             // Vesting period has ended. Unlocked all tokens.
-            return b.totalTokenAmount - b.claimedTokenAmount;
+            return user.totalTokenAmount - user.claimedTokenAmount;
         }
 
         // Cliff period has ended. Calculate vested tokens.
         (uint16 duration, uint16 periodsPassed) = getVestingPeriodsPassed(pid);
-        uint256 unlockedTokens = b.listingTokenAmount +
-            b.cliffTokenAmount +
-            ((b.vestedTokenAmount * periodsPassed) / duration);
+        uint256 unlockedTokens = user.listingTokenAmount +
+            user.cliffTokenAmount +
+            ((user.vestedTokenAmount * periodsPassed) / duration);
 
-        return unlockedTokens - b.claimedTokenAmount;
+        return unlockedTokens - user.claimedTokenAmount;
     }
 
     /**
@@ -560,21 +568,21 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     function getVestingPeriodsPassed(
         uint16 pid
     ) public view returns (uint16, uint16) {
-        Pool storage p = s_vestingPools[pid];
+        Pool storage pool = s_vestingPools[pid];
 
         // Cliff not ended yet
-        if (block.timestamp < p.cliffEndDate) {
-            return (p.vestingDurationInMonths, 0);
+        if (block.timestamp < pool.cliffEndDate) {
+            return (pool.vestingDurationInMonths, 0);
         }
 
-        uint16 duration = p.unlockType == UnlockTypes.DAILY
-            ? p.vestingDurationInDays
-            : p.vestingDurationInMonths;
+        uint16 duration = pool.unlockType == UnlockTypes.DAILY
+            ? pool.vestingDurationInDays
+            : pool.vestingDurationInMonths;
 
         // Unlock type daily or monthly
         uint16 periodsPassed = uint16(
-            (block.timestamp - p.cliffEndDate) /
-                (p.unlockType == UnlockTypes.DAILY ? DAY : MONTH)
+            (block.timestamp - pool.cliffEndDate) /
+                (pool.unlockType == UnlockTypes.DAILY ? DAY : MONTH)
         );
 
         return (duration, periodsPassed);
