@@ -76,7 +76,7 @@ contract WOW_Vesting is IVesting, Initializable, AccessControlUpgradeable {
      */
     modifier mAmountNotZero(uint256 tokenAmount) {
         if (tokenAmount == 0) {
-            revert Errors.Vesting__TokenAmonutZero();
+            revert Errors.Vesting__TokenAmountZero();
         }
         _;
     }
@@ -389,7 +389,6 @@ contract WOW_Vesting is IVesting, Initializable, AccessControlUpgradeable {
             }
 
             b.stakedTokenAmount += tokenAmount;
-
         } else {
             if (tokenAmount > b.stakedTokenAmount) {
                 revert Errors.Vesting__NotEnoughTokenBalance();

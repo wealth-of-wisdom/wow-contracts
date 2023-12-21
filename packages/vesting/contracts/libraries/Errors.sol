@@ -15,7 +15,7 @@ library Errors {
     error Vesting__PoolWithThisNameExists();
     error Vesting__StakedTokensCanNotBeClaimed();
     error Vesting__TokenAmountExeedsTotalPoolAmount();
-    error Vesting__TokenAmonutZero();
+    error Vesting__TokenAmountZero();
     error Vesting__VestingDurationZero();
     error Vesting__ZeroAddress();
     error Vesting__EmptyName();
