@@ -13,6 +13,6 @@ abstract contract Constants {
     uint16 internal constant CLIFF_PERCENTAGE_DIVIDEND = 1;
     uint16 internal constant CLIFF_PERCENTAGE_DIVISOR = 10;
     uint16 internal constant VESTING_DURATION_IN_MONTHS = 3;
-    uint256 internal constant TOTAL_POOL_TOKEN_AMONUT = 1 * 10 ** 22;
+    uint256 internal constant TOTAL_POOL_TOKEN_AMOUNT = 1 * 10 ** 22;
     uint256 internal constant BENEFICIARY_DEFAULT_TOKEN_AMOUNT = 200;
 }

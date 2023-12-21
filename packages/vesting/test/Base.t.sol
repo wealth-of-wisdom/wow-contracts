@@ -21,6 +21,12 @@ contract Base_Test is Test, Constants {
     uint256 internal immutable N_TESTERS;
     uint32 internal immutable LISTING_DATE;
 
+    address[] beneficiaries = [alice, bob];
+    uint256[] tokenAmounts = [
+        BENEFICIARY_DEFAULT_TOKEN_AMOUNT,
+        BENEFICIARY_DEFAULT_TOKEN_AMOUNT
+    ];
+
     MockToken internal token;
     Vesting internal vesting;
 
@@ -42,7 +48,7 @@ contract Base_Test is Test, Constants {
 
     function setUp() public virtual {
         token = new MockToken();
-        token.initialize("MOCK", "MCK", 1000);
+        token.initialize("MOCK", "MCK", 1000000);
 
         for (uint256 i = 0; i < N_TESTERS; ++i) {
             deal(TEST_ACCOUNTS[i], INIT_ETH_BALANCE);
@@ -64,11 +70,14 @@ contract Base_Test is Test, Constants {
             CLIFF_PERCENTAGE_DIVISOR,
             VESTING_DURATION_IN_MONTHS,
             IVesting.UnlockTypes.MONTHLY,
-            TOTAL_POOL_TOKEN_AMONUT
+            TOTAL_POOL_TOKEN_AMOUNT
         );
     }
 
-    function checkPoolState(uint16 poolIndex) public {
+    function checkPoolState(
+        uint16 poolIndex,
+        uint256 calculatedUnlockedPoolTokens
+    ) public {
         (
             string memory name,
             uint16 listingPercentageDividend,
@@ -114,9 +123,9 @@ contract Base_Test is Test, Constants {
             "CLIFF_PERCENTAGE_DIVISOR is incorrect"
         );
         assertEq(
-            TOTAL_POOL_TOKEN_AMONUT,
+            TOTAL_POOL_TOKEN_AMOUNT,
             totalPoolTokenAmount,
-            "TOTAL_POOL_TOKEN_AMONUT is incorrect"
+            "TOTAL_POOL_TOKEN_AMOUNT is incorrect"
         );
         assertEq(
             VESTING_DURATION_IN_MONTHS,
@@ -134,7 +143,7 @@ contract Base_Test is Test, Constants {
             "vestingEndDate is incorrect"
         );
         assertEq(
-            TOTAL_POOL_TOKEN_AMONUT,
+            calculatedUnlockedPoolTokens,
             unlockedPoolTokens,
             "unlockedPoolTokens is incorrect"
         );
