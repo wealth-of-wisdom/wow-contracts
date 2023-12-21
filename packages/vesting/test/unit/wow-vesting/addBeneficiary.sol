@@ -1,28 +1,24 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.20;
 
-import {Vm} from "forge-std/Test.sol";
-import "forge-std/console.sol";
-import {WOW_Vesting} from "../contracts/WOW_Vesting.sol";
-import {VestingHelper} from "./VestingHelper.sol";
+import {IVesting} from "../../../contracts/interfaces/IVesting.sol";
+import {Errors} from "../../../contracts/libraries/Errors.sol";
+import {WOW_Vesting_Unit_Test} from "./WowVestingUnit.t.sol";
 
-contract VestingTest is VestingHelper {
+contract WOW_Vesting_AddBeneficiary_Unit_Test is WOW_Vesting_Unit_Test {
     event Initialized(uint8 version);
 
     function setUp() public override {
-        super.setUp();
-
-        vesting = new WOW_Vesting();
-        vesting.initialize(token, LISTING_DATE);
+        WOW_Vesting_Unit_Test.setUp();
     }
 
     /* ========== INITIALIZE TESTS ========== */
 
-    function test_addToBeneficiariesList_AddsBeneficiaryToPool() public {
+    function test_addBeneficiary_AddsBeneficiaryToPool() external {
         addOneNormalVestingPool();
         checkPoolState(PRIMARY_POOL);
 
-        vesting.addToBeneficiariesList(
+        vesting.addBeneficiary(
             PRIMARY_POOL,
             alice,
             BENEFICIARY_DEFAULT_TOKEN_AMOUNT
@@ -35,34 +31,34 @@ contract VestingTest is VestingHelper {
         );
     }
 
-    function test_addToBeneficiariesList_RevertIf_NotAdmin() public {
+    function test_addBeneficiary_RevertIf_NotAdmin() external {
         vm.prank(alice);
         vm.expectRevert();
-        vesting.addToBeneficiariesList(
+        vesting.addBeneficiary(
             PRIMARY_POOL,
             alice,
             BENEFICIARY_DEFAULT_TOKEN_AMOUNT
         );
     }
 
-    function test_addToBeneficiariesList_RevertIf_TokenAmonutZero() public {
+    function test_addBeneficiary_RevertIf_TokenAmonutZero() external {
         addOneNormalVestingPool();
         checkPoolState(PRIMARY_POOL);
-        vm.expectRevert(WOW_Vesting.TokenAmonutZero.selector);
-        vesting.addToBeneficiariesList(PRIMARY_POOL, alice, 0);
+        vm.expectRevert(Errors.Vesting__TokenAmountZero.selector);
+        vesting.addBeneficiary(PRIMARY_POOL, alice, 0);
     }
 
-    function test_addToBeneficiariesList_RevertIf_PoolDoesNotExist() public {
-        vm.expectRevert(WOW_Vesting.PoolDoesNotExist.selector);
-        vesting.addToBeneficiariesList(
+    function test_addBeneficiary_RevertIf_PoolDoesNotExist() external {
+        vm.expectRevert(Errors.Vesting__PoolDoesNotExist.selector);
+        vesting.addBeneficiary(
             PRIMARY_POOL,
             alice,
             BENEFICIARY_DEFAULT_TOKEN_AMOUNT
         );
     }
 
-    function test_addToBeneficiariesList_RevertIf_TokenAmountExeedsTotalPoolAmount()
-        public
+    function test_addBeneficiary_RevertIf_TokenAmountExeedsTotalPoolAmount()
+        external
     {
         vesting.addVestingPool(
             POOL_NAME,
@@ -72,29 +68,29 @@ contract VestingTest is VestingHelper {
             CLIFF_PERCENTAGE_DIVIDEND,
             CLIFF_PERCENTAGE_DIVISOR,
             VESTING_DURATION_IN_MONTHS,
-            WOW_Vesting.UnlockTypes.MONTHLY,
+            IVesting.UnlockTypes.MONTHLY,
             100
         );
-        vm.expectRevert(WOW_Vesting.TokenAmountExeedsTotalPoolAmount.selector);
-        vesting.addToBeneficiariesList(
+        vm.expectRevert(
+            Errors.Vesting__TokenAmountExeedsTotalPoolAmount.selector
+        );
+        vesting.addBeneficiary(
             PRIMARY_POOL,
             alice,
             BENEFICIARY_DEFAULT_TOKEN_AMOUNT
         );
     }
 
-    function test_addToBeneficiariesList_CanAddToBeneficiariesListTwice()
-        public
-    {
+    function test_addBeneficiary_CanaddBeneficiaryTwice() external {
         uint newAmount = 100;
         addOneNormalVestingPool();
         checkPoolState(PRIMARY_POOL);
-        vesting.addToBeneficiariesList(
+        vesting.addBeneficiary(
             PRIMARY_POOL,
             alice,
             BENEFICIARY_DEFAULT_TOKEN_AMOUNT
         );
-        vesting.addToBeneficiariesList(PRIMARY_POOL, alice, newAmount);
+        vesting.addBeneficiary(PRIMARY_POOL, alice, newAmount);
         checkBeneficiaryState(
             PRIMARY_POOL,
             alice,

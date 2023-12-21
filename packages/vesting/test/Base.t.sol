@@ -1,38 +1,44 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.14;
+pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
 import {WOW_Vesting} from "../contracts/WOW_Vesting.sol";
-import {MockToken} from "../contracts/mock/MockToken.sol";
+import {IVesting} from "../contracts/interfaces/IVesting.sol";
+import {MockToken} from "./mocks/MockToken.sol";
+import {Constants} from "./utils/Constants.sol";
 
-// Helper for foundry tests of Superfluid related contracts
-contract VestingHelper is Test {
-    /* ============ STATE VARIABLES ============ */
-    uint256 internal constant INIT_ETH_BALANCE = type(uint128).max;
-    uint256 internal constant INIT_SUPER_TOKEN_BALANCE = type(uint128).max;
+contract Base_Test is Test, Constants {
+    /*//////////////////////////////////////////////////////////////////////////
+                                  STATE VARIABLES
+    //////////////////////////////////////////////////////////////////////////*/
+
     address constant ZERO_ADDRESS = address(0x0);
-
     address internal constant alice = address(0x421);
     address internal constant bob = address(0x422);
     address internal constant carol = address(0x423);
 
     address[] internal TEST_ACCOUNTS = [alice, bob, carol];
     uint256 internal immutable N_TESTERS;
-
-    uint256 LISTING_DATE = block.timestamp;
-    uint constant PRIMARY_POOL = 0;
-    string constant POOL_NAME = "Test1";
-    uint constant LISTING_PERCENTAGE_DIVIDEND = 1;
-    uint constant LISTING_PERCENTAGE_DIVISOR = 20;
-    uint constant CLIFF_IN_DAYS = 1;
-    uint constant CLIFF_PERCENTAGE_DIVIDEND = 1;
-    uint constant CLIFF_PERCENTAGE_DIVISOR = 10;
-    uint constant VESTING_DURATION_IN_MONTHS = 3;
-    uint constant TOTAL_POOL_TOKEN_AMONUT = 1 * 10 ** 22;
-    uint constant BENEFICIARY_DEFAULT_TOKEN_AMOUNT = 200;
+    uint32 internal immutable LISTING_DATE;
 
     MockToken internal token;
     WOW_Vesting internal vesting;
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                  CONSTRUCTOR
+    //////////////////////////////////////////////////////////////////////////*/
+
+    constructor(uint8 nTesters) {
+        // Assign the test accounts
+        require(nTesters <= TEST_ACCOUNTS.length, "Too many testers");
+        N_TESTERS = nTesters;
+
+        LISTING_DATE = uint32(block.timestamp);
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                SET UP FUNCTIONS
+    //////////////////////////////////////////////////////////////////////////*/
 
     function setUp() public virtual {
         token = new MockToken();
@@ -44,7 +50,9 @@ contract VestingHelper is Test {
         }
     }
 
-    /* ========== VESTING HELPER FUNCTIONS ========== */
+    /*//////////////////////////////////////////////////////////////////////////
+                                  HELPER FUNCTIONS
+    //////////////////////////////////////////////////////////////////////////*/
 
     function addOneNormalVestingPool() public {
         vesting.addVestingPool(
@@ -55,32 +63,34 @@ contract VestingHelper is Test {
             CLIFF_PERCENTAGE_DIVIDEND,
             CLIFF_PERCENTAGE_DIVISOR,
             VESTING_DURATION_IN_MONTHS,
-            WOW_Vesting.UnlockTypes.MONTHLY,
+            IVesting.UnlockTypes.MONTHLY,
             TOTAL_POOL_TOKEN_AMONUT
         );
     }
 
-    function checkPoolState(uint poolIndex) public {
+    function checkPoolState(uint16 poolIndex) public {
         (
             string memory name,
-            uint listingPercentageDividend,
-            uint listingPercentageDivisor,
-            uint cliffPercentageDividend,
-            uint cliffPercentageDivisor,
-            WOW_Vesting.UnlockTypes unlockType,
-            uint totalPoolTokenAmount
+            uint16 listingPercentageDividend,
+            uint16 listingPercentageDivisor,
+            uint16 cliffPercentageDividend,
+            uint16 cliffPercentageDivisor,
+            IVesting.UnlockTypes unlockType,
+            uint256 totalPoolTokenAmount
         ) = vesting.getPoolData(poolIndex);
 
         (
-            uint cliffInDays,
-            uint cliffEndDate,
-            uint vestingDurationInDays,
-            uint vestingDurationInMonths,
-            uint vestingEndDate
+            uint16 cliffInDays,
+            uint32 cliffEndDate,
+            uint16 vestingDurationInDays,
+            uint16 vestingDurationInMonths,
+            uint32 vestingEndDate
         ) = vesting.getPoolDates(poolIndex);
 
-        uint listingDate = vesting.getListingDate();
-        uint unlockedPoolTokens = vesting.getTotalUnlockedPoolTokens(poolIndex);
+        uint32 listingDate = vesting.getListingDate();
+        uint256 unlockedPoolTokens = vesting.getTotalUnlockedPoolTokens(
+            poolIndex
+        );
 
         assertEq(POOL_NAME, name, "POOL_NAME is incorrect");
         assertEq(
@@ -136,24 +146,24 @@ contract VestingHelper is Test {
     }
 
     function checkBeneficiaryState(
-        uint poolIndex,
+        uint16 poolIndex,
         address beneficiary,
-        uint amount,
-        uint calculatedClaimedAmount
+        uint256 amount,
+        uint256 calculatedClaimedAmount
     ) public {
         (
-            uint totalTokens,
-            uint listingTokenAmount,
-            uint cliffTokenAmount,
-            uint vestedTokenAmount,
-            uint claimedTotalTokenAmount
+            uint256 totalTokens,
+            uint256 listingTokenAmount,
+            uint256 cliffTokenAmount,
+            uint256 vestedTokenAmount,
+            uint256 claimedTotalTokenAmount
         ) = vesting.getBeneficiaryInformation(poolIndex, beneficiary);
 
-        uint calculatedListingTokenAmount = (amount *
+        uint256 calculatedListingTokenAmount = (amount *
             LISTING_PERCENTAGE_DIVIDEND) / LISTING_PERCENTAGE_DIVISOR;
-        uint calculateCliffTokenAmount = (amount * CLIFF_PERCENTAGE_DIVIDEND) /
-            CLIFF_PERCENTAGE_DIVISOR;
-        uint calculatedVestedTokenAmount = amount -
+        uint256 calculateCliffTokenAmount = (amount *
+            CLIFF_PERCENTAGE_DIVIDEND) / CLIFF_PERCENTAGE_DIVISOR;
+        uint256 calculatedVestedTokenAmount = amount -
             listingTokenAmount -
             cliffTokenAmount;
 
