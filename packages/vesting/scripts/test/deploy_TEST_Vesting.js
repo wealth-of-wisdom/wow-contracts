@@ -14,10 +14,10 @@ async function main() {
   ]);
   await token.waitForDeployment();
 
-  const WOW_Vesting = await ethers.getContractFactory("WOW_Vesting");
-  const vesting = await upgrades.deployProxy(WOW_Vesting, [token, listingDate]);
+  const Vesting = await ethers.getContractFactory("Vesting");
+  const vesting = await upgrades.deployProxy(Vesting, [token, listingDate]);
   await vesting.waitForDeployment();
-  console.log("WOW_Vesting deployed to:", await vesting.getAddress());
+  console.log("Vesting deployed to:", await vesting.getAddress());
 }
 
 main().catch((error) => {

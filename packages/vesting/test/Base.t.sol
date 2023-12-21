@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
-import {WOW_Vesting} from "../contracts/WOW_Vesting.sol";
+import {Vesting} from "../contracts/Vesting.sol";
 import {IVesting} from "../contracts/interfaces/IVesting.sol";
 import {MockToken} from "./mocks/MockToken.sol";
 import {Constants} from "./utils/Constants.sol";
@@ -22,7 +22,7 @@ contract Base_Test is Test, Constants {
     uint32 internal immutable LISTING_DATE;
 
     MockToken internal token;
-    WOW_Vesting internal vesting;
+    Vesting internal vesting;
 
     /*//////////////////////////////////////////////////////////////////////////
                                   CONSTRUCTOR

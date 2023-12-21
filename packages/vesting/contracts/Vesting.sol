@@ -9,7 +9,7 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {IVesting} from "./interfaces/IVesting.sol";
 import {Errors} from "./libraries/Errors.sol";
 
-contract WOW_Vesting is IVesting, Initializable, AccessControlUpgradeable {
+contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     /*//////////////////////////////////////////////////////////////////////////
                                     LIBRARIES  
     //////////////////////////////////////////////////////////////////////////*/
