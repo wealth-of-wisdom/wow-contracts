@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import {Test} from "forge-std/Test.sol";
 import {Vesting} from "../contracts/Vesting.sol";
@@ -62,7 +62,6 @@ contract Base_Test is Test, Constants, Events {
     //////////////////////////////////////////////////////////////////////////*/
 
     function _addDefaultVestingPool() internal {
-        vm.prank(admin);
         vesting.addVestingPool(
             POOL_NAME,
             LISTING_PERCENTAGE_DIVIDEND,
@@ -71,7 +70,7 @@ contract Base_Test is Test, Constants, Events {
             CLIFF_PERCENTAGE_DIVIDEND,
             CLIFF_PERCENTAGE_DIVISOR,
             VESTING_DURATION_IN_MONTHS,
-            IVesting.UnlockTypes.MONTHLY,
+            VESTING_UNLOCK_TYPE,
             TOTAL_POOL_TOKEN_AMOUNT
         );
     }

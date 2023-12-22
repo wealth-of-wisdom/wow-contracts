@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
@@ -161,7 +161,6 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
 
         p.cliffInDays = cliffInDays;
         p.cliffEndDate = s_listingDate + (cliffInDays * DAY);
-
         p.cliffPercentageDividend = cliffPercentageDividend;
         p.cliffPercentageDivisor = cliffPercentageDivisor;
 
@@ -532,24 +531,24 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
 
     function getPoolCliffData(
         uint16 pid
-    ) external view returns (uint16, uint16, uint16, uint32) {
+    ) external view returns (uint32, uint16, uint16, uint16) {
         Pool storage pool = s_vestingPools[pid];
         return (
+            pool.cliffEndDate,
             pool.cliffInDays,
             pool.cliffPercentageDividend,
-            pool.cliffPercentageDivisor,
-            pool.cliffEndDate
+            pool.cliffPercentageDivisor
         );
     }
 
     function getPoolVestingData(
         uint16 pid
-    ) external view returns (uint16, uint16, uint32) {
+    ) external view returns (uint32, uint16, uint16) {
         Pool storage pool = s_vestingPools[pid];
         return (
+            pool.vestingEndDate,
             pool.vestingDurationInMonths,
-            pool.vestingDurationInDays,
-            pool.vestingEndDate
+            pool.vestingDurationInDays
         );
     }
 
