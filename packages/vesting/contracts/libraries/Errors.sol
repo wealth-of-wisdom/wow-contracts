@@ -9,7 +9,7 @@ library Errors {
     error Vesting__NotEnoughVestedTokensForStaking();
     error Vesting__NotBeneficiary();
     error Vesting__NoTokensUnlocked();
-    error Vesting__NotEnoughTokenBalance();
+    error Vesting__NotEnoughStakedTokens();
     error Vesting__PercentageDivisorZero();
     error Vesting__PoolDoesNotExist();
     error Vesting__PoolWithThisNameExists();

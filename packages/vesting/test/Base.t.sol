@@ -19,7 +19,6 @@ contract Base_Test is Test, Constants, Events {
     address internal constant carol = address(0x423);
 
     address[] internal TEST_ACCOUNTS = [admin, alice, bob, carol];
-    uint256 internal immutable N_TESTERS;
     uint32 internal immutable LISTING_DATE;
 
     address[] internal beneficiaries = [alice, bob, carol];
@@ -36,11 +35,7 @@ contract Base_Test is Test, Constants, Events {
                                   CONSTRUCTOR
     //////////////////////////////////////////////////////////////////////////*/
 
-    constructor(uint8 nTesters) {
-        // Assign the test accounts
-        require(nTesters <= TEST_ACCOUNTS.length, "Too many testers");
-        N_TESTERS = nTesters;
-
+    constructor() {
         LISTING_DATE = uint32(block.timestamp);
     }
 
@@ -49,18 +44,17 @@ contract Base_Test is Test, Constants, Events {
     //////////////////////////////////////////////////////////////////////////*/
 
     function setUp() public virtual {
+        uint8 accountsNum = uint8(TEST_ACCOUNTS.length);
+
         vm.startPrank(admin);
         token = new MockToken();
         token.initialize("MOCK", "MCK", 1_000_000 ether);
 
-        vesting = new Vesting();
-        vesting.initialize(address(token), LISTING_DATE);
-        vm.stopPrank();
-
-        for (uint256 i = 0; i < N_TESTERS; ++i) {
+        for (uint8 i = 0; i < accountsNum; ++i) {
             deal(TEST_ACCOUNTS[i], INIT_ETH_BALANCE);
             token.mint(TEST_ACCOUNTS[i], INIT_TOKEN_BALANCE);
         }
+        vm.stopPrank();
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -181,7 +175,11 @@ contract Base_Test is Test, Constants, Events {
             beneficiary.listingTokenAmount -
             beneficiary.cliffTokenAmount;
 
-        assertEq(amount, beneficiary.totalTokens, "totalTokens is incorrect.");
+        assertEq(
+            amount,
+            beneficiary.totalTokenAmount,
+            "totalTokens is incorrect."
+        );
         assertEq(
             calculatedListingTokenAmount,
             beneficiary.listingTokenAmount,
@@ -199,8 +197,8 @@ contract Base_Test is Test, Constants, Events {
         );
         assertEq(
             claimedAmount,
-            beneficiary.claimedTotalTokenAmount,
-            "claimedTotalTokenAmount is incorrect"
+            beneficiary.claimedTokenAmount,
+            "claimedTokenAmount is incorrect"
         );
     }
 }

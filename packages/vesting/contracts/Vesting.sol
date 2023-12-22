@@ -20,9 +20,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
                                 PUBLIC CONSTANTS
     //////////////////////////////////////////////////////////////////////////*/
 
-    bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
-    bytes32 public constant DEFAULT_STAKING_ROLE =
-        keccak256("DEFAULT_STAKING_ROLE");
+    bytes32 public constant STAKING_ROLE = keccak256("STAKING_ROLE");
     uint32 public constant DAY = 1 days;
     uint32 public constant MONTH = 30 days;
 
@@ -103,17 +101,16 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     function initialize(
         IERC20 token,
         uint32 listingDate
-    ) external initializer mValidListingDate(listingDate) {
-        if (address(token) == address(0)) {
-            revert Errors.Vesting__ZeroAddress();
-        }
-
+    )
+        external
+        initializer
+        mAddressNotZero(address(token))
+        mValidListingDate(listingDate)
+    {
         __AccessControl_init();
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(MANAGER_ROLE, msg.sender);
 
         s_token = token;
-        s_poolCount = 0;
         s_listingDate = listingDate;
     }
 
@@ -176,6 +173,12 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         p.totalPoolTokenAmount = totalPoolTokenAmount;
 
         s_poolCount++;
+
+        s_token.safeTransferFrom(
+            msg.sender,
+            address(this),
+            totalPoolTokenAmount
+        );
 
         emit VestingPoolAdded(pid, totalPoolTokenAmount);
     }
@@ -332,7 +335,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
 
         // Checks: Enough tokens in the contract
         if (unlockedTokens > s_token.balanceOf(address(this))) {
-            revert Errors.Vesting__NotEnoughTokenBalance();
+            revert Errors.Vesting__NotEnoughStakedTokens();
         }
 
         Pool storage p = s_vestingPools[pid];
@@ -363,23 +366,23 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      * @param pid Index that refers to vesting pool object.
      * @param beneficiary Address of the staker.
      * @param tokenAmount Amount used to stake or unstake from vesting pool.
-     * @param isStaking Specification whether we are staking or unstaking from pool.
+     * @param startStaking Specification whether we are staking or unstaking from pool.
      */
     function updateVestedStakedTokens(
         uint16 pid,
         address beneficiary,
         uint256 tokenAmount,
-        bool isStaking
+        bool startStaking
     )
         external
-        onlyRole(DEFAULT_STAKING_ROLE)
+        onlyRole(STAKING_ROLE)
         mAddressNotZero(beneficiary)
         mPoolExists(pid)
     {
         Pool storage p = s_vestingPools[pid];
         Beneficiary storage b = p.beneficiaries[beneficiary];
 
-        if (isStaking) {
+        if (startStaking) {
             if (
                 tokenAmount >
                 b.totalTokenAmount - b.stakedTokenAmount - b.claimedTokenAmount
@@ -390,13 +393,13 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
             b.stakedTokenAmount += tokenAmount;
         } else {
             if (tokenAmount > b.stakedTokenAmount) {
-                revert Errors.Vesting__NotEnoughTokenBalance();
+                revert Errors.Vesting__NotEnoughStakedTokens();
             }
 
             b.stakedTokenAmount -= tokenAmount;
         }
 
-        emit StakedTokensUpdated(pid, tokenAmount, isStaking);
+        emit StakedTokensUpdated(pid, tokenAmount, startStaking);
     }
 
     /*//////////////////////////////////////////////////////////////////////////

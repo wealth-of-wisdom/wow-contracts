@@ -2,6 +2,9 @@
 pragma solidity 0.8.20;
 
 abstract contract Constants {
+    bytes32 internal constant DEFAULT_ADMIN_ROLE = 0x00;
+    bytes32 internal constant STAKING_ROLE = keccak256("STAKING_ROLE");
+
     address internal constant ZERO_ADDRESS = address(0x0);
     uint256 internal constant INIT_ETH_BALANCE = type(uint128).max;
     uint256 internal constant INIT_TOKEN_BALANCE = type(uint128).max;
