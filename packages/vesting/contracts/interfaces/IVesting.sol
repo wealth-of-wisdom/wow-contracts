@@ -72,7 +72,6 @@ interface IVesting is IVestingEvents {
         uint256 claimedTokenAmount;
     }
 
-    /// @todo make sure the order is correct
     struct Pool {
         string name;
         uint16 listingPercentageDividend;

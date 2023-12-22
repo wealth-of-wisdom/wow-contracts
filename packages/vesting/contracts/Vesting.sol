@@ -353,9 +353,6 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
 
         if (unlockedTokens > availableTokens) {
             revert Errors.Vesting__StakedTokensCanNotBeClaimed();
-
-            /// @question not sure if we want to transfer only full amount or partial
-            // unlockedTokens = availableTokens;
         }
 
         user.claimedTokenAmount += unlockedTokens;
@@ -505,7 +502,6 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
             uint256
         )
     {
-        /// @question maybe we should return all pool data in one function?
         Pool storage pool = s_vestingPools[pid];
         return (
             pool.name,
