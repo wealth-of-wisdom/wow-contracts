@@ -56,7 +56,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         if (
             s_vestingPools[pid].beneficiaries[msg.sender].totalTokenAmount == 0
         ) {
-            revert Errors.Vesting__NotInBeneficiaryList();
+            revert Errors.Vesting__NotBeneficiary();
         }
         _;
     }
@@ -86,7 +86,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      */
     modifier mValidListingDate(uint32 listingDate) {
         if (listingDate < block.timestamp) {
-            revert Errors.Vesting__ListingDateCanOnlyBeSetInFuture();
+            revert Errors.Vesting__ListingDateNotInFuture();
         }
         _;
     }
@@ -325,10 +325,12 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     {
         uint256 unlockedTokens = getUnlockedTokenAmount(pid, msg.sender);
 
+        // Checks: At least some tokens are unlocked
         if (unlockedTokens == 0) {
-            revert Errors.Vesting__NoClaimableTokens();
+            revert Errors.Vesting__NoTokensUnlocked();
         }
 
+        // Checks: Enough tokens in the contract
         if (unlockedTokens > s_token.balanceOf(address(this))) {
             revert Errors.Vesting__NotEnoughTokenBalance();
         }
@@ -336,24 +338,21 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         Pool storage p = s_vestingPools[pid];
         Beneficiary storage b = p.beneficiaries[msg.sender];
 
-        /**
-         * @dev Additional staking logic requires check whether
-         * @dev claimable tokens are not withdrawing from staked token pool
-         */
-
+        // Available tokens are the maximum amount that user should be able claim
+        // if all tokens are unlocked for the user,
         uint256 availableTokens = b.totalTokenAmount -
             b.claimedTokenAmount -
             b.stakedTokenAmount;
 
+        // Checks: Unlocked tokens are not withdrawing from staked token pool
         if (unlockedTokens > availableTokens) {
             revert Errors.Vesting__StakedTokensCanNotBeClaimed();
-
-            /// @question not sure if we want to transfer only full amount or partial
-            // unlockedTokens = availableTokens;
         }
 
+        // Effects
         b.claimedTokenAmount += unlockedTokens;
 
+        // Interactions
         s_token.safeTransfer(msg.sender, unlockedTokens);
 
         emit TokensClaimed(pid, msg.sender, unlockedTokens);
@@ -404,35 +403,35 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
                           EXTERNAL VIEW/PURE FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
-    /**
-     * @notice Checks how many tokens unlocked in a pool (not allocated to any user).
-     * @param pid Index that refers to vesting pool object.
-     */
-    function getTotalUnlockedPoolTokens(
-        uint16 pid
-    ) external view returns (uint256) {
-        Pool storage p = s_vestingPools[pid];
-        return p.totalPoolTokenAmount - p.lockedPoolTokenAmount;
-    }
+    // /**
+    //  * @notice Checks how many tokens unlocked in a pool (not allocated to any user).
+    //  * @param pid Index that refers to vesting pool object.
+    //  */
+    // function getTotalUnlockedPoolTokens(
+    //     uint16 pid
+    // ) external view returns (uint256) {
+    //     Pool storage p = s_vestingPools[pid];
+    //     return p.totalPoolTokenAmount - p.lockedPoolTokenAmount;
+    // }
 
     /**
      * @notice Get beneficiary details for pool.
      * @param pid Index that refers to vesting pool object.
-     * @param _address Address of the beneficiary wallet.
+     * @param user Address of the beneficiary wallet.
      * @return Beneficiary structure information.
      */
-    function getBeneficiaryInformation(
+    function getBeneficiary(
         uint16 pid,
-        address _address
-    ) external view returns (uint256, uint256, uint256, uint256, uint256) {
-        Beneficiary storage b = s_vestingPools[pid].beneficiaries[_address];
-        return (
-            b.totalTokenAmount,
-            b.listingTokenAmount,
-            b.cliffTokenAmount,
-            b.vestedTokenAmount,
-            b.claimedTokenAmount
-        );
+        address user
+    ) external view returns (Beneficiary memory) {
+        return s_vestingPools[pid].beneficiaries[user];
+        // return (
+        //     b.totalTokenAmount,
+        //     b.listingTokenAmount,
+        //     b.cliffTokenAmount,
+        //     b.vestedTokenAmount,
+        //     b.claimedTokenAmount
+        // );
     }
 
     /**
@@ -459,54 +458,95 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         return s_token;
     }
 
-    /**
-     * @notice Get vesting pool dates.
-     * @param pid Index that refers to vesting pool object.
-     * @return Part of the vesting pool information.
-     */
-    function getPoolDates(
+    // /**
+    //  * @notice Get vesting pool dates.
+    //  * @param pid Index that refers to vesting pool object.
+    //  * @return Part of the vesting pool information.
+    //  */
+    // function getPoolDates(
+    //     uint16 pid
+    // ) external view returns (uint16, uint32, uint16, uint16, uint32) {
+    //     Pool storage p = s_vestingPools[pid];
+    //     return (
+    //         p.cliffInDays,
+    //         p.cliffEndDate,
+    //         p.vestingDurationInDays,
+    //         p.vestingDurationInMonths,
+    //         p.vestingEndDate
+    //     );
+    // }
+
+    // /**
+    //  * @notice Get vesting pool data (not dates).
+    //  * @param pid Index that refers to vesting pool object.
+    //  * @return Part of the vesting pool information.
+    //  */
+    // function getPoolData(
+    //     uint16 pid
+    // )
+    //     external
+    //     view
+    //     returns (
+    //         string memory,
+    //         uint16,
+    //         uint16,
+    //         uint16,
+    //         uint16,
+    //         UnlockTypes,
+    //         uint256
+    //     )
+    // {
+    //     Pool storage p = s_vestingPools[pid];
+    //     return (
+    //         p.name,
+    //         p.listingPercentageDividend,
+    //         p.listingPercentageDivisor,
+    //         p.cliffPercentageDividend,
+    //         p.cliffPercentageDivisor,
+    //         p.unlockType,
+    //         p.totalPoolTokenAmount
+    //     );
+    // }
+
+    function getGeneralPoolData(
         uint16 pid
-    ) external view returns (uint16, uint32, uint16, uint16, uint32) {
-        Pool storage p = s_vestingPools[pid];
+    ) external view returns (string memory, UnlockTypes, uint256, uint256) {
+        Pool storage pool = s_vestingPools[pid];
         return (
-            p.cliffInDays,
-            p.cliffEndDate,
-            p.vestingDurationInDays,
-            p.vestingDurationInMonths,
-            p.vestingEndDate
+            pool.name,
+            pool.unlockType,
+            pool.totalPoolTokenAmount,
+            pool.lockedPoolTokenAmount
         );
     }
 
-    /**
-     * @notice Get vesting pool data (not dates).
-     * @param pid Index that refers to vesting pool object.
-     * @return Part of the vesting pool information.
-     */
-    function getPoolData(
+    function getPoolListingData(
         uint16 pid
-    )
-        external
-        view
-        returns (
-            string memory,
-            uint16,
-            uint16,
-            uint16,
-            uint16,
-            UnlockTypes,
-            uint256
-        )
-    {
-        /// @question maybe we should return all pool data in one function?
-        Pool storage p = s_vestingPools[pid];
+    ) external view returns (uint16, uint16) {
+        Pool storage pool = s_vestingPools[pid];
+        return (pool.listingPercentageDividend, pool.listingPercentageDivisor);
+    }
+
+    function getPoolCliffData(
+        uint16 pid
+    ) external view returns (uint16, uint16, uint16, uint32) {
+        Pool storage pool = s_vestingPools[pid];
         return (
-            p.name,
-            p.listingPercentageDividend,
-            p.listingPercentageDivisor,
-            p.cliffPercentageDividend,
-            p.cliffPercentageDivisor,
-            p.unlockType,
-            p.totalPoolTokenAmount
+            pool.cliffInDays,
+            pool.cliffPercentageDividend,
+            pool.cliffPercentageDivisor,
+            pool.cliffEndDate
+        );
+    }
+
+    function getPoolVestingData(
+        uint16 pid
+    ) external view returns (uint16, uint16, uint32) {
+        Pool storage pool = s_vestingPools[pid];
+        return (
+            pool.vestingDurationInMonths,
+            pool.vestingDurationInDays,
+            pool.vestingEndDate
         );
     }
 
