@@ -195,8 +195,8 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     )
         public
         onlyRole(DEFAULT_ADMIN_ROLE)
-        mAddressNotZero(beneficiary)
         mPoolExists(pid)
+        mAddressNotZero(beneficiary)
         mAmountNotZero(tokenAmount)
     {
         Pool storage p = s_vestingPools[pid];

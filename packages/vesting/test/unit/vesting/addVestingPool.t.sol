@@ -8,22 +8,6 @@ import {Vesting_Unit_Test} from "./VestingUnit.t.sol";
 
 contract Vesting_AddVestingPool_Unit_Test is Vesting_Unit_Test {
     /*//////////////////////////////////////////////////////////////////////////////
-                                    HELPER MODIFIERS
-    //////////////////////////////////////////////////////////////////////////////*/
-
-    modifier approveAndAddPool() {
-        _approveAndAddPool();
-        _;
-    }
-
-    function _approveAndAddPool() internal {
-        vm.startPrank(admin);
-        token.approve(address(vesting), TOTAL_POOL_TOKEN_AMOUNT);
-        _addDefaultVestingPool();
-        vm.stopPrank();
-    }
-
-    /*//////////////////////////////////////////////////////////////////////////////
                                         TESTS
     //////////////////////////////////////////////////////////////////////////////*/
 

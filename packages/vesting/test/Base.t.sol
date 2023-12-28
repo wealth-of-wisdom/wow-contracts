@@ -58,8 +58,20 @@ contract Base_Test is Test, Constants, Events {
     }
 
     /*//////////////////////////////////////////////////////////////////////////
-                                  HELPER FUNCTIONS
+                          HELPER MODIFIERS / FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
+
+    modifier approveAndAddPool() {
+        _approveAndAddPool();
+        _;
+    }
+
+    function _approveAndAddPool() internal {
+        vm.startPrank(admin);
+        token.approve(address(vesting), TOTAL_POOL_TOKEN_AMOUNT);
+        _addDefaultVestingPool();
+        vm.stopPrank();
+    }
 
     function _addDefaultVestingPool() internal {
         vesting.addVestingPool(
