@@ -14,7 +14,10 @@ module.exports = {
     },
   },
   etherscan: {
-    apiKey: process.env.SEPOLIA_API_KEY,
+    apiKey: {
+      ethereum: process.env.ETHEREUM_API_KEY,
+      sepolia: process.env.SEPOLIA_API_KEY,
+    },
   },
   sourcify: {
     enabled: true,
@@ -22,6 +25,10 @@ module.exports = {
   networks: {
     sepolia: {
       url: process.env.SEPOLIA_HOST,
+      accounts: [process.env.PRIVATE_KEY],
+    },
+    ethereum: {
+      url: process.env.ETHEREUM_HOST,
       accounts: [process.env.PRIVATE_KEY],
     },
   },
