@@ -107,8 +107,25 @@ contract Vesting_AddMultipleBeneficiaries_Unit_Test is Vesting_Unit_Test {
             tokenAmounts
         );
 
-        _checkBeneficiaryData(PRIMARY_POOL, alice, BENEFICIARY_TOKEN_AMOUNT, 0);
-        _checkBeneficiaryData(PRIMARY_POOL, bob, BENEFICIARY_TOKEN_AMOUNT, 0);
-        _checkBeneficiaryData(PRIMARY_POOL, carol, BENEFICIARY_TOKEN_AMOUNT, 0);
+        IVesting.Beneficiary memory aliceBeneficiary = vesting.getBeneficiary(
+            PRIMARY_POOL,
+            alice
+        );
+        IVesting.Beneficiary memory bobBeneficiary = vesting.getBeneficiary(
+            PRIMARY_POOL,
+            bob
+        );
+        IVesting.Beneficiary memory carolBeneficiary = vesting.getBeneficiary(
+            PRIMARY_POOL,
+            carol
+        );
+
+        // Validate beneficiaries
+        assertBeneficiaryData(aliceBeneficiary, BENEFICIARY_TOKEN_AMOUNT, 0);
+        assertBeneficiaryData(bobBeneficiary, BENEFICIARY_TOKEN_AMOUNT, 0);
+        assertBeneficiaryData(carolBeneficiary, BENEFICIARY_TOKEN_AMOUNT, 0);
+
+        // Validate pool
+        assertGeneralPoolData(vesting, PRIMARY_POOL, BENEFICIARY_TOKEN_AMOUNT * 3);
     }
 }

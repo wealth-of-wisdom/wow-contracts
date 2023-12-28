@@ -19,4 +19,5 @@ library Errors {
     error Vesting__VestingDurationZero();
     error Vesting__ZeroAddress();
     error Vesting__EmptyName();
+    error Vesting__BeneficiaryDoesNotExist();
 }

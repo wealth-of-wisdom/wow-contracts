@@ -5,10 +5,14 @@ import {Test} from "forge-std/Test.sol";
 import {Vesting} from "../contracts/Vesting.sol";
 import {IVesting} from "../contracts/interfaces/IVesting.sol";
 import {MockToken} from "./mocks/MockToken.sol";
-import {Constants} from "./utils/Constants.sol";
+import {Assertions} from "./utils/Assertions.sol";
 import {Events} from "./utils/Events.sol";
 
-contract Base_Test is Test, Constants, Events {
+contract Base_Test is
+    Test,
+    Assertions, // Inherits Constants
+    Events
+{
     /*//////////////////////////////////////////////////////////////////////////
                                   STATE VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
@@ -67,15 +71,23 @@ contract Base_Test is Test, Constants, Events {
     }
 
     function _approveAndAddPool() internal {
+        _approveAndAddPool(POOL_NAME);
+    }
+
+    function _approveAndAddPool(string memory name) internal {
         vm.startPrank(admin);
         token.approve(address(vesting), TOTAL_POOL_TOKEN_AMOUNT);
-        _addDefaultVestingPool();
+        _addDefaultVestingPool(name);
         vm.stopPrank();
     }
 
     function _addDefaultVestingPool() internal {
+        _addDefaultVestingPool(POOL_NAME);
+    }
+
+    function _addDefaultVestingPool(string memory name) internal {
         vesting.addVestingPool(
-            POOL_NAME,
+            name,
             LISTING_PERCENTAGE_DIVIDEND,
             LISTING_PERCENTAGE_DIVISOR,
             CLIFF_IN_DAYS,
@@ -166,55 +178,4 @@ contract Base_Test is Test, Constants, Events {
     //         "cliffEndDate is incorrect"
     //     );
     // }
-
-    function _checkBeneficiaryData(
-        uint16 poolIndex,
-        address user,
-        uint256 totalAmount,
-        uint256 claimedAmount
-    ) internal {
-        IVesting.Beneficiary memory beneficiary = vesting.getBeneficiary(
-            poolIndex,
-            user
-        );
-
-        uint256 calculatedListingTokenAmount = (totalAmount *
-            LISTING_PERCENTAGE_DIVIDEND) / LISTING_PERCENTAGE_DIVISOR;
-        uint256 calculateCliffTokenAmount = (totalAmount *
-            CLIFF_PERCENTAGE_DIVIDEND) / CLIFF_PERCENTAGE_DIVISOR;
-        uint256 calculatedVestedTokenAmount = totalAmount -
-            beneficiary.listingTokenAmount -
-            beneficiary.cliffTokenAmount;
-
-        assertEq(
-            beneficiary.totalTokenAmount,
-            totalAmount,
-            "totalTokens is incorrect."
-        );
-        assertEq(
-            beneficiary.listingTokenAmount,
-            calculatedListingTokenAmount,
-            "listingTokenAmount is incorrect"
-        );
-        assertEq(
-            beneficiary.cliffTokenAmount,
-            calculateCliffTokenAmount,
-            "cliffTokenAmount is incorrect"
-        );
-        assertEq(
-            beneficiary.vestedTokenAmount,
-            calculatedVestedTokenAmount,
-            "vestedTokenAmount is incorrect"
-        );
-        assertEq(
-            beneficiary.stakedTokenAmount,
-            0,
-            "stakedTokenAmount is incorrect"
-        );
-        assertEq(
-            beneficiary.claimedTokenAmount,
-            claimedAmount,
-            "claimedTokenAmount is incorrect"
-        );
-    }
 }

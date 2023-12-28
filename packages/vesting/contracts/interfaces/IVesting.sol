@@ -93,6 +93,15 @@ interface IVesting is IVestingEvents {
                                        FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
+    function getBeneficiary(
+        uint16 pid,
+        address user
+    ) external view returns (Beneficiary memory);
+
+    function getGeneralPoolData(
+        uint16 pid
+    ) external view returns (string memory, UnlockTypes, uint256, uint256);
+
     // function initialize(IERC20 token, uint32 listingDate) external;
 
     // function addVestingPool(

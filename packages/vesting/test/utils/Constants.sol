@@ -12,7 +12,9 @@ abstract contract Constants {
     uint256 internal constant INIT_TOKEN_BALANCE = type(uint128).max;
 
     uint16 internal constant PRIMARY_POOL = 0;
+    uint16 internal constant SECONDARY_POOL = 1;
     string internal constant POOL_NAME = "Test1";
+    string internal constant POOL_NAME_2 = "Test2";
     uint16 internal constant LISTING_PERCENTAGE_DIVIDEND = 1;
     uint16 internal constant LISTING_PERCENTAGE_DIVISOR = 20;
     uint16 internal constant CLIFF_IN_DAYS = 1;

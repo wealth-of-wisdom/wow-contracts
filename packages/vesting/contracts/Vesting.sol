@@ -51,10 +51,15 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      * @notice Checks whether the address is user of the pool.
      */
     modifier mOnlyBeneficiary(uint16 pid) {
-        if (
-            s_vestingPools[pid].beneficiaries[msg.sender].totalTokenAmount == 0
-        ) {
+        if (!_isBeneficiaryAdded(pid, msg.sender)) {
             revert Errors.Vesting__NotBeneficiary();
+        }
+        _;
+    }
+
+    modifier mBeneficiaryExists(uint16 pid, address beneficiary) {
+        if (!_isBeneficiaryAdded(pid, beneficiary)) {
+            revert Errors.Vesting__BeneficiaryDoesNotExist();
         }
         _;
     }
@@ -261,7 +266,12 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     function removeBeneficiary(
         uint16 pid,
         address beneficiary
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) mPoolExists(pid) {
+    )
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        mPoolExists(pid)
+        mBeneficiaryExists(pid, beneficiary)
+    {
         Pool storage pool = s_vestingPools[pid];
         Beneficiary storage user = pool.beneficiaries[beneficiary];
 
@@ -612,6 +622,15 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         if (vestingDurationInMonths == 0) {
             revert Errors.Vesting__VestingDurationZero();
         }
+    }
+
+    function _isBeneficiaryAdded(
+        uint16 pid,
+        address beneficiary
+    ) internal view returns (bool) {
+        return
+            s_vestingPools[pid].beneficiaries[beneficiary].totalTokenAmount !=
+            0;
     }
 
     /**
