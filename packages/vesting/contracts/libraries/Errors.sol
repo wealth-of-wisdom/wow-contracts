@@ -20,4 +20,5 @@ library Errors {
     error Vesting__ZeroAddress();
     error Vesting__EmptyName();
     error Vesting__BeneficiaryDoesNotExist();
+    error Vesting__InsufficientBalance();
 }

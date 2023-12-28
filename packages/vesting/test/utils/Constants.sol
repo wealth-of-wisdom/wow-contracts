@@ -23,6 +23,6 @@ abstract contract Constants {
     uint16 internal constant VESTING_DURATION_IN_MONTHS = 3;
     IVesting.UnlockTypes internal constant VESTING_UNLOCK_TYPE =
         IVesting.UnlockTypes.MONTHLY;
-    uint256 internal constant TOTAL_POOL_TOKEN_AMOUNT = 10_000 ether;
+    uint256 internal constant TOTAL_POOL_TOKEN_AMOUNT = 100_000 ether;
     uint256 internal constant BENEFICIARY_TOKEN_AMOUNT = 1 ether;
 }

@@ -316,9 +316,19 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         IERC20 customToken,
         address recipient,
         uint256 tokenAmount
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) mAddressNotZero(recipient) {
+    )
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        mAddressNotZero(address(customToken))
+        mAddressNotZero(recipient)
+        mAmountNotZero(tokenAmount)
+    {
         if (customToken == s_token) {
             revert Errors.Vesting__CanNotWithdrawVestedTokens();
+        }
+
+        if (tokenAmount > customToken.balanceOf(address(this))) {
+            revert Errors.Vesting__InsufficientBalance();
         }
 
         customToken.safeTransfer(recipient, tokenAmount);

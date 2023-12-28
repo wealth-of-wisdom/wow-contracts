@@ -52,7 +52,7 @@ contract Base_Test is
 
         vm.startPrank(admin);
         token = new MockToken();
-        token.initialize("MOCK", "MCK", 1_000_000 ether);
+        token.initialize("MOCK", "MCK", TOTAL_POOL_TOKEN_AMOUNT * 10);
 
         for (uint8 i = 0; i < accountsNum; ++i) {
             deal(TEST_ACCOUNTS[i], INIT_ETH_BALANCE);
