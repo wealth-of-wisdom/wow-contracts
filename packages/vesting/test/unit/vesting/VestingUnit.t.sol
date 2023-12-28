@@ -13,7 +13,7 @@ contract Vesting_Unit_Test is Base_Test, IVestingEvents {
 
         vm.startPrank(admin);
         vesting = new Vesting();
-        vesting.initialize(token, LISTING_DATE);
+        vesting.initialize(token, staking, LISTING_DATE);
         vm.stopPrank();
     }
 }

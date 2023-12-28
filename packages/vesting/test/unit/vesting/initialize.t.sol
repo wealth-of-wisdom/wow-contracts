@@ -20,19 +20,19 @@ contract Vesting_Initialize_Unit_Test is Vesting_Unit_Test {
 
     function test_initialize_RevertIf_TokenIsZeroAddress() external {
         vm.expectRevert(Errors.Vesting__ZeroAddress.selector);
-        vesting.initialize(IERC20(ZERO_ADDRESS), LISTING_DATE);
+        vesting.initialize(IERC20(ZERO_ADDRESS), staking, LISTING_DATE);
     }
 
     function test_initialize_RevertIf_ListingDateNotInFuture() external {
         vm.warp(LISTING_DATE + 1 seconds);
         vm.expectRevert(Errors.Vesting__ListingDateNotInFuture.selector);
-        vesting.initialize(token, LISTING_DATE);
+        vesting.initialize(token, staking, LISTING_DATE);
     }
 
     function test_initialize_GrantsDefaultAdminRoleToAdmin() external {
         vm.warp(LISTING_DATE - 1 seconds);
         vm.prank(admin);
-        vesting.initialize(token, LISTING_DATE);
+        vesting.initialize(token, staking, LISTING_DATE);
 
         assertTrue(
             vesting.hasRole(DEFAULT_ADMIN_ROLE, admin),
@@ -40,9 +40,21 @@ contract Vesting_Initialize_Unit_Test is Vesting_Unit_Test {
         );
     }
 
+    function test_initialize_GrantsStakingRoleToStaking() external {
+        vm.warp(LISTING_DATE - 1 seconds);
+        vm.prank(admin);
+        vesting.initialize(token, staking, LISTING_DATE);
+
+        assertTrue(
+            vesting.hasRole(STAKING_ROLE, staking),
+            "Admin should have staking role"
+        );
+    }
+
+
     function test_initialize_SetsVestingTokenCorrectly() external {
         vm.warp(LISTING_DATE - 1 seconds);
-        vesting.initialize(token, LISTING_DATE);
+        vesting.initialize(token, staking, LISTING_DATE);
 
         assertEq(
             address(vesting.getToken()),
@@ -53,7 +65,7 @@ contract Vesting_Initialize_Unit_Test is Vesting_Unit_Test {
 
     function test_initialize_SetsListingDateCorrectly() external {
         vm.warp(LISTING_DATE - 1 seconds);
-        vesting.initialize(token, LISTING_DATE);
+        vesting.initialize(token, staking, LISTING_DATE);
 
         assertEq(
             vesting.getListingDate(),
@@ -64,7 +76,7 @@ contract Vesting_Initialize_Unit_Test is Vesting_Unit_Test {
 
     function test_initialize_LeavesPoolCountAtZero() external {
         vm.warp(LISTING_DATE - 1 seconds);
-        vesting.initialize(token, LISTING_DATE);
+        vesting.initialize(token, staking, LISTING_DATE);
 
         assertEq(vesting.getPoolCount(), 0, "Pool count should be zero");
     }
@@ -74,6 +86,6 @@ contract Vesting_Initialize_Unit_Test is Vesting_Unit_Test {
         vm.expectEmit(true, true, true, true);
         emit Initialized(1);
 
-        vesting.initialize(token, LISTING_DATE);
+        vesting.initialize(token, staking, LISTING_DATE);
     }
 }

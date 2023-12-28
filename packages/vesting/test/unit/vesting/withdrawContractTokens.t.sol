@@ -21,6 +21,10 @@ contract Vesting_WithdrawContractTokens_Unit_Test is Vesting_Unit_Test {
         vm.stopPrank();
     }
 
+    /*//////////////////////////////////////////////////////////////////////////////
+                                        TESTS
+    //////////////////////////////////////////////////////////////////////////////*/
+
     function test_withdrawContractTokens_RevertIf_NotAdmin() external {
         vm.expectRevert(
             abi.encodeWithSelector(

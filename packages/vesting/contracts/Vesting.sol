@@ -29,6 +29,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     //////////////////////////////////////////////////////////////////////////*/
 
     IERC20 internal s_token;
+    address internal s_stakingContract;
     mapping(uint16 => Pool) internal s_vestingPools;
     uint32 internal s_listingDate;
     uint16 internal s_poolCount;
@@ -105,6 +106,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      */
     function initialize(
         IERC20 token,
+        address stakingContract,
         uint32 listingDate
     )
         external
@@ -114,6 +116,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     {
         __AccessControl_init();
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(STAKING_ROLE, stakingContract);
 
         s_token = token;
         s_listingDate = listingDate;
@@ -362,7 +365,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
 
         // Checks: Enough tokens in the contract
         if (unlockedTokens > s_token.balanceOf(address(this))) {
-            revert Errors.Vesting__NotEnoughStakedTokens();
+            revert Errors.Vesting__NotEnoughTokens();
         }
 
         Pool storage pool = s_vestingPools[pid];
@@ -403,8 +406,9 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     )
         external
         onlyRole(STAKING_ROLE)
-        mAddressNotZero(beneficiary)
         mPoolExists(pid)
+        mBeneficiaryExists(pid, beneficiary)
+        mAmountNotZero(tokenAmount)
     {
         Pool storage pool = s_vestingPools[pid];
         Beneficiary storage user = pool.beneficiaries[beneficiary];

@@ -21,4 +21,5 @@ library Errors {
     error Vesting__EmptyName();
     error Vesting__BeneficiaryDoesNotExist();
     error Vesting__InsufficientBalance();
+    error Vesting__NotEnoughTokens();
 }

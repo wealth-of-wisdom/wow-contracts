@@ -23,8 +23,6 @@ contract Base_Test is
     address internal constant carol = address(0x423);
 
     address[] internal TEST_ACCOUNTS = [admin, alice, bob, carol];
-    uint32 internal immutable LISTING_DATE;
-
     address[] internal beneficiaries = [alice, bob, carol];
     uint256[] internal tokenAmounts = [
         BENEFICIARY_TOKEN_AMOUNT,
@@ -32,15 +30,17 @@ contract Base_Test is
         BENEFICIARY_TOKEN_AMOUNT
     ];
 
+    uint32 internal immutable LISTING_DATE;
     MockToken internal token;
     Vesting internal vesting;
+    address internal staking = address(0x524);
 
     /*//////////////////////////////////////////////////////////////////////////
                                   CONSTRUCTOR
     //////////////////////////////////////////////////////////////////////////*/
 
     constructor() {
-        LISTING_DATE = uint32(block.timestamp);
+        LISTING_DATE = uint32(block.timestamp) + 1 days;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -65,6 +65,7 @@ contract Base_Test is
                           HELPER MODIFIERS / FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
+    // Pools
     modifier approveAndAddPool() {
         _approveAndAddPool();
         _;
@@ -96,6 +97,21 @@ contract Base_Test is
             VESTING_DURATION_IN_MONTHS,
             VESTING_UNLOCK_TYPE,
             TOTAL_POOL_TOKEN_AMOUNT
+        );
+    }
+
+    // Beneficiaries
+    modifier addBeneficiary(address beneficiary) {
+        _addBeneficiary(beneficiary);
+        _;
+    }
+
+    function _addBeneficiary(address beneficiary) internal {
+        vm.prank(admin);
+        vesting.addBeneficiary(
+            PRIMARY_POOL,
+            beneficiary,
+            BENEFICIARY_TOKEN_AMOUNT
         );
     }
 
