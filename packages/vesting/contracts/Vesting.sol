@@ -112,6 +112,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         external
         initializer
         mAddressNotZero(address(token))
+        mAddressNotZero(stakingContract)
         mValidListingDate(listingDate)
     {
         __AccessControl_init();
