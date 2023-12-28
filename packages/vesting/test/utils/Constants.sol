@@ -25,4 +25,14 @@ abstract contract Constants {
         IVesting.UnlockTypes.MONTHLY;
     uint256 internal constant TOTAL_POOL_TOKEN_AMOUNT = 100_000 ether;
     uint256 internal constant BENEFICIARY_TOKEN_AMOUNT = 1 ether;
+    uint256 internal constant LISTING_TOKEN_AMOUNT =
+        (BENEFICIARY_TOKEN_AMOUNT * LISTING_PERCENTAGE_DIVIDEND) /
+            LISTING_PERCENTAGE_DIVISOR;
+    uint256 internal constant CLIFF_TOKEN_AMOUNT =
+        (BENEFICIARY_TOKEN_AMOUNT * CLIFF_PERCENTAGE_DIVIDEND) /
+            CLIFF_PERCENTAGE_DIVISOR;
+    uint256 internal constant LISTING_AND_CLIFF_TOKEN_AMOUNT =
+        LISTING_TOKEN_AMOUNT + CLIFF_TOKEN_AMOUNT;
+    uint256 internal constant VESTING_TOKEN_AMOUNT =
+        BENEFICIARY_TOKEN_AMOUNT - LISTING_AND_CLIFF_TOKEN_AMOUNT;
 }

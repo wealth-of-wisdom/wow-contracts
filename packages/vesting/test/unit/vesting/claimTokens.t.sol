@@ -52,30 +52,118 @@ contract Vesting_ClaimTokens_Unit_Test is Vesting_Unit_Test {
         vesting.claimTokens(PRIMARY_POOL);
     }
 
-    // function test_claimTokens_RevertIf_ClaimingStakedTokens()
-    //     external
-    //     approveAndAddPool
-    //     addBeneficiary(alice)
-    // {
-    // }
+    function test_claimTokens_RevertIf_ClaimingStakedTokens()
+        external
+        approveAndAddPool
+        addBeneficiary(alice)
+    {
+        vm.prank(staking);
+        vesting.updateVestedStakedTokens(
+            PRIMARY_POOL,
+            alice,
+            BENEFICIARY_TOKEN_AMOUNT,
+            true
+        );
 
-    // function test_claimTokens_IncreasesClaimedTokensAmount()
-    //     external
-    //     approveAndAddPool
-    // {}
+        vm.warp(LISTING_DATE + 1 minutes);
+        vm.expectRevert(Errors.Vesting__StakedTokensCanNotBeClaimed.selector);
+        vm.prank(alice);
+        vesting.claimTokens(PRIMARY_POOL);
+    }
 
-    // function test_claimTokens_TransfersTokensToSender()
-    //     external
-    //     approveAndAddPool
-    // {}
+    function test_claimTokens_IncreasesClaimedTokensAmountWhenClaimingAfterListingDate()
+        external
+        approveAndAddPool
+        addBeneficiary(alice)
+    {
+        vm.warp(LISTING_DATE + 1 minutes);
+        vm.prank(alice);
+        vesting.claimTokens(PRIMARY_POOL);
 
-    // function test_claimTokens_TransfersTokensFromVesting()
-    //     external
-    //     approveAndAddPool
-    // {}
+        IVesting.Beneficiary memory beneficiary = vesting.getBeneficiary(
+            PRIMARY_POOL,
+            alice
+        );
+        assertEq(
+            beneficiary.claimedTokenAmount,
+            beneficiary.listingTokenAmount
+        );
+    }
 
-    // function test_claimTokens_EmitsTokensClaimedEvent()
-    //     external
-    //     approveAndAddPool
-    // {}
+    function test_claimTokens_IncreasesClaimedTokensAmountWhenClaimingAfterCliffDate()
+        external
+        approveAndAddPool
+        addBeneficiary(alice)
+    {
+        vm.warp(LISTING_DATE + CLIFF_IN_DAYS * 1 days);
+        vm.prank(alice);
+        vesting.claimTokens(PRIMARY_POOL);
+
+        IVesting.Beneficiary memory beneficiary = vesting.getBeneficiary(
+            PRIMARY_POOL,
+            alice
+        );
+        assertEq(
+            beneficiary.claimedTokenAmount,
+            beneficiary.listingTokenAmount + beneficiary.cliffTokenAmount
+        );
+    }
+
+    function test_claimTokens_TransfersTokensToSender()
+        external
+        approveAndAddPool
+        addBeneficiary(alice)
+    {
+        uint256 balanceBefore = token.balanceOf(alice);
+
+        vm.warp(LISTING_DATE + 1 minutes);
+        vm.prank(alice);
+        vesting.claimTokens(PRIMARY_POOL);
+
+        uint256 balanceAfter = token.balanceOf(alice);
+
+        IVesting.Beneficiary memory beneficiary = vesting.getBeneficiary(
+            PRIMARY_POOL,
+            alice
+        );
+        assertEq(balanceBefore + beneficiary.listingTokenAmount, balanceAfter);
+    }
+
+    function test_claimTokens_TransfersTokensFromVesting()
+        external
+        approveAndAddPool
+        addBeneficiary(alice)
+    {
+        uint256 balanceBefore = token.balanceOf(address(vesting));
+
+        vm.warp(LISTING_DATE + 1 minutes);
+        vm.prank(alice);
+        vesting.claimTokens(PRIMARY_POOL);
+
+        uint256 balanceAfter = token.balanceOf(address(vesting));
+
+        IVesting.Beneficiary memory beneficiary = vesting.getBeneficiary(
+            PRIMARY_POOL,
+            alice
+        );
+        assertEq(balanceBefore - beneficiary.listingTokenAmount, balanceAfter);
+    }
+
+    function test_claimTokens_EmitsTokensClaimedEvent()
+        external
+        approveAndAddPool
+        addBeneficiary(alice)
+    {
+        IVesting.Beneficiary memory beneficiary = vesting.getBeneficiary(
+            PRIMARY_POOL,
+            alice
+        );
+
+        vm.expectEmit(true, true, true, true);
+        emit TokensClaimed(PRIMARY_POOL, alice, beneficiary.listingTokenAmount);
+
+        vm.warp(LISTING_DATE + 1 minutes);
+        vm.prank(alice);
+        vesting.claimTokens(PRIMARY_POOL);
+    }
 }

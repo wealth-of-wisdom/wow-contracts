@@ -2,8 +2,8 @@
 pragma solidity 0.8.20;
 
 import {Test} from "forge-std/Test.sol";
-import {Vesting} from "../contracts/Vesting.sol";
 import {IVesting} from "../contracts/interfaces/IVesting.sol";
+import {VestingMock} from "./mocks/VestingMock.sol";
 import {MockToken} from "./mocks/MockToken.sol";
 import {Assertions} from "./utils/Assertions.sol";
 import {Events} from "./utils/Events.sol";
@@ -31,8 +31,11 @@ contract Base_Test is
     ];
 
     uint32 internal immutable LISTING_DATE;
+    uint32 internal immutable CLIFF_END_DATE;
+    uint32 internal immutable VESTING_END_DATE;
+
     MockToken internal token;
-    Vesting internal vesting;
+    VestingMock internal vesting;
     address internal staking = address(0x524);
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -41,6 +44,11 @@ contract Base_Test is
 
     constructor() {
         LISTING_DATE = uint32(block.timestamp) + 1 days;
+        CLIFF_END_DATE = LISTING_DATE + CLIFF_IN_DAYS * 1 days;
+        VESTING_END_DATE =
+            CLIFF_END_DATE +
+            VESTING_DURATION_IN_MONTHS *
+            30 days;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -114,84 +122,4 @@ contract Base_Test is
             BENEFICIARY_TOKEN_AMOUNT
         );
     }
-
-    // function checkPoolState(
-    //     uint16 poolIndex,
-    //     uint256 calculatedUnlockedPoolTokens
-    // ) public {
-    //     (
-    //         string memory name,
-    //         uint16 listingPercentageDividend,
-    //         uint16 listingPercentageDivisor,
-    //         uint16 cliffPercentageDividend,
-    //         uint16 cliffPercentageDivisor,
-    //         IVesting.UnlockTypes unlockType,
-    //         uint256 totalPoolTokenAmount
-    //     ) = vesting.getPoolData(poolIndex);
-
-    //     (
-    //         uint16 cliffInDays,
-    //         uint32 cliffEndDate,
-    //         uint16 vestingDurationInDays,
-    //         uint16 vestingDurationInMonths,
-    //         uint32 vestingEndDate
-    //     ) = vesting.getPoolDates(poolIndex);
-
-    //     uint32 listingDate = vesting.getListingDate();
-    //     uint256 unlockedPoolTokens = vesting.getTotalUnlockedPoolTokens(
-    //         poolIndex
-    //     );
-
-    //     assertEq(POOL_NAME, name, "POOL_NAME is incorrect");
-    //     assertEq(
-    //         LISTING_PERCENTAGE_DIVIDEND,
-    //         listingPercentageDividend,
-    //         "LISTING_PERCENTAGE_DIVIDEND is incorrect"
-    //     );
-    //     assertEq(
-    //         LISTING_PERCENTAGE_DIVISOR,
-    //         listingPercentageDivisor,
-    //         "LISTING_PERCENTAGE_DIVISOR is incorrect"
-    //     );
-    //     assertEq(
-    //         CLIFF_PERCENTAGE_DIVIDEND,
-    //         cliffPercentageDividend,
-    //         "CLIFF_PERCENTAGE_DIVIDEND is incorrect"
-    //     );
-    //     assertEq(
-    //         CLIFF_PERCENTAGE_DIVISOR,
-    //         cliffPercentageDivisor,
-    //         "CLIFF_PERCENTAGE_DIVISOR is incorrect"
-    //     );
-    //     assertEq(
-    //         TOTAL_POOL_TOKEN_AMOUNT,
-    //         totalPoolTokenAmount,
-    //         "TOTAL_POOL_TOKEN_AMOUNT is incorrect"
-    //     );
-    //     assertEq(
-    //         VESTING_DURATION_IN_MONTHS,
-    //         vestingDurationInMonths,
-    //         "vestingDurationInMonths is incorrect"
-    //     );
-    //     assertEq(
-    //         vestingDurationInDays,
-    //         30 * vestingDurationInMonths,
-    //         "vestingDurationInDays is incorrect"
-    //     );
-    //     assertEq(
-    //         vestingEndDate,
-    //         cliffEndDate + 24 * 3600 * 30 * vestingDurationInMonths,
-    //         "vestingEndDate is incorrect"
-    //     );
-    //     assertEq(
-    //         calculatedUnlockedPoolTokens,
-    //         unlockedPoolTokens,
-    //         "unlockedPoolTokens is incorrect"
-    //     );
-    //     assertEq(
-    //         cliffEndDate,
-    //         listingDate + 24 * 3600 * cliffInDays,
-    //         "cliffEndDate is incorrect"
-    //     );
-    // }
 }
