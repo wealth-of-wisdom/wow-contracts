@@ -52,7 +52,7 @@
 //         );
 //         vm.warp(1000001);
 //         vesting.removeBeneficiary(PRIMARY_POOL, alice);
-//         _checkBeneficiaryState(PRIMARY_POOL, alice, 0, 0);
+//         _checkBeneficiaryData(PRIMARY_POOL, alice, 0, 0);
 //         checkPoolState(PRIMARY_POOL, TOTAL_POOL_TOKEN_AMOUNT);
 //     }
 
@@ -70,7 +70,7 @@
 //         vm.prank(alice);
 //         vesting.claimTokens(PRIMARY_POOL);
 //         vesting.removeBeneficiary(PRIMARY_POOL, alice);
-//         _checkBeneficiaryState(PRIMARY_POOL, alice, 0, 0);
+//         _checkBeneficiaryData(PRIMARY_POOL, alice, 0, 0);
 //         checkPoolState(PRIMARY_POOL, calculatedUnlockedPoolTokens);
 //     }
 
@@ -86,7 +86,7 @@
 //         );
 //         vm.warp(1000000);
 //         vesting.removeBeneficiary(PRIMARY_POOL, alice);
-//         _checkBeneficiaryState(PRIMARY_POOL, alice, 0, 0);
+//         _checkBeneficiaryData(PRIMARY_POOL, alice, 0, 0);
 //         checkPoolState(PRIMARY_POOL, TOTAL_POOL_TOKEN_AMOUNT);
 //     }
 
@@ -104,7 +104,7 @@
 //         vm.prank(alice);
 //         vesting.claimTokens(PRIMARY_POOL);
 //         vesting.removeBeneficiary(PRIMARY_POOL, alice);
-//         _checkBeneficiaryState(PRIMARY_POOL, alice, 0, 0);
+//         _checkBeneficiaryData(PRIMARY_POOL, alice, 0, 0);
 //         checkPoolState(PRIMARY_POOL, calculatedUnlockedPoolTokens);
 //     }
 
@@ -119,7 +119,7 @@
 //             BENEFICIARY_TOKEN_AMOUNT
 //         );
 //         vesting.removeBeneficiary(PRIMARY_POOL, alice);
-//         _checkBeneficiaryState(PRIMARY_POOL, alice, 0, 0);
+//         _checkBeneficiaryData(PRIMARY_POOL, alice, 0, 0);
 //         checkPoolState(PRIMARY_POOL, TOTAL_POOL_TOKEN_AMOUNT);
 //     }
 
@@ -138,7 +138,7 @@
 //         vesting.claimTokens(PRIMARY_POOL);
 //         vm.warp(2);
 //         vesting.removeBeneficiary(PRIMARY_POOL, alice);
-//         _checkBeneficiaryState(PRIMARY_POOL, alice, 0, 0);
+//         _checkBeneficiaryData(PRIMARY_POOL, alice, 0, 0);
 //         checkPoolState(PRIMARY_POOL, calculatedUnlockedPoolTokens);
 //     }
 

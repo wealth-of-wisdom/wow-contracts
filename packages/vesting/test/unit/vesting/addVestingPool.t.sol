@@ -7,10 +7,6 @@ import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {Vesting_Unit_Test} from "./VestingUnit.t.sol";
 
 contract Vesting_AddVestingPool_Unit_Test is Vesting_Unit_Test {
-    /*//////////////////////////////////////////////////////////////////////////////
-                                        TESTS
-    //////////////////////////////////////////////////////////////////////////////*/
-
     function test_addVestingPool_RevertIf_NotAdmin() external {
         vm.expectRevert(
             abi.encodeWithSelector(

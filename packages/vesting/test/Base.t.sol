@@ -167,10 +167,10 @@ contract Base_Test is Test, Constants, Events {
     //     );
     // }
 
-    function _checkBeneficiaryState(
+    function _checkBeneficiaryData(
         uint16 poolIndex,
         address user,
-        uint256 amount,
+        uint256 totalAmount,
         uint256 claimedAmount
     ) internal {
         IVesting.Beneficiary memory beneficiary = vesting.getBeneficiary(
@@ -178,37 +178,42 @@ contract Base_Test is Test, Constants, Events {
             user
         );
 
-        uint256 calculatedListingTokenAmount = (amount *
+        uint256 calculatedListingTokenAmount = (totalAmount *
             LISTING_PERCENTAGE_DIVIDEND) / LISTING_PERCENTAGE_DIVISOR;
-        uint256 calculateCliffTokenAmount = (amount *
+        uint256 calculateCliffTokenAmount = (totalAmount *
             CLIFF_PERCENTAGE_DIVIDEND) / CLIFF_PERCENTAGE_DIVISOR;
-        uint256 calculatedVestedTokenAmount = amount -
+        uint256 calculatedVestedTokenAmount = totalAmount -
             beneficiary.listingTokenAmount -
             beneficiary.cliffTokenAmount;
 
         assertEq(
-            amount,
             beneficiary.totalTokenAmount,
+            totalAmount,
             "totalTokens is incorrect."
         );
         assertEq(
-            calculatedListingTokenAmount,
             beneficiary.listingTokenAmount,
+            calculatedListingTokenAmount,
             "listingTokenAmount is incorrect"
         );
         assertEq(
-            calculateCliffTokenAmount,
             beneficiary.cliffTokenAmount,
+            calculateCliffTokenAmount,
             "cliffTokenAmount is incorrect"
         );
         assertEq(
-            calculatedVestedTokenAmount,
             beneficiary.vestedTokenAmount,
+            calculatedVestedTokenAmount,
             "vestedTokenAmount is incorrect"
         );
         assertEq(
-            claimedAmount,
+            beneficiary.stakedTokenAmount,
+            0,
+            "stakedTokenAmount is incorrect"
+        );
+        assertEq(
             beneficiary.claimedTokenAmount,
+            claimedAmount,
             "claimedTokenAmount is incorrect"
         );
     }

@@ -7,8 +7,6 @@ import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {Vesting_Unit_Test} from "./VestingUnit.t.sol";
 
 contract Vesting_AddBeneficiary_Unit_Test is Vesting_Unit_Test {
-    /* ========== INITIALIZE TESTS ========== */
-
     function test_addBeneficiary_RevertIf_NotAdmin() external {
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -254,5 +252,16 @@ contract Vesting_AddBeneficiary_Unit_Test is Vesting_Unit_Test {
                 beneficiary.cliffTokenAmount,
             "Incorrect user vested token amount"
         );
+    }
+
+    function test_addBeneficiary_EmitsBeneficiaryAddedEvent()
+        external
+        approveAndAddPool
+    {
+        vm.expectEmit(true, true, true, true);
+        emit BeneficiaryAdded(PRIMARY_POOL, alice, BENEFICIARY_TOKEN_AMOUNT);
+
+        vm.prank(admin);
+        vesting.addBeneficiary(PRIMARY_POOL, alice, BENEFICIARY_TOKEN_AMOUNT);
     }
 }

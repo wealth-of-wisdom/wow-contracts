@@ -14,6 +14,10 @@ contract Vesting_Initialize_Unit_Test is Vesting_Unit_Test {
         vesting = new Vesting();
     }
 
+    /*//////////////////////////////////////////////////////////////////////////////
+                                        TESTS
+    //////////////////////////////////////////////////////////////////////////////*/
+
     function test_initialize_RevertIf_TokenIsZeroAddress() external {
         vm.expectRevert(Errors.Vesting__ZeroAddress.selector);
         vesting.initialize(IERC20(ZERO_ADDRESS), LISTING_DATE);
