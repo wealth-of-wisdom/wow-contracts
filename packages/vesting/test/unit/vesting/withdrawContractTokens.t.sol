@@ -6,7 +6,7 @@ import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol"
 import {IVesting} from "../../../contracts/interfaces/IVesting.sol";
 import {MockToken} from "../../mocks/MockToken.sol";
 import {Errors} from "../../../contracts/libraries/Errors.sol";
-import {Vesting_Unit_Test} from "./VestingUnit.t.sol";
+import {Vesting_Unit_Test} from "../VestingUnit.t.sol";
 
 contract Vesting_WithdrawContractTokens_Unit_Test is Vesting_Unit_Test {
     uint256 internal withdrawAmount = 1 ether;

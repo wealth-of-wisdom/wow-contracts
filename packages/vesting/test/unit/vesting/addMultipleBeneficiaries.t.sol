@@ -4,7 +4,7 @@ pragma solidity 0.8.20;
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {IVesting} from "../../../contracts/interfaces/IVesting.sol";
 import {Errors} from "../../../contracts/libraries/Errors.sol";
-import {Vesting_Unit_Test} from "./VestingUnit.t.sol";
+import {Vesting_Unit_Test} from "../VestingUnit.t.sol";
 
 contract Vesting_AddMultipleBeneficiaries_Unit_Test is Vesting_Unit_Test {
     function test_addMultipleBeneficiaries_RevertIf_ArraySizesDoNotMatch()
@@ -126,6 +126,10 @@ contract Vesting_AddMultipleBeneficiaries_Unit_Test is Vesting_Unit_Test {
         assertBeneficiaryData(carolBeneficiary, BENEFICIARY_TOKEN_AMOUNT, 0);
 
         // Validate pool
-        assertGeneralPoolData(vesting, PRIMARY_POOL, BENEFICIARY_TOKEN_AMOUNT * 3);
+        assertGeneralPoolData(
+            vesting,
+            PRIMARY_POOL,
+            BENEFICIARY_TOKEN_AMOUNT * 3
+        );
     }
 }

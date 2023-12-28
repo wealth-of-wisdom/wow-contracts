@@ -12,4 +12,6 @@ artifacts
 #Forge files
 build/
 
-
+#Coverage
+report
+lcov.info

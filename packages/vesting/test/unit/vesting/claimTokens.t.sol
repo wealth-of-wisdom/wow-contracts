@@ -3,7 +3,7 @@ pragma solidity 0.8.20;
 
 import {IVesting} from "../../../contracts/interfaces/IVesting.sol";
 import {Errors} from "../../../contracts/libraries/Errors.sol";
-import {Vesting_Unit_Test} from "./VestingUnit.t.sol";
+import {Vesting_Unit_Test} from "../VestingUnit.t.sol";
 
 contract Vesting_ClaimTokens_Unit_Test is Vesting_Unit_Test {
     function test_claimTokens_RevertIf_PoolDoesNotExist() external {

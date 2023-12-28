@@ -551,7 +551,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         }
 
         // Cliff period has ended. Calculate vested tokens.
-        (uint16 duration, uint16 periodsPassed) = getVestingPeriodsPassed(pid);
+        (uint16 periodsPassed, uint16 duration) = getVestingPeriodsPassed(pid);
         uint256 unlockedTokens = user.listingTokenAmount +
             user.cliffTokenAmount +
             ((user.vestedTokenAmount * periodsPassed) / duration);
@@ -562,30 +562,29 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     /**
      * @notice Calculates how many full days or months have passed since the cliff end.
      * @param pid Index that refers to vesting pool object.
-     * @return If unlock type is daily: vesting duration in days, else: in months.
-     * @return If unlock type is daily: number of days passed, else: number of months passed.
+     * @return periodsPassed If unlock type is daily: number of days passed, else: number of months passed.
+     * @return duration If unlock type is daily: vesting duration in days, else: in months.
      */
     function getVestingPeriodsPassed(
         uint16 pid
-    ) public view returns (uint16, uint16) {
+    ) public view returns (uint16 periodsPassed, uint16 duration) {
         Pool storage pool = s_vestingPools[pid];
 
-        // Cliff not ended yet
-        if (block.timestamp < pool.cliffEndDate) {
-            return (pool.vestingDurationInMonths, 0);
+        // Default value for duration is vesting duration in months
+        duration = pool.vestingDurationInMonths;
+
+        if (block.timestamp >= pool.cliffEndDate) {
+            periodsPassed = uint16(
+                (block.timestamp - pool.cliffEndDate) /
+                    (pool.unlockType == UnlockTypes.DAILY ? DAY : MONTH)
+            );
+
+            if (pool.unlockType == UnlockTypes.DAILY) {
+                duration = pool.vestingDurationInDays;
+            }
         }
 
-        uint16 duration = pool.unlockType == UnlockTypes.DAILY
-            ? pool.vestingDurationInDays
-            : pool.vestingDurationInMonths;
-
-        // Unlock type daily or monthly
-        uint16 periodsPassed = uint16(
-            (block.timestamp - pool.cliffEndDate) /
-                (pool.unlockType == UnlockTypes.DAILY ? DAY : MONTH)
-        );
-
-        return (duration, periodsPassed);
+        // periodsPassed by default is 0 if cliff has not ended yet
     }
 
     /*//////////////////////////////////////////////////////////////////////////

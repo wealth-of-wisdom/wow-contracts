@@ -3,11 +3,11 @@ pragma solidity 0.8.20;
 
 import {IVesting} from "../../../contracts/interfaces/IVesting.sol";
 import {Errors} from "../../../contracts/libraries/Errors.sol";
-import {Vesting_Unit_Test} from "./VestingUnit.t.sol";
+import {Vesting_Unit_Test} from "../VestingUnit.t.sol";
 
 contract Vesting_GetUnlockedTokenAmount_Unit_Test is Vesting_Unit_Test {
     // Current time is 1 minute before listing date
-    function test_getUnlockedTokenAmount_ReturnsZeroWhenListingDateNotReaced()
+    function test_getUnlockedTokenAmount_ReturnsZeroIfListingDateNotReaced()
         external
         approveAndAddPool
         addBeneficiary(alice)
@@ -22,7 +22,7 @@ contract Vesting_GetUnlockedTokenAmount_Unit_Test is Vesting_Unit_Test {
     }
 
     // Current time is listing date
-    function test_getUnlockedTokenAmount_ReturnsListingAmountWhenListingDateReached()
+    function test_getUnlockedTokenAmount_ReturnsListingAmountIfListingDateReached()
         external
         approveAndAddPool
         addBeneficiary(alice)
@@ -40,7 +40,7 @@ contract Vesting_GetUnlockedTokenAmount_Unit_Test is Vesting_Unit_Test {
     }
 
     // Current time is listing date
-    function test_getUnlockedTokenAmount_ReturnsListingMinusClaimedAmountWhenListingDateReached()
+    function test_getUnlockedTokenAmount_ReturnsListingMinusClaimedAmountIfListingDateReached()
         external
         approveAndAddPool
         addBeneficiary(alice)
@@ -65,7 +65,7 @@ contract Vesting_GetUnlockedTokenAmount_Unit_Test is Vesting_Unit_Test {
     }
 
     // Current time is 1 minute after listing date
-    function test_getUnlockedTokenAmount_ReturnsListingAmountWhenCliffDateNotReached()
+    function test_getUnlockedTokenAmount_ReturnsListingAmountIfCliffDateNotReached()
         external
         approveAndAddPool
         addBeneficiary(alice)
@@ -83,7 +83,7 @@ contract Vesting_GetUnlockedTokenAmount_Unit_Test is Vesting_Unit_Test {
     }
 
     // Current time is 1 minute after listing date
-    function test_getUnlockedTokenAmount_ReturnsListingMinusClaimedAmountWhenCliffDateNotReached()
+    function test_getUnlockedTokenAmount_ReturnsListingMinusClaimedAmountIfCliffDateNotReached()
         external
         approveAndAddPool
         addBeneficiary(alice)
@@ -109,7 +109,7 @@ contract Vesting_GetUnlockedTokenAmount_Unit_Test is Vesting_Unit_Test {
     }
 
     // Current time is vesting end date
-    function test_getUnlockedTokenAmount_ReturnsTotalAmountWhenVestingEndReached()
+    function test_getUnlockedTokenAmount_ReturnsTotalAmountIfVestingEndReached()
         external
         approveAndAddPool
         addBeneficiary(alice)
@@ -128,7 +128,7 @@ contract Vesting_GetUnlockedTokenAmount_Unit_Test is Vesting_Unit_Test {
     }
 
     // Current time is vesting end date
-    function test_getUnlockedTokenAmount_ReturnsTotalMinusClaimedAmountWhenVestingEndReached()
+    function test_getUnlockedTokenAmount_ReturnsTotalMinusClaimedAmountIfVestingEndReached()
         external
         approveAndAddPool
         addBeneficiary(alice)
@@ -153,7 +153,7 @@ contract Vesting_GetUnlockedTokenAmount_Unit_Test is Vesting_Unit_Test {
     }
 
     // Current time is 1 minute after vesting end date
-    function test_getUnlockedTokenAmount_ReturnsTotalAmountWhenVestingEndPassed()
+    function test_getUnlockedTokenAmount_ReturnsTotalAmountIfVestingEndPassed()
         external
         approveAndAddPool
         addBeneficiary(alice)
@@ -172,7 +172,7 @@ contract Vesting_GetUnlockedTokenAmount_Unit_Test is Vesting_Unit_Test {
     }
 
     // Current time is 1 minute after vesting end date
-    function test_getUnlockedTokenAmount_ReturnsTotalMinusClaimedAmountWhenVestingEndPassed()
+    function test_getUnlockedTokenAmount_ReturnsTotalMinusClaimedAmountIfVestingEndPassed()
         external
         approveAndAddPool
         addBeneficiary(alice)
@@ -197,7 +197,7 @@ contract Vesting_GetUnlockedTokenAmount_Unit_Test is Vesting_Unit_Test {
     }
 
     // Current time is cliff end date
-    function test_getUnlockedTokenAmount_ReturnsListingAndCliffAmountWhenCliffDateReached()
+    function test_getUnlockedTokenAmount_ReturnsListingAndCliffAmountIfCliffDateReached()
         external
         approveAndAddPool
         addBeneficiary(alice)
@@ -216,7 +216,7 @@ contract Vesting_GetUnlockedTokenAmount_Unit_Test is Vesting_Unit_Test {
     }
 
     // Current time is cliff end date
-    function test_getUnlockedTokenAmount_ReturnsListingAndCliffMinusClaimedAmountWhenCliffDateReached()
+    function test_getUnlockedTokenAmount_ReturnsListingAndCliffMinusClaimedAmountIfCliffDateReached()
         external
         approveAndAddPool
         addBeneficiary(alice)
@@ -242,7 +242,7 @@ contract Vesting_GetUnlockedTokenAmount_Unit_Test is Vesting_Unit_Test {
     }
 
     // Current time is 1 minute after cliff end date
-    function test_getUnlockedTokenAmount_ReturnsListingAndCliffAmountWhenCliffDatePassed()
+    function test_getUnlockedTokenAmount_ReturnsListingAndCliffAmountIfCliffDatePassed()
         external
         approveAndAddPool
         addBeneficiary(alice)
@@ -261,7 +261,7 @@ contract Vesting_GetUnlockedTokenAmount_Unit_Test is Vesting_Unit_Test {
     }
 
     // Current time is 1 minute after cliff end date
-    function test_getUnlockedTokenAmount_ReturnsListingAndCliffMinusClaimedAmountWhenCliffDatePassed()
+    function test_getUnlockedTokenAmount_ReturnsListingAndCliffMinusClaimedAmountIfCliffDatePassed()
         external
         approveAndAddPool
         addBeneficiary(alice)
@@ -287,7 +287,7 @@ contract Vesting_GetUnlockedTokenAmount_Unit_Test is Vesting_Unit_Test {
     }
 
     // Current time is 1 month after cliff end date
-    function test_getUnlockedTokenAmount_ReturnsVestedAmountWhenOnePeriodPassed()
+    function test_getUnlockedTokenAmount_ReturnsVestedAmountIfOnePeriodPassed()
         external
         approveAndAddPool
         addBeneficiary(alice)
@@ -307,7 +307,7 @@ contract Vesting_GetUnlockedTokenAmount_Unit_Test is Vesting_Unit_Test {
     }
 
     // Current time is 1 month after cliff end date
-    function test_getUnlockedTokenAmount_ReturnsVestedMinusClaimedAmountWhenOnePeriodPassed()
+    function test_getUnlockedTokenAmount_ReturnsVestedMinusClaimedAmountIfOnePeriodPassed()
         external
         approveAndAddPool
         addBeneficiary(alice)
@@ -335,7 +335,7 @@ contract Vesting_GetUnlockedTokenAmount_Unit_Test is Vesting_Unit_Test {
     }
 
     // Current time is 2 month after cliff end date
-    function test_getUnlockedTokenAmount_ReturnsVestedAmountWhenTwoPeriodPassed()
+    function test_getUnlockedTokenAmount_ReturnsVestedAmountIfTwoPeriodPassed()
         external
         approveAndAddPool
         addBeneficiary(alice)
@@ -355,7 +355,7 @@ contract Vesting_GetUnlockedTokenAmount_Unit_Test is Vesting_Unit_Test {
     }
 
     // Current time is 1 month after cliff end date
-    function test_getUnlockedTokenAmount_ReturnsVestedMinusClaimedAmountWhenTwoPeriodPassed()
+    function test_getUnlockedTokenAmount_ReturnsVestedMinusClaimedAmountIfTwoPeriodPassed()
         external
         approveAndAddPool
         addBeneficiary(alice)

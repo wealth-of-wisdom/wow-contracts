@@ -5,7 +5,7 @@ import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {IVesting} from "../../../contracts/interfaces/IVesting.sol";
 import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {VestingMock} from "../../mocks/VestingMock.sol";
-import {Vesting_Unit_Test} from "./VestingUnit.t.sol";
+import {Vesting_Unit_Test} from "../VestingUnit.t.sol";
 
 contract Vesting_Initialize_Unit_Test is Vesting_Unit_Test {
     function setUp() public virtual override {
