@@ -1,7 +1,7 @@
 {
     "name": "@wealth-of-wisdom/vesting",
     "version": "1.0.0",
-    "main": "index.js",
+    "main": "hardhat.config.js",
     "license": "MIT",
     "scripts": {
         "test": "forge test",
