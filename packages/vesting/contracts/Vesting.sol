@@ -28,11 +28,13 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
                                 INTERNAL STORAGE
     //////////////////////////////////////////////////////////////////////////*/
 
+    /* solhint-disable var-name-mixedcase */
     IERC20 internal s_token;
     address internal s_stakingContract;
     mapping(uint16 => Pool) internal s_vestingPools;
     uint32 internal s_listingDate;
     uint16 internal s_poolCount;
+    /* solhint-enable */
 
     /*//////////////////////////////////////////////////////////////////////////
                                     MODIFIERS   
@@ -210,6 +212,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      * @param beneficiary Address of the user wallet.
      * @param tokenAmount Purchased token absolute amount (with included decimals).
      */
+    /* solhint-disable ordering */
     function addBeneficiary(
         uint16 pid,
         address beneficiary,
@@ -254,6 +257,8 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
 
         emit BeneficiaryAdded(pid, beneficiary, tokenAmount);
     }
+
+    /* solhint-enable */
 
     /**
      * @notice Adds addresses with purchased token amount to the user list.
@@ -588,7 +593,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      */
     function getPoolVestingData(
         uint16 pid
-    )  external view returns (uint32, uint16, uint16) {
+    ) external view returns (uint32, uint16, uint16) {
         Pool storage pool = s_vestingPools[pid];
         return (
             pool.vestingEndDate,
