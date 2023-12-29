@@ -1,13 +1,39 @@
-# Sample Hardhat Project
+# Wealth of Wisdom Staking Contract
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+## Usage
 
-Try running some of the following tasks:
+### Build
 
 ```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.js
+$ forge build
+```
+
+### Test
+
+```shell
+$ forge test
+```
+
+### Deploy
+
+```shell
+$ yarn deploy:<network>
+```
+
+### Gas Snapshots
+
+```shell
+$ forge snapshot
+```
+
+### Anvil
+
+```shell
+$ anvil
+```
+
+### Cast
+
+```shell
+$ cast <subcommand>
 ```
