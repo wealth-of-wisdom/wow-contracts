@@ -17,10 +17,10 @@ contract Base_Test is
                                   STATE VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
 
-    address internal constant admin = address(0x420);
-    address internal constant alice = address(0x421);
-    address internal constant bob = address(0x422);
-    address internal constant carol = address(0x423);
+    address internal constant admin = address(0x1);
+    address internal constant alice = address(0x2);
+    address internal constant bob = address(0x3);
+    address internal constant carol = address(0x4);
 
     address[] internal TEST_ACCOUNTS = [admin, alice, bob, carol];
     address[] internal beneficiaries = [alice, bob, carol];
@@ -36,7 +36,7 @@ contract Base_Test is
 
     MockToken internal token;
     VestingMock internal vesting;
-    address internal staking = address(0x524);
+    address internal staking = makeAddr("staking");
 
     /*//////////////////////////////////////////////////////////////////////////
                                   CONSTRUCTOR

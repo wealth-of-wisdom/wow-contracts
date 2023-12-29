@@ -67,6 +67,17 @@ contract Vesting_Initialize_Unit_Test is Vesting_Unit_Test {
         );
     }
 
+    function test_initialize_SetsStakingContractCorrectly() external {
+        vm.warp(LISTING_DATE - 1 seconds);
+        vesting.initialize(token, staking, LISTING_DATE);
+
+        assertEq(
+            vesting.getStakingContract(),
+            staking,
+            "Staking contract should be set correctly"
+        );
+    }
+
     function test_initialize_SetsListingDateCorrectly() external {
         vm.warp(LISTING_DATE - 1 seconds);
         vesting.initialize(token, staking, LISTING_DATE);

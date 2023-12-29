@@ -8,5 +8,6 @@ remappings = [
     '@wealth-of-wisdom/nft/contracts/=../../packages/nft/contracts/',
     '@openzeppelin/=./node_modules/@openzeppelin/',
 ]
+gas_reports = ["*"]
 
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config

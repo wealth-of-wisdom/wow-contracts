@@ -36,6 +36,8 @@ interface IVestingEvents {
         uint256 tokenAmount
     );
 
+    event StakingContractSet(address indexed newContract);
+
     event TokensClaimed(
         uint16 indexed poolIndex,
         address indexed user,
@@ -93,100 +95,92 @@ interface IVesting is IVestingEvents {
                                        FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
+    function initialize(
+        IERC20 token,
+        address stakingContract,
+        uint32 listingDate
+    ) external;
+
+    function addVestingPool(
+        string calldata name,
+        uint16 listingPercentageDividend,
+        uint16 listingPercentageDivisor,
+        uint16 cliffInDays,
+        uint16 cliffPercentageDividend,
+        uint16 cliffPercentageDivisor,
+        uint16 vestingDurationInMonths,
+        UnlockTypes unlockType,
+        uint256 totalPoolTokenAmount
+    ) external;
+
+    function addBeneficiary(
+        uint16 pid,
+        address beneficiary,
+        uint256 tokenAmount
+    ) external;
+
+    function addMultipleBeneficiaries(
+        uint16 pid,
+        address[] calldata beneficiaries,
+        uint256[] calldata tokenAmounts
+    ) external;
+
+    function removeBeneficiary(uint16 pid, address beneficiary) external;
+
+    function changeListingDate(uint32 newListingDate) external;
+
+    function withdrawContractTokens(
+        IERC20 customToken,
+        address recipient,
+        uint256 tokenAmount
+    ) external;
+
+    function setStakingContract(address newStaking) external;
+
+    function claimTokens(uint16 pid) external;
+
+    function updateVestedStakedTokens(
+        uint16 pid,
+        address beneficiary,
+        uint256 tokenAmount,
+        bool startStaking
+    ) external;
+
     function getBeneficiary(
         uint16 pid,
         address user
     ) external view returns (Beneficiary memory);
 
+    function getListingDate() external view returns (uint32);
+
+    function getPoolCount() external view returns (uint16);
+
+    function getToken() external view returns (IERC20);
+
+    function getStakingContract() external view returns (address);
+
     function getGeneralPoolData(
         uint16 pid
     ) external view returns (string memory, UnlockTypes, uint256, uint256);
 
-    // function initialize(IERC20 token, uint32 listingDate) external;
+    function getPoolListingData(
+        uint16 pid
+    ) external view returns (uint16, uint16);
 
-    // function addVestingPool(
-    //     string calldata name,
-    //     uint16 listingPercentageDividend,
-    //     uint16 listingPercentageDivisor,
-    //     uint16 cliffInDays,
-    //     uint16 cliffPercentageDividend,
-    //     uint16 cliffPercentageDivisor,
-    //     uint16 vestingDurationInMonths,
-    //     UnlockTypes unlockType,
-    //     uint256 totalPoolTokenAmount
-    // ) external;
+    function getPoolCliffData(
+        uint16 pid
+    ) external view returns (uint32, uint16, uint16, uint16);
 
-    // function addBeneficiary(
-    //     uint16 pid,
-    //     address beneficiary,
-    //     uint256 tokenAmount
-    // ) external;
+    function getPoolVestingData(
+        uint16 pid
+    ) external view returns (uint32, uint16, uint16);
 
-    // function addMultipleBeneficiaries(
-    //     uint16 pid,
-    //     address[] calldata beneficiaries,
-    //     uint256[] calldata tokenAmounts
-    // ) external;
+    function getUnlockedTokenAmount(
+        uint16 pid,
+        address beneficiary
+    ) external view returns (uint256 unlockedAmount);
 
-    // function changeListingDate(uint32 newListingDate) external;
-
-    // function removeBeneficiary(uint16 pid, address beneficiary) external;
-
-    // function withdrawContractTokens(
-    //     IERC20 customToken,
-    //     address recipient,
-    //     uint256 tokenAmount
-    // ) external;
-
-    // function claimTokens(uint16 pid) external;
-
-    // function updateVestedStakedTokens(
-    //     uint16 pid,
-    //     address beneficiary,
-    //     uint256 tokenAmount,
-    //     bool isStaking
-    // ) external;
-
-    // function getTotalUnlockedPoolTokens(
-    //     uint16 pid
-    // ) external view returns (uint256);
-
-    // function getBeneficiaryInformation(
-    //     uint16 pid,
-    //     address _address
-    // ) external view returns (uint256, uint256, uint256, uint256, uint256);
-
-    // function getListingDate() external view returns (uint32);
-
-    // function getPoolCount() external view returns (uint16);
-
-    // function getToken() external view returns (IERC20);
-
-    // function getPoolDates(
-    //     uint16 pid
-    // ) external view returns (uint16, uint32, uint16, uint16, uint32);
-
-    // function getPoolData(
-    //     uint16 pid
-    // )
-    //     external
-    //     view
-    //     returns (
-    //         string memory,
-    //         uint16,
-    //         uint16,
-    //         uint16,
-    //         uint16,
-    //         UnlockTypes,
-    //         uint256
-    //     );
-
-    // function getUnlockedTokenAmount(
-    //     uint16 pid,
-    //     address beneficiary
-    // ) external view returns (uint256);
-
-    // function getVestingPeriodsPassed(
-    //     uint16 pid
-    // ) external view returns (uint16, uint16);
+    function getVestingPeriodsPassed(
+        uint16 pid
+    ) external view returns (uint16 periodsPassed, uint16 duration);
 }

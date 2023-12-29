@@ -15,7 +15,7 @@ contract Vesting_ClaimTokens_Unit_Test is Vesting_Unit_Test {
         external
         approveAndAddPool
     {
-        vm.expectRevert(Errors.Vesting__ZeroAddress.selector);
+        vm.expectRevert(Errors.Vesting__NotBeneficiary.selector);
         vm.prank(ZERO_ADDRESS);
         vesting.claimTokens(PRIMARY_POOL);
     }

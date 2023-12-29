@@ -18,3 +18,7 @@ lcov.info
 
 #OpenZeppelin
 .openzeppelin/
+
+#Gas report
+.gas-snapshot
+.gas-snapshot2

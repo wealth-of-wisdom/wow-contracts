@@ -5,6 +5,22 @@ import {Vesting} from "../../contracts/Vesting.sol";
 import {IVesting} from "../../contracts/interfaces/IVesting.sol";
 
 contract VestingMock is Vesting {
+    /*//////////////////////////////////////////////////////////////////////////////
+                              EXPOSED INTERNAL FUNCTIONS
+    //////////////////////////////////////////////////////////////////////////////*/
+
+    function exposed_getTokensByPercentage(
+        uint256 totalAmount,
+        uint16 dividend,
+        uint16 divisor
+    ) external pure returns (uint256) {
+        return _getTokensByPercentage(totalAmount, dividend, divisor);
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////////
+                                    MOCK FUNCTIONS
+    //////////////////////////////////////////////////////////////////////////////*/
+
     function mock_setClaimedAmount(
         uint16 pid,
         address beneficiary,

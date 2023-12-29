@@ -7,20 +7,6 @@ import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {Vesting_Unit_Test} from "../VestingUnit.t.sol";
 
 contract Vesting_AddMultipleBeneficiaries_Unit_Test is Vesting_Unit_Test {
-    function test_addMultipleBeneficiaries_RevertIf_ArraySizesDoNotMatch()
-        external
-    {
-        tokenAmounts.push(BENEFICIARY_TOKEN_AMOUNT);
-
-        vm.expectRevert(Errors.Vesting__ArraySizeMismatch.selector);
-        vm.prank(admin);
-        vesting.addMultipleBeneficiaries(
-            PRIMARY_POOL,
-            beneficiaries,
-            tokenAmounts
-        );
-    }
-
     function test_addMultipleBeneficiaries_RevertIf_NotAdmin() external {
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -41,6 +27,21 @@ contract Vesting_AddMultipleBeneficiaries_Unit_Test is Vesting_Unit_Test {
         external
     {
         vm.expectRevert(Errors.Vesting__PoolDoesNotExist.selector);
+        vm.prank(admin);
+        vesting.addMultipleBeneficiaries(
+            PRIMARY_POOL,
+            beneficiaries,
+            tokenAmounts
+        );
+    }
+
+    function test_addMultipleBeneficiaries_RevertIf_ArraySizesDoNotMatch()
+        external
+        approveAndAddPool
+    {
+        tokenAmounts.push(BENEFICIARY_TOKEN_AMOUNT);
+
+        vm.expectRevert(Errors.Vesting__ArraySizeMismatch.selector);
         vm.prank(admin);
         vesting.addMultipleBeneficiaries(
             PRIMARY_POOL,
