@@ -1,16 +1,16 @@
 {
     "name": "@wealth-of-wisdom/vesting",
     "version": "1.0.0",
-    "main": "index.js",
+    "main": "hardhat.config.js",
     "license": "MIT",
     "scripts": {
         "test": "forge test",
         "build": "forge build",
         "coverage": "forge coverage",
         "coverage:lcov": "forge coverage --report lcov && genhtml -o report --branch-coverage lcov.info",
-        "deploy:ethereum": "npx hardhat run scripts/deployVesting.js --network ethereum",
+        "deploy:ethereum": "npx hardhat run scripts/deployVesting.js --network mainnet",
         "deploy:sepolia": "npx hardhat run scripts/deployVesting.js --network sepolia",
-        "verify:ethereum": "npx hardhat verify --network ethereum",
+        "verify:ethereum": "npx hardhat verify --network mainnet",
         "verify:sepolia": "npx hardhat verify --network sepolia"
     },
     "dependencies": {
@@ -25,7 +25,6 @@
         "@nomicfoundation/hardhat-network-helpers": "^1.0.10",
         "@nomicfoundation/hardhat-toolbox": "^2.0.2",
         "@nomiclabs/hardhat-ethers": "^2.2.3",
-        "@nomiclabs/hardhat-etherscan": "^3.1.8",
         "@openzeppelin/hardhat-upgrades": "^2.5.0",
         "@typechain/ethers-v5": "^10.2.1",
         "@typechain/hardhat": "^6.1.6",

@@ -28,11 +28,13 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
                                 INTERNAL STORAGE
     //////////////////////////////////////////////////////////////////////////*/
 
+    /* solhint-disable var-name-mixedcase */
     IERC20 internal s_token;
     address internal s_stakingContract;
     mapping(uint16 => Pool) internal s_vestingPools;
     uint32 internal s_listingDate;
     uint16 internal s_poolCount;
+    /* solhint-enable */
 
     /*//////////////////////////////////////////////////////////////////////////
                                     MODIFIERS   
@@ -210,6 +212,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      * @param beneficiary Address of the user wallet.
      * @param tokenAmount Purchased token absolute amount (with included decimals).
      */
+    /* solhint-disable ordering */
     function addBeneficiary(
         uint16 pid,
         address beneficiary,
@@ -254,6 +257,8 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
 
         emit BeneficiaryAdded(pid, beneficiary, tokenAmount);
     }
+
+    /* solhint-enable */
 
     /**
      * @notice Adds addresses with purchased token amount to the user list.
@@ -526,6 +531,14 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         return s_stakingContract;
     }
 
+    /**
+     * @notice Return pool data.
+     * @param pid Index that refers to vesting pool object.
+     * @return Pool name
+     * @return Unlock type
+     * @return Total pool token amount
+     * @return Locked pool token amount
+     */
     function getGeneralPoolData(
         uint16 pid
     ) external view returns (string memory, UnlockTypes, uint256, uint256) {
@@ -538,6 +551,12 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         );
     }
 
+    /**
+     * @notice Return pool listing data.
+     * @param pid Index that refers to vesting pool object.
+     * @return listing percentage dividend
+     * @return listing percentage divisor
+     */
     function getPoolListingData(
         uint16 pid
     ) external view returns (uint16, uint16) {
@@ -545,6 +564,14 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         return (pool.listingPercentageDividend, pool.listingPercentageDivisor);
     }
 
+    /**
+     * @notice Return pool cliff data.
+     * @param pid Index that refers to vesting pool object.
+     * @return cliff end date
+     * @return cliff in days
+     * @return cliff percentage dividend
+     * @return cliff percentage divisor
+     */
     function getPoolCliffData(
         uint16 pid
     ) external view returns (uint32, uint16, uint16, uint16) {
@@ -557,6 +584,13 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         );
     }
 
+    /**
+     * @notice Return pool vesting data.
+     * @param pid Index that refers to vesting pool object.
+     * @return vesting end date
+     * @return vesting duration in months
+     * @return vesting duration in days
+     */
     function getPoolVestingData(
         uint16 pid
     ) external view returns (uint32, uint16, uint16) {
@@ -693,6 +727,12 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         }
     }
 
+    /**
+     * @notice Checks whether the beneficiary exists in the pool.
+     * @param pid Index that refers to vesting pool object.
+     * @param beneficiary Address of the user wallet.
+     * @return true if beneficiary exists in the pool, else false.
+     */
     function _isBeneficiaryAdded(
         uint16 pid,
         address beneficiary

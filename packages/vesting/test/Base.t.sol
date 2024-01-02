@@ -2,7 +2,6 @@
 pragma solidity 0.8.20;
 
 import {Test} from "forge-std/Test.sol";
-import {IVesting} from "../contracts/interfaces/IVesting.sol";
 import {VestingMock} from "./mocks/VestingMock.sol";
 import {MockToken} from "./mocks/MockToken.sol";
 import {Assertions} from "./utils/Assertions.sol";

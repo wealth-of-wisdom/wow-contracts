@@ -4,9 +4,8 @@ out = "build"
 allow_paths = ["../.."]
 libs = ["../../node_modules", "../../lib"]
 remappings = [
-    '@wealth-of-wisdom/staking/contracts/=../../packages/stakings/contracts/',
-    '@wealth-of-wisdom/nft/contracts/=../../packages/nft/contracts/',
-    '@openzeppelin/=./node_modules/@openzeppelin/',
+    "@openzeppelin/=../../node_modules/@openzeppelin/",
 ]
+gas_reports = ["*"]
 
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config
