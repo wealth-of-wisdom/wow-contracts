@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
@@ -35,6 +35,8 @@ interface IVestingEvents {
         address indexed recipient,
         uint256 tokenAmount
     );
+
+    event StakingContractSet(address indexed newContract);
 
     event TokensClaimed(
         uint16 indexed poolIndex,
@@ -93,7 +95,11 @@ interface IVesting is IVestingEvents {
                                        FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
-    function initialize(IERC20 token, uint32 listingDate) external;
+    function initialize(
+        IERC20 token,
+        address stakingContract,
+        uint32 listingDate
+    ) external;
 
     function addVestingPool(
         string calldata name,
@@ -119,9 +125,9 @@ interface IVesting is IVestingEvents {
         uint256[] calldata tokenAmounts
     ) external;
 
-    function changeListingDate(uint32 newListingDate) external;
-
     function removeBeneficiary(uint16 pid, address beneficiary) external;
+
+    function changeListingDate(uint32 newListingDate) external;
 
     function withdrawContractTokens(
         IERC20 customToken,
@@ -129,23 +135,21 @@ interface IVesting is IVestingEvents {
         uint256 tokenAmount
     ) external;
 
+    function setStakingContract(address newStaking) external;
+
     function claimTokens(uint16 pid) external;
 
     function updateVestedStakedTokens(
         uint16 pid,
         address beneficiary,
         uint256 tokenAmount,
-        bool isStaking
+        bool startStaking
     ) external;
 
-    function getTotalUnlockedPoolTokens(
-        uint16 pid
-    ) external view returns (uint256);
-
-    function getBeneficiaryInformation(
+    function getBeneficiary(
         uint16 pid,
-        address _address
-    ) external view returns (uint256, uint256, uint256, uint256, uint256);
+        address user
+    ) external view returns (Beneficiary memory);
 
     function getListingDate() external view returns (uint32);
 
@@ -153,31 +157,30 @@ interface IVesting is IVestingEvents {
 
     function getToken() external view returns (IERC20);
 
-    function getPoolDates(
-        uint16 pid
-    ) external view returns (uint16, uint32, uint16, uint16, uint32);
+    function getStakingContract() external view returns (address);
 
-    function getPoolData(
+    function getGeneralPoolData(
         uint16 pid
-    )
-        external
-        view
-        returns (
-            string memory,
-            uint16,
-            uint16,
-            uint16,
-            uint16,
-            UnlockTypes,
-            uint256
-        );
+    ) external view returns (string memory, UnlockTypes, uint256, uint256);
+
+    function getPoolListingData(
+        uint16 pid
+    ) external view returns (uint16, uint16);
+
+    function getPoolCliffData(
+        uint16 pid
+    ) external view returns (uint32, uint16, uint16, uint16);
+
+    function getPoolVestingData(
+        uint16 pid
+    ) external view returns (uint32, uint16, uint16);
 
     function getUnlockedTokenAmount(
         uint16 pid,
         address beneficiary
-    ) external view returns (uint256);
+    ) external view returns (uint256 unlockedAmount);
 
     function getVestingPeriodsPassed(
         uint16 pid
-    ) external view returns (uint16, uint16);
+    ) external view returns (uint16 periodsPassed, uint16 duration);
 }
