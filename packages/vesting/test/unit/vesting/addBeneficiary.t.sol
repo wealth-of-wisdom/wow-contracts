@@ -62,7 +62,7 @@ contract Vesting_AddBeneficiary_Unit_Test is Vesting_Unit_Test {
         );
     }
 
-    function test_addBeneficiary_IncreasesLockedPoolTokenAmountWithOneBeneficiary()
+    function test_addBeneficiary_IncreasesDedicatedPoolTokenAmountWithOneBeneficiary()
         external
         approveAndAddPool
     {
@@ -77,7 +77,7 @@ contract Vesting_AddBeneficiary_Unit_Test is Vesting_Unit_Test {
         );
     }
 
-    function test_addBeneficiary_IncreasesLockedPoolTokenAmountWithTwoBeneficiaries()
+    function test_addBeneficiary_IncreasesDedicatedPoolTokenAmountWithTwoBeneficiaries()
         external
         approveAndAddPool
     {

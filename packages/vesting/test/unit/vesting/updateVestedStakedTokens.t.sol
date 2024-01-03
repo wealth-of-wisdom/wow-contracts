@@ -28,7 +28,7 @@ contract Vesting_UpdateVestedStakedTokens_Unit_Test is Vesting_Unit_Test {
         external
     {
         vm.expectRevert(Errors.Vesting__PoolDoesNotExist.selector);
-        vm.prank(staking);
+        vm.prank(address(staking));
         vesting.updateVestedStakedTokens(
             PRIMARY_POOL,
             alice,
@@ -42,7 +42,7 @@ contract Vesting_UpdateVestedStakedTokens_Unit_Test is Vesting_Unit_Test {
         approveAndAddPool
     {
         vm.expectRevert(Errors.Vesting__BeneficiaryDoesNotExist.selector);
-        vm.prank(staking);
+        vm.prank(address(staking));
         vesting.updateVestedStakedTokens(
             PRIMARY_POOL,
             alice,
@@ -57,7 +57,7 @@ contract Vesting_UpdateVestedStakedTokens_Unit_Test is Vesting_Unit_Test {
         addBeneficiary(alice)
     {
         vm.expectRevert(Errors.Vesting__TokenAmountZero.selector);
-        vm.prank(staking);
+        vm.prank(address(staking));
         vesting.updateVestedStakedTokens(PRIMARY_POOL, alice, 0, true);
     }
 
@@ -69,7 +69,7 @@ contract Vesting_UpdateVestedStakedTokens_Unit_Test is Vesting_Unit_Test {
         vm.expectRevert(
             Errors.Vesting__NotEnoughVestedTokensForStaking.selector
         );
-        vm.prank(staking);
+        vm.prank(address(staking));
         vesting.updateVestedStakedTokens(
             PRIMARY_POOL,
             alice,
@@ -83,7 +83,7 @@ contract Vesting_UpdateVestedStakedTokens_Unit_Test is Vesting_Unit_Test {
         approveAndAddPool
         addBeneficiary(alice)
     {
-        vm.prank(staking);
+        vm.prank(address(staking));
         vesting.updateVestedStakedTokens(
             PRIMARY_POOL,
             alice,
@@ -108,7 +108,7 @@ contract Vesting_UpdateVestedStakedTokens_Unit_Test is Vesting_Unit_Test {
         addBeneficiary(alice)
     {
         vm.expectRevert(Errors.Vesting__NotEnoughStakedTokens.selector);
-        vm.prank(staking);
+        vm.prank(address(staking));
         vesting.updateVestedStakedTokens(PRIMARY_POOL, alice, 1 wei, false);
     }
 
@@ -117,7 +117,7 @@ contract Vesting_UpdateVestedStakedTokens_Unit_Test is Vesting_Unit_Test {
         approveAndAddPool
         addBeneficiary(alice)
     {
-        vm.startPrank(staking);
+        vm.startPrank(address(staking));
         vesting.updateVestedStakedTokens(
             PRIMARY_POOL,
             alice,
@@ -152,7 +152,7 @@ contract Vesting_UpdateVestedStakedTokens_Unit_Test is Vesting_Unit_Test {
         vm.expectEmit(true, true, true, true);
         emit StakedTokensUpdated(PRIMARY_POOL, BENEFICIARY_TOKEN_AMOUNT, true);
 
-        vm.prank(staking);
+        vm.prank(address(staking));
         vesting.updateVestedStakedTokens(
             PRIMARY_POOL,
             alice,
@@ -166,7 +166,7 @@ contract Vesting_UpdateVestedStakedTokens_Unit_Test is Vesting_Unit_Test {
         approveAndAddPool
         addBeneficiary(alice)
     {
-        vm.prank(staking);
+        vm.prank(address(staking));
         vesting.updateVestedStakedTokens(
             PRIMARY_POOL,
             alice,
@@ -181,7 +181,7 @@ contract Vesting_UpdateVestedStakedTokens_Unit_Test is Vesting_Unit_Test {
             false
         );
 
-        vm.prank(staking);
+        vm.prank(address(staking));
         vesting.updateVestedStakedTokens(
             PRIMARY_POOL,
             alice,

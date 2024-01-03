@@ -2,6 +2,7 @@
 pragma solidity 0.8.20;
 
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
+import {IStaking} from "@wealth-of-wisdom/staking/contracts/interfaces/IStaking.sol";
 import {IVesting} from "../../../contracts/interfaces/IVesting.sol";
 import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {VestingMock} from "../../mocks/VestingMock.sol";
@@ -25,7 +26,7 @@ contract Vesting_Initialize_Unit_Test is Vesting_Unit_Test {
 
     function test_initialize_RevertIf_StakingContractIsZeroAddress() external {
         vm.expectRevert(Errors.Vesting__ZeroAddress.selector);
-        vesting.initialize(token, ZERO_ADDRESS, LISTING_DATE);
+        vesting.initialize(token, IStaking(ZERO_ADDRESS), LISTING_DATE);
     }
 
     function test_initialize_RevertIf_ListingDateNotInFuture() external {
@@ -51,7 +52,7 @@ contract Vesting_Initialize_Unit_Test is Vesting_Unit_Test {
         vesting.initialize(token, staking, LISTING_DATE);
 
         assertTrue(
-            vesting.hasRole(STAKING_ROLE, staking),
+            vesting.hasRole(STAKING_ROLE, address(staking)),
             "Admin should have staking role"
         );
     }
@@ -72,8 +73,8 @@ contract Vesting_Initialize_Unit_Test is Vesting_Unit_Test {
         vesting.initialize(token, staking, LISTING_DATE);
 
         assertEq(
-            vesting.getStakingContract(),
-            staking,
+            address(vesting.getStakingContract()),
+            address(staking),
             "Staking contract should be set correctly"
         );
     }
