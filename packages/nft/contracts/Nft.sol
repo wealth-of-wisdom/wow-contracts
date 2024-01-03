@@ -6,11 +6,11 @@ import {ERC721BurnableUpgradeable} from "@openzeppelin/contracts-upgradeable/tok
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import { IERC20 } from "@openzeppelin/contracts/interfaces/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {INft} from "./interfaces/INft.sol";
 
-contract Nft is 
+contract Nft is
     INft,
     Initializable,
     ERC721Upgradeable,
@@ -26,7 +26,7 @@ contract Nft is
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
-     /*//////////////////////////////////////////////////////////////////////////
+    /*//////////////////////////////////////////////////////////////////////////
                                 PUBLIC STORAGE
     //////////////////////////////////////////////////////////////////////////*/
 
@@ -38,9 +38,8 @@ contract Nft is
     //////////////////////////////////////////////////////////////////////////*/
 
     /* solhint-disable var-name-mixedcase */
-    address payable private _collectorWallet;
     mapping(uint256 => Band) internal s_bands; // token ID => band
-    mapping(uint16 => uint256) internal level_pricing; // level => price in USD
+    mapping(uint16 => uint256) internal s_level_pricing; // level => price in USD
     uint256 internal s_nextTokenId;
     uint16 internal s_maxLevel;
     /* solhint-enable */
@@ -48,18 +47,26 @@ contract Nft is
     /*//////////////////////////////////////////////////////////////////////////
                                   MODIFIERS
     //////////////////////////////////////////////////////////////////////////*/
-    
-    modifier mNotZero(address addr) {
+
+    modifier mAddressNotZero(address addr) {
         if (addr == address(0)) revert Nft__ZeroAddress();
         _;
     }
-        
+
     modifier mTokenExists(IERC20 tokenAddress) {
-        if (tokenAddress != USDTtokenAddress || tokenAddress != USDCtokenAddress) {
+        if (
+            tokenAddress != USDTtokenAddress || tokenAddress != USDCtokenAddress
+        ) {
             revert Nft__NonExistantPayment();
         }
         _;
     }
+
+    modifier mAmountNotZero(uint256 amount) {
+        if (amount == 0) revert Nft__PassedZeroAmount();
+        _;
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                   CONSTRUCTOR
     //////////////////////////////////////////////////////////////////////////*/
@@ -78,8 +85,12 @@ contract Nft is
         string memory symbol,
         IERC20 USDTaddress,
         IERC20 USDCaddress
-    ) public initializer  mNotZero(address(USDTaddress))
-        mNotZero(address(USDCaddress)) {
+    )
+        public
+        initializer
+        mAddressNotZero(address(USDTaddress))
+        mAddressNotZero(address(USDCaddress))
+    {
         __ERC721_init(name, symbol);
         __ERC721Burnable_init();
         __AccessControl_init();
@@ -90,41 +101,14 @@ contract Nft is
         _grantRole(UPGRADER_ROLE, msg.sender);
 
         s_maxLevel = 5;
-        level_pricing[1] = 1_000;
-        level_pricing[2] = 5_000;
-        level_pricing[3] = 10_000;
-        level_pricing[4] = 33_000;
-        level_pricing[5] = 100_000;
+        s_level_pricing[1] = 1_000;
+        s_level_pricing[2] = 5_000;
+        s_level_pricing[3] = 10_000;
+        s_level_pricing[4] = 33_000;
+        s_level_pricing[5] = 100_000;
 
         USDTtokenAddress = USDTaddress;
         USDCtokenAddress = USDCaddress;
-
-    }
-
-    /*//////////////////////////////////////////////////////////////////////////
-                            FUNCTIONS FOR ADMIN ROLE
-    //////////////////////////////////////////////////////////////////////////*/
-
-    function setMaxLevel(uint16 maxLevel) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        if (maxLevel <= s_maxLevel) {
-            revert Nft__InvalidMaxLevel(maxLevel);
-        }
-
-        s_maxLevel = maxLevel;
-    }
-
-    function setLevelPricing(uint16 level, uint256 price) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        if (s_maxLevel < level) {
-            revert Nft__InvalidMaxLevel(s_maxLevel);
-        }
-        level_pricing[level] = price;
-    }
-
-    function setCollectorWallet(
-        address payable collectorWallet
-    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        if (collectorWallet == address(0)) revert Nft__ZeroAddress();
-        _collectorWallet = collectorWallet;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -141,19 +125,20 @@ contract Nft is
         _purchaseBand(assetAddress, cost);
 
         // Effects: mint the band
-        uint256 tokenId = s_nextTokenId++;
+        uint256 tokenId = ++s_nextTokenId;
         _safeMint(msg.sender, tokenId);
 
         // Effects: set the band data
-        bool isGenesis = isGenesisBand(tokenId);
-        s_bands[tokenId] = Band({level: level, isGenesis: isGenesis});
+        s_bands[tokenId] = Band({level: level, isGenesis: false});
 
-        /// @todo Handle any excess payment
-
-        emit BandMinted(msg.sender, tokenId, level, isGenesis);
+        emit BandMinted(msg.sender, tokenId, level, false);
     }
 
-    function changeBand(uint256 tokenId, uint16 newLevel, IERC20 assetAddress) external {
+    function changeBand(
+        uint256 tokenId,
+        uint16 newLevel,
+        IERC20 assetAddress
+    ) external {
         if (ownerOf(tokenId) != msg.sender) {
             revert Nft__NotBandOwner();
         }
@@ -168,7 +153,13 @@ contract Nft is
         if (newLevel > currentLevel) {
             uint256 upgradeCost = getBandLevelCost(newLevel) -
                 getBandLevelCost(currentLevel);
-                _purchaseBand(assetAddress, upgradeCost);
+            // Effects: burn previously owned band
+            _burn(tokenId);
+            // Effects: purchase new band
+            _purchaseBand(assetAddress, upgradeCost);
+            // Effects: mint the band
+            tokenId = ++s_nextTokenId;
+            _safeMint(msg.sender, tokenId);
         }
         // newLevel < currentLevel
         else {
@@ -184,14 +175,26 @@ contract Nft is
 
             // Refund the excess payment
             if (downgradeRefund > 0) {
-               _refundBandDowngrade(assetAddress, downgradeRefund);
+                // Effects: burn previously owned band
+                _burn(tokenId);
+                _refundBandDowngrade(assetAddress, downgradeRefund);
+                // Effects: mint the band
+                tokenId = ++s_nextTokenId;
+                _safeMint(msg.sender, tokenId);
             }
         }
 
-        /// @todo Handle any excess payment
         band.level = newLevel;
 
         emit BandChanged(msg.sender, tokenId, currentLevel, newLevel);
+    }
+
+    function withdrawTokens(
+        IERC20 tokenAddress,
+        uint256 amount
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) mAmountNotZero(amount) {
+        tokenAddress.safeTransferFrom(address(this), msg.sender, amount);
+        emit TokensWithdrawn(address(this), msg.sender, amount);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -211,22 +214,64 @@ contract Nft is
     }
 
     /*//////////////////////////////////////////////////////////////////////////
+                            FUNCTIONS FOR ADMIN ROLE
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function setMaxLevel(uint16 maxLevel) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (maxLevel <= s_maxLevel) {
+            revert Nft__InvalidMaxLevel(maxLevel);
+        }
+
+        s_maxLevel = maxLevel;
+    }
+
+    function setLevelPricing(
+        uint16 level,
+        uint256 price
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (s_maxLevel < level) {
+            revert Nft__InvalidMaxLevel(s_maxLevel);
+        }
+        s_level_pricing[level] = price;
+    }
+
+    function mintGenesisBand(
+        address receiver,
+        uint16 level,
+        uint16 amount
+    )
+        public
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        mAmountNotZero(amount)
+        mAddressNotZero(receiver)
+    {
+        // Checks: level must be valid
+        if (level > s_maxLevel) {
+            revert Nft__InvalidLevel(level);
+        }
+        uint256 tokenId;
+        // Effects: mint genesis band
+        for (uint256 i = 0; i < amount; i++) {
+            tokenId = ++s_nextTokenId;
+            _safeMint(receiver, tokenId);
+        }
+
+        // Effects: set the band data
+        s_bands[tokenId] = Band({level: level, isGenesis: true});
+
+        emit BandMinted(msg.sender, tokenId, level, true);
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
                             PUBLIC VIEW/PURE FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
     function getBandLevelCost(uint16 level) public view returns (uint256) {
-        /// @question What is the cost for each level? Do we want to use price feed?
-        /// @todo Implement this function to return the cost for a given level
-        return level_pricing[level];
+        return s_level_pricing[level];
     }
 
-    function getCollectorWallet() public view returns (address) {
-        return _collectorWallet;
-    }
-
-    function isGenesisBand(uint256 tokenId) public pure returns (bool) {
-        /// @todo Implement this function to return true if the given token ID is a genesis band
-        return false;
+    function isGenesisBand(uint256 tokenId) public view returns (bool) {
+        return s_bands[tokenId].isGenesis;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -253,49 +298,29 @@ contract Nft is
     function _authorizeUpgrade(
         address newImplementation
     ) internal override onlyRole(UPGRADER_ROLE) {}
-    
+
     /*//////////////////////////////////////////////////////////////////////////
                             INTERAL FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
     function _purchaseBand(
         IERC20 tokenAddress,
         uint256 cost
-    ) internal virtual mTokenExists(tokenAddress){
-        if (
-            tokenAddress.allowance(msg.sender, address(this)) <
-            cost
-        ) revert Nft__NotEnoughTokenAllowance();
+    ) internal virtual mTokenExists(tokenAddress) {
+        if (tokenAddress.allowance(msg.sender, address(this)) < cost)
+            revert Nft__NotEnoughTokenAllowance();
 
-        tokenAddress.safeTransferFrom(
-            msg.sender,
-            _collectorWallet,
-            cost
-        );
-        emit PurchasePaid(
-            address(tokenAddress),
-            cost
-        );
+        tokenAddress.safeTransferFrom(msg.sender, address(this), cost);
+        emit PurchasePaid(address(tokenAddress), cost);
     }
 
-    //@todo decide fund location, either collector wallet or contact
-     function _refundBandDowngrade(
+    function _refundBandDowngrade(
         IERC20 tokenAddress,
         uint256 cost
-    ) internal virtual mTokenExists(tokenAddress){
-       if (
-            tokenAddress.allowance(address(this), msg.sender) <
-            cost
-        ) revert Nft__NotEnoughTokenAllowance();
+    ) internal virtual mTokenExists(tokenAddress) {
+        if (tokenAddress.allowance(address(this), msg.sender) < cost)
+            revert Nft__NotEnoughTokenAllowance();
 
-        tokenAddress.safeTransferFrom(
-            address(this),
-            msg.sender,
-            cost
-        );
-        emit RefundPaid(
-            address(tokenAddress),
-            cost
-        );
+        tokenAddress.safeTransferFrom(address(this), msg.sender, cost);
+        emit RefundPaid(address(tokenAddress), cost);
     }
-
 }
