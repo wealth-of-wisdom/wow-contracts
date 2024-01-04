@@ -24,7 +24,7 @@ interface INftEvents {
 
     event RefundPaid(address tokenAddress, uint256 amount);
 
-    event TokensWithdrawn(address from, address to, uint256 amount);
+    event TokensWithdrawn(address token, address to, uint256 amount);
 }
 
 interface INft is INftEvents {
@@ -50,7 +50,6 @@ interface INft is INftEvents {
     error Nft__InvalidTokenId();
     error Nft__NotBandOwner();
     error Nft__NonExistantPayment();
-    error Nft__NotEnoughTokenAllowance();
     error Nft__PassedZeroAmount();
     error Nft__ZeroAddress();
 }

@@ -30,8 +30,8 @@ contract Nft is
                                 PUBLIC STORAGE
     //////////////////////////////////////////////////////////////////////////*/
 
-    IERC20 public USDTtokenAddress;
-    IERC20 public USDCtokenAddress;
+    IERC20 public s_tokenUSDT;
+    IERC20 public s_tokenUSDC;
 
     /*//////////////////////////////////////////////////////////////////////////
                                 INTERNAL STORAGE
@@ -39,7 +39,7 @@ contract Nft is
 
     /* solhint-disable var-name-mixedcase */
     mapping(uint256 => Band) internal s_bands; // token ID => band
-    mapping(uint16 => uint256) internal s_level_pricing; // level => price in USD
+    mapping(uint16 => uint256) internal s_levelToPrice; // level => price in USD
     uint256 internal s_nextTokenId;
     uint16 internal s_maxLevel;
     /* solhint-enable */
@@ -54,9 +54,7 @@ contract Nft is
     }
 
     modifier mTokenExists(IERC20 tokenAddress) {
-        if (
-            tokenAddress != USDTtokenAddress || tokenAddress != USDCtokenAddress
-        ) {
+        if (tokenAddress != s_tokenUSDT && tokenAddress != s_tokenUSDC) {
             revert Nft__NonExistantPayment();
         }
         _;
@@ -101,44 +99,43 @@ contract Nft is
         _grantRole(UPGRADER_ROLE, msg.sender);
 
         s_maxLevel = 5;
-        s_level_pricing[1] = 1_000;
-        s_level_pricing[2] = 5_000;
-        s_level_pricing[3] = 10_000;
-        s_level_pricing[4] = 33_000;
-        s_level_pricing[5] = 100_000;
+        s_levelToPrice[1] = 1_000 * 10 ** 6;
+        s_levelToPrice[2] = 5_000 * 10 ** 6;
+        s_levelToPrice[3] = 10_000 * 10 ** 6;
+        s_levelToPrice[4] = 33_000 * 10 ** 6;
+        s_levelToPrice[5] = 100_000 * 10 ** 6;
 
-        USDTtokenAddress = USDTaddress;
-        USDCtokenAddress = USDCaddress;
+        s_tokenUSDT = USDTaddress;
+        s_tokenUSDC = USDCaddress;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                             EXTERNAL FUNCTIONS FOR USERS
     //////////////////////////////////////////////////////////////////////////*/
 
-    function mintBand(uint16 level, IERC20 assetAddress) external {
+    function mintBand(uint16 level, IERC20 token) external mTokenExists(token) {
         // Checks: level must be valid
-        if (level > s_maxLevel) {
+        if (level > s_maxLevel && level != 0) {
             revert Nft__InvalidLevel(level);
         }
 
         uint256 cost = getBandLevelCost(level);
-        _purchaseBand(assetAddress, cost);
+        _purchaseBand(token, cost);
 
         // Effects: mint the band
-        uint256 tokenId = ++s_nextTokenId;
-        _safeMint(msg.sender, tokenId);
-
+        _safeMint(msg.sender, s_nextTokenId);
         // Effects: set the band data
-        s_bands[tokenId] = Band({level: level, isGenesis: false});
+        s_bands[s_nextTokenId] = Band({level: level, isGenesis: false});
 
-        emit BandMinted(msg.sender, tokenId, level, false);
+        emit BandMinted(msg.sender, s_nextTokenId, level, false);
+        s_nextTokenId++;
     }
 
     function changeBand(
         uint256 tokenId,
         uint16 newLevel,
-        IERC20 assetAddress
-    ) external {
+        IERC20 token
+    ) external mTokenExists(token) {
         if (ownerOf(tokenId) != msg.sender) {
             revert Nft__NotBandOwner();
         }
@@ -146,9 +143,13 @@ contract Nft is
         Band storage band = s_bands[tokenId];
         uint16 currentLevel = band.level;
 
-        if (newLevel > s_maxLevel || newLevel == currentLevel) {
+        if (
+            (newLevel > s_maxLevel || newLevel == currentLevel) && newLevel != 0
+        ) {
             revert Nft__InvalidLevel(newLevel);
         }
+
+        band.level = newLevel;
 
         if (newLevel > currentLevel) {
             uint256 upgradeCost = getBandLevelCost(newLevel) -
@@ -156,19 +157,19 @@ contract Nft is
             // Effects: burn previously owned band
             _burn(tokenId);
             // Effects: purchase new band
-            _purchaseBand(assetAddress, upgradeCost);
+            _purchaseBand(token, upgradeCost);
             // Effects: mint the band
+            _safeMint(msg.sender, s_nextTokenId);
             tokenId = ++s_nextTokenId;
-            _safeMint(msg.sender, tokenId);
         }
         // newLevel < currentLevel
         else {
             uint256 downgradeRefund = getBandLevelCost(currentLevel) -
                 getBandLevelCost(newLevel);
 
-            if (address(this).balance < downgradeRefund) {
+            if (token.balanceOf(address(this)) < downgradeRefund) {
                 revert Nft__InsufficientContractBalance(
-                    address(this).balance,
+                    token.balanceOf(address(this)),
                     downgradeRefund
                 );
             }
@@ -177,14 +178,12 @@ contract Nft is
             if (downgradeRefund > 0) {
                 // Effects: burn previously owned band
                 _burn(tokenId);
-                _refundBandDowngrade(assetAddress, downgradeRefund);
+                _refundBandDowngrade(token, downgradeRefund);
                 // Effects: mint the band
+                _safeMint(msg.sender, s_nextTokenId);
                 tokenId = ++s_nextTokenId;
-                _safeMint(msg.sender, tokenId);
             }
         }
-
-        band.level = newLevel;
 
         emit BandChanged(msg.sender, tokenId, currentLevel, newLevel);
     }
@@ -193,8 +192,11 @@ contract Nft is
         IERC20 tokenAddress,
         uint256 amount
     ) external onlyRole(DEFAULT_ADMIN_ROLE) mAmountNotZero(amount) {
+        uint256 balance = tokenAddress.balanceOf(address(this));
+        if (amount > balance)
+            revert Nft__InsufficientContractBalance(balance, amount);
         tokenAddress.safeTransferFrom(address(this), msg.sender, amount);
-        emit TokensWithdrawn(address(this), msg.sender, amount);
+        emit TokensWithdrawn(address(tokenAddress), msg.sender, amount);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -229,10 +231,10 @@ contract Nft is
         uint16 level,
         uint256 price
     ) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        if (s_maxLevel < level) {
+        if (s_maxLevel < level && level != 0) {
             revert Nft__InvalidMaxLevel(s_maxLevel);
         }
-        s_level_pricing[level] = price;
+        s_levelToPrice[level] = price;
     }
 
     function mintGenesisBand(
@@ -246,20 +248,18 @@ contract Nft is
         mAddressNotZero(receiver)
     {
         // Checks: level must be valid
-        if (level > s_maxLevel) {
+        if (level > s_maxLevel && level != 0) {
             revert Nft__InvalidLevel(level);
         }
-        uint256 tokenId;
         // Effects: mint genesis band
         for (uint256 i = 0; i < amount; i++) {
-            tokenId = ++s_nextTokenId;
-            _safeMint(receiver, tokenId);
+            _safeMint(receiver, s_nextTokenId);
+            // Effects: set the band data
+            s_bands[s_nextTokenId] = Band({level: level, isGenesis: true});
+            emit BandMinted(msg.sender, s_nextTokenId, level, true);
+
+            s_nextTokenId++;
         }
-
-        // Effects: set the band data
-        s_bands[tokenId] = Band({level: level, isGenesis: true});
-
-        emit BandMinted(msg.sender, tokenId, level, true);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -267,7 +267,7 @@ contract Nft is
     //////////////////////////////////////////////////////////////////////////*/
 
     function getBandLevelCost(uint16 level) public view returns (uint256) {
-        return s_level_pricing[level];
+        return s_levelToPrice[level];
     }
 
     function isGenesisBand(uint256 tokenId) public view returns (bool) {
@@ -306,9 +306,6 @@ contract Nft is
         IERC20 tokenAddress,
         uint256 cost
     ) internal virtual mTokenExists(tokenAddress) {
-        if (tokenAddress.allowance(msg.sender, address(this)) < cost)
-            revert Nft__NotEnoughTokenAllowance();
-
         tokenAddress.safeTransferFrom(msg.sender, address(this), cost);
         emit PurchasePaid(address(tokenAddress), cost);
     }
@@ -317,9 +314,6 @@ contract Nft is
         IERC20 tokenAddress,
         uint256 cost
     ) internal virtual mTokenExists(tokenAddress) {
-        if (tokenAddress.allowance(address(this), msg.sender) < cost)
-            revert Nft__NotEnoughTokenAllowance();
-
         tokenAddress.safeTransferFrom(address(this), msg.sender, cost);
         emit RefundPaid(address(tokenAddress), cost);
     }
