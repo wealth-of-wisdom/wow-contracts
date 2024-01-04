@@ -12,6 +12,7 @@
         "verify:sepolia": "npx hardhat verify --network sepolia"
     },
     "dependencies": {
+        "@chainlink/contracts": "^0.8.0",
         "@nomicfoundation/hardhat-ethers": "^3.0.5",
         "@openzeppelin/contracts": "5.0.1",
         "@openzeppelin/contracts-upgradeable": "^5.0.0",
