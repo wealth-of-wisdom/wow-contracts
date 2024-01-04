@@ -16,6 +16,7 @@ abstract contract Assertions is StdAssertions, Constants {
     function assertBeneficiaryData(
         IVesting.Beneficiary memory beneficiary,
         uint256 totalAmount,
+        uint256 stakedAmount,
         uint256 claimedAmount
     ) internal {
         uint256 calculatedListingTokenAmount = (totalAmount *
@@ -48,7 +49,7 @@ abstract contract Assertions is StdAssertions, Constants {
         );
         assertEq(
             beneficiary.stakedTokenAmount,
-            0,
+            stakedAmount,
             "stakedTokenAmount is incorrect"
         );
         assertEq(
@@ -61,13 +62,13 @@ abstract contract Assertions is StdAssertions, Constants {
     function assertGeneralPoolData(
         IVesting vesting,
         uint16 poolIndex,
-        uint256 expectedLockedAmount
+        uint256 expectedDedicatedAmount
     ) internal {
         (
             string memory name,
             IVesting.UnlockTypes unlockType,
             uint256 totalAmount,
-            uint256 lockedAmount
+            uint256 dedicatedAmount
         ) = vesting.getGeneralPoolData(poolIndex);
 
         assertEq(POOL_NAME, name, "Pool name is incorrect");
@@ -78,9 +79,9 @@ abstract contract Assertions is StdAssertions, Constants {
             "Total amount is incorrect"
         );
         assertEq(
-            expectedLockedAmount,
-            lockedAmount,
-            "Locked amount is incorrect"
+            expectedDedicatedAmount,
+            dedicatedAmount,
+            "Dedicated amount is incorrect"
         );
     }
 }

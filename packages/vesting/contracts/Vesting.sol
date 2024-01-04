@@ -5,9 +5,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-
 import {IStaking} from "@wealth-of-wisdom/staking/contracts/interfaces/IStaking.sol";
-
 import {IVesting} from "./interfaces/IVesting.sol";
 import {Errors} from "./libraries/Errors.sol";
 
@@ -313,14 +311,18 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         uint256 availableAmount = user.totalTokenAmount -
             user.claimedTokenAmount;
 
-        // Effects: Update pool dedicated token amount
-        pool.dedicatedPoolTokenAmount -= availableAmount;
+        if (availableAmount > 0) {
+            // Effects: Update pool dedicated token amount
+            pool.dedicatedPoolTokenAmount -= availableAmount;
+        }
 
         // Effects: Delete user from the pool
         delete pool.beneficiaries[beneficiary];
 
-        // Interactions: Unstake staked tokens from staking contract
-        s_staking.unstakeVestedTokens(beneficiary, stakedAmount);
+        if (stakedAmount > 0) {
+            // Interactions: Unstake staked tokens from staking contract
+            s_staking.unstakeVestedTokens(beneficiary, stakedAmount);
+        }
 
         emit BeneficiaryRemoved(pid, beneficiary, availableAmount);
     }
