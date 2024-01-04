@@ -122,9 +122,9 @@ contract Vesting_AddMultipleBeneficiaries_Unit_Test is Vesting_Unit_Test {
         );
 
         // Validate beneficiaries
-        assertBeneficiaryData(aliceBeneficiary, BENEFICIARY_TOKEN_AMOUNT, 0);
-        assertBeneficiaryData(bobBeneficiary, BENEFICIARY_TOKEN_AMOUNT, 0);
-        assertBeneficiaryData(carolBeneficiary, BENEFICIARY_TOKEN_AMOUNT, 0);
+        assertBeneficiaryData(aliceBeneficiary, BENEFICIARY_TOKEN_AMOUNT, 0, 0);
+        assertBeneficiaryData(bobBeneficiary, BENEFICIARY_TOKEN_AMOUNT, 0, 0);
+        assertBeneficiaryData(carolBeneficiary, BENEFICIARY_TOKEN_AMOUNT, 0, 0);
 
         // Validate pool
         assertGeneralPoolData(

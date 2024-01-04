@@ -3,6 +3,8 @@ pragma solidity 0.8.20;
 
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 
+import {IStaking} from "@wealth-of-wisdom/staking/contracts/interfaces/IStaking.sol";
+
 interface IVestingEvents {
     /*//////////////////////////////////////////////////////////////////////////
                                        EVENTS
@@ -22,7 +24,7 @@ interface IVestingEvents {
     event BeneficiaryRemoved(
         uint16 indexed poolIndex,
         address indexed beneficiary,
-        uint256 unlockedPoolAmount
+        uint256 availableAmount
     );
 
     event ListingDateChanged(uint32 oldDate, uint32 newDate);
@@ -33,7 +35,7 @@ interface IVestingEvents {
         uint256 tokenAmount
     );
 
-    event StakingContractSet(address indexed newContract);
+    event StakingContractSet(IStaking indexed newContract);
 
     event TokensClaimed(
         uint16 indexed poolIndex,
@@ -85,7 +87,7 @@ interface IVesting is IVestingEvents {
         UnlockTypes unlockType;
         mapping(address => Beneficiary) beneficiaries;
         uint256 totalPoolTokenAmount;
-        uint256 lockedPoolTokenAmount;
+        uint256 dedicatedPoolTokenAmount;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -94,7 +96,7 @@ interface IVesting is IVestingEvents {
 
     function initialize(
         IERC20 token,
-        address stakingContract,
+        IStaking stakingContract,
         uint32 listingDate
     ) external;
 
@@ -132,7 +134,7 @@ interface IVesting is IVestingEvents {
         uint256 tokenAmount
     ) external;
 
-    function setStakingContract(address newStaking) external;
+    function setStakingContract(IStaking newStaking) external;
 
     function claimTokens(uint16 pid) external;
 
@@ -154,7 +156,7 @@ interface IVesting is IVestingEvents {
 
     function getToken() external view returns (IERC20);
 
-    function getStakingContract() external view returns (address);
+    function getStakingContract() external view returns (IStaking);
 
     function getGeneralPoolData(
         uint16 pid

@@ -4,8 +4,8 @@ out = "build"
 allow_paths = ["../.."]
 libs = ["../../node_modules", "../../lib"]
 remappings = [
-    "@wealth-of-wisdom/staking/contracts/=../../packages/stakings/contracts/",
-    "@wealth-of-wisdom/nft/contracts/=../../packages/nft/contracts/",
+    "@wealth-of-wisdom/staking=../../packages/staking",
+    "@wealth-of-wisdom/nft=../../packages/nft",
     "@openzeppelin/=../../node_modules/@openzeppelin/",
 ]
 gas_reports = ["*"]

@@ -57,7 +57,7 @@ contract Vesting_ClaimTokens_Unit_Test is Vesting_Unit_Test {
         approveAndAddPool
         addBeneficiary(alice)
     {
-        vm.prank(staking);
+        vm.prank(address(staking));
         vesting.updateVestedStakedTokens(
             PRIMARY_POOL,
             alice,

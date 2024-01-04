@@ -5,7 +5,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-
+import {IStaking} from "@wealth-of-wisdom/staking/contracts/interfaces/IStaking.sol";
 import {IVesting} from "./interfaces/IVesting.sol";
 import {Errors} from "./libraries/Errors.sol";
 
@@ -30,7 +30,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
 
     /* solhint-disable var-name-mixedcase */
     IERC20 internal s_token;
-    address internal s_stakingContract;
+    IStaking internal s_staking;
     mapping(uint16 => Pool) internal s_vestingPools;
     uint32 internal s_listingDate;
     uint16 internal s_poolCount;
@@ -111,23 +111,23 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      */
     function initialize(
         IERC20 token,
-        address stakingContract,
+        IStaking stakingContract,
         uint32 listingDate
     )
         external
         initializer
         mAddressNotZero(address(token))
-        mAddressNotZero(stakingContract)
+        mAddressNotZero(address(stakingContract))
         mValidListingDate(listingDate)
     {
         // Effects: Initialize AccessControl
         __AccessControl_init();
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(STAKING_ROLE, stakingContract);
+        _grantRole(STAKING_ROLE, address(stakingContract));
 
         // Effects: Initialize storage variables
         s_token = token;
-        s_stakingContract = stakingContract;
+        s_staking = stakingContract;
         s_listingDate = listingDate;
     }
 
@@ -229,13 +229,13 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         // Checks: User token amount should not exceed total pool amount
         if (
             pool.totalPoolTokenAmount <
-            (pool.lockedPoolTokenAmount + tokenAmount)
+            (pool.dedicatedPoolTokenAmount + tokenAmount)
         ) {
             revert Errors.Vesting__TokenAmountExeedsTotalPoolAmount();
         }
 
         // Effects: Increase locked pool token amount
-        pool.lockedPoolTokenAmount += tokenAmount;
+        pool.dedicatedPoolTokenAmount += tokenAmount;
 
         // Effects: update user token amounts
         Beneficiary storage user = pool.beneficiaries[beneficiary];
@@ -302,14 +302,29 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         Pool storage pool = s_vestingPools[pid];
         Beneficiary storage user = pool.beneficiaries[beneficiary];
 
-        /// @question should we remove user if he has staked tokens?
-        uint256 unlockedPoolAmount = user.totalTokenAmount -
-            user.claimedTokenAmount;
-        pool.lockedPoolTokenAmount -= unlockedPoolAmount;
+        // Get staked amount that will be unstaked from staking contract
+        uint256 stakedAmount = user.stakedTokenAmount;
 
+        // Get unlocked amount that will be transferred to the user
+        // We don't need to check whether the user has staked tokens
+        // because we are unstaking all staked tokens, which means it will be 0
+        uint256 availableAmount = user.totalTokenAmount -
+            user.claimedTokenAmount;
+
+        if (availableAmount > 0) {
+            // Effects: Update pool dedicated token amount
+            pool.dedicatedPoolTokenAmount -= availableAmount;
+        }
+
+        // Effects: Delete user from the pool
         delete pool.beneficiaries[beneficiary];
 
-        emit BeneficiaryRemoved(pid, beneficiary, unlockedPoolAmount);
+        if (stakedAmount > 0) {
+            // Interactions: Unstake staked tokens from staking contract
+            s_staking.unstakeVestedTokens(beneficiary, stakedAmount);
+        }
+
+        emit BeneficiaryRemoved(pid, beneficiary, availableAmount);
     }
 
     /**
@@ -375,14 +390,18 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      * @param newStaking Address of the new staking contract.
      */
     function setStakingContract(
-        address newStaking
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) mAddressNotZero(newStaking) {
+        IStaking newStaking
+    )
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        mAddressNotZero(address(newStaking))
+    {
         // Effects: Revoke and grant roles
-        revokeRole(STAKING_ROLE, s_stakingContract);
-        grantRole(STAKING_ROLE, newStaking);
+        revokeRole(STAKING_ROLE, address(s_staking));
+        grantRole(STAKING_ROLE, address(newStaking));
 
         // Effects: Set new staking contract address
-        s_stakingContract = newStaking;
+        s_staking = newStaking;
 
         emit StakingContractSet(newStaking);
     }
@@ -527,8 +546,8 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      * @notice Return staking contract address
      * @return staking contract address.
      */
-    function getStakingContract() external view returns (address) {
-        return s_stakingContract;
+    function getStakingContract() external view returns (IStaking) {
+        return s_staking;
     }
 
     /**
@@ -547,7 +566,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
             pool.name,
             pool.unlockType,
             pool.totalPoolTokenAmount,
-            pool.lockedPoolTokenAmount
+            pool.dedicatedPoolTokenAmount
         );
     }
 

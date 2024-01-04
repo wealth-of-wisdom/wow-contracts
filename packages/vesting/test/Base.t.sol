@@ -2,8 +2,10 @@
 pragma solidity 0.8.20;
 
 import {Test} from "forge-std/Test.sol";
+
 import {VestingMock} from "./mocks/VestingMock.sol";
-import {MockToken} from "./mocks/MockToken.sol";
+import {StakingMock} from "./mocks/StakingMock.sol";
+import {TokenMock} from "./mocks/TokenMock.sol";
 import {Assertions} from "./utils/Assertions.sol";
 import {Events} from "./utils/Events.sol";
 
@@ -33,9 +35,9 @@ contract Base_Test is
     uint32 internal immutable CLIFF_END_DATE;
     uint32 internal immutable VESTING_END_DATE;
 
-    MockToken internal token;
+    TokenMock internal token;
     VestingMock internal vesting;
-    address internal staking = makeAddr("staking");
+    StakingMock internal staking;
 
     /*//////////////////////////////////////////////////////////////////////////
                                   CONSTRUCTOR
@@ -58,8 +60,10 @@ contract Base_Test is
         uint8 accountsNum = uint8(TEST_ACCOUNTS.length);
 
         vm.startPrank(admin);
-        token = new MockToken();
+        token = new TokenMock();
         token.initialize("MOCK", "MCK", TOTAL_POOL_TOKEN_AMOUNT * 10);
+
+        staking = new StakingMock();
 
         for (uint8 i = 0; i < accountsNum; ++i) {
             deal(TEST_ACCOUNTS[i], INIT_ETH_BALANCE);

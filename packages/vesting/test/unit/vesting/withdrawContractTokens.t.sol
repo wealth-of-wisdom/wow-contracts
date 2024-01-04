@@ -4,19 +4,19 @@ pragma solidity 0.8.20;
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {IVesting} from "../../../contracts/interfaces/IVesting.sol";
-import {MockToken} from "../../mocks/MockToken.sol";
+import {TokenMock} from "../../mocks/TokenMock.sol";
 import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {Vesting_Unit_Test} from "../VestingUnit.t.sol";
 
 contract Vesting_WithdrawContractTokens_Unit_Test is Vesting_Unit_Test {
     uint256 internal withdrawAmount = 1 ether;
-    MockToken internal customToken;
+    TokenMock internal customToken;
 
     function setUp() public virtual override {
         Vesting_Unit_Test.setUp();
 
         vm.startPrank(admin);
-        customToken = new MockToken();
+        customToken = new TokenMock();
         customToken.initialize("TEST", "TST", TOTAL_POOL_TOKEN_AMOUNT * 10);
         vm.stopPrank();
     }
