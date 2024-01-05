@@ -2,7 +2,7 @@
 pragma solidity 0.8.20;
 
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
-import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {Nft} from "../Nft.sol";
 
 interface INftEvents {
     /*//////////////////////////////////////////////////////////////////////////
@@ -66,11 +66,9 @@ interface INft is INftEvents {
     //////////////////////////////////////////////////////////////////////////*/
 
     function initialize(
-        string memory name,
-        string memory symbol,
         IERC20 tokenUSDT,
         IERC20 tokenUSDC,
-        IERC721 contractNFT
+        Nft contractNFT
     ) external;
 
     function mintBand(uint16 level, IERC20 token) external;
