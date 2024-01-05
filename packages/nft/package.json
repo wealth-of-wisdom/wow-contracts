@@ -8,6 +8,10 @@
         "build": "forge build",
         "coverage": "forge coverage",
         "coverage:lcov": "forge coverage --report lcov && genhtml -o report --branch-coverage lcov.info",
+        "deploy:sale:ethereum": "npx hardhat run scripts/deployNftSale.js --network mainnet",
+        "deploy:sale:sepolia": "npx hardhat run scripts/deployNftSale.js --network sepolia",
+        "deploy:nft:ethereum": "npx hardhat run scripts/deployNft.js --network mainnet",
+        "deploy:nft:sepolia": "npx hardhat run scripts/deployNft.js --network sepolia",
         "verify:ethereum": "npx hardhat verify --network mainnet",
         "verify:sepolia": "npx hardhat verify --network sepolia"
     },

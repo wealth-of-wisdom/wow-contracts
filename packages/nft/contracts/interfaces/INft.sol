@@ -44,22 +44,6 @@ interface INft is INftEvents {
         bool isGenesis;
         bool isActive;
     }
-    /*//////////////////////////////////////////////////////////////////////////
-                                       ERRORS
-    //////////////////////////////////////////////////////////////////////////*/
-
-    error Nft__InvalidLevel(uint16 level);
-    error Nft__InvalidMaxLevel(uint16 maxLevel);
-    error Nft__InsufficientContractBalance(
-        uint256 contractBalance,
-        uint256 requiredAmount
-    );
-    error Nft__TransferFailed();
-    error Nft__InvalidTokenId();
-    error Nft__NotBandOwner();
-    error Nft__NonExistantPayment();
-    error Nft__PassedZeroAmount();
-    error Nft__ZeroAddress();
 
     /*//////////////////////////////////////////////////////////////////////////
                                       FUNCTIONS

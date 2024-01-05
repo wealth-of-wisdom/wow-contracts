@@ -8,6 +8,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {INft} from "./interfaces/INft.sol";
 import {Nft} from "./Nft.sol";
+import {Errors} from "./libraries/Errors.sol";
 
 contract NftSale is
     INft,
@@ -52,39 +53,30 @@ contract NftSale is
 
     modifier mAddressNotZero(address addr) {
         if (addr == address(0)) {
-            revert Nft__ZeroAddress();
+            revert Errors.Nft__ZeroAddress();
         }
         _;
     }
 
     modifier mTokenExists(IERC20 token) {
         if (token != s_tokenUSDT && token != s_tokenUSDC) {
-            revert Nft__NonExistantPayment();
+            revert Errors.Nft__NonExistantPayment();
         }
         _;
     }
 
     modifier mAmountNotZero(uint256 amount) {
         if (amount == 0) {
-            revert Nft__PassedZeroAmount();
+            revert Errors.Nft__PassedZeroAmount();
         }
         _;
     }
 
     modifier mValidBandLevel(uint16 level) {
         if (level == 0 || level > s_maxLevel) {
-            revert Nft__InvalidLevel(level);
+            revert Errors.Nft__InvalidLevel(level);
         }
         _;
-    }
-
-    /*//////////////////////////////////////////////////////////////////////////
-                                  CONSTRUCTOR
-    //////////////////////////////////////////////////////////////////////////*/
-
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
-        _disableInitializers();
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -153,7 +145,7 @@ contract NftSale is
     ) external mValidBandLevel(newLevel) mTokenExists(token) {
         // Checks: the sender must be the owner of the band
         if (s_contractNFT.ownerOf(tokenId) != msg.sender) {
-            revert Nft__NotBandOwner();
+            revert Errors.Nft__NotBandOwner();
         }
 
         Band storage band = s_bands[tokenId];
@@ -161,7 +153,7 @@ contract NftSale is
 
         // Checks: the new level must be different from the current level
         if (newLevel == currentLevel) {
-            revert Nft__InvalidLevel(newLevel);
+            revert Errors.Nft__InvalidLevel(newLevel);
         }
 
         // Effects: Update the band level
@@ -197,7 +189,7 @@ contract NftSale is
 
         // Checks: the contract must have enough balance to withdraw
         if (balance < amount) {
-            revert Nft__InsufficientContractBalance(balance, amount);
+            revert Errors.Nft__InsufficientContractBalance(balance, amount);
         }
 
         // Interaction: transfer the tokens to the sender
@@ -211,7 +203,7 @@ contract NftSale is
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         // Checks: the new max level must be greater than the current max level
         if (maxLevel <= s_maxLevel) {
-            revert Nft__InvalidMaxLevel(maxLevel);
+            revert Errors.Nft__InvalidMaxLevel(maxLevel);
         }
 
         // Effects: set the new max level
@@ -332,7 +324,7 @@ contract NftSale is
 
         // Checks: the contract must have enough balance to refund
         if (balance < cost) {
-            revert Nft__InsufficientContractBalance(balance, cost);
+            revert Errors.Nft__InsufficientContractBalance(balance, cost);
         }
 
         // Interaction: transfer the refund to the user
