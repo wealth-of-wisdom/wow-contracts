@@ -79,6 +79,13 @@ contract NftSale is
         _;
     }
 
+    modifier mBandOwner(uint256 tokenId) {
+        if (s_contractNFT.ownerOf(tokenId) != msg.sender) {
+            revert Errors.Nft__NotBandOwner();
+        }
+        _;
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                   INITIALIZER
     //////////////////////////////////////////////////////////////////////////*/
@@ -125,15 +132,16 @@ contract NftSale is
         // Effects: Transfer the payment to the contract
         _purchaseBand(token, cost);
 
+        uint256 tokenId = s_contractNFT._nextTokenId();
         // Effects: mint the band
         s_contractNFT.safeMint(msg.sender);
 
         // Effects: set the band data
-        uint256 tokenId = s_contractNFT._nextTokenId();
+
         s_bands[tokenId] = Band({
             level: level,
             isGenesis: false,
-            isActive: true
+            activityType: ActivityType.INACTIVE
         });
         emit BandMinted(msg.sender, tokenId, level, false);
     }
@@ -142,12 +150,12 @@ contract NftSale is
         uint256 tokenId,
         uint16 newLevel,
         IERC20 token
-    ) external mValidBandLevel(newLevel) mTokenExists(token) {
-        // Checks: the sender must be the owner of the band
-        if (s_contractNFT.ownerOf(tokenId) != msg.sender) {
-            revert Errors.Nft__NotBandOwner();
-        }
-
+    )
+        external
+        mValidBandLevel(newLevel)
+        mTokenExists(token)
+        mBandOwner(tokenId)
+    {
         Band storage band = s_bands[tokenId];
         uint16 currentLevel = band.level;
 
@@ -175,6 +183,16 @@ contract NftSale is
         }
 
         emit BandUpdated(msg.sender, tokenId, currentLevel, newLevel);
+    }
+
+    function activateBand(uint256 tokenId) external mBandOwner(tokenId) {
+        s_bands[tokenId].activityType = ActivityType.ACTIVATED;
+        emit BandActivated(
+            msg.sender,
+            tokenId,
+            s_bands[tokenId].level,
+            s_bands[tokenId].isGenesis
+        );
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -238,15 +256,15 @@ contract NftSale is
         mAmountNotZero(amount)
     {
         for (uint256 i = 0; i < amount; i++) {
-            // Effects: mint genesis band
-            s_contractNFT.safeMint(msg.sender);
-
             uint256 tokenId = s_contractNFT._nextTokenId();
+            // Effects: mint genesis band
+            s_contractNFT.safeMint(receiver);
+
             // Effects: set the band data
             s_bands[tokenId] = Band({
                 level: level,
                 isGenesis: true,
-                isActive: true
+                activityType: ActivityType.INACTIVE
             });
             emit BandMinted(receiver, tokenId, level, true);
         }
@@ -341,18 +359,19 @@ contract NftSale is
         s_bands[tokenId] = Band({
             level: currentLevel,
             isGenesis: false,
-            isActive: false
+            activityType: ActivityType.DEACTIVATED
         });
+
+        uint256 newTokenId = s_contractNFT._nextTokenId();
 
         //@todo think about multiple minting processes at the same time
         // will it affect id catching
         s_contractNFT.safeMint(msg.sender);
 
-        uint256 newTokenId = s_contractNFT._nextTokenId();
         s_bands[newTokenId] = Band({
             level: newLevel,
             isGenesis: false,
-            isActive: true
+            activityType: ActivityType.INACTIVE
         });
     }
 }

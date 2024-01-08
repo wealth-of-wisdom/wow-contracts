@@ -52,4 +52,22 @@ contract Base_Test is Test, Constants {
         }
         vm.stopPrank();
     }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                          HELPER MODIFIERS / FUNCTIONS
+    //////////////////////////////////////////////////////////////////////////*/
+
+    // Pools
+    modifier mintOneBandForUser() {
+        _mintOneBandForUser();
+        _;
+    }
+
+    function _mintOneBandForUser() internal {
+        vm.startPrank(alice);
+        uint256 price = sale.getLevelPriceInUSD(DEFAULT_LEVEL);
+        tokenUSDT.approve(address(sale), price);
+        sale.mintBand(DEFAULT_LEVEL, tokenUSDT);
+        vm.stopPrank();
+    }
 }

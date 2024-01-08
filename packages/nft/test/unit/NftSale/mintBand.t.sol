@@ -42,11 +42,12 @@ contract Nft_Sale_MintBand_Unit_Test is Nft_Sale_Unit_Test {
 
         assertEq(
             sale.getCurrentTokenId(),
-            STARTER_TOKEN_ID,
+            FIRST_MINTED_TOKEN_ID,
             "Token was not minted and ID not changed"
         );
-        assertTrue(
-            sale.getBand(STARTER_TOKEN_ID).isActive,
+        assertEq(
+            uint8(sale.getBand(STARTER_TOKEN_ID).activityType),
+            uint8(NFT_ACTIVITY_TYPE_INACTIVE),
             "Band not activated"
         );
         assertFalse(

@@ -23,6 +23,13 @@ interface INftEvents {
         uint16 newLevel
     );
 
+    event BandActivated(
+        address indexed receiver,
+        uint256 indexed tokenId,
+        uint16 level,
+        bool isGenesis
+    );
+
     event TokensWithdrawn(IERC20 token, address receiver, uint256 amount);
 
     event MaxLevelSet(uint16 newMaxLevel);
@@ -36,13 +43,22 @@ interface INftEvents {
 
 interface INft is INftEvents {
     /*//////////////////////////////////////////////////////////////////////////
+                                       ENUMS
+    //////////////////////////////////////////////////////////////////////////*/
+
+    enum ActivityType {
+        DEACTIVATED,
+        INACTIVE,
+        ACTIVATED
+    }
+    /*//////////////////////////////////////////////////////////////////////////
                                        STRUCTS
     //////////////////////////////////////////////////////////////////////////*/
 
     struct Band {
         uint16 level;
         bool isGenesis;
-        bool isActive;
+        ActivityType activityType;
     }
 
     /*//////////////////////////////////////////////////////////////////////////

@@ -31,11 +31,12 @@ contract Nft is
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, msg.sender);
         _grantRole(UPGRADER_ROLE, msg.sender);
+        _nextTokenId = 0;
     }
 
     function safeMint(address to) public onlyRole(MINTER_ROLE) {
-        uint256 tokenId = _nextTokenId++;
-        _safeMint(to, tokenId);
+        _safeMint(to, _nextTokenId);
+        _nextTokenId++;
     }
 
     function _authorizeUpgrade(
