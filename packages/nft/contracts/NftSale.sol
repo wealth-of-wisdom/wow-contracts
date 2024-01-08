@@ -276,7 +276,7 @@ contract NftSale is
         return s_maxLevel;
     }
 
-    function getNextTokenId() external view returns (uint256) {
+    function getCurrentTokenId() external view returns (uint256) {
         return s_contractNFT._nextTokenId();
     }
 

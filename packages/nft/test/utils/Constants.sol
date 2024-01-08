@@ -11,4 +11,5 @@ abstract contract Constants {
 
     uint16 internal constant DEFAULT_LEVEL = 1;
     uint256 internal constant TOTAL_TOKEN_AMOUNT = 100_000 ether;
+    uint256 internal constant STARTER_TOKEN_ID = 1;
 }

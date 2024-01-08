@@ -19,6 +19,8 @@ contract Nft_Sale_Unit_Test is Base_Test, INftEvents {
         sale = new NftSaleMock();
         sale.initialize(tokenUSDT, tokenUSDC, nftContract);
 
+        nftContract.grantRole(MINTER_ROLE, address(sale));
+
         vm.stopPrank();
     }
 }

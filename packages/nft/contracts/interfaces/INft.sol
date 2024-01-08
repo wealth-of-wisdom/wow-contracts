@@ -85,5 +85,5 @@ interface INft is INftEvents {
 
     function getMaxLevel() external view returns (uint16);
 
-    function getNextTokenId() external view returns (uint256);
+    function getCurrentTokenId() external view returns (uint256);
 }
