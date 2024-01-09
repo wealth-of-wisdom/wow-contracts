@@ -12,11 +12,15 @@ abstract contract Constants {
 
     uint16 internal constant DEFAULT_LEVEL = 2;
     uint16 internal constant DEFAULT_NEW_LEVEL = 3;
+    uint16 internal constant DEFAULT_PRICE = 500;
+
     uint16 internal constant DEFAULT_GENESIS_AMOUNT = 5;
     uint256 internal constant TOTAL_TOKEN_AMOUNT = 100_000 ether;
     uint256 internal constant STARTER_TOKEN_ID = 0;
     uint256 internal constant FIRST_MINTED_TOKEN_ID = 1;
 
+    INftSale.ActivityType internal constant NFT_ACTIVITY_TYPE_ACTIVATED =
+        INftSale.ActivityType.ACTIVATED;
     INftSale.ActivityType internal constant NFT_ACTIVITY_TYPE_INACTIVE =
         INftSale.ActivityType.INACTIVE;
     INftSale.ActivityType internal constant NFT_ACTIVITY_TYPE_DEACTIVATED =
