@@ -12,6 +12,7 @@ library Errors {
     error Nft__InvalidTokenId();
     error Nft__NotBandOwner();
     error Nft__NonExistantPayment();
+    error Nft__UnupdatableBand();
     error Nft__PassedZeroAmount();
     error Nft__ZeroAddress();
 }

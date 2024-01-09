@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import {INftEvents} from "../../contracts/interfaces/INft.sol";
+import {INftEvents} from "../../contracts/interfaces/INftSale.sol";
 import {NftSaleMock} from "../mocks/NftSaleMock.sol";
 import {NftMock} from "../mocks/NftMock.sol";
 import {Base_Test} from "../Base.t.sol";

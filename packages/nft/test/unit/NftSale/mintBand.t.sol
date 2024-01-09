@@ -2,7 +2,7 @@
 pragma solidity 0.8.20;
 
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
-import {INft} from "../../../contracts/interfaces/INft.sol";
+import {INftSale} from "../../../contracts/interfaces/INftSale.sol";
 import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {Nft_Sale_Unit_Test} from "../NftSaleUnit.t.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
@@ -41,7 +41,7 @@ contract Nft_Sale_MintBand_Unit_Test is Nft_Sale_Unit_Test {
         vm.stopPrank();
 
         assertEq(
-            sale.getCurrentTokenId(),
+            nftContract.getNextTokenId(),
             FIRST_MINTED_TOKEN_ID,
             "Token was not minted and ID not changed"
         );

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
-import {INft} from "../../contracts/interfaces/INft.sol";
+import {INftSale} from "../../contracts/interfaces/INftSale.sol";
 
 abstract contract Constants {
     bytes32 internal constant DEFAULT_ADMIN_ROLE = 0x00;
@@ -17,8 +17,8 @@ abstract contract Constants {
     uint256 internal constant STARTER_TOKEN_ID = 0;
     uint256 internal constant FIRST_MINTED_TOKEN_ID = 1;
 
-    INft.ActivityType internal constant NFT_ACTIVITY_TYPE_INACTIVE =
-        INft.ActivityType.INACTIVE;
-    INft.ActivityType internal constant NFT_ACTIVITY_TYPE_DEACTIVATED =
-        INft.ActivityType.DEACTIVATED;
+    INftSale.ActivityType internal constant NFT_ACTIVITY_TYPE_INACTIVE =
+        INftSale.ActivityType.INACTIVE;
+    INftSale.ActivityType internal constant NFT_ACTIVITY_TYPE_DEACTIVATED =
+        INftSale.ActivityType.DEACTIVATED;
 }

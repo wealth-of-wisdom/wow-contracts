@@ -6,12 +6,12 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
-import {INft} from "./interfaces/INft.sol";
+import {INftSale} from "./interfaces/INftSale.sol";
 import {Nft} from "./Nft.sol";
 import {Errors} from "./libraries/Errors.sol";
 
 contract NftSale is
-    INft,
+    INftSale,
     Initializable,
     AccessControlUpgradeable,
     UUPSUpgradeable
@@ -128,21 +128,19 @@ contract NftSale is
         IERC20 token
     ) external mValidBandLevel(level) mTokenExists(token) {
         uint256 cost = s_levelToPrice[level];
-
-        // Effects: Transfer the payment to the contract
-        _purchaseBand(token, cost);
-
-        uint256 tokenId = s_contractNFT._nextTokenId();
-        // Effects: mint the band
-        s_contractNFT.safeMint(msg.sender);
-
         // Effects: set the band data
-
+        uint256 tokenId = s_contractNFT.getNextTokenId();
         s_bands[tokenId] = Band({
             level: level,
             isGenesis: false,
             activityType: ActivityType.INACTIVE
         });
+
+        // Effects: Transfer the payment to the contract
+        _purchaseBand(token, cost);
+
+        // Interaction: mint the band
+        s_contractNFT.safeMint(msg.sender);
         emit BandMinted(msg.sender, tokenId, level, false);
     }
 
@@ -159,28 +157,26 @@ contract NftSale is
         Band storage band = s_bands[tokenId];
         uint16 currentLevel = band.level;
 
+        if (
+            s_bands[tokenId].isGenesis ||
+            s_bands[tokenId].activityType == ActivityType.DEACTIVATED
+        ) {
+            revert Errors.Nft__UnupdatableBand();
+        }
+
         // Checks: the new level must be different from the current level
-        if (newLevel == currentLevel) {
+        if (newLevel == currentLevel && newLevel <= currentLevel) {
             revert Errors.Nft__InvalidLevel(newLevel);
         }
 
         // Effects: Update the band level
         band.level = newLevel;
 
-        if (newLevel > currentLevel) {
-            uint256 upgradeCost = s_levelToPrice[newLevel] -
-                s_levelToPrice[currentLevel];
-            _purchaseBand(token, upgradeCost);
-            _updateBand(tokenId, currentLevel, newLevel);
-        }
-        // newLevel < currentLevel
-        else {
-            uint256 downgradeRefund = s_levelToPrice[currentLevel] -
-                s_levelToPrice[newLevel];
-
-            _refundBandDowngrade(token, downgradeRefund);
-            _updateBand(tokenId, currentLevel, newLevel);
-        }
+        uint256 upgradeCost = s_levelToPrice[newLevel] -
+            s_levelToPrice[currentLevel];
+        _purchaseBand(token, upgradeCost);
+        _updateBand(tokenId, currentLevel, newLevel);
+        s_contractNFT.safeMint(msg.sender);
 
         emit BandUpdated(msg.sender, tokenId, currentLevel, newLevel);
     }
@@ -256,7 +252,7 @@ contract NftSale is
         mAmountNotZero(amount)
     {
         for (uint256 i = 0; i < amount; i++) {
-            uint256 tokenId = s_contractNFT._nextTokenId();
+            uint256 tokenId = s_contractNFT.getNextTokenId();
             // Effects: mint genesis band
             s_contractNFT.safeMint(receiver);
 
@@ -292,10 +288,6 @@ contract NftSale is
 
     function getMaxLevel() external view returns (uint16) {
         return s_maxLevel;
-    }
-
-    function getCurrentTokenId() external view returns (uint256) {
-        return s_contractNFT._nextTokenId();
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -334,23 +326,6 @@ contract NftSale is
         emit PurchasePaid(token, cost);
     }
 
-    function _refundBandDowngrade(
-        IERC20 token,
-        uint256 cost
-    ) internal virtual mTokenExists(token) {
-        uint256 balance = token.balanceOf(address(this));
-
-        // Checks: the contract must have enough balance to refund
-        if (balance < cost) {
-            revert Errors.Nft__InsufficientContractBalance(balance, cost);
-        }
-
-        // Interaction: transfer the refund to the user
-        token.safeTransfer(msg.sender, cost);
-
-        emit RefundPaid(token, cost);
-    }
-
     function _updateBand(
         uint256 tokenId,
         uint16 currentLevel,
@@ -362,12 +337,7 @@ contract NftSale is
             activityType: ActivityType.DEACTIVATED
         });
 
-        uint256 newTokenId = s_contractNFT._nextTokenId();
-
-        //@todo think about multiple minting processes at the same time
-        // will it affect id catching
-        s_contractNFT.safeMint(msg.sender);
-
+        uint256 newTokenId = s_contractNFT.getNextTokenId();
         s_bands[newTokenId] = Band({
             level: newLevel,
             isGenesis: false,

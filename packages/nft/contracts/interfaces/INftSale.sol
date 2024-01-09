@@ -41,7 +41,7 @@ interface INftEvents {
     event RefundPaid(IERC20 token, uint256 amount);
 }
 
-interface INft is INftEvents {
+interface INftSale is INftEvents {
     /*//////////////////////////////////////////////////////////////////////////
                                        ENUMS
     //////////////////////////////////////////////////////////////////////////*/
@@ -100,6 +100,4 @@ interface INft is INftEvents {
     function getLevelPriceInUSD(uint16 level) external view returns (uint256);
 
     function getMaxLevel() external view returns (uint16);
-
-    function getCurrentTokenId() external view returns (uint256);
 }
