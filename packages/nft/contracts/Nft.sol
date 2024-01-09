@@ -43,6 +43,14 @@ contract Nft is
         return s_nextTokenId;
     }
 
+    function transferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public override onlyRole(MINTER_ROLE) {
+        super.transferFrom(from, to, tokenId);
+    }
+
     function _authorizeUpgrade(
         address newImplementation
     ) internal override onlyRole(UPGRADER_ROLE) {}
