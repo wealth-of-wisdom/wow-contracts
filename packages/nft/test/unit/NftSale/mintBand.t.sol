@@ -61,4 +61,32 @@ contract NftSale_MintBand_Unit_Test is NftSale_Unit_Test {
             "Funds not transfered"
         );
     }
+
+    function test_mintBand_PurchaseAndMintBandThenTransfer() external {
+        assertEq(nftContract.balanceOf(admin), 0, "NFT pre-minted to admin");
+        assertEq(nftContract.balanceOf(alice), 0, "NFT pre-minted to alice");
+
+        uint256 price = sale.getLevelPriceInUSD(DEFAULT_LEVEL);
+        vm.startPrank(admin);
+        tokenUSDT.approve(address(sale), price);
+        sale.mintBand(DEFAULT_LEVEL, tokenUSDT);
+
+        INftSale.Band memory bandData = sale.getBand(STARTER_TOKEN_ID);
+        assertEq(
+            nftContract.balanceOf(admin),
+            1,
+            "NFT minted to incorrect address"
+        );
+        assertEq(
+            nftContract.balanceOf(alice),
+            0,
+            "NFT minted to incorrect address"
+        );
+
+        nftContract.safeTransferFrom(admin, alice, STARTER_TOKEN_ID);
+        vm.stopPrank();
+
+        assertEq(nftContract.balanceOf(admin), 0, "NFT transfer not complete");
+        assertEq(nftContract.balanceOf(alice), 1, "NFT transfer not complete");
+    }
 }

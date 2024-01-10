@@ -131,4 +131,78 @@ contract NftSale_UpdateBand_Unit_Test is NftSale_Unit_Test {
             "Funds not transfered"
         );
     }
+
+    function test_updateBand_TransferNftAndUpdateBand()
+        external
+        mintOneBandForUser
+    {
+        assertEq(nftContract.balanceOf(admin), 0, "NFT pre-minted to admin");
+        assertEq(
+            nftContract.balanceOf(alice),
+            1,
+            "NFT not pre-minted to alice"
+        );
+
+        uint256 newPrice = sale.getLevelPriceInUSD(DEFAULT_NEW_LEVEL);
+        uint256 oldPrice = sale.getLevelPriceInUSD(DEFAULT_LEVEL);
+        uint256 upgradePrice = newPrice - oldPrice;
+
+        vm.prank(admin);
+        nftContract.grantRole(MINTER_ROLE, address(alice));
+
+        vm.prank(alice);
+        nftContract.safeTransferFrom(alice, admin, STARTER_TOKEN_ID);
+
+        assertEq(
+            nftContract.balanceOf(admin),
+            1,
+            "NFT transfered to incorrect address"
+        );
+        assertEq(
+            nftContract.balanceOf(alice),
+            0,
+            "NFT transfered to incorrect address"
+        );
+
+        vm.startPrank(admin);
+        tokenUSDT.approve(address(sale), upgradePrice);
+        sale.updateBand(STARTER_TOKEN_ID, DEFAULT_NEW_LEVEL, tokenUSDT);
+        vm.stopPrank();
+        INftSale.Band memory starterBandData = sale.getBand(STARTER_TOKEN_ID);
+        INftSale.Band memory firstTokenBandData = sale.getBand(
+            FIRST_MINTED_TOKEN_ID
+        );
+
+        assertEq(
+            nftContract.getNextTokenId(),
+            FIRST_MINTED_TOKEN_ID + 1,
+            "Token was not minted and ID not changed"
+        );
+        assertEq(
+            uint8(starterBandData.activityType),
+            uint8(NFT_ACTIVITY_TYPE_DEACTIVATED),
+            "Band not deactivated"
+        );
+        assertEq(
+            uint8(firstTokenBandData.activityType),
+            uint8(NFT_ACTIVITY_TYPE_INACTIVE),
+            "Band not activated"
+        );
+        assertFalse(starterBandData.isGenesis, "Band set as genesis");
+        assertEq(
+            firstTokenBandData.level,
+            DEFAULT_NEW_LEVEL,
+            "Band level set incorrectly"
+        );
+        assertEq(
+            nftContract.ownerOf(STARTER_TOKEN_ID),
+            admin,
+            "User did not receive new nft"
+        );
+        assertEq(
+            tokenUSDT.balanceOf(address(sale)),
+            oldPrice + upgradePrice,
+            "Funds not transfered"
+        );
+    }
 }
