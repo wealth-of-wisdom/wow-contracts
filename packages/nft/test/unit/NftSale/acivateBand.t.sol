@@ -4,10 +4,10 @@ pragma solidity 0.8.20;
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {INftSale} from "../../../contracts/interfaces/INftSale.sol";
 import {Errors} from "../../../contracts/libraries/Errors.sol";
-import {Nft_Sale_Unit_Test} from "../NftSaleUnit.t.sol";
+import {NftSale_Unit_Test} from "../NftSaleUnit.t.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 
-contract Nft_Sale_ActivateBand_Unit_Test is Nft_Sale_Unit_Test {
+contract NftSale_ActivateBand_Unit_Test is NftSale_Unit_Test {
     function test_activateBand_RevertIf_NotBandOwner()
         external
         mintOneBandForUser

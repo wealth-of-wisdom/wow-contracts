@@ -4,10 +4,10 @@ pragma solidity 0.8.20;
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {INftSale} from "../../../contracts/interfaces/INftSale.sol";
 import {Errors} from "../../../contracts/libraries/Errors.sol";
-import {Nft_Sale_Unit_Test} from "../NftSaleUnit.t.sol";
+import {NftSale_Unit_Test} from "../NftSaleUnit.t.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 
-contract Nft_Sale_MintGenesisBand_Unit_Test is Nft_Sale_Unit_Test {
+contract NftSale_MintGenesisBand_Unit_Test is NftSale_Unit_Test {
     function test_mintGenesisBand_RevertIf_AccessControlUnauthorizedAccount()
         external
     {
@@ -57,6 +57,7 @@ contract Nft_Sale_MintGenesisBand_Unit_Test is Nft_Sale_Unit_Test {
     function test_mintGenesisBand_MintGenesisBandWithDataUpdates() external {
         vm.prank(admin);
         sale.mintGenesisBand(alice, DEFAULT_LEVEL, DEFAULT_GENESIS_AMOUNT);
+        INftSale.Band memory bandData = sale.getBand(STARTER_TOKEN_ID);
 
         assertEq(
             nftContract.getNextTokenId(),
@@ -64,19 +65,12 @@ contract Nft_Sale_MintGenesisBand_Unit_Test is Nft_Sale_Unit_Test {
             "Token was not minted and ID not changed"
         );
         assertEq(
-            uint8(sale.getBand(STARTER_TOKEN_ID).activityType),
+            uint8(bandData.activityType),
             uint8(NFT_ACTIVITY_TYPE_INACTIVE),
             "Band not activated"
         );
-        assertTrue(
-            sale.getBand(STARTER_TOKEN_ID).isGenesis,
-            "Band not set as genesis"
-        );
-        assertEq(
-            sale.getBand(STARTER_TOKEN_ID).level,
-            DEFAULT_LEVEL,
-            "Band level set incorrectly"
-        );
+        assertTrue(bandData.isGenesis, "Band not set as genesis");
+        assertEq(bandData.level, DEFAULT_LEVEL, "Band level set incorrectly");
         assertEq(
             nftContract.balanceOf(alice),
             DEFAULT_GENESIS_AMOUNT,

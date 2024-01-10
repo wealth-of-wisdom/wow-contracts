@@ -165,7 +165,7 @@ contract NftSale is
         }
 
         // Checks: the new level must be different from the current level
-        if (newLevel == currentLevel && newLevel <= currentLevel) {
+        if (newLevel <= currentLevel) {
             revert Errors.Nft__InvalidLevel(newLevel);
         }
 
@@ -174,8 +174,8 @@ contract NftSale is
 
         uint256 upgradeCost = s_levelToPrice[newLevel] -
             s_levelToPrice[currentLevel];
-        _purchaseBand(token, upgradeCost);
         _updateBand(tokenId, currentLevel, newLevel);
+        _purchaseBand(token, upgradeCost);
         s_contractNFT.safeMint(msg.sender);
 
         emit BandUpdated(msg.sender, tokenId, currentLevel, newLevel);

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import {INftEvents} from "../../contracts/interfaces/INftSale.sol";
+import {INftSaleEvents} from "../../contracts/interfaces/INftSale.sol";
 import {NftSaleMock} from "../mocks/NftSaleMock.sol";
 import {NftMock} from "../mocks/NftMock.sol";
 import {Base_Test} from "../Base.t.sol";
 
-contract Nft_Sale_Unit_Test is Base_Test, INftEvents {
+contract NftSale_Unit_Test is Base_Test, INftSaleEvents {
     constructor() Base_Test() {}
 
     function setUp() public virtual override {

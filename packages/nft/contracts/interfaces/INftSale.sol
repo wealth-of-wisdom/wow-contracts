@@ -4,7 +4,7 @@ pragma solidity 0.8.20;
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {Nft} from "../Nft.sol";
 
-interface INftEvents {
+interface INftSaleEvents {
     /*//////////////////////////////////////////////////////////////////////////
                                        EVENTS
     //////////////////////////////////////////////////////////////////////////*/
@@ -41,7 +41,7 @@ interface INftEvents {
     event RefundPaid(IERC20 token, uint256 amount);
 }
 
-interface INftSale is INftEvents {
+interface INftSale is INftSaleEvents {
     /*//////////////////////////////////////////////////////////////////////////
                                        ENUMS
     //////////////////////////////////////////////////////////////////////////*/
