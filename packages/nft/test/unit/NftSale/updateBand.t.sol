@@ -2,9 +2,9 @@
 pragma solidity 0.8.20;
 
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
-import {INftSale} from "../../../contracts/interfaces/INftSale.sol";
-import {Errors} from "../../../contracts/libraries/Errors.sol";
-import {NftSale_Unit_Test} from "../NftSaleUnit.t.sol";
+import {INftSale} from "@wealth-of-wisdom/nft/contracts/interfaces/INftSale.sol";
+import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
+import {NftSale_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftSaleUnit.t.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 
 contract NftSale_UpdateBand_Unit_Test is NftSale_Unit_Test {
@@ -94,10 +94,6 @@ contract NftSale_UpdateBand_Unit_Test is NftSale_Unit_Test {
         tokenUSDT.approve(address(sale), upgradePrice);
         sale.updateBand(STARTER_TOKEN_ID, DEFAULT_NEW_LEVEL, tokenUSDT);
         vm.stopPrank();
-        INftSale.Band memory starterBandData = sale.getBand(STARTER_TOKEN_ID);
-        INftSale.Band memory firstTokenBandData = sale.getBand(
-            FIRST_MINTED_TOKEN_ID
-        );
 
         assertEq(
             nftContract.getNextTokenId(),
@@ -105,18 +101,21 @@ contract NftSale_UpdateBand_Unit_Test is NftSale_Unit_Test {
             "Token was not minted and ID not changed"
         );
         assertEq(
-            uint8(starterBandData.activityType),
+            uint8(sale.getBand(STARTER_TOKEN_ID).activityType),
             uint8(NFT_ACTIVITY_TYPE_DEACTIVATED),
             "Band not deactivated"
         );
         assertEq(
-            uint8(firstTokenBandData.activityType),
+            uint8(sale.getBand(FIRST_MINTED_TOKEN_ID).activityType),
             uint8(NFT_ACTIVITY_TYPE_INACTIVE),
             "Band not activated"
         );
-        assertFalse(starterBandData.isGenesis, "Band set as genesis");
+        assertFalse(
+            sale.getBand(STARTER_TOKEN_ID).isGenesis,
+            "Band set as genesis"
+        );
         assertEq(
-            firstTokenBandData.level,
+            sale.getBand(FIRST_MINTED_TOKEN_ID).level,
             DEFAULT_NEW_LEVEL,
             "Band level set incorrectly"
         );
@@ -168,10 +167,6 @@ contract NftSale_UpdateBand_Unit_Test is NftSale_Unit_Test {
         tokenUSDT.approve(address(sale), upgradePrice);
         sale.updateBand(STARTER_TOKEN_ID, DEFAULT_NEW_LEVEL, tokenUSDT);
         vm.stopPrank();
-        INftSale.Band memory starterBandData = sale.getBand(STARTER_TOKEN_ID);
-        INftSale.Band memory firstTokenBandData = sale.getBand(
-            FIRST_MINTED_TOKEN_ID
-        );
 
         assertEq(
             nftContract.getNextTokenId(),
@@ -179,18 +174,21 @@ contract NftSale_UpdateBand_Unit_Test is NftSale_Unit_Test {
             "Token was not minted and ID not changed"
         );
         assertEq(
-            uint8(starterBandData.activityType),
+            uint8(sale.getBand(STARTER_TOKEN_ID).activityType),
             uint8(NFT_ACTIVITY_TYPE_DEACTIVATED),
             "Band not deactivated"
         );
         assertEq(
-            uint8(firstTokenBandData.activityType),
+            uint8(sale.getBand(FIRST_MINTED_TOKEN_ID).activityType),
             uint8(NFT_ACTIVITY_TYPE_INACTIVE),
             "Band not activated"
         );
-        assertFalse(starterBandData.isGenesis, "Band set as genesis");
+        assertFalse(
+            sale.getBand(STARTER_TOKEN_ID).isGenesis,
+            "Band set as genesis"
+        );
         assertEq(
-            firstTokenBandData.level,
+            sale.getBand(FIRST_MINTED_TOKEN_ID).level,
             DEFAULT_NEW_LEVEL,
             "Band level set incorrectly"
         );

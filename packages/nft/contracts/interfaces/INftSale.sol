@@ -2,7 +2,8 @@
 pragma solidity 0.8.20;
 
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
-import {Nft} from "../Nft.sol";
+import {Vesting} from "@wealth-of-wisdom/vesting/contracts/Vesting.sol";
+import {Nft} from "@wealth-of-wisdom/nft/contracts/Nft.sol";
 
 interface INftSaleEvents {
     /*//////////////////////////////////////////////////////////////////////////
@@ -49,7 +50,8 @@ interface INftSale is INftSaleEvents {
     enum ActivityType {
         DEACTIVATED,
         INACTIVE,
-        ACTIVATED
+        ACTIVATED,
+        EXTENDED
     }
     /*//////////////////////////////////////////////////////////////////////////
                                        STRUCTS
@@ -61,6 +63,11 @@ interface INftSale is INftSaleEvents {
         ActivityType activityType;
     }
 
+    struct NftLevel {
+        uint256 price;
+        uint256 complimentaryTokens;
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                       FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
@@ -68,7 +75,9 @@ interface INftSale is INftSaleEvents {
     function initialize(
         IERC20 tokenUSDT,
         IERC20 tokenUSDC,
-        Nft contractNFT
+        Nft contractNFT,
+        Vesting contractVesting,
+        uint16 pid
     ) external;
 
     function mintBand(uint16 level, IERC20 token) external;

@@ -6,6 +6,7 @@ import {IVesting} from "../../contracts/interfaces/IVesting.sol";
 abstract contract Constants {
     bytes32 internal constant DEFAULT_ADMIN_ROLE = 0x00;
     bytes32 internal constant STAKING_ROLE = keccak256("STAKING_ROLE");
+    bytes32 internal constant BENEFICIARY_ROLE = keccak256("BENEFICIARY_ROLE");
 
     address internal constant ZERO_ADDRESS = address(0x0);
     uint256 internal constant INIT_ETH_BALANCE = type(uint128).max;

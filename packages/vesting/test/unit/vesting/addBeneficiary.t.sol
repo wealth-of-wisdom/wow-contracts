@@ -2,9 +2,9 @@
 pragma solidity 0.8.20;
 
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
-import {IVesting} from "../../../contracts/interfaces/IVesting.sol";
-import {Errors} from "../../../contracts/libraries/Errors.sol";
-import {Vesting_Unit_Test} from "../VestingUnit.t.sol";
+import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
+import {Errors} from "@wealth-of-wisdom/vesting/contracts/libraries/Errors.sol";
+import {Vesting_Unit_Test} from "@wealth-of-wisdom/vesting/test/unit/VestingUnit.t.sol";
 
 contract Vesting_AddBeneficiary_Unit_Test is Vesting_Unit_Test {
     function test_addBeneficiary_RevertIf_NotAdmin() external {
@@ -12,7 +12,7 @@ contract Vesting_AddBeneficiary_Unit_Test is Vesting_Unit_Test {
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
                 alice,
-                DEFAULT_ADMIN_ROLE
+                BENEFICIARY_ROLE
             )
         );
         vm.prank(alice);

@@ -6,8 +6,9 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
-import {INftSale} from "./interfaces/INftSale.sol";
-import {Nft} from "./Nft.sol";
+import {Vesting} from "@wealth-of-wisdom/vesting/contracts/Vesting.sol";
+import {INftSale} from "@wealth-of-wisdom/nft/contracts/interfaces/INftSale.sol";
+import {Nft} from "@wealth-of-wisdom/nft/contracts/Nft.sol";
 import {Errors} from "./libraries/Errors.sol";
 
 contract NftSale is
@@ -36,6 +37,7 @@ contract NftSale is
     IERC20 internal s_tokenUSDT;
     IERC20 internal s_tokenUSDC;
     Nft internal s_contractNFT;
+    Vesting internal s_contractVesting;
 
     /*//////////////////////////////////////////////////////////////////////////
                                 INTERNAL STORAGE
@@ -43,8 +45,9 @@ contract NftSale is
 
     /* solhint-disable var-name-mixedcase */
     mapping(uint256 => Band) internal s_bands; // token ID => band
-    mapping(uint16 => uint256) internal s_levelToPrice; // level => price in USD
+    mapping(uint16 => NftLevel) internal s_levelToPrice; // level => price in USD
     uint16 internal s_maxLevel;
+    uint16 internal promotionalPID;
     /* solhint-enable */
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -93,7 +96,9 @@ contract NftSale is
     function initialize(
         IERC20 tokenUSDT,
         IERC20 tokenUSDC,
-        Nft contractNFT
+        Nft contractNFT,
+        Vesting contractVesting,
+        uint16 pid
     )
         external
         initializer
@@ -108,15 +113,24 @@ contract NftSale is
         _grantRole(UPGRADER_ROLE, msg.sender);
 
         s_maxLevel = 5;
-        s_levelToPrice[1] = 1_000 * 10 ** 6;
-        s_levelToPrice[2] = 5_000 * 10 ** 6;
-        s_levelToPrice[3] = 10_000 * 10 ** 6;
-        s_levelToPrice[4] = 33_000 * 10 ** 6;
-        s_levelToPrice[5] = 100_000 * 10 ** 6;
+        promotionalPID = pid;
+
+        s_levelToPrice[1].price = 1_000 * 10 ** 6;
+        s_levelToPrice[2].price = 5_000 * 10 ** 6;
+        s_levelToPrice[3].price = 10_000 * 10 ** 6;
+        s_levelToPrice[4].price = 33_000 * 10 ** 6;
+        s_levelToPrice[5].price = 100_000 * 10 ** 6;
+
+        s_levelToPrice[1].complimentaryTokens = 1_000 * 10 ** 6;
+        s_levelToPrice[2].complimentaryTokens = 25_000 * 10 ** 6;
+        s_levelToPrice[3].complimentaryTokens = 100_000 * 10 ** 6;
+        s_levelToPrice[4].complimentaryTokens = 660_000 * 10 ** 6;
+        s_levelToPrice[5].complimentaryTokens = 3_000_000 * 10 ** 6;
 
         s_tokenUSDT = tokenUSDT;
         s_tokenUSDC = tokenUSDC;
         s_contractNFT = contractNFT;
+        s_contractVesting = contractVesting;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -127,7 +141,7 @@ contract NftSale is
         uint16 level,
         IERC20 token
     ) external mValidBandLevel(level) mTokenExists(token) {
-        uint256 cost = s_levelToPrice[level];
+        uint256 cost = s_levelToPrice[level].price;
         // Effects: set the band data
         uint256 tokenId = s_contractNFT.getNextTokenId();
         s_bands[tokenId] = Band({
@@ -172,8 +186,8 @@ contract NftSale is
         // Effects: Update the band level
         band.level = newLevel;
 
-        uint256 upgradeCost = s_levelToPrice[newLevel] -
-            s_levelToPrice[currentLevel];
+        uint256 upgradeCost = s_levelToPrice[newLevel].price -
+            s_levelToPrice[currentLevel].price;
         _updateBand(tokenId, currentLevel, newLevel);
         _purchaseBand(token, upgradeCost);
         s_contractNFT.safeMint(msg.sender);
@@ -182,12 +196,18 @@ contract NftSale is
     }
 
     function activateBand(uint256 tokenId) external mBandOwner(tokenId) {
-        s_bands[tokenId].activityType = ActivityType.ACTIVATED;
+        Band storage bandData = s_bands[tokenId];
+        bandData.activityType = ActivityType.ACTIVATED;
+        s_contractVesting.addBeneficiary(
+            promotionalPID,
+            msg.sender,
+            s_levelToPrice[bandData.level].complimentaryTokens
+        );
         emit BandActivated(
             msg.sender,
             tokenId,
-            s_bands[tokenId].level,
-            s_bands[tokenId].isGenesis
+            bandData.level,
+            bandData.isGenesis
         );
     }
 
@@ -235,9 +255,17 @@ contract NftSale is
         mValidBandLevel(level)
         mAmountNotZero(price)
     {
-        s_levelToPrice[level] = price;
+        s_levelToPrice[level].price = price;
 
         emit LevelPriceSet(level, price);
+    }
+
+    function setComplietaryPrice(
+        uint16 level,
+        uint256 newPrice
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        s_levelToPrice[level].complimentaryTokens = newPrice;
+        emit LevelPriceSet(level, newPrice);
     }
 
     function mintGenesisBand(
@@ -283,11 +311,21 @@ contract NftSale is
     }
 
     function getLevelPriceInUSD(uint16 level) external view returns (uint256) {
-        return s_levelToPrice[level];
+        return s_levelToPrice[level].price;
     }
 
     function getMaxLevel() external view returns (uint16) {
         return s_maxLevel;
+    }
+
+    function getPromotionalPID() external view returns (uint16) {
+        return promotionalPID;
+    }
+
+    function getComplimentaryTokenAmountPerLevel(
+        uint16 level
+    ) public view returns (uint256) {
+        return s_levelToPrice[level].complimentaryTokens;
     }
 
     /*//////////////////////////////////////////////////////////////////////////

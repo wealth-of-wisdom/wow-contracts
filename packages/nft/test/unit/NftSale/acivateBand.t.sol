@@ -2,9 +2,9 @@
 pragma solidity 0.8.20;
 
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
-import {INftSale} from "../../../contracts/interfaces/INftSale.sol";
-import {Errors} from "../../../contracts/libraries/Errors.sol";
-import {NftSale_Unit_Test} from "../NftSaleUnit.t.sol";
+import {INftSale} from "@wealth-of-wisdom/nft/contracts/interfaces/INftSale.sol";
+import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
+import {NftSale_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftSaleUnit.t.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 
 contract NftSale_ActivateBand_Unit_Test is NftSale_Unit_Test {
@@ -30,11 +30,17 @@ contract NftSale_ActivateBand_Unit_Test is NftSale_Unit_Test {
     function test_activateBand_activatesBand() external mintOneBandForUser {
         vm.prank(alice);
         sale.activateBand(STARTER_TOKEN_ID);
-        INftSale.Band memory bandData = sale.getBand(STARTER_TOKEN_ID);
-        assertFalse(bandData.isGenesis, "Token genesis state changed");
-        assertEq(bandData.level, DEFAULT_LEVEL, "Level data changed");
+        assertFalse(
+            sale.getBand(STARTER_TOKEN_ID).isGenesis,
+            "Token genesis state changed"
+        );
         assertEq(
-            uint8(bandData.activityType),
+            sale.getBand(STARTER_TOKEN_ID).level,
+            DEFAULT_LEVEL,
+            "Level data changed"
+        );
+        assertEq(
+            uint8(sale.getBand(STARTER_TOKEN_ID).activityType),
             uint8(NFT_ACTIVITY_TYPE_ACTIVATED),
             "Band was not activated"
         );
