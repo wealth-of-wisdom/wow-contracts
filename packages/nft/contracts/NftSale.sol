@@ -6,7 +6,7 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
-import {Vesting} from "@wealth-of-wisdom/vesting/contracts/Vesting.sol";
+import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
 import {INftSale} from "@wealth-of-wisdom/nft/contracts/interfaces/INftSale.sol";
 import {Nft} from "@wealth-of-wisdom/nft/contracts/Nft.sol";
 import {Errors} from "./libraries/Errors.sol";
@@ -37,7 +37,7 @@ contract NftSale is
     IERC20 internal s_tokenUSDT;
     IERC20 internal s_tokenUSDC;
     Nft internal s_contractNFT;
-    Vesting internal s_contractVesting;
+    IVesting internal s_contractVesting;
 
     /*//////////////////////////////////////////////////////////////////////////
                                 INTERNAL STORAGE
@@ -97,7 +97,7 @@ contract NftSale is
         IERC20 tokenUSDT,
         IERC20 tokenUSDC,
         Nft contractNFT,
-        Vesting contractVesting,
+        IVesting contractVesting,
         uint16 pid
     )
         external

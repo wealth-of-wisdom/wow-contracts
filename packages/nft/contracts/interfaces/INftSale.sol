@@ -2,7 +2,7 @@
 pragma solidity 0.8.20;
 
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
-import {Vesting} from "@wealth-of-wisdom/vesting/contracts/Vesting.sol";
+import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
 import {Nft} from "@wealth-of-wisdom/nft/contracts/Nft.sol";
 
 interface INftSaleEvents {
@@ -76,7 +76,7 @@ interface INftSale is INftSaleEvents {
         IERC20 tokenUSDT,
         IERC20 tokenUSDC,
         Nft contractNFT,
-        Vesting contractVesting,
+        IVesting contractVesting,
         uint16 pid
     ) external;
 
