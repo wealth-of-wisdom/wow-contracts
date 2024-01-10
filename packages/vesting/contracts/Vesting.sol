@@ -498,7 +498,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
             user.stakedTokenAmount -= tokenAmount;
         }
 
-        emit StakedTokensUpdated(pid, tokenAmount, startStaking);
+        emit StakedTokensUpdated(pid, beneficiary, tokenAmount, startStaking);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
