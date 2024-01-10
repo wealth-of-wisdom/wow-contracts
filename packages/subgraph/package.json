@@ -11,8 +11,8 @@
         "deploy": "graph deploy --node https://api.thegraph.com/deploy/ <YOUR_SUBGRAPH_URL>",
         "create-local": "graph create --node http://localhost:8020/ <YOUR_SUBGRAPH_URL>",
         "remove-local": "graph remove --node http://localhost:8020/ <YOUR_SUBGRAPH_URL>",
-        "deploy-local": "graph deploy --product hosted-service bernardas/wow-subgraph ./sepolia.subgraph.yaml",
-        "deploy-sepolia": "graph deploy wow/subgraph --node https://deploy.stream.superhow.net --ipfs https://ipfs.stream.superhow.net --version-label  ./sepolia.subgraph.yaml",
+        "deploy-local": "graph deploy --product hosted-service matasvosylius/vesting-subgraph ./sepolia.subgraph.yaml",
+        "deploy-sepolia": "graph deploy wow/subgraph --node https://deploy.stream.superhow.net --ipfs https://ipfs.stream.superhow.net --version-label 0.0.1 ./sepolia.subgraph.yaml",
         "deploy-eth": "graph deploy --product hosted-service wealth-of-wisdom/vesting-eth ./eth.subgraph.yaml"
     },
     "devDependencies": {
