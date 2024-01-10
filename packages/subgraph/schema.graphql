@@ -1,0 +1,41 @@
+# Enum for UnlockType
+enum UnlockType {
+  DAILY
+  MONTHLY
+}
+
+type VestingContract @entity {
+  id: ID!
+  vestingContractAddress: Bytes!
+  stakingContractAddress: Bytes!
+  listingDate: BigInt!
+}
+
+type VestingPool @entity {
+  id: ID!
+  poolId: BigInt!
+  vestingContract: VestingContract!
+  name: String!
+  listingPercentage: BigInt!
+  cliffDuration: BigInt!
+  cliffEndDate: BigInt!
+  cliffPercentage: BigInt!
+  vestingDuration: BigInt!
+  vestingEndDate: BigInt!
+  unlockType: UnlockType!
+  dedicatedPoolTokens: BigInt!
+  totalPoolTokenAmount: BigInt!
+  beneficiaries: [Beneficiary!] @derivedFrom(field: "vestingPool")
+}
+
+type Beneficiary @entity {
+  id: ID!
+  address: Bytes!
+  vestingPool: VestingPool!
+  totalTokens: BigInt!
+  vestedTokens: BigInt!
+  stakedTokens: BigInt!
+  claimedTokens: BigInt!
+}
+
+

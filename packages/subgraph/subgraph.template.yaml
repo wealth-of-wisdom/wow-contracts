@@ -1,0 +1,43 @@
+specVersion: 0.0.5
+description: Subgraph for the Streampay Multi-Streams
+repository: https://github.com/wealth-of-wisdom/wow-contracts
+schema:
+    file: ./schema.graphql
+dataSources:
+    - kind: ethereum/contract
+      name: Vesting
+      network: {{network}}
+      source:
+          address: "{{vestingAddress}}"
+          abi: Vesting
+          startBlock: {{startBlock}}
+      mapping:
+          kind: ethereum/events
+          apiVersion: 0.0.7
+          language: wasm/assemblyscript
+          file: ./src/mappings/vesting.ts  # Path to mapping file
+          entities:
+              - VestingPool
+              - Beneficiary
+          abis:
+            - name: Vesting
+              file: ./abis/Vesting.json
+          eventHandlers:
+            - event: Initialized(uint64)
+              handler: handleInitialized
+            - event: VestingPoolAdded(indexed uint16,uint256)
+              handler: handleVestingPoolAdded
+            - event: BeneficiaryAdded(indexed uint16,indexed address,uint256)
+              handler: handleBeneficiaryAdded
+            - event: BeneficiaryRemoved(indexed uint16,indexed address,uint256)
+              handler: handleBeneficiaryRemoved
+            - event: ContractTokensWithdrawn(indexed address,indexed address,uint256)
+              handler: handleContractTokensWithdrawn
+            - event: ListingDateChanged(uint32,uint32)
+              handler: handleListingDateChanged
+            - event: StakedTokensUpdated(indexed uint16,uint256,bool)
+              handler: handleStakedTokensUpdated
+            - event: StakingContractSet(indexed address)
+              handler: handleStakingContractSet
+            - event: TokensClaimed(indexed uint16,indexed address,uint256)
+              handler: handleTokensClaimed

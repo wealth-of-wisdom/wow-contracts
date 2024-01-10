@@ -1,0 +1,24 @@
+{
+    "overrides": [
+        {
+            "files": ["*.yaml"],
+            "options": {
+                "printWidth": 80,
+                "tabWidth": 4,
+                "useTabs": false,
+                "singleQuote": false,
+                "bracketSpacing": false
+            }
+        },
+        {
+            "files": ["*.json", "*.ts", "*.graphql"],
+            "options": {
+                "printWidth": 120,
+                "tabWidth": 4,
+                "useTabs": false,
+                "singleQuote": false,
+                "bracketSpacing": true
+            }
+        }
+    ]
+}
