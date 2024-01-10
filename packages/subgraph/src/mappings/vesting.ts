@@ -29,7 +29,8 @@ export function handleInitialized(event: InitializedEvent): void {
 
 export function handleVestingPoolAdded(event: VestingPoolAddedEvent): void {
 
-    const vestingPool: VestingPool = getOrInitVestingPool(event.address, new BigInt(event.params.poolIndex));
+    
+    const vestingPool: VestingPool = getOrInitVestingPool(event.address, BigInt.fromI32(event.params.poolIndex));
 
     const vestingContract = Vesting.bind(event.address)
 
@@ -55,13 +56,13 @@ export function handleVestingPoolAdded(event: VestingPoolAddedEvent): void {
     //     - pool.vestingDurationInDays,   
     const vestingEndDate: BigInt = poolVestingData.value0;
     // const vestingDurationInMonths: BigInt = poolVestingData.value1;
-    const vestingDurationInDays: BigInt = new BigInt(poolVestingData.value2);
+    const vestingDurationInDays: BigInt = BigInt.fromI32(poolVestingData.value2);
 
     // Listing data structure:
     //     - pool.listingPercentageDividend
     //     - pool.listingPercentageDivisor,
-    const listingPercentageDividend: BigInt = new BigInt(poolListingData.value0);
-    const listingPercentageDivisor: BigInt = new BigInt(poolListingData.value1);
+    const listingPercentageDividend: BigInt = BigInt.fromI32(poolListingData.value0);
+    const listingPercentageDivisor: BigInt = BigInt.fromI32(poolListingData.value1);
 
     // Cliff data structure:
     //     - pool.cliffEndDate
@@ -69,16 +70,16 @@ export function handleVestingPoolAdded(event: VestingPoolAddedEvent): void {
     //     - pool.cliffPercentageDividend
     //     - pool.cliffPercentageDivisor,    
     const cliffEndDate: BigInt = poolCliffData.value0;
-    const cliffInDays: BigInt = new BigInt(poolCliffData.value1);
-    const cliffPercentageDividend: BigInt = new BigInt(poolCliffData.value2);
-    const cliffPercentageDivisor: BigInt = new BigInt(poolCliffData.value3);
+    const cliffInDays: BigInt = BigInt.fromI32(poolCliffData.value1);
+    const cliffPercentageDividend: BigInt = BigInt.fromI32(poolCliffData.value2);
+    const cliffPercentageDivisor: BigInt = BigInt.fromI32(poolCliffData.value3);
 
 
 
-    vestingPool.poolId = new BigInt(event.params.poolIndex);
+    vestingPool.poolId = BigInt.fromI32(event.params.poolIndex);
 
     vestingPool.name = poolName
-    vestingPool.unlockType = getUnlockType(getUnlockFromI32(new BigInt(unlockType)));
+    vestingPool.unlockType = getUnlockType(getUnlockFromI32(BigInt.fromI32(unlockType)));
     vestingPool.totalPoolTokenAmount = totalPoolTokenAmount;
     vestingPool.dedicatedPoolTokens = dedicatedPoolTokenAmount;
 
@@ -103,7 +104,7 @@ export function handleVestingPoolAdded(event: VestingPoolAddedEvent): void {
 
 
 export function handleBeneficiaryAdded(event: BeneficiaryAddedEvent): void {
-    const beneficiary: Beneficiary = getOrInitBeneficiaries(event.address, event.params.beneficiary, new BigInt(event.params.poolIndex));
+    const beneficiary: Beneficiary = getOrInitBeneficiaries(event.address, event.params.beneficiary, BigInt.fromI32(event.params.poolIndex));
 
     beneficiary.address = event.params.beneficiary;
     beneficiary.vestingPool = event.params.poolIndex.toString();
@@ -115,7 +116,7 @@ export function handleBeneficiaryAdded(event: BeneficiaryAddedEvent): void {
 }
 
 export function handleBeneficiaryRemoved(event: BeneficiaryRemovedEvent): void {
-    const beneficiary: Beneficiary = getOrInitBeneficiaries(event.address, event.params.beneficiary, new BigInt(event.params.poolIndex));
+    const beneficiary: Beneficiary = getOrInitBeneficiaries(event.address, event.params.beneficiary, BigInt.fromI32(event.params.poolIndex));
 
     // TODO: Not sure if this how it supposed to look like
     store.remove("Beneficiary", beneficiary.id)
@@ -148,7 +149,7 @@ export function handleStakedTokensUpdated(
 ): void {
     // NEEDED: Reikia kad idetu:
     // emit StakedTokensUpdated(pid, tokenAmount, startStaking); ir beneficiary
-    const beneficiary: Beneficiary = getOrInitBeneficiaries(event.address, event.transaction.from, new BigInt(event.params.poolIndex));
+    const beneficiary: Beneficiary = getOrInitBeneficiaries(event.address, event.transaction.from, BigInt.fromI32(event.params.poolIndex));
 
     if (event.params.stake === true) {
         beneficiary.stakedTokens = beneficiary.stakedTokens.plus(event.params.amount);
@@ -169,7 +170,7 @@ export function handleStakingContractSet(event: StakingContractSetEvent): void {
 }
 
 export function handleTokensClaimed(event: TokensClaimedEvent): void {
-    const beneficiary: Beneficiary = getOrInitBeneficiaries(event.address, event.params.user, new BigInt(event.params.poolIndex));
+    const beneficiary: Beneficiary = getOrInitBeneficiaries(event.address, event.params.user, BigInt.fromI32(event.params.poolIndex));
 
     // count claimed amount
     beneficiary.claimedTokens = beneficiary.claimedTokens.plus(event.params.tokenAmount);

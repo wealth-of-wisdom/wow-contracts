@@ -1,11 +1,11 @@
-import { BigInt} from "@graphprotocol/graph-ts";
+import { BigInt } from "@graphprotocol/graph-ts";
 import { UnlockType } from "../helpers/vesting.helpers";
 
 
 export const getUnlockFromI32 = (unlockType: BigInt): UnlockType => {
-    if (unlockType === new BigInt(0)) {
+    if (unlockType.equals(BigInt.fromI32(0))) {
         return UnlockType.DAILY;
-    } else if (unlockType === new BigInt(1)) {
+    } else if (unlockType.equals(BigInt.fromI32(1))) {
         return UnlockType.MONTHLY;
     } else {
         throw new Error("Invalid number");
