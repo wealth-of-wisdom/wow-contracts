@@ -2,7 +2,8 @@
 pragma solidity 0.8.20;
 
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
-import {Nft} from "../Nft.sol";
+import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
+import {INft} from "@wealth-of-wisdom/nft/contracts/interfaces/INft.sol";
 
 interface INftSaleEvents {
     /*//////////////////////////////////////////////////////////////////////////
@@ -34,7 +35,13 @@ interface INftSaleEvents {
 
     event MaxLevelSet(uint16 newMaxLevel);
 
+    event VestingContractSet(IVesting newContract);
+
+    event NftContractSet(INft newContract);
+
     event LevelPriceSet(uint16 level, uint256 price);
+
+    event LevelTokensSet(uint16 level, uint256 tokenAmount);
 
     event PurchasePaid(IERC20 token, uint256 amount);
 
@@ -49,7 +56,8 @@ interface INftSale is INftSaleEvents {
     enum ActivityType {
         DEACTIVATED,
         INACTIVE,
-        ACTIVATED
+        ACTIVATED,
+        EXTENDED
     }
     /*//////////////////////////////////////////////////////////////////////////
                                        STRUCTS
@@ -61,6 +69,16 @@ interface INftSale is INftSaleEvents {
         ActivityType activityType;
     }
 
+    /**
+     * @param price -Price for NFT level purchase
+     * @param vestingRewardWOWTokens -  Tokens that will be invested into the
+     * vesting pool as a reward for purchasing this NFT level
+     **/
+    struct NftLevel {
+        uint256 price;
+        uint256 vestingRewardWOWTokens;
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                       FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
@@ -68,7 +86,9 @@ interface INftSale is INftSaleEvents {
     function initialize(
         IERC20 tokenUSDT,
         IERC20 tokenUSDC,
-        Nft contractNFT
+        INft contractNFT,
+        IVesting contractVesting,
+        uint16 pid
     ) external;
 
     function mintBand(uint16 level, IERC20 token) external;
@@ -79,11 +99,22 @@ interface INftSale is INftSaleEvents {
         IERC20 token
     ) external;
 
+    function activateBand(uint256 tokenId) external;
+
     function withdrawTokens(IERC20 token, uint256 amount) external;
 
     function setMaxLevel(uint16 maxLevel) external;
 
     function setLevelPrice(uint16 level, uint256 price) external;
+
+    function setVestingRewardWOWTokens(
+        uint16 level,
+        uint256 newTokenAmount
+    ) external;
+
+    function setVestingContract(IVesting newContract) external;
+
+    function setNftContract(INft newContract) external;
 
     function mintGenesisBand(
         address receiver,
@@ -95,9 +126,15 @@ interface INftSale is INftSaleEvents {
 
     function getTokenUSDC() external view returns (IERC20);
 
+    function getNftContract() external view returns (INft);
+
+    function getVestingContract() external view returns (IVesting);
+
     function getBand(uint256 tokenId) external view returns (Band memory);
 
     function getLevelPriceInUSD(uint16 level) external view returns (uint256);
 
     function getMaxLevel() external view returns (uint16);
+
+    function getVestingRewardWOWTokens(uint16) external view returns (uint256);
 }

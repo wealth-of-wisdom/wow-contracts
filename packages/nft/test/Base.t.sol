@@ -2,10 +2,12 @@
 pragma solidity 0.8.20;
 
 import {Test} from "forge-std/Test.sol";
-import {Constants} from "./utils/Constants.sol";
-import {TokenMock} from "./mocks/TokenMock.sol";
-import {NftSaleMock} from "./mocks/NftSaleMock.sol";
-import {NftMock} from "./mocks/NftMock.sol";
+import {Constants} from "@wealth-of-wisdom/nft/test/utils/Constants.sol";
+import {TokenMock} from "@wealth-of-wisdom/nft/test/mocks/TokenMock.sol";
+import {StakingMock} from "@wealth-of-wisdom/vesting/test/mocks/StakingMock.sol";
+import {VestingMock} from "@wealth-of-wisdom/vesting/test/mocks/VestingMock.sol";
+import {NftSaleMock} from "@wealth-of-wisdom/nft/test/mocks/NftSaleMock.sol";
+import {Nft} from "@wealth-of-wisdom/nft/contracts/Nft.sol";
 
 contract Base_Test is Test, Constants {
     /*//////////////////////////////////////////////////////////////////////////
@@ -22,14 +24,20 @@ contract Base_Test is Test, Constants {
 
     TokenMock internal tokenUSDT;
     TokenMock internal tokenUSDC;
-    NftMock internal nftContract;
+    Nft internal nftContract;
     NftSaleMock internal sale;
+    StakingMock internal staking;
+    VestingMock internal vesting;
+
+    uint32 internal immutable LISTING_DATE;
 
     /*//////////////////////////////////////////////////////////////////////////
                                   CONSTRUCTOR
     //////////////////////////////////////////////////////////////////////////*/
 
-    constructor() {}
+    constructor() {
+        LISTING_DATE = uint32(block.timestamp) + 1 days;
+    }
 
     /*//////////////////////////////////////////////////////////////////////////
                                 SET UP FUNCTIONS
@@ -39,6 +47,8 @@ contract Base_Test is Test, Constants {
         uint8 accountsNum = uint8(TEST_ACCOUNTS.length);
 
         vm.startPrank(admin);
+        staking = new StakingMock();
+
         tokenUSDT = new TokenMock();
         tokenUSDT.initialize("USDT token", "USDT", TOTAL_TOKEN_AMOUNT);
 
