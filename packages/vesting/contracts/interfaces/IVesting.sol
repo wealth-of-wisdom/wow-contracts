@@ -45,6 +45,7 @@ interface IVestingEvents {
 
     event StakedTokensUpdated(
         uint16 indexed poolIndex,
+        address indexed beneficiary,
         uint256 amount,
         bool stake
     );

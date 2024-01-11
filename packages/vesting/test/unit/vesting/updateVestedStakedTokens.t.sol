@@ -150,7 +150,7 @@ contract Vesting_UpdateVestedStakedTokens_Unit_Test is Vesting_Unit_Test {
         addBeneficiary(alice)
     {
         vm.expectEmit(true, true, true, true);
-        emit StakedTokensUpdated(PRIMARY_POOL, BENEFICIARY_TOKEN_AMOUNT, true);
+        emit StakedTokensUpdated(PRIMARY_POOL, alice, BENEFICIARY_TOKEN_AMOUNT, true);
 
         vm.prank(address(staking));
         vesting.updateVestedStakedTokens(
@@ -177,6 +177,7 @@ contract Vesting_UpdateVestedStakedTokens_Unit_Test is Vesting_Unit_Test {
         vm.expectEmit(true, true, true, true);
         emit StakedTokensUpdated(
             PRIMARY_POOL,
+            alice,
             BENEFICIARY_TOKEN_AMOUNT - 10 wei,
             false
         );
