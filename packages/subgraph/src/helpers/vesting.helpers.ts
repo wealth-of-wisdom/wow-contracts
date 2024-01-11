@@ -44,13 +44,14 @@ export function getOrInitVestingPool(vestingContractAddress: Address, poolId: Bi
         vestingPool.poolId = BIGINT_ZERO;
         vestingPool.vestingContract = getOrInitVestingContract(vestingContractAddress).id;
         vestingPool.name = "";
-        vestingPool.listingPercentage = BIGINT_ZERO;
+        vestingPool.listingPercentageDividend = BIGINT_ZERO;
+        vestingPool.listingPercentageDivisor = BIGINT_ZERO;
 
         // Cliff details
         vestingPool.cliffDuration = BIGINT_ZERO;
         vestingPool.cliffEndDate = BIGINT_ZERO;
-        vestingPool.cliffPercentage = BIGINT_ZERO;
-
+        vestingPool.cliffPercentageDividend = BIGINT_ZERO;
+        vestingPool.cliffPercentageDivisor = BIGINT_ZERO;
         // Vesting details
         vestingPool.vestingDuration = BIGINT_ZERO;
         vestingPool.vestingEndDate = BIGINT_ZERO;

@@ -16,10 +16,12 @@ type VestingPool @entity {
   poolId: BigInt!
   vestingContract: VestingContract!
   name: String!
-  listingPercentage: BigInt!
+  listingPercentageDividend: BigInt!
+  listingPercentageDivisor: BigInt!
   cliffDuration: BigInt!
   cliffEndDate: BigInt!
-  cliffPercentage: BigInt!
+  cliffPercentageDividend: BigInt!
+  cliffPercentageDivisor: BigInt!
   vestingDuration: BigInt!
   vestingEndDate: BigInt!
   unlockType: UnlockType!

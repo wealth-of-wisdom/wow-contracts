@@ -83,16 +83,15 @@ export function handleVestingPoolAdded(event: VestingPoolAddedEvent): void {
     vestingPool.totalPoolTokenAmount = totalPoolTokenAmount;
     vestingPool.dedicatedPoolTokens = dedicatedPoolTokenAmount;
 
-    // TODO: need to figure out how to calcualte listing Percentage from those two variables:
-    // listingPercentageDividend and listingPercentageDivisor
-    vestingPool.listingPercentage = listingPercentageDividend;
 
+    vestingPool.listingPercentageDividend = listingPercentageDividend;
+    vestingPool.listingPercentageDivisor = listingPercentageDivisor;
 
     vestingPool.cliffDuration = cliffInDays;
     vestingPool.cliffEndDate = cliffEndDate;
-    // TODO: need to figure out how to calcualte cliff Percentage from those two variables:
-    // cliffPercentageDividend and cliffPercentageDivisor
-    vestingPool.cliffPercentage = cliffPercentageDividend;
+ 
+    vestingPool.cliffPercentageDividend = cliffPercentageDividend;
+    vestingPool.cliffPercentageDivisor = cliffPercentageDivisor;
     vestingPool.vestingDuration = vestingDurationInDays;
     vestingPool.vestingEndDate = vestingEndDate;
 
