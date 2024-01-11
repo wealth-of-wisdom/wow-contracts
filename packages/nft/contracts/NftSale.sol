@@ -284,14 +284,14 @@ contract NftSale is
         IVesting newContract
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         s_vestingContract = newContract;
-        emit NewContractSet(address(newContract));
+        emit VestingContractSet(newContract);
     }
 
     function setNftContract(
         INft newContract
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         s_nftContract = newContract;
-        emit NewContractSet(address(newContract));
+        emit NftContractSet(newContract);
     }
 
     function mintGenesisBand(
