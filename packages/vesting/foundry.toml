@@ -6,6 +6,7 @@ libs = ["../../node_modules", "../../lib"]
 remappings = [
     "@wealth-of-wisdom/staking=../../packages/staking",
     "@wealth-of-wisdom/nft=../../packages/nft",
+    "@wealth-of-wisdom/vesting=../../packages/vesting",
     "@openzeppelin/=../../node_modules/@openzeppelin/",
 ]
 gas_reports = ["*"]

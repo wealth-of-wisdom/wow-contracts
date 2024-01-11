@@ -3,10 +3,10 @@ pragma solidity 0.8.20;
 
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {IStaking} from "@wealth-of-wisdom/staking/contracts/interfaces/IStaking.sol";
-import {IVesting} from "../../../contracts/interfaces/IVesting.sol";
-import {Errors} from "../../../contracts/libraries/Errors.sol";
-import {VestingMock} from "../../mocks/VestingMock.sol";
-import {Vesting_Unit_Test} from "../VestingUnit.t.sol";
+import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
+import {Errors} from "@wealth-of-wisdom/vesting/contracts/libraries/Errors.sol";
+import {VestingMock} from "@wealth-of-wisdom/vesting/test/mocks/VestingMock.sol";
+import {Vesting_Unit_Test} from "@wealth-of-wisdom/vesting/test/unit/VestingUnit.t.sol";
 
 contract Vesting_Initialize_Unit_Test is Vesting_Unit_Test {
     function setUp() public virtual override {
