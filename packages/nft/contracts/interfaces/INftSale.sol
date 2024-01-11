@@ -3,7 +3,7 @@ pragma solidity 0.8.20;
 
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
-import {Nft} from "@wealth-of-wisdom/nft/contracts/Nft.sol";
+import {INft} from "@wealth-of-wisdom/nft/contracts/interfaces/INft.sol";
 
 interface INftSaleEvents {
     /*//////////////////////////////////////////////////////////////////////////
@@ -37,6 +37,8 @@ interface INftSaleEvents {
 
     event LevelPriceSet(uint16 level, uint256 price);
 
+    event LevelTokensSet(uint16 level, uint256 tokenAmount);
+
     event PurchasePaid(IERC20 token, uint256 amount);
 
     event RefundPaid(IERC20 token, uint256 amount);
@@ -63,6 +65,11 @@ interface INftSale is INftSaleEvents {
         ActivityType activityType;
     }
 
+    /**
+     * @param price -Price for NFT level purchase
+     * @param complimentaryTokens -  Tokens that will be invested into the
+     * vesting pool as a reward for purchasing this NFT level
+     **/
     struct NftLevel {
         uint256 price;
         uint256 complimentaryTokens;
@@ -75,7 +82,7 @@ interface INftSale is INftSaleEvents {
     function initialize(
         IERC20 tokenUSDT,
         IERC20 tokenUSDC,
-        Nft contractNFT,
+        INft contractNFT,
         IVesting contractVesting,
         uint16 pid
     ) external;

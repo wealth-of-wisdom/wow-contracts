@@ -12,7 +12,7 @@ contract Vesting_AddBeneficiary_Unit_Test is Vesting_Unit_Test {
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
                 alice,
-                BENEFICIARY_ROLE
+                BENEFICIARIES_MANAGER_ROLE
             )
         );
         vm.prank(alice);

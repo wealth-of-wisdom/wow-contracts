@@ -6,6 +6,7 @@ import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.
 import {NftSaleMock} from "@wealth-of-wisdom/nft/test/mocks/NftSaleMock.sol";
 import {VestingMock} from "@wealth-of-wisdom/vesting/test/mocks/VestingMock.sol";
 import {Nft} from "@wealth-of-wisdom/nft/contracts/Nft.sol";
+import {INft} from "@wealth-of-wisdom/nft/contracts/interfaces/INft.sol";
 import {Base_Test} from "@wealth-of-wisdom/nft/test/Base.t.sol";
 
 contract NftSale_Unit_Test is Base_Test, INftSaleEvents {
@@ -38,13 +39,13 @@ contract NftSale_Unit_Test is Base_Test, INftSaleEvents {
         sale.initialize(
             tokenUSDT,
             tokenUSDC,
-            nftContract,
+            INft(address(nftContract)),
             vesting,
             DEFAULT_PID
         );
 
         nftContract.grantRole(MINTER_ROLE, address(sale));
-        vesting.grantRole(BENEFICIARY_ROLE, address(sale));
+        vesting.grantRole(BENEFICIARIES_MANAGER_ROLE, address(sale));
 
         vm.stopPrank();
     }

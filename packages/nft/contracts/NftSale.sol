@@ -8,7 +8,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
 import {INftSale} from "@wealth-of-wisdom/nft/contracts/interfaces/INftSale.sol";
-import {Nft} from "@wealth-of-wisdom/nft/contracts/Nft.sol";
+import {INft} from "@wealth-of-wisdom/nft/contracts/interfaces/INft.sol";
 import {Errors} from "./libraries/Errors.sol";
 
 contract NftSale is
@@ -29,15 +29,16 @@ contract NftSale is
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+    uint64 public constant DECIMALS = 10 ** 6;
 
     /*//////////////////////////////////////////////////////////////////////////
                                 PUBLIC STORAGE
     //////////////////////////////////////////////////////////////////////////*/
 
-    IERC20 internal s_tokenUSDT;
-    IERC20 internal s_tokenUSDC;
-    Nft internal s_contractNFT;
-    IVesting internal s_contractVesting;
+    IERC20 internal s_usdtToken;
+    IERC20 internal s_usdcToken;
+    INft internal s_nftContract;
+    IVesting internal s_vestingContract;
 
     /*//////////////////////////////////////////////////////////////////////////
                                 INTERNAL STORAGE
@@ -62,7 +63,7 @@ contract NftSale is
     }
 
     modifier mTokenExists(IERC20 token) {
-        if (token != s_tokenUSDT && token != s_tokenUSDC) {
+        if (token != s_usdtToken && token != s_usdcToken) {
             revert Errors.Nft__NonExistantPayment();
         }
         _;
@@ -83,7 +84,7 @@ contract NftSale is
     }
 
     modifier mBandOwner(uint256 tokenId) {
-        if (s_contractNFT.ownerOf(tokenId) != msg.sender) {
+        if (s_nftContract.ownerOf(tokenId) != msg.sender) {
             revert Errors.Nft__NotBandOwner();
         }
         _;
@@ -96,7 +97,7 @@ contract NftSale is
     function initialize(
         IERC20 tokenUSDT,
         IERC20 tokenUSDC,
-        Nft contractNFT,
+        INft contractNFT,
         IVesting contractVesting,
         uint16 pid
     )
@@ -115,22 +116,31 @@ contract NftSale is
         s_maxLevel = 5;
         promotionalPID = pid;
 
-        s_levelToPrice[1].price = 1_000 * 10 ** 6;
-        s_levelToPrice[2].price = 5_000 * 10 ** 6;
-        s_levelToPrice[3].price = 10_000 * 10 ** 6;
-        s_levelToPrice[4].price = 33_000 * 10 ** 6;
-        s_levelToPrice[5].price = 100_000 * 10 ** 6;
+        s_levelToPrice[1] = NftLevel({
+            price: 1_000 * DECIMALS,
+            complimentaryTokens: 1_000 * DECIMALS
+        });
+        s_levelToPrice[2] = NftLevel({
+            price: 5_000 * DECIMALS,
+            complimentaryTokens: 25_000 * DECIMALS
+        });
+        s_levelToPrice[3] = NftLevel({
+            price: 10_000 * DECIMALS,
+            complimentaryTokens: 100_000 * DECIMALS
+        });
+        s_levelToPrice[4] = NftLevel({
+            price: 33_000 * DECIMALS,
+            complimentaryTokens: 660_000 * DECIMALS
+        });
+        s_levelToPrice[5] = NftLevel({
+            price: 100_000 * DECIMALS,
+            complimentaryTokens: 3_000_000 * DECIMALS
+        });
 
-        s_levelToPrice[1].complimentaryTokens = 1_000 * 10 ** 6;
-        s_levelToPrice[2].complimentaryTokens = 25_000 * 10 ** 6;
-        s_levelToPrice[3].complimentaryTokens = 100_000 * 10 ** 6;
-        s_levelToPrice[4].complimentaryTokens = 660_000 * 10 ** 6;
-        s_levelToPrice[5].complimentaryTokens = 3_000_000 * 10 ** 6;
-
-        s_tokenUSDT = tokenUSDT;
-        s_tokenUSDC = tokenUSDC;
-        s_contractNFT = contractNFT;
-        s_contractVesting = contractVesting;
+        s_usdtToken = tokenUSDT;
+        s_usdcToken = tokenUSDC;
+        s_nftContract = contractNFT;
+        s_vestingContract = contractVesting;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -143,7 +153,7 @@ contract NftSale is
     ) external mValidBandLevel(level) mTokenExists(token) {
         uint256 cost = s_levelToPrice[level].price;
         // Effects: set the band data
-        uint256 tokenId = s_contractNFT.getNextTokenId();
+        uint256 tokenId = s_nftContract.getNextTokenId();
         s_bands[tokenId] = Band({
             level: level,
             isGenesis: false,
@@ -154,7 +164,7 @@ contract NftSale is
         _purchaseBand(token, cost);
 
         // Interaction: mint the band
-        s_contractNFT.safeMint(msg.sender);
+        s_nftContract.safeMint(msg.sender);
         emit BandMinted(msg.sender, tokenId, level, false);
     }
 
@@ -190,15 +200,15 @@ contract NftSale is
             s_levelToPrice[currentLevel].price;
         _updateBand(tokenId, currentLevel, newLevel);
         _purchaseBand(token, upgradeCost);
-        s_contractNFT.safeMint(msg.sender);
+        s_nftContract.safeMint(msg.sender);
 
         emit BandUpdated(msg.sender, tokenId, currentLevel, newLevel);
     }
 
     function activateBand(uint256 tokenId) external mBandOwner(tokenId) {
-        Band storage bandData = s_bands[tokenId];
-        bandData.activityType = ActivityType.ACTIVATED;
-        s_contractVesting.addBeneficiary(
+        Band memory bandData = s_bands[tokenId];
+        s_bands[tokenId].activityType = ActivityType.ACTIVATED;
+        s_vestingContract.addBeneficiary(
             promotionalPID,
             msg.sender,
             s_levelToPrice[bandData.level].complimentaryTokens
@@ -260,12 +270,12 @@ contract NftSale is
         emit LevelPriceSet(level, price);
     }
 
-    function setComplietaryPrice(
+    function setComplimentaryPrice(
         uint16 level,
-        uint256 newPrice
+        uint256 newTokenAmount
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        s_levelToPrice[level].complimentaryTokens = newPrice;
-        emit LevelPriceSet(level, newPrice);
+        s_levelToPrice[level].complimentaryTokens = newTokenAmount;
+        emit LevelTokensSet(level, newTokenAmount);
     }
 
     function mintGenesisBand(
@@ -280,9 +290,9 @@ contract NftSale is
         mAmountNotZero(amount)
     {
         for (uint256 i = 0; i < amount; i++) {
-            uint256 tokenId = s_contractNFT.getNextTokenId();
+            uint256 tokenId = s_nftContract.getNextTokenId();
             // Effects: mint genesis band
-            s_contractNFT.safeMint(receiver);
+            s_nftContract.safeMint(receiver);
 
             // Effects: set the band data
             s_bands[tokenId] = Band({
@@ -299,11 +309,11 @@ contract NftSale is
     //////////////////////////////////////////////////////////////////////////*/
 
     function getTokenUSDT() external view returns (IERC20) {
-        return s_tokenUSDT;
+        return s_usdtToken;
     }
 
     function getTokenUSDC() external view returns (IERC20) {
-        return s_tokenUSDC;
+        return s_usdcToken;
     }
 
     function getBand(uint256 tokenId) external view returns (Band memory) {
@@ -375,7 +385,7 @@ contract NftSale is
             activityType: ActivityType.DEACTIVATED
         });
 
-        uint256 newTokenId = s_contractNFT.getNextTokenId();
+        uint256 newTokenId = s_nftContract.getNextTokenId();
         s_bands[newTokenId] = Band({
             level: newLevel,
             isGenesis: false,

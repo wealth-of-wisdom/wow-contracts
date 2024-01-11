@@ -21,7 +21,8 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     //////////////////////////////////////////////////////////////////////////*/
 
     bytes32 public constant STAKING_ROLE = keccak256("STAKING_ROLE");
-    bytes32 public constant BENEFICIARY_ROLE = keccak256("BENEFICIARY_ROLE");
+    bytes32 public constant BENEFICIARIES_MANAGER_ROLE =
+        keccak256("BENEFICIARIES_MANAGER_ROLE");
 
     uint32 public constant DAY = 1 days;
     uint32 public constant MONTH = 30 days;
@@ -125,7 +126,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         // Effects: Initialize AccessControl
         __AccessControl_init();
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(BENEFICIARY_ROLE, msg.sender);
+        _grantRole(BENEFICIARIES_MANAGER_ROLE, msg.sender);
         _grantRole(STAKING_ROLE, address(stakingContract));
 
         // Effects: Initialize storage variables
@@ -220,8 +221,45 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         uint16 pid,
         address beneficiary,
         uint256 tokenAmount
-    ) public onlyRole(BENEFICIARY_ROLE) {
-        _addBeneficiary(pid, beneficiary, tokenAmount);
+    )
+        public
+        onlyRole(BENEFICIARIES_MANAGER_ROLE)
+        mPoolExists(pid)
+        mAddressNotZero(beneficiary)
+        mAmountNotZero(tokenAmount)
+    {
+        Pool storage pool = s_vestingPools[pid];
+
+        // Checks: User token amount should not exceed total pool amount
+        if (
+            pool.totalPoolTokenAmount <
+            (pool.dedicatedPoolTokenAmount + tokenAmount)
+        ) {
+            revert Errors.Vesting__TokenAmountExeedsTotalPoolAmount();
+        }
+
+        // Effects: Increase locked pool token amount
+        pool.dedicatedPoolTokenAmount += tokenAmount;
+
+        // Effects: update user token amounts
+        Beneficiary storage user = pool.beneficiaries[beneficiary];
+        user.totalTokenAmount += tokenAmount;
+        user.listingTokenAmount = _getTokensByPercentage(
+            user.totalTokenAmount,
+            pool.listingPercentageDividend,
+            pool.listingPercentageDivisor
+        );
+        user.cliffTokenAmount = _getTokensByPercentage(
+            user.totalTokenAmount,
+            pool.cliffPercentageDividend,
+            pool.cliffPercentageDivisor
+        );
+        user.vestedTokenAmount =
+            user.totalTokenAmount -
+            user.listingTokenAmount -
+            user.cliffTokenAmount;
+
+        emit BeneficiaryAdded(pid, beneficiary, tokenAmount);
     }
 
     /* solhint-enable */
@@ -726,50 +764,6 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         return
             s_vestingPools[pid].beneficiaries[beneficiary].totalTokenAmount !=
             0;
-    }
-
-    function _addBeneficiary(
-        uint16 pid,
-        address beneficiary,
-        uint256 tokenAmount
-    )
-        internal
-        mPoolExists(pid)
-        mAddressNotZero(beneficiary)
-        mAmountNotZero(tokenAmount)
-    {
-        Pool storage pool = s_vestingPools[pid];
-
-        // Checks: User token amount should not exceed total pool amount
-        if (
-            pool.totalPoolTokenAmount <
-            (pool.dedicatedPoolTokenAmount + tokenAmount)
-        ) {
-            revert Errors.Vesting__TokenAmountExeedsTotalPoolAmount();
-        }
-
-        // Effects: Increase locked pool token amount
-        pool.dedicatedPoolTokenAmount += tokenAmount;
-
-        // Effects: update user token amounts
-        Beneficiary storage user = pool.beneficiaries[beneficiary];
-        user.totalTokenAmount += tokenAmount;
-        user.listingTokenAmount = _getTokensByPercentage(
-            user.totalTokenAmount,
-            pool.listingPercentageDividend,
-            pool.listingPercentageDivisor
-        );
-        user.cliffTokenAmount = _getTokensByPercentage(
-            user.totalTokenAmount,
-            pool.cliffPercentageDividend,
-            pool.cliffPercentageDivisor
-        );
-        user.vestedTokenAmount =
-            user.totalTokenAmount -
-            user.listingTokenAmount -
-            user.cliffTokenAmount;
-
-        emit BeneficiaryAdded(pid, beneficiary, tokenAmount);
     }
 
     /**

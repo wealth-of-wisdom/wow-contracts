@@ -6,7 +6,8 @@ import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.
 abstract contract Constants {
     bytes32 internal constant DEFAULT_ADMIN_ROLE = 0x00;
     bytes32 internal constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    bytes32 internal constant BENEFICIARY_ROLE = keccak256("BENEFICIARY_ROLE");
+    bytes32 internal constant BENEFICIARIES_MANAGER_ROLE =
+        keccak256("BENEFICIARIES_MANAGER_ROLE");
 
     address internal constant ZERO_ADDRESS = address(0x0);
     uint256 internal constant INIT_ETH_BALANCE = type(uint128).max;

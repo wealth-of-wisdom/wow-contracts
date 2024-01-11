@@ -95,27 +95,27 @@ contract NftSale_UpdateBand_Unit_Test is NftSale_Unit_Test {
         sale.updateBand(STARTER_TOKEN_ID, DEFAULT_NEW_LEVEL, tokenUSDT);
         vm.stopPrank();
 
+        INftSale.Band memory bandData = sale.getBand(STARTER_TOKEN_ID);
+        INftSale.Band memory newBandData = sale.getBand(FIRST_MINTED_TOKEN_ID);
+
         assertEq(
             nftContract.getNextTokenId(),
             FIRST_MINTED_TOKEN_ID + 1,
             "Token was not minted and ID not changed"
         );
         assertEq(
-            uint8(sale.getBand(STARTER_TOKEN_ID).activityType),
+            uint8(bandData.activityType),
             uint8(NFT_ACTIVITY_TYPE_DEACTIVATED),
             "Band not deactivated"
         );
         assertEq(
-            uint8(sale.getBand(FIRST_MINTED_TOKEN_ID).activityType),
+            uint8(newBandData.activityType),
             uint8(NFT_ACTIVITY_TYPE_INACTIVE),
             "Band not activated"
         );
-        assertFalse(
-            sale.getBand(STARTER_TOKEN_ID).isGenesis,
-            "Band set as genesis"
-        );
+        assertFalse(bandData.isGenesis, "Band set as genesis");
         assertEq(
-            sale.getBand(FIRST_MINTED_TOKEN_ID).level,
+            newBandData.level,
             DEFAULT_NEW_LEVEL,
             "Band level set incorrectly"
         );
@@ -168,27 +168,27 @@ contract NftSale_UpdateBand_Unit_Test is NftSale_Unit_Test {
         sale.updateBand(STARTER_TOKEN_ID, DEFAULT_NEW_LEVEL, tokenUSDT);
         vm.stopPrank();
 
+        INftSale.Band memory starterBandData = sale.getBand(STARTER_TOKEN_ID);
+        INftSale.Band memory newBandData = sale.getBand(FIRST_MINTED_TOKEN_ID);
+
         assertEq(
             nftContract.getNextTokenId(),
             FIRST_MINTED_TOKEN_ID + 1,
             "Token was not minted and ID not changed"
         );
         assertEq(
-            uint8(sale.getBand(STARTER_TOKEN_ID).activityType),
+            uint8(starterBandData.activityType),
             uint8(NFT_ACTIVITY_TYPE_DEACTIVATED),
             "Band not deactivated"
         );
         assertEq(
-            uint8(sale.getBand(FIRST_MINTED_TOKEN_ID).activityType),
+            uint8(newBandData.activityType),
             uint8(NFT_ACTIVITY_TYPE_INACTIVE),
             "Band not activated"
         );
-        assertFalse(
-            sale.getBand(STARTER_TOKEN_ID).isGenesis,
-            "Band set as genesis"
-        );
+        assertFalse(starterBandData.isGenesis, "Band set as genesis");
         assertEq(
-            sale.getBand(FIRST_MINTED_TOKEN_ID).level,
+            newBandData.level,
             DEFAULT_NEW_LEVEL,
             "Band level set incorrectly"
         );
