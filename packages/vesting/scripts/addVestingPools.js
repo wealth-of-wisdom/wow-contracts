@@ -7,6 +7,8 @@ async function addVestingPools(vestingContract, pools) {
     const vesting = Vesting.attach(vestingContract)
     const divisor = 100
 
+    // Approve vesting as token spender before adding pools
+
     pools.forEach(async (pool) => {
         await vesting.addVestingPool(
             pool.name,
