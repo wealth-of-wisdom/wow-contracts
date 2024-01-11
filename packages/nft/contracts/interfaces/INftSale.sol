@@ -69,12 +69,12 @@ interface INftSale is INftSaleEvents {
 
     /**
      * @param price -Price for NFT level purchase
-     * @param complimentaryTokens -  Tokens that will be invested into the
+     * @param vestingRewardWOWTokens -  Tokens that will be invested into the
      * vesting pool as a reward for purchasing this NFT level
      **/
     struct NftLevel {
         uint256 price;
-        uint256 complimentaryTokens;
+        uint256 vestingRewardWOWTokens;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -97,11 +97,22 @@ interface INftSale is INftSaleEvents {
         IERC20 token
     ) external;
 
+    function activateBand(uint256 tokenId) external;
+
     function withdrawTokens(IERC20 token, uint256 amount) external;
 
     function setMaxLevel(uint16 maxLevel) external;
 
     function setLevelPrice(uint16 level, uint256 price) external;
+
+    function setVestingRewardWOWTokens(
+        uint16 level,
+        uint256 newTokenAmount
+    ) external;
+
+    function setVestingContract(IVesting newContract) external;
+
+    function setNftContract(INft newContract) external;
 
     function mintGenesisBand(
         address receiver,
@@ -113,9 +124,15 @@ interface INftSale is INftSaleEvents {
 
     function getTokenUSDC() external view returns (IERC20);
 
+    function getNftContract() external view returns (INft);
+
+    function getVestingContract() external view returns (IVesting);
+
     function getBand(uint256 tokenId) external view returns (Band memory);
 
     function getLevelPriceInUSD(uint16 level) external view returns (uint256);
 
     function getMaxLevel() external view returns (uint16);
+
+    function getVestingRewardWOWTokens(uint16) external view returns (uint256);
 }

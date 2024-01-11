@@ -29,7 +29,8 @@ contract NftSale is
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
-    uint64 public constant DECIMALS = 10 ** 6;
+    uint64 public constant USD_DECIMALS = 10 ** 6;
+    uint256 public constant WOW_DECIMALS = 10 ** 18;
 
     /*//////////////////////////////////////////////////////////////////////////
                                 PUBLIC STORAGE
@@ -118,24 +119,24 @@ contract NftSale is
         promotionalPID = pid;
 
         s_levelToPrice[1] = NftLevel({
-            price: 1_000 * DECIMALS,
-            complimentaryTokens: 1_000 * DECIMALS
+            price: 1_000 * USD_DECIMALS,
+            vestingRewardWOWTokens: 1_000 * WOW_DECIMALS
         });
         s_levelToPrice[2] = NftLevel({
-            price: 5_000 * DECIMALS,
-            complimentaryTokens: 25_000 * DECIMALS
+            price: 5_000 * USD_DECIMALS,
+            vestingRewardWOWTokens: 25_000 * WOW_DECIMALS
         });
         s_levelToPrice[3] = NftLevel({
-            price: 10_000 * DECIMALS,
-            complimentaryTokens: 100_000 * DECIMALS
+            price: 10_000 * USD_DECIMALS,
+            vestingRewardWOWTokens: 100_000 * WOW_DECIMALS
         });
         s_levelToPrice[4] = NftLevel({
-            price: 33_000 * DECIMALS,
-            complimentaryTokens: 660_000 * DECIMALS
+            price: 33_000 * USD_DECIMALS,
+            vestingRewardWOWTokens: 660_000 * WOW_DECIMALS
         });
         s_levelToPrice[5] = NftLevel({
-            price: 100_000 * DECIMALS,
-            complimentaryTokens: 3_000_000 * DECIMALS
+            price: 100_000 * USD_DECIMALS,
+            vestingRewardWOWTokens: 3_000_000 * WOW_DECIMALS
         });
 
         s_usdtToken = tokenUSDT;
@@ -212,7 +213,7 @@ contract NftSale is
         s_vestingContract.addBeneficiary(
             promotionalPID,
             msg.sender,
-            s_levelToPrice[bandData.level].complimentaryTokens
+            s_levelToPrice[bandData.level].vestingRewardWOWTokens
         );
         emit BandActivated(
             msg.sender,
@@ -271,11 +272,11 @@ contract NftSale is
         emit LevelPriceSet(level, price);
     }
 
-    function setComplimentaryPrice(
+    function setVestingRewardWOWTokens(
         uint16 level,
         uint256 newTokenAmount
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        s_levelToPrice[level].complimentaryTokens = newTokenAmount;
+        s_levelToPrice[level].vestingRewardWOWTokens = newTokenAmount;
         emit LevelTokensSet(level, newTokenAmount);
     }
 
@@ -355,10 +356,10 @@ contract NftSale is
         return promotionalPID;
     }
 
-    function getComplimentaryTokenAmountPerLevel(
+    function getVestingRewardWOWTokens(
         uint16 level
     ) public view returns (uint256) {
-        return s_levelToPrice[level].complimentaryTokens;
+        return s_levelToPrice[level].vestingRewardWOWTokens;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
