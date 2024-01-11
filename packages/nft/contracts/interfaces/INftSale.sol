@@ -35,6 +35,8 @@ interface INftSaleEvents {
 
     event MaxLevelSet(uint16 newMaxLevel);
 
+    event NewContractSet(address newContract);
+
     event LevelPriceSet(uint16 level, uint256 price);
 
     event LevelTokensSet(uint16 level, uint256 tokenAmount);

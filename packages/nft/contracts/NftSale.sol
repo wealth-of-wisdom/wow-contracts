@@ -105,6 +105,7 @@ contract NftSale is
         initializer
         mAddressNotZero(address(tokenUSDT))
         mAddressNotZero(address(tokenUSDC))
+        mAddressNotZero(address(contractNFT))
     {
         __AccessControl_init();
         __UUPSUpgradeable_init();
@@ -278,6 +279,20 @@ contract NftSale is
         emit LevelTokensSet(level, newTokenAmount);
     }
 
+    function setVestingContract(
+        IVesting newContract
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        s_vestingContract = newContract;
+        emit NewContractSet(address(newContract));
+    }
+
+    function setNftContract(
+        INft newContract
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        s_nftContract = newContract;
+        emit NewContractSet(address(newContract));
+    }
+
     function mintGenesisBand(
         address receiver,
         uint16 level,
@@ -314,6 +329,14 @@ contract NftSale is
 
     function getTokenUSDC() external view returns (IERC20) {
         return s_usdcToken;
+    }
+
+    function getNftContract() external view returns (INft) {
+        return s_nftContract;
+    }
+
+    function getVestingContract() external view returns (IVesting) {
+        return s_vestingContract;
     }
 
     function getBand(uint256 tokenId) external view returns (Band memory) {
