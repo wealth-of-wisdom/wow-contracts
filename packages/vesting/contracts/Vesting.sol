@@ -21,6 +21,9 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     //////////////////////////////////////////////////////////////////////////*/
 
     bytes32 public constant STAKING_ROLE = keccak256("STAKING_ROLE");
+    bytes32 public constant BENEFICIARIES_MANAGER_ROLE =
+        keccak256("BENEFICIARIES_MANAGER_ROLE");
+
     uint32 public constant DAY = 1 days;
     uint32 public constant MONTH = 30 days;
 
@@ -123,6 +126,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         // Effects: Initialize AccessControl
         __AccessControl_init();
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(BENEFICIARIES_MANAGER_ROLE, msg.sender);
         _grantRole(STAKING_ROLE, address(stakingContract));
 
         // Effects: Initialize storage variables
@@ -219,7 +223,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         uint256 tokenAmount
     )
         public
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(BENEFICIARIES_MANAGER_ROLE)
         mPoolExists(pid)
         mAddressNotZero(beneficiary)
         mAmountNotZero(tokenAmount)
@@ -673,6 +677,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      * @return periodsPassed If unlock type is daily: number of days passed, else: number of months passed.
      * @return duration If unlock type is daily: vesting duration in days, else: in months.
      */
+
     function getVestingPeriodsPassed(
         uint16 pid
     ) public view returns (uint16 periodsPassed, uint16 duration) {
