@@ -16,7 +16,7 @@ const generateManifests = () => {
             const contents = Mustache.render(template, data);
             const [filename] = file.split(".");
 
-            if (filename === "bsc") {
+            if (filename === "mainnet") {
                 const outputFile = `subgraph.yaml`;
                 console.info(`✅ Rendering into ${outputFile} done.`);
                 fs.writeFileSync(outputFile, contents);

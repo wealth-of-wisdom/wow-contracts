@@ -146,14 +146,16 @@ export function handleListingDateChanged(event: ListingDateChangedEvent): void {
 export function handleStakedTokensUpdated(
     event: StakedTokensUpdatedEvent
 ): void {
-    // NEEDED: Reikia kad idetu:
-    // emit StakedTokensUpdated(pid, tokenAmount, startStaking); ir beneficiary
+    // NEEDS: Needed beneficiary in StakedTokensUpdated event
+    const {stake, amount } = event.params;
+
     const beneficiary: Beneficiary = getOrInitBeneficiaries(event.address, event.transaction.from, BigInt.fromI32(event.params.poolIndex));
 
-    if (event.params.stake === true) {
-        beneficiary.stakedTokens = beneficiary.stakedTokens.plus(event.params.amount);
-    } else if (event.params.stake === false) {
-        beneficiary.stakedTokens = beneficiary.stakedTokens.minus(event.params.amount);
+    
+    if (stake === true) {
+        beneficiary.stakedTokens = beneficiary.stakedTokens.plus(amount);
+    } else if (stake === false) {
+        beneficiary.stakedTokens = beneficiary.stakedTokens.minus(amount);
     }
 
     beneficiary.save();
