@@ -7,6 +7,8 @@ async function main() {
         process.env.USDT_TOKEN,
         process.env.USDC_TOKEN,
         process.env.NFT_CONTRACT,
+        process.env.VESTING_CONTRACT,
+        process.env.PID
     ])
     await sale.waitForDeployment()
     console.log("NFT Sale deployed to:", await sale.getAddress())

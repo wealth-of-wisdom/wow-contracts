@@ -3,7 +3,7 @@ pragma solidity 0.8.20;
 
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
-import {INft} from "@wealth-of-wisdom/nft/contracts/interfaces/INft.sol";
+import {INft} from "../interfaces/INft.sol";
 
 interface INftSaleEvents {
     /*//////////////////////////////////////////////////////////////////////////
