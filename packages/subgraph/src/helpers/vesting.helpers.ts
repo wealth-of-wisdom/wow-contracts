@@ -1,16 +1,12 @@
 import { Address, BigInt, log, Bytes } from "@graphprotocol/graph-ts";
-import { BIGDEC_ZERO, BIGINT_ZERO } from "../utils/constants";
+import { BIGINT_ZERO, UnlockType } from "../utils/constants";
 import {
     VestingContract,
     VestingPool,
     Beneficiary,
 } from "../../generated/schema"
-import { getUnlockType } from "../utils/utils";
+import { stringifyUnlockType } from "../utils/utils";
 
-export enum UnlockType {
-    DAILY,
-    MONTHLY
-}
 
 
 export function getOrInitVestingContract(vestingContractAddress: Address): VestingContract {
@@ -55,7 +51,7 @@ export function getOrInitVestingPool(vestingContractAddress: Address, poolId: Bi
         // Vesting details
         vestingPool.vestingDuration = BIGINT_ZERO;
         vestingPool.vestingEndDate = BIGINT_ZERO;
-        vestingPool.unlockType = getUnlockType(UnlockType.DAILY);
+        vestingPool.unlockType = stringifyUnlockType(UnlockType.DAILY);
 
         vestingPool.dedicatedPoolTokens = BIGINT_ZERO
         vestingPool.totalPoolTokenAmount = BIGINT_ZERO;
