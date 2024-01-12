@@ -12,14 +12,17 @@ import {
 } from "../../generated/Vesting/Vesting"
 import {
     VestingContract,
-    VestingPool,
     Beneficiary,
 } from "../../generated/schema"
 import { getOrInitBeneficiaries, getOrInitVestingContract, getOrInitVestingPool } from "../helpers/vesting.helpers"
 import { getUnlockTypeFromBigInt, stringifyUnlockType } from "../utils/utils";
 import { BigInt, store } from "@graphprotocol/graph-ts";
 
-// Initialize Vesting contract
+
+/**
+ * Handles the Initialized event triggered when the contract is initialized.
+ * @param event - The InitializedEvent containing the contract address.
+ */
 export function handleInitialized(event: InitializedEvent): void {
 
     const vestingContract: VestingContract = getOrInitVestingContract(event.address);
@@ -27,6 +30,11 @@ export function handleInitialized(event: InitializedEvent): void {
     vestingContract.save();
 }
 
+
+/**
+ * Handles the VestingPoolAdded event triggered when a new vesting pool is added.
+ * @param event - The VestingPoolAddedEvent containing the contract address and new pool index.
+ */
 export function handleVestingPoolAdded(event: VestingPoolAddedEvent): void {
     const vestingContract = Vesting.bind(event.address);
     const poolIndex = BigInt.fromI32(event.params.poolIndex);
@@ -75,7 +83,10 @@ export function handleVestingPoolAdded(event: VestingPoolAddedEvent): void {
     vestingPool.save();
   }
 
-
+/**
+ * Handles the BeneficiaryAdded event triggered when a new beneficiary is added to a pool.
+ * @param event - The BeneficiaryAddedEvent containing beneficiary, pool, and token amount details.
+ */
 export function handleBeneficiaryAdded(event: BeneficiaryAddedEvent): void {
     const beneficiary: Beneficiary = getOrInitBeneficiaries(event.address, event.params.beneficiary, BigInt.fromI32(event.params.poolIndex));
 
@@ -88,6 +99,11 @@ export function handleBeneficiaryAdded(event: BeneficiaryAddedEvent): void {
 
 }
 
+
+/**
+ * Handles the BeneficiaryRemoved event triggered when a beneficiary is removed from a pool.
+ * @param event - The BeneficiaryRemovedEvent containing beneficiary and pool details.
+ */
 export function handleBeneficiaryRemoved(event: BeneficiaryRemovedEvent): void {
     const beneficiary: Beneficiary = getOrInitBeneficiaries(event.address, event.params.beneficiary, BigInt.fromI32(event.params.poolIndex));
 
@@ -97,7 +113,11 @@ export function handleBeneficiaryRemoved(event: BeneficiaryRemovedEvent): void {
     beneficiary.save()
 }
 
-// @notice Admin Transfers tokens to the selected recipient.
+/**
+ * Handles the ContractTokensWithdrawn event triggered when tokens are withdrawn from the contract.
+ * @param event - The ContractTokensWithdrawnEvent (No specific data for now).
+ * @notice - this event triggered when admin decides to withdraw tokens that randomly put into the contract (not WOW tokens)
+ */
 export function handleContractTokensWithdrawn(
     event: ContractTokensWithdrawnEvent
 ): void {
@@ -106,7 +126,10 @@ export function handleContractTokensWithdrawn(
 }
 
 
-
+/**
+ * Handles the ListingDateChanged event triggered when the listing date of the contract is changed.
+ * @param event - The ListingDateChangedEvent containing the new listing date.
+ */
 export function handleListingDateChanged(event: ListingDateChangedEvent): void {
 
     const vestingContract: VestingContract = getOrInitVestingContract(event.address);
@@ -116,7 +139,10 @@ export function handleListingDateChanged(event: ListingDateChangedEvent): void {
     vestingContract.save()
 }
 
-
+/**
+ * Handles the StakedTokensUpdated event triggered when staked tokens are updated.
+ * @param event - The StakedTokensUpdatedEvent containing stake status, amount, beneficiary, and pool details.
+ */
 export function handleStakedTokensUpdated(
     event: StakedTokensUpdatedEvent
 ): void {
@@ -137,6 +163,10 @@ export function handleStakedTokensUpdated(
     beneficiary.save();
 }
 
+/**
+ * Handles the StakingContractSet event triggered when the staking contract address is set.
+ * @param event - The StakingContractSetEvent containing the new staking contract address.
+ */
 export function handleStakingContractSet(event: StakingContractSetEvent): void {
     const vestingContract: VestingContract = getOrInitVestingContract(event.address);
 
@@ -146,6 +176,11 @@ export function handleStakingContractSet(event: StakingContractSetEvent): void {
     vestingContract.save();
 }
 
+
+/**
+ * Handles the TokensClaimed event triggered when tokens are claimed by a beneficiary.
+ * @param event - The TokensClaimedEvent containing beneficiary, pool, and claimed token amount details.
+ */
 export function handleTokensClaimed(event: TokensClaimedEvent): void {
     const beneficiary: Beneficiary = getOrInitBeneficiaries(event.address, event.params.user, BigInt.fromI32(event.params.poolIndex));
 
