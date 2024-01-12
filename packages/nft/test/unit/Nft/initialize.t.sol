@@ -4,11 +4,11 @@ pragma solidity 0.8.20;
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {Nft} from "@wealth-of-wisdom/nft/contracts/Nft.sol";
 import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
-import {NftSale_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftSaleUnit.t.sol";
+import {Nft_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftUnit.t.sol";
 
-contract Nft_Initialize_Unit_Test is NftSale_Unit_Test {
+contract Nft_Initialize_Unit_Test is Nft_Unit_Test {
     function setUp() public virtual override {
-        NftSale_Unit_Test.setUp();
+        Nft_Unit_Test.setUp();
 
         nftContract = new Nft();
     }

@@ -19,9 +19,10 @@ contract Base_Test is Test, Constants, Events {
     address internal constant alice = address(0x2);
     address internal constant bob = address(0x3);
     address internal constant carol = address(0x4);
+    address internal constant dan = address(0x5);
 
-    address[] internal TEST_ACCOUNTS = [admin, alice, bob, carol];
-    address[] internal beneficiaries = [alice, bob, carol];
+    address[] internal TEST_ACCOUNTS = [admin, alice, bob, carol, dan];
+    address[] internal beneficiaries = [alice, bob, carol, dan];
 
     TokenMock internal tokenUSDT;
     TokenMock internal tokenUSDC;

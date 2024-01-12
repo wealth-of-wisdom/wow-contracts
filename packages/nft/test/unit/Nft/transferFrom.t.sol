@@ -3,11 +3,11 @@ pragma solidity 0.8.20;
 
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
-import {NftSale_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftSaleUnit.t.sol";
+import {Nft_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftUnit.t.sol";
 
-contract Nft_TransferFrom_Unit_Test is NftSale_Unit_Test {
+contract Nft_TransferFrom_Unit_Test is Nft_Unit_Test {
     function setUp() public override {
-        NftSale_Unit_Test.setUp();
+        Nft_Unit_Test.setUp();
 
         vm.prank(admin);
         nftContract.safeMint(alice);
@@ -35,7 +35,11 @@ contract Nft_TransferFrom_Unit_Test is NftSale_Unit_Test {
         vm.prank(alice);
         nftContract.transferFrom(alice, bob, NFT_TOKEN_ID_0);
 
-        assertEq(nftContract.balanceOf(alice), 0, "NFT not transferred from alice");
+        assertEq(
+            nftContract.balanceOf(alice),
+            0,
+            "NFT not transferred from alice"
+        );
         assertEq(nftContract.balanceOf(bob), 1, "NFT not transferred to bob");
     }
 }

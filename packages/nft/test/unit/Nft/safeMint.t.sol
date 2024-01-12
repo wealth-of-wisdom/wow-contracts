@@ -3,9 +3,9 @@ pragma solidity 0.8.20;
 
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
-import {NftSale_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftSaleUnit.t.sol";
+import {Nft_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftUnit.t.sol";
 
-contract Nft_SafeMint_Unit_Test is NftSale_Unit_Test {
+contract Nft_SafeMint_Unit_Test is Nft_Unit_Test {
     function test_safeMint_RevertIf_NotMinter() external {
         vm.expectRevert(
             abi.encodeWithSelector(
