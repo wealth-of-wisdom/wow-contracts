@@ -23,20 +23,20 @@ contract NftSale_WithdrawTokens_Unit_Test is NftSale_Unit_Test {
     }
 
     function test_withdrawTokens_RevertIf_PassedZeroAmount() external {
-        vm.expectRevert(Errors.Nft__PassedZeroAmount.selector);
+        vm.expectRevert(Errors.NftSale__PassedZeroAmount.selector);
         vm.prank(admin);
         sale.withdrawTokens(tokenUSDT, 0);
     }
 
     function test_withdrawTokens_RevertIf_InsufficientContractBalance()
         external
-        mintOneBandForUser
+        mintLevel2BandForAlice
     {
         uint256 minimalAmount = 100;
         uint256 contractBalance = tokenUSDC.balanceOf(address(sale));
         vm.expectRevert(
             abi.encodeWithSelector(
-                Errors.Nft__InsufficientContractBalance.selector,
+                Errors.NftSale__InsufficientContractBalance.selector,
                 contractBalance,
                 minimalAmount
             )
@@ -47,7 +47,7 @@ contract NftSale_WithdrawTokens_Unit_Test is NftSale_Unit_Test {
 
     function test_withdrawTokens_EmitsTokensWithdrawn()
         external
-        mintOneBandForUser
+        mintLevel2BandForAlice
     {
         uint256 contractBalance = tokenUSDT.balanceOf(address(sale));
         vm.startPrank(admin);
@@ -57,7 +57,10 @@ contract NftSale_WithdrawTokens_Unit_Test is NftSale_Unit_Test {
         vm.stopPrank();
     }
 
-    function test_withdrawTokens_WithdrawTokens() external mintOneBandForUser {
+    function test_withdrawTokens_WithdrawTokens()
+        external
+        mintLevel2BandForAlice
+    {
         uint256 contractBalance = tokenUSDT.balanceOf(address(sale));
         uint256 adminBalanceUSDT = tokenUSDT.balanceOf(admin);
 

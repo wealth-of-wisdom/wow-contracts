@@ -19,15 +19,15 @@ contract NftSale_MintGenesisBand_Unit_Test is NftSale_Unit_Test {
             )
         );
         vm.prank(alice);
-        sale.mintGenesisBand(alice, DEFAULT_LEVEL, DEFAULT_GENESIS_AMOUNT);
+        sale.mintGenesisBand(alice, DEFAULT_LEVEL_2, DEFAULT_GENESIS_AMOUNT);
     }
 
     function test_mintGenesisBand_RevertIf_ZeroAddress() external {
-        vm.expectRevert(Errors.Nft__ZeroAddress.selector);
+        vm.expectRevert(Errors.NftSale__ZeroAddress.selector);
         vm.prank(admin);
         sale.mintGenesisBand(
             ZERO_ADDRESS,
-            DEFAULT_LEVEL,
+            DEFAULT_LEVEL_2,
             DEFAULT_GENESIS_AMOUNT
         );
     }
@@ -35,29 +35,32 @@ contract NftSale_MintGenesisBand_Unit_Test is NftSale_Unit_Test {
     function test_mintGenesisBand_RevertIf_InvalidLevel() external {
         uint16 fakeLevel = 16;
         vm.expectRevert(
-            abi.encodeWithSelector(Errors.Nft__InvalidLevel.selector, fakeLevel)
+            abi.encodeWithSelector(
+                Errors.NftSale__InvalidLevel.selector,
+                fakeLevel
+            )
         );
         vm.prank(admin);
         sale.mintGenesisBand(alice, fakeLevel, DEFAULT_GENESIS_AMOUNT);
     }
 
     function test_mintGenesisBand_RevertIf_PassedZeroAmount() external {
-        vm.expectRevert(Errors.Nft__PassedZeroAmount.selector);
+        vm.expectRevert(Errors.NftSale__PassedZeroAmount.selector);
         vm.prank(admin);
-        sale.mintGenesisBand(alice, DEFAULT_LEVEL, 0);
+        sale.mintGenesisBand(alice, DEFAULT_LEVEL_2, 0);
     }
 
     function test_mintGenesisBand_EmitsBandMinted() external {
         vm.expectEmit(true, true, true, true);
-        emit BandMinted(alice, STARTER_TOKEN_ID, DEFAULT_LEVEL, true);
+        emit BandMinted(alice, NFT_TOKEN_ID_0, DEFAULT_LEVEL_2, true);
         vm.prank(admin);
-        sale.mintGenesisBand(alice, DEFAULT_LEVEL, DEFAULT_GENESIS_AMOUNT);
+        sale.mintGenesisBand(alice, DEFAULT_LEVEL_2, DEFAULT_GENESIS_AMOUNT);
     }
 
     function test_mintGenesisBand_MintGenesisBandWithDataUpdates() external {
         vm.prank(admin);
-        sale.mintGenesisBand(alice, DEFAULT_LEVEL, DEFAULT_GENESIS_AMOUNT);
-        INftSale.Band memory bandData = sale.getBand(STARTER_TOKEN_ID);
+        sale.mintGenesisBand(alice, DEFAULT_LEVEL_2, DEFAULT_GENESIS_AMOUNT);
+        INftSale.Band memory bandData = sale.getBand(NFT_TOKEN_ID_0);
 
         assertEq(
             nftContract.getNextTokenId(),
@@ -70,7 +73,7 @@ contract NftSale_MintGenesisBand_Unit_Test is NftSale_Unit_Test {
             "Band not activated"
         );
         assertTrue(bandData.isGenesis, "Band not set as genesis");
-        assertEq(bandData.level, DEFAULT_LEVEL, "Band level set incorrectly");
+        assertEq(bandData.level, DEFAULT_LEVEL_2, "Band level set incorrectly");
         assertEq(
             nftContract.balanceOf(alice),
             DEFAULT_GENESIS_AMOUNT,

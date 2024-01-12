@@ -50,10 +50,10 @@ contract Base_Test is Test, Constants {
         staking = new StakingMock();
 
         tokenUSDT = new TokenMock();
-        tokenUSDT.initialize("USDT token", "USDT", TOTAL_TOKEN_AMOUNT);
+        tokenUSDT.initialize("USDT token", "USDT", INITIAL_TOKEN_AMOUNT);
 
         tokenUSDC = new TokenMock();
-        tokenUSDC.initialize("USDC token", "USDTC", TOTAL_TOKEN_AMOUNT);
+        tokenUSDC.initialize("USDC token", "USDTC", INITIAL_TOKEN_AMOUNT);
 
         for (uint8 i = 0; i < accountsNum; ++i) {
             deal(TEST_ACCOUNTS[i], INIT_ETH_BALANCE);
@@ -68,16 +68,16 @@ contract Base_Test is Test, Constants {
     //////////////////////////////////////////////////////////////////////////*/
 
     // Pools
-    modifier mintOneBandForUser() {
-        _mintOneBandForUser();
+    modifier mintLevel2BandForAlice() {
+        _mintLevel2BandForAlice();
         _;
     }
 
-    function _mintOneBandForUser() internal {
+    function _mintLevel2BandForAlice() internal {
         vm.startPrank(alice);
-        uint256 price = sale.getLevelPriceInUSD(DEFAULT_LEVEL);
+        uint256 price = sale.getLevelPriceInUSD(DEFAULT_LEVEL_2);
         tokenUSDT.approve(address(sale), price);
-        sale.mintBand(DEFAULT_LEVEL, tokenUSDT);
+        sale.mintBand(DEFAULT_LEVEL_2, tokenUSDT);
         vm.stopPrank();
     }
 }

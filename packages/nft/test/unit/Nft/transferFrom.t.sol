@@ -18,7 +18,7 @@ contract Nft_TransferFrom_Unit_Test is NftSale_Unit_Test {
             )
         );
         vm.prank(alice);
-        nftContract.transferFrom(admin, alice, STARTER_TOKEN_ID);
+        nftContract.transferFrom(admin, alice, NFT_TOKEN_ID_0);
     }
 
     function test_transferFrom_transferTokenOnlyWithMinterRole() external {
@@ -39,7 +39,7 @@ contract Nft_TransferFrom_Unit_Test is NftSale_Unit_Test {
             "NFT minted to incorrect address"
         );
 
-        nftContract.transferFrom(admin, alice, STARTER_TOKEN_ID);
+        nftContract.transferFrom(admin, alice, NFT_TOKEN_ID_0);
         vm.stopPrank();
 
         assertEq(nftContract.balanceOf(admin), 0, "NFT transfer not complete");

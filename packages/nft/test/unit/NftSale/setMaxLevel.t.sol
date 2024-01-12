@@ -19,18 +19,18 @@ contract NftSale_SetMaxLevel_Unit_Test is NftSale_Unit_Test {
             )
         );
         vm.prank(alice);
-        sale.setMaxLevel(DEFAULT_LEVEL);
+        sale.setMaxLevel(DEFAULT_LEVEL_2);
     }
 
     function test_setMaxLevel_RevertIf_InvalidMaxLevel() external {
         vm.expectRevert(
             abi.encodeWithSelector(
-                Errors.Nft__InvalidMaxLevel.selector,
-                DEFAULT_LEVEL
+                Errors.NftSale__InvalidMaxLevel.selector,
+                DEFAULT_LEVEL_2
             )
         );
         vm.prank(admin);
-        sale.setMaxLevel(DEFAULT_LEVEL);
+        sale.setMaxLevel(DEFAULT_LEVEL_2);
     }
 
     function test_setMaxLevel_setsNewMaxLevel() external {

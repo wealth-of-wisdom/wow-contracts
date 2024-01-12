@@ -10,29 +10,29 @@ import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 contract NftSale_ActivateBand_Unit_Test is NftSale_Unit_Test {
     function test_activateBand_RevertIf_NotBandOwner()
         external
-        mintOneBandForUser
+        mintLevel2BandForAlice
     {
-        vm.expectRevert(Errors.Nft__NotBandOwner.selector);
+        vm.expectRevert(Errors.NftSale__NotBandOwner.selector);
         vm.prank(bob);
-        sale.activateBand(STARTER_TOKEN_ID);
+        sale.activateBand(NFT_TOKEN_ID_0);
     }
 
     function test_activateBand_EmitsBandActivated()
         external
-        mintOneBandForUser
+        mintLevel2BandForAlice
     {
         vm.expectEmit(true, true, true, true);
-        emit BandActivated(alice, STARTER_TOKEN_ID, DEFAULT_LEVEL, false);
+        emit BandActivated(alice, NFT_TOKEN_ID_0, DEFAULT_LEVEL_2, false);
         vm.prank(alice);
-        sale.activateBand(STARTER_TOKEN_ID);
+        sale.activateBand(NFT_TOKEN_ID_0);
     }
 
-    function test_activateBand_activatesBand() external mintOneBandForUser {
+    function test_activateBand_activatesBand() external mintLevel2BandForAlice {
         vm.prank(alice);
-        sale.activateBand(STARTER_TOKEN_ID);
-        INftSale.Band memory bandData = sale.getBand(STARTER_TOKEN_ID);
+        sale.activateBand(NFT_TOKEN_ID_0);
+        INftSale.Band memory bandData = sale.getBand(NFT_TOKEN_ID_0);
         assertFalse(bandData.isGenesis, "Token genesis state changed");
-        assertEq(bandData.level, DEFAULT_LEVEL, "Level data changed");
+        assertEq(bandData.level, DEFAULT_LEVEL_2, "Level data changed");
         assertEq(
             uint8(bandData.activityType),
             uint8(NFT_ACTIVITY_TYPE_ACTIVATED),
