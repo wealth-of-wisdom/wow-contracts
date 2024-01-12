@@ -34,10 +34,10 @@ export function handleVestingPoolAdded(event: VestingPoolAddedEvent): void {
     const vestingPool = getOrInitVestingPool(event.address, poolIndex);
   
     // Fetch data from Vesting contract
-    const generalData = vestingContract.getGeneralPoolData(poolIndex);
-    const vestingData = vestingContract.getPoolVestingData(poolIndex);
-    const listingData = vestingContract.getPoolListingData(poolIndex);
-    const cliffData = vestingContract.getPoolCliffData(poolIndex);
+    const generalData = vestingContract.getGeneralPoolData(event.params.poolIndex);
+    const vestingData = vestingContract.getPoolVestingData(event.params.poolIndex);
+    const listingData = vestingContract.getPoolListingData(event.params.poolIndex);
+    const cliffData = vestingContract.getPoolCliffData(event.params.poolIndex);
   
     // Getting data from Vesting contract getters
     const poolName = generalData.value0;
@@ -71,7 +71,7 @@ export function handleVestingPoolAdded(event: VestingPoolAddedEvent): void {
     vestingPool.vestingDuration = vestingDurationInDays;
     vestingPool.vestingEndDate = vestingEndDate;
   
-    // Save the updated VestingPool entity
+    
     vestingPool.save();
   }
 
@@ -108,7 +108,7 @@ export function handleContractTokensWithdrawn(
 
 
 export function handleListingDateChanged(event: ListingDateChangedEvent): void {
-    // 
+
     const vestingContract: VestingContract = getOrInitVestingContract(event.address);
 
     vestingContract.listingDate = event.params.newDate
@@ -120,9 +120,11 @@ export function handleListingDateChanged(event: ListingDateChangedEvent): void {
 export function handleStakedTokensUpdated(
     event: StakedTokensUpdatedEvent
 ): void {
-    // NEEDS: Needed beneficiary in StakedTokensUpdated event
-    const {stake, amount } = event.params;
 
+    const stake = event.params.stake;
+    const amount = event.params.amount;
+
+    // TODO: after the contract update change `event.transaction.from` to `event.params.beneficiary`
     const beneficiary: Beneficiary = getOrInitBeneficiaries(event.address, event.transaction.from, BigInt.fromI32(event.params.poolIndex));
 
     
