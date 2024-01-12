@@ -3,13 +3,14 @@ pragma solidity 0.8.20;
 
 import {Test} from "forge-std/Test.sol";
 import {Constants} from "@wealth-of-wisdom/nft/test/utils/Constants.sol";
+import {Events} from "@wealth-of-wisdom/nft/test/utils/Events.sol";
 import {TokenMock} from "@wealth-of-wisdom/nft/test/mocks/TokenMock.sol";
 import {StakingMock} from "@wealth-of-wisdom/vesting/test/mocks/StakingMock.sol";
 import {VestingMock} from "@wealth-of-wisdom/vesting/test/mocks/VestingMock.sol";
 import {NftSaleMock} from "@wealth-of-wisdom/nft/test/mocks/NftSaleMock.sol";
 import {Nft} from "@wealth-of-wisdom/nft/contracts/Nft.sol";
 
-contract Base_Test is Test, Constants {
+contract Base_Test is Test, Constants, Events {
     /*//////////////////////////////////////////////////////////////////////////
                                   STATE VARIABLES
     //////////////////////////////////////////////////////////////////////////*/

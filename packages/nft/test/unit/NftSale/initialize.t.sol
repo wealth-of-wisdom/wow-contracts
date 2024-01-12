@@ -2,6 +2,7 @@
 pragma solidity 0.8.20;
 
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
 import {VestingMock} from "@wealth-of-wisdom/vesting/test/mocks/VestingMock.sol";
 import {Nft} from "@wealth-of-wisdom/nft/contracts/Nft.sol";
@@ -230,6 +231,31 @@ contract NftSale_Initialize_Unit_Test is NftSale_Unit_Test {
             address(sale.getVestingContract()),
             address(vesting),
             "Vesting contract should be set correctly"
+        );
+    }
+
+    function test_initialize_RevertIf_AlreadyInitialized() external initializeNftSale {
+        vm.expectRevert(Initializable.InvalidInitialization.selector);
+        sale.initialize(
+            tokenUSDT,
+            tokenUSDC,
+            INft(address(nftContract)),
+            vesting,
+            DEFAULT_VESTING_PID
+        );
+    }
+
+    function test_initialize_EmitsInitializedEvent() external {
+        vm.expectEmit(true, true, true, true);
+        emit Initialized(1);
+
+        vm.prank(admin);
+        sale.initialize(
+            tokenUSDT,
+            tokenUSDC,
+            INft(address(nftContract)),
+            vesting,
+            DEFAULT_VESTING_PID
         );
     }
 }

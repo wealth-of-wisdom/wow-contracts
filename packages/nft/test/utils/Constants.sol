@@ -8,6 +8,8 @@ abstract contract Constants {
     bytes32 internal constant DEFAULT_ADMIN_ROLE = 0x00;
     bytes32 internal constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 internal constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+    bytes32 public constant WHITELISTED_SENDER_ROLE =
+        keccak256("WHITELISTED_SENDER_ROLE");
     bytes32 internal constant BENEFICIARIES_MANAGER_ROLE =
         keccak256("BENEFICIARIES_MANAGER_ROLE");
 
