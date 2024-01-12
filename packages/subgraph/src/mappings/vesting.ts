@@ -13,6 +13,7 @@ import {
 import {
     VestingContract,
     Beneficiary,
+    VestingPool,
 } from "../../generated/schema"
 import { getOrInitBeneficiaries, getOrInitVestingContract, getOrInitVestingPool } from "../helpers/vesting.helpers"
 import { getUnlockTypeFromBigInt, stringifyUnlockType } from "../utils/utils";
@@ -36,10 +37,10 @@ export function handleInitialized(event: InitializedEvent): void {
  * @param event - The VestingPoolAddedEvent containing the contract address and new pool index.
  */
 export function handleVestingPoolAdded(event: VestingPoolAddedEvent): void {
-    const vestingContract = Vesting.bind(event.address);
-    const poolIndex = BigInt.fromI32(event.params.poolIndex);
+    const vestingContract: Vesting = Vesting.bind(event.address);
+    const poolIndex: BigInt = BigInt.fromI32(event.params.poolIndex);
   
-    const vestingPool = getOrInitVestingPool(event.address, poolIndex);
+    const vestingPool: VestingPool = getOrInitVestingPool(event.address, poolIndex);
   
     // Fetch data from Vesting contract
     const generalData = vestingContract.getGeneralPoolData(event.params.poolIndex);
@@ -92,7 +93,7 @@ export function handleBeneficiaryAdded(event: BeneficiaryAddedEvent): void {
 
     beneficiary.address = event.params.beneficiary;
     beneficiary.vestingPool = event.params.poolIndex.toString();
-    // NOTE / FIX : total amounts is the tokens are allocated to the person, but i can be done more than once
+    // @note total amounts is the tokens are allocated to the person, but i can be done more than once
     beneficiary.totalTokens = beneficiary.totalTokens.plus(event.params.addedTokenAmount);
 
     beneficiary.save();
@@ -107,7 +108,7 @@ export function handleBeneficiaryAdded(event: BeneficiaryAddedEvent): void {
 export function handleBeneficiaryRemoved(event: BeneficiaryRemovedEvent): void {
     const beneficiary: Beneficiary = getOrInitBeneficiaries(event.address, event.params.beneficiary, BigInt.fromI32(event.params.poolIndex));
 
-    // TODO: Not sure if this how it supposed to look like
+    // @note Not sure if this how it supposed to look like
     store.remove("Beneficiary", beneficiary.id)
 
     beneficiary.save()
@@ -143,23 +144,22 @@ export function handleListingDateChanged(event: ListingDateChangedEvent): void {
  * Handles the StakedTokensUpdated event triggered when staked tokens are updated.
  * @param event - The StakedTokensUpdatedEvent containing stake status, amount, beneficiary, and pool details.
  */
-export function handleStakedTokensUpdated(
-    event: StakedTokensUpdatedEvent
-): void {
-
-    const stake = event.params.stake;
-    const amount = event.params.amount;
-
-    // TODO: after the contract update change `event.transaction.from` to `event.params.beneficiary`
-    const beneficiary: Beneficiary = getOrInitBeneficiaries(event.address, event.transaction.from, BigInt.fromI32(event.params.poolIndex));
-
+export function handleStakedTokensUpdated(event: StakedTokensUpdatedEvent): void {
     
-    if (stake === true) {
-        beneficiary.stakedTokens = beneficiary.stakedTokens.plus(amount);
-    } else if (stake === false) {
-        beneficiary.stakedTokens = beneficiary.stakedTokens.minus(amount);
-    }
 
+    const isStake: boolean = event.params.stake;
+    const amount: BigInt = event.params.amount;
+    const poolIndex: BigInt = BigInt.fromI32(event.params.poolIndex);
+
+    // @todo after the contract update change `event.transaction.from` to `event.params.beneficiary`
+    const beneficiary: Beneficiary = getOrInitBeneficiaries(event.address, event.transaction.from, poolIndex);
+
+    // Update staked tokens based on the stake status
+    beneficiary.stakedTokens = isStake
+        ? beneficiary.stakedTokens.plus(amount)
+        : beneficiary.stakedTokens.minus(amount);
+
+    // Save the updated Beneficiary entity
     beneficiary.save();
 }
 
@@ -170,7 +170,6 @@ export function handleStakedTokensUpdated(
 export function handleStakingContractSet(event: StakingContractSetEvent): void {
     const vestingContract: VestingContract = getOrInitVestingContract(event.address);
 
-    // TODO: double check when it's called in SC
     vestingContract.stakingContractAddress = event.params.newContract;
 
     vestingContract.save();
@@ -184,13 +183,13 @@ export function handleStakingContractSet(event: StakingContractSetEvent): void {
 export function handleTokensClaimed(event: TokensClaimedEvent): void {
     const beneficiary: Beneficiary = getOrInitBeneficiaries(event.address, event.params.user, BigInt.fromI32(event.params.poolIndex));
 
-    // count claimed amount
+    // sum claimed amount
     beneficiary.claimedTokens = beneficiary.claimedTokens.plus(event.params.tokenAmount);
 
     // remove vested tokens because they are claimed
     beneficiary.vestedTokens = beneficiary.vestedTokens.minus(event.params.tokenAmount);
 
-    // I think also needed total tokens that are claimed removed from total tokens (not sure about that)
+    // @note I think also needed total tokens that are claimed removed from total tokens (not sure about that)
     beneficiary.save();
 }
 
