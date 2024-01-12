@@ -1,5 +1,5 @@
 specVersion: 0.0.5
-description: Subgraph for the Streampay Multi-Streams
+description: Subgraph for the WOW token vesting contract
 repository: https://github.com/wealth-of-wisdom/wow-contracts
 schema:
     file: ./schema.graphql
@@ -15,7 +15,7 @@ dataSources:
           kind: ethereum/events
           apiVersion: 0.0.7
           language: wasm/assemblyscript
-          file: ./src/mappings/vesting.ts  # Path to mapping file
+          file: ./src/mappings/vesting.ts
           entities:
               - VestingPool
               - Beneficiary
