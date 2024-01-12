@@ -35,7 +35,7 @@ dataSources:
               handler: handleContractTokensWithdrawn
             - event: ListingDateChanged(uint32,uint32)
               handler: handleListingDateChanged
-            - event: StakedTokensUpdated(indexed uint16,uint256,bool)
+            - event: StakedTokensUpdated(indexed uint16,indexed address,uint256,bool)
               handler: handleStakedTokensUpdated
             - event: StakingContractSet(indexed address)
               handler: handleStakingContractSet

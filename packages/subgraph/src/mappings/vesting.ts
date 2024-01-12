@@ -123,7 +123,6 @@ export function handleContractTokensWithdrawn(
     event: ContractTokensWithdrawnEvent
 ): void {
     // TODO: Not a priority right now
-
 }
 
 
@@ -151,8 +150,8 @@ export function handleStakedTokensUpdated(event: StakedTokensUpdatedEvent): void
     const amount: BigInt = event.params.amount;
     const poolIndex: BigInt = BigInt.fromI32(event.params.poolIndex);
 
-    // @todo after the contract update change `event.transaction.from` to `event.params.beneficiary`
-    const beneficiary: Beneficiary = getOrInitBeneficiaries(event.address, event.transaction.from, poolIndex);
+ 
+    const beneficiary: Beneficiary = getOrInitBeneficiaries(event.address, event.params.beneficiary, poolIndex);
 
     // Update staked tokens based on the stake status
     beneficiary.stakedTokens = isStake
