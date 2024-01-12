@@ -183,6 +183,7 @@ contract NftSale is
         Band storage band = s_bands[tokenId];
         uint16 currentLevel = band.level;
 
+        // Checks: the band cannot be genesis or deactivated
         if (
             s_bands[tokenId].isGenesis ||
             s_bands[tokenId].activityType == ActivityType.DEACTIVATED
@@ -197,8 +198,14 @@ contract NftSale is
 
         uint256 upgradeCost = s_nftLevels[newLevel].price -
             s_nftLevels[currentLevel].price;
-        _updateBand(tokenId, currentLevel, newLevel);
+
+        // Effects: Update the old band data and add new band
+        _updateBand(tokenId, newLevel);
+
+        // Effects: Transfer the payment to the contract
         _purchaseBand(token, upgradeCost);
+
+        // Interaction: mint the new band (we don't burn the old one)
         s_nftContract.safeMint(msg.sender);
 
         emit BandUpdated(msg.sender, tokenId, currentLevel, newLevel);
@@ -206,12 +213,22 @@ contract NftSale is
 
     function activateBand(uint256 tokenId) external mBandOwner(tokenId) {
         Band memory bandData = s_bands[tokenId];
+
+        // Checks: the band must not be activated
+        if (bandData.activityType == ActivityType.ACTIVATED) {
+            revert Errors.NftSale__AlreadyActivated();
+        }
+
+        // Effects: update the band activity
         s_bands[tokenId].activityType = ActivityType.ACTIVATED;
+
+        // Effects: add the vesting beneficiary
         s_vestingContract.addBeneficiary(
             s_promotionalVestingPID,
             msg.sender,
             s_nftLevels[bandData.level].vestingRewardWOWTokens
         );
+
         emit BandActivated(
             msg.sender,
             tokenId,
@@ -255,6 +272,13 @@ contract NftSale is
         emit MaxLevelSet(maxLevel);
     }
 
+    function setPromotionalVestingPID(
+        uint16 pid
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        s_promotionalVestingPID = pid;
+        emit PromotionalVestingPIDSet(pid);
+    }
+
     function setLevelPrice(
         uint16 level,
         uint256 price
@@ -272,21 +296,43 @@ contract NftSale is
     function setVestingRewardWOWTokens(
         uint16 level,
         uint256 newTokenAmount
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) mAmountNotZero(newTokenAmount) {
         s_nftLevels[level].vestingRewardWOWTokens = newTokenAmount;
         emit LevelTokensSet(level, newTokenAmount);
     }
 
+    function setUSDTToken(
+        IERC20 newToken
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) mAddressNotZero(address(newToken)) {
+        s_usdtToken = newToken;
+        emit USDTTokenSet(newToken);
+    }
+
+    function setUSDCToken(
+        IERC20 newToken
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) mAddressNotZero(address(newToken)) {
+        s_usdcToken = newToken;
+        emit USDCTokenSet(newToken);
+    }
+
     function setVestingContract(
         IVesting newContract
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    )
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        mAddressNotZero(address(newContract))
+    {
         s_vestingContract = newContract;
         emit VestingContractSet(newContract);
     }
 
     function setNftContract(
         INft newContract
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    )
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        mAddressNotZero(address(newContract))
+    {
         s_nftContract = newContract;
         emit NftContractSet(newContract);
     }
@@ -302,10 +348,8 @@ contract NftSale is
         mValidBandLevel(level)
         mAmountNotZero(amount)
     {
-        for (uint256 i = 0; i < amount; i++) {
+        for (uint256 i; i < amount; i++) {
             uint256 tokenId = s_nftContract.getNextTokenId();
-            // Effects: mint genesis band
-            s_nftContract.safeMint(receiver);
 
             // Effects: set the band data
             s_bands[tokenId] = Band({
@@ -313,6 +357,10 @@ contract NftSale is
                 isGenesis: true,
                 activityType: ActivityType.INACTIVE
             });
+
+            // Interactions: mint genesis band
+            s_nftContract.safeMint(receiver);
+
             emit BandMinted(receiver, tokenId, level, true);
         }
     }
@@ -341,16 +389,16 @@ contract NftSale is
         return s_bands[tokenId];
     }
 
-    function getLevelPriceInUSD(uint16 level) external view returns (uint256) {
-        return s_nftLevels[level].price;
-    }
-
     function getMaxLevel() external view returns (uint16) {
         return s_maxLevel;
     }
 
     function getPromotionalPID() external view returns (uint16) {
         return s_promotionalVestingPID;
+    }
+
+    function getLevelPriceInUSD(uint16 level) external view returns (uint256) {
+        return s_nftLevels[level].price;
     }
 
     function getVestingRewardWOWTokens(
@@ -395,16 +443,8 @@ contract NftSale is
         emit PurchasePaid(token, cost);
     }
 
-    function _updateBand(
-        uint256 tokenId,
-        uint16 currentLevel,
-        uint16 newLevel
-    ) internal virtual {
-        s_bands[tokenId] = Band({
-            level: currentLevel,
-            isGenesis: false,
-            activityType: ActivityType.DEACTIVATED
-        });
+    function _updateBand(uint256 tokenId, uint16 newLevel) internal virtual {
+        s_bands[tokenId].activityType = ActivityType.DEACTIVATED;
 
         uint256 newTokenId = s_nftContract.getNextTokenId();
         s_bands[newTokenId] = Band({

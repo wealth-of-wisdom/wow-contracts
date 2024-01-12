@@ -2,15 +2,13 @@
 pragma solidity 0.8.20;
 
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
-import {INftSale} from "@wealth-of-wisdom/nft/contracts/interfaces/INftSale.sol";
+import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
+import {INftSale, INftSaleEvents} from "@wealth-of-wisdom/nft/contracts/interfaces/INftSale.sol";
 import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
 import {NftSale_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftSaleUnit.t.sol";
-import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 
-contract NftSale_SetMaxLevel_Unit_Test is NftSale_Unit_Test {
-    function test_setMaxLevel_RevertIf_AccessControlUnauthorizedAccount()
-        external
-    {
+contract NftSale_SetMaxLevel_Unit_Test is INftSaleEvents, NftSale_Unit_Test {
+    function test_setMaxLevel_RevertIf_NotDefaultAdmin() external {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
@@ -35,8 +33,20 @@ contract NftSale_SetMaxLevel_Unit_Test is NftSale_Unit_Test {
 
     function test_setMaxLevel_setsNewMaxLevel() external {
         uint16 newLevel = 10;
+
         vm.prank(admin);
         sale.setMaxLevel(newLevel);
+
         assertEq(sale.getMaxLevel(), newLevel, "New level not set");
+    }
+
+    function test_setMaxLevel_EmitsMaxLevelSetEvent() external {
+        uint16 newLevel = 10;
+
+        vm.expectEmit(true, true, true, true);
+        emit MaxLevelSet(newLevel);
+
+        vm.prank(admin);
+        sale.setMaxLevel(newLevel);
     }
 }

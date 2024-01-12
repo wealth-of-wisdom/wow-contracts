@@ -2,14 +2,13 @@
 pragma solidity 0.8.20;
 
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
-import {INftSaleEvents} from "@wealth-of-wisdom/nft/contracts/interfaces/INftSale.sol";
 import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
-import {NftSaleMock} from "@wealth-of-wisdom/nft/test/mocks/NftSaleMock.sol";
 import {VestingMock} from "@wealth-of-wisdom/vesting/test/mocks/VestingMock.sol";
 import {Nft} from "@wealth-of-wisdom/nft/contracts/Nft.sol";
 import {INft} from "@wealth-of-wisdom/nft/contracts/interfaces/INft.sol";
-import {NftSale_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftSaleUnit.t.sol";
 import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
+import {NftSaleMock} from "@wealth-of-wisdom/nft/test/mocks/NftSaleMock.sol";
+import {NftSale_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftSaleUnit.t.sol";
 
 contract NftSale_Initialize_Unit_Test is NftSale_Unit_Test {
     modifier initializeNftSale() {

@@ -15,4 +15,5 @@ library Errors {
     error NftSale__UnupdatableBand();
     error NftSale__PassedZeroAmount();
     error NftSale__ZeroAddress();
+    error NftSale__AlreadyActivated();
 }

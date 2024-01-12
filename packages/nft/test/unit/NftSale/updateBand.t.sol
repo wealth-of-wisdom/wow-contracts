@@ -2,10 +2,10 @@
 pragma solidity 0.8.20;
 
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
+import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {INftSale} from "@wealth-of-wisdom/nft/contracts/interfaces/INftSale.sol";
 import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
 import {NftSale_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftSaleUnit.t.sol";
-import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 
 contract NftSale_UpdateBand_Unit_Test is NftSale_Unit_Test {
     uint256 internal upgradePrice;
