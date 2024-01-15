@@ -32,7 +32,7 @@
         "@types/chai": "^4.3.11",
         "@types/mocha": "^10.0.6",
         "chai": "^4.3.10",
-        "ethers": "^5.4.7",
+        "ethers": "^6.9.0",
         "hardhat": "2.13.0",
         "hardhat-gas-reporter": "^1.0.9",
         "prettier": "3.1.1",

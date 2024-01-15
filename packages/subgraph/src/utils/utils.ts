@@ -1,5 +1,5 @@
 import { BigInt } from "@graphprotocol/graph-ts";
-import { UnlockType } from "./constants";
+import { BIGINT_ONE, BIGINT_ZERO, UnlockType } from "./constants";
 
 
 
@@ -10,9 +10,9 @@ import { UnlockType } from "./constants";
    * @throws Error if the input is not a valid unlock type.
    */
   export const getUnlockTypeFromBigInt = (unlockType: BigInt): UnlockType => {
-    if (unlockType.equals(BigInt.fromI32(0))) {
+    if (unlockType.equals(BIGINT_ZERO)) {
       return UnlockType.DAILY;
-    } else if (unlockType.equals(BigInt.fromI32(1))) {
+    } else if (unlockType.equals(BIGINT_ONE)) {
       return UnlockType.MONTHLY;
     } else {
       throw new Error("Invalid unlock type value");

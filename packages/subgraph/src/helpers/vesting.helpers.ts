@@ -16,7 +16,7 @@ import { stringifyUnlockType } from "../utils/utils";
 export function getOrInitVestingContract(vestingContractAddress: Address): VestingContract {
 
     //  @note: redundant ID and vesting contract address.
-    let vestingContractId = vestingContractAddress.toHex();
+    let vestingContractId = BIGINT_ZERO.toHex()
     let vestingContract = VestingContract.load(vestingContractId);
 
     if (!vestingContract) {
