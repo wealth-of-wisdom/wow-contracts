@@ -10,7 +10,7 @@ async function addVestingPools(vestingTokenContract, vestingContract, pools) {
     const vesting = Vesting.attach(vestingContract)
     const divisor = 100
 
-    await token.approve(process.env.VESTING_CONTRACT, process.env.FULL_POOL_TOKEN_AMOUNT);
+    await token.approve(vestingContract, process.env.FULL_POOL_TOKEN_AMOUNT);
 
     for (var pool of pools) {
         console.log(pool)

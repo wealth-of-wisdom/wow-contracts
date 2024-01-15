@@ -132,8 +132,6 @@ interface INftSale is INftSaleEvents {
 
     function getVestingContract() external view returns (IVesting);
 
-    function getVestingPoolBalance() external view returns (uint256);
-
     function getBand(uint256 tokenId) external view returns (Band memory);
 
     function getLevelPriceInUSD(uint16 level) external view returns (uint256);

@@ -47,10 +47,9 @@ contract NftSale is
 
     /* solhint-disable var-name-mixedcase */
     mapping(uint256 => Band) internal s_bands; // token ID => band
-    mapping(uint16 => NftLevel) internal s_levelToPrice; // level => price in USD
+    mapping(uint16 => NftLevel) internal s_nftLevels; // level => data
     uint16 internal s_maxLevel;
     uint16 internal promotionalPID;
-    uint256 vestingPoolBalance;
     /* solhint-enable */
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -119,23 +118,23 @@ contract NftSale is
         s_maxLevel = 5;
         promotionalPID = pid;
 
-        s_levelToPrice[1] = NftLevel({
+        s_nftLevels[1] = NftLevel({
             price: 1_000 * USD_DECIMALS,
             vestingRewardWOWTokens: 1_000 * WOW_DECIMALS
         });
-        s_levelToPrice[2] = NftLevel({
+        s_nftLevels[2] = NftLevel({
             price: 5_000 * USD_DECIMALS,
             vestingRewardWOWTokens: 25_000 * WOW_DECIMALS
         });
-        s_levelToPrice[3] = NftLevel({
+        s_nftLevels[3] = NftLevel({
             price: 10_000 * USD_DECIMALS,
             vestingRewardWOWTokens: 100_000 * WOW_DECIMALS
         });
-        s_levelToPrice[4] = NftLevel({
+        s_nftLevels[4] = NftLevel({
             price: 33_000 * USD_DECIMALS,
             vestingRewardWOWTokens: 660_000 * WOW_DECIMALS
         });
-        s_levelToPrice[5] = NftLevel({
+        s_nftLevels[5] = NftLevel({
             price: 100_000 * USD_DECIMALS,
             vestingRewardWOWTokens: 3_000_000 * WOW_DECIMALS
         });
@@ -144,10 +143,6 @@ contract NftSale is
         s_usdcToken = tokenUSDC;
         s_nftContract = contractNFT;
         s_vestingContract = contractVesting;
-
-        (, , vestingPoolBalance, ) = s_vestingContract.getGeneralPoolData(
-            promotionalPID
-        );
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -158,7 +153,7 @@ contract NftSale is
         uint16 level,
         IERC20 token
     ) external mValidBandLevel(level) mTokenExists(token) {
-        uint256 cost = s_levelToPrice[level].price;
+        uint256 cost = s_nftLevels[level].price;
         // Effects: set the band data
         uint256 tokenId = s_nftContract.getNextTokenId();
         s_bands[tokenId] = Band({
@@ -204,8 +199,8 @@ contract NftSale is
         // Effects: Update the band level
         band.level = newLevel;
 
-        uint256 upgradeCost = s_levelToPrice[newLevel].price -
-            s_levelToPrice[currentLevel].price;
+        uint256 upgradeCost = s_nftLevels[newLevel].price -
+            s_nftLevels[currentLevel].price;
         _updateBand(tokenId, currentLevel, newLevel);
         _purchaseBand(token, upgradeCost);
         s_nftContract.safeMint(msg.sender);
@@ -217,12 +212,15 @@ contract NftSale is
         Band memory bandData = s_bands[tokenId];
         s_bands[tokenId].activityType = ActivityType.ACTIVATED;
         s_bands[tokenId].activityTimestamp = block.timestamp;
-        uint256 rewardTokens = s_levelToPrice[bandData.level]
+        
+        (, , , uint256 vestingPoolBalance) = s_vestingContract
+            .getGeneralPoolData(promotionalPID);
+        uint256 rewardTokens = s_nftLevels[bandData.level]
             .vestingRewardWOWTokens;
 
-        if (vestingPoolBalance > 0 && vestingPoolBalance < rewardTokens) {
-            rewardTokens = vestingPoolBalance;
-        }
+        rewardTokens = (vestingPoolBalance < rewardTokens)
+            ? vestingPoolBalance
+            : rewardTokens;
 
         if (rewardTokens > 0) {
             s_vestingContract.addBeneficiary(
@@ -283,7 +281,7 @@ contract NftSale is
         mValidBandLevel(level)
         mAmountNotZero(price)
     {
-        s_levelToPrice[level].price = price;
+        s_nftLevels[level].price = price;
 
         emit LevelPriceSet(level, price);
     }
@@ -292,7 +290,7 @@ contract NftSale is
         uint16 level,
         uint256 newTokenAmount
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        s_levelToPrice[level].vestingRewardWOWTokens = newTokenAmount;
+        s_nftLevels[level].vestingRewardWOWTokens = newTokenAmount;
         emit LevelTokensSet(level, newTokenAmount);
     }
 
@@ -357,16 +355,12 @@ contract NftSale is
         return s_vestingContract;
     }
 
-    function getVestingPoolBalance() external view returns (uint256) {
-        return vestingPoolBalance;
-    }
-
     function getBand(uint256 tokenId) external view returns (Band memory) {
         return s_bands[tokenId];
     }
 
     function getLevelPriceInUSD(uint16 level) external view returns (uint256) {
-        return s_levelToPrice[level].price;
+        return s_nftLevels[level].price;
     }
 
     function getMaxLevel() external view returns (uint16) {
@@ -380,7 +374,7 @@ contract NftSale is
     function getVestingRewardWOWTokens(
         uint16 level
     ) public view returns (uint256) {
-        return s_levelToPrice[level].vestingRewardWOWTokens;
+        return s_nftLevels[level].vestingRewardWOWTokens;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
