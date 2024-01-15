@@ -18,6 +18,7 @@ library Errors {
         uint256 requiredAmount
     );
     error NftSale__TransferFailed();
+    error NftSale__MismatchInVariableLength();
     error NftSale__InvalidTokenId();
     error NftSale__NotBandOwner();
     error NftSale__NonExistantPayment();
@@ -25,4 +26,5 @@ library Errors {
     error NftSale__PassedZeroAmount();
     error NftSale__ZeroAddress();
     error NftSale__AlreadyActivated();
+    error NftSale__NotActivated();
 }

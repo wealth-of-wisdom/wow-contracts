@@ -29,12 +29,22 @@ interface INftSaleEvents {
         address indexed receiver,
         uint256 indexed tokenId,
         uint16 level,
-        bool isGenesis
+        bool isGenesis,
+        uint256 activityType,
+        uint256 activityTimestamp
+    );
+
+    event BandUpdated(
+        uint256 indexed tokenId,
+        uint256 activityType,
+        uint256 activityTimestamp
     );
 
     event TokensWithdrawn(IERC20 token, address receiver, uint256 amount);
 
     event MaxLevelSet(uint16 newMaxLevel);
+
+    event DivisorSet(uint256 newGenesisTokenDivisor);
 
     event PromotionalVestingPIDSet(uint16 newPID);
 
@@ -46,11 +56,22 @@ interface INftSaleEvents {
 
     event NftContractSet(INft newContract);
 
-    event LevelPriceSet(uint16 level, uint256 price);
-
-    event LevelTokensSet(uint16 level, uint256 tokenAmount);
+    event LevelDataSet(
+        uint16 newLevel,
+        uint256 newPrice,
+        uint256 newVestingRewardWOWTokens,
+        uint256 newlifecycleTimestamp,
+        uint256 newLifecycleExtensionInMonths,
+        uint256 allocationPerProject
+    );
 
     event PurchasePaid(IERC20 token, uint256 amount);
+
+    event ProjectPerLifecycle(
+        uint16 level,
+        uint8 project,
+        uint16 NftLifecycleProjectAmount
+    );
 
     event RefundPaid(IERC20 token, uint256 amount);
 }
@@ -79,12 +100,15 @@ interface INftSale is INftSaleEvents {
 
     /**
      * @param price -Price for NFT level purchase
-     * @param vestingRewardWOWTokens -  Tokens that will be invested into the
+     * @param vBandActivatedestingRewardWOWTokens -  Tokens that will be invested into the
      * vesting pool as a reward for purchasing this NFT level
      **/
     struct NftLevel {
         uint256 price;
         uint256 vestingRewardWOWTokens;
+        uint256 lifecycleTimestamp;
+        uint256 lifecycleExtensionInMonths;
+        uint256 allocationPerProject;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -96,7 +120,9 @@ interface INftSale is INftSaleEvents {
         IERC20 tokenUSDC,
         INft contractNFT,
         IVesting contractVesting,
-        uint16 pid
+        uint16 maxLevel,
+        uint16 pid,
+        uint256 genesisTokenDivisor
     ) external;
 
     function mintBand(uint16 level, IERC20 token) external;
@@ -109,18 +135,17 @@ interface INftSale is INftSaleEvents {
 
     function activateBand(uint256 tokenId) external;
 
+    function deactivateBandOnExpiration(uint256 tokenId) external;
+
+    function extendBand(uint256 tokenId) external;
+
     function withdrawTokens(IERC20 token, uint256 amount) external;
 
     function setMaxLevel(uint16 maxLevel) external;
 
+    function setGenesisTokenDivisor(uint256 newGenesisTokenDivisor) external;
+
     function setPromotionalVestingPID(uint16 pid) external;
-
-    function setLevelPrice(uint16 level, uint256 price) external;
-
-    function setVestingRewardWOWTokens(
-        uint16 level,
-        uint256 newTokenAmount
-    ) external;
 
     function setUSDTToken(IERC20 newToken) external;
 
@@ -130,10 +155,24 @@ interface INftSale is INftSaleEvents {
 
     function setNftContract(INft newContract) external;
 
-    function mintGenesisBand(
-        address receiver,
+    function setLevelData(
+        uint16 newLevel,
+        uint256 newPrice,
+        uint256 newVestingRewardWOWTokens,
+        uint256 newlifecycleTimestamp,
+        uint256 newLifecycleExtensionInMonths,
+        uint256 newAllocationPerProject
+    ) external;
+
+    function setProjectLifecycle(
         uint16 level,
-        uint16 amount
+        uint8 project,
+        uint16 NftLifecycleProjectAmount
+    ) external;
+
+    function mintGenesisBands(
+        address[] memory receiver,
+        uint16[] memory level
     ) external;
 
     function getTokenUSDT() external view returns (IERC20);
@@ -148,9 +187,14 @@ interface INftSale is INftSaleEvents {
 
     function getMaxLevel() external view returns (uint16);
 
+    function getGenesisTokenDivisor() external view returns (uint256);
+
     function getPromotionalPID() external view returns (uint16);
 
-    function getLevelPriceInUSD(uint16 level) external view returns (uint256);
+    function getLevelData(uint16 level) external view returns (NftLevel memory);
 
-    function getVestingRewardWOWTokens(uint16) external view returns (uint256);
+    function getProjectLifecycle(
+        uint16 level,
+        uint8 project
+    ) external view returns (uint16);
 }
