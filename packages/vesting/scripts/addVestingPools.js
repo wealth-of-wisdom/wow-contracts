@@ -2,14 +2,17 @@ const { ethers, upgrades } = require("hardhat")
 const poolsData = require("./wowTokenSupply.json")
 require("dotenv").config()
 
-async function addVestingPools(vestingContract, pools) {
+async function addVestingPools(vestingTokenContract, vestingContract, pools) {
+    const Token = await ethers.getContractFactory("WOWToken")
+    const token = Token.attach(vestingTokenContract)
+
     const Vesting = await ethers.getContractFactory("Vesting")
     const vesting = Vesting.attach(vestingContract)
     const divisor = 100
 
-    // Approve vesting as token spender before adding pools
-
-    pools.forEach(async (pool) => {
+    for (var pool of pools) {
+        await token.approve(process.env.VESTING_CONTRACT, pool.tokens_amount);
+        console.log(pool)
         await vesting.addVestingPool(
             pool.name,
             pool.listing_release_percentage,
@@ -19,14 +22,13 @@ async function addVestingPools(vestingContract, pools) {
             divisor,
             pool.vesting_in_months,
             0, // DAILY
-            pool.tokens_amount,
-        )
+            pool.tokens_amount)
         console.log("Vesting pool added!")
-    })
+    }
 }
 
 async function main() {
-    await addVestingPools(process.env.VESTING_CONTRACT, poolsData)
+    await addVestingPools(process.env.VESTING_TOKEN, process.env.VESTING_CONTRACT, poolsData)
 }
 
 main().catch((error) => {

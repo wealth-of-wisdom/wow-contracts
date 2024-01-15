@@ -14,7 +14,8 @@ interface INftSaleEvents {
         address indexed receiver,
         uint256 indexed tokenId,
         uint16 level,
-        bool isGenesis
+        bool isGenesis,
+        uint256 activityTimestamp
     );
 
     event BandUpdated(
@@ -67,6 +68,7 @@ interface INftSale is INftSaleEvents {
         uint16 level;
         bool isGenesis;
         ActivityType activityType;
+        uint256 activityTimestamp;
     }
 
     /**
@@ -129,6 +131,8 @@ interface INftSale is INftSaleEvents {
     function getNftContract() external view returns (INft);
 
     function getVestingContract() external view returns (IVesting);
+
+    function getVestingPoolBalance() external view returns (uint256);
 
     function getBand(uint256 tokenId) external view returns (Band memory);
 

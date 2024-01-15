@@ -50,6 +50,7 @@ contract NftSale is
     mapping(uint16 => NftLevel) internal s_levelToPrice; // level => price in USD
     uint16 internal s_maxLevel;
     uint16 internal promotionalPID;
+    uint256 vestingPoolBalance;
     /* solhint-enable */
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -143,6 +144,10 @@ contract NftSale is
         s_usdcToken = tokenUSDC;
         s_nftContract = contractNFT;
         s_vestingContract = contractVesting;
+
+        (, , vestingPoolBalance, ) = s_vestingContract.getGeneralPoolData(
+            promotionalPID
+        );
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -159,7 +164,8 @@ contract NftSale is
         s_bands[tokenId] = Band({
             level: level,
             isGenesis: false,
-            activityType: ActivityType.INACTIVE
+            activityType: ActivityType.INACTIVE,
+            activityTimestamp: block.timestamp
         });
 
         // Effects: Transfer the payment to the contract
@@ -167,7 +173,7 @@ contract NftSale is
 
         // Interaction: mint the band
         s_nftContract.safeMint(msg.sender);
-        emit BandMinted(msg.sender, tokenId, level, false);
+        emit BandMinted(msg.sender, tokenId, level, false, block.timestamp);
     }
 
     function updateBand(
@@ -210,11 +216,21 @@ contract NftSale is
     function activateBand(uint256 tokenId) external mBandOwner(tokenId) {
         Band memory bandData = s_bands[tokenId];
         s_bands[tokenId].activityType = ActivityType.ACTIVATED;
-        s_vestingContract.addBeneficiary(
-            promotionalPID,
-            msg.sender,
-            s_levelToPrice[bandData.level].vestingRewardWOWTokens
-        );
+        s_bands[tokenId].activityTimestamp = block.timestamp;
+        uint256 rewardTokens = s_levelToPrice[bandData.level]
+            .vestingRewardWOWTokens;
+
+        if (vestingPoolBalance > 0 && vestingPoolBalance < rewardTokens) {
+            rewardTokens = vestingPoolBalance;
+        }
+
+        if (rewardTokens > 0) {
+            s_vestingContract.addBeneficiary(
+                promotionalPID,
+                msg.sender,
+                rewardTokens
+            );
+        }
         emit BandActivated(
             msg.sender,
             tokenId,
@@ -314,9 +330,10 @@ contract NftSale is
             s_bands[tokenId] = Band({
                 level: level,
                 isGenesis: true,
-                activityType: ActivityType.INACTIVE
+                activityType: ActivityType.INACTIVE,
+                activityTimestamp: block.timestamp
             });
-            emit BandMinted(receiver, tokenId, level, true);
+            emit BandMinted(receiver, tokenId, level, true, block.timestamp);
         }
     }
 
@@ -338,6 +355,10 @@ contract NftSale is
 
     function getVestingContract() external view returns (IVesting) {
         return s_vestingContract;
+    }
+
+    function getVestingPoolBalance() external view returns (uint256) {
+        return vestingPoolBalance;
     }
 
     function getBand(uint256 tokenId) external view returns (Band memory) {
@@ -406,14 +427,16 @@ contract NftSale is
         s_bands[tokenId] = Band({
             level: currentLevel,
             isGenesis: false,
-            activityType: ActivityType.DEACTIVATED
+            activityType: ActivityType.DEACTIVATED,
+            activityTimestamp: block.timestamp
         });
 
         uint256 newTokenId = s_nftContract.getNextTokenId();
         s_bands[newTokenId] = Band({
             level: newLevel,
             isGenesis: false,
-            activityType: ActivityType.INACTIVE
+            activityType: ActivityType.INACTIVE,
+            activityTimestamp: block.timestamp
         });
     }
 }
