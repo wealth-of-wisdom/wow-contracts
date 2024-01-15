@@ -41,7 +41,7 @@ contract NftSale_Unit_Test is Base_Test, INftSaleEvents {
             tokenUSDC,
             INft(address(nftContract)),
             vesting,
-            DEFAULT_PID
+            DEFAULT_VESTING_PID
         );
 
         nftContract.grantRole(MINTER_ROLE, address(sale));

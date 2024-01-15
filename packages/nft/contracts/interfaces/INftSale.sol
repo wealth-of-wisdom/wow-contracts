@@ -36,6 +36,12 @@ interface INftSaleEvents {
 
     event MaxLevelSet(uint16 newMaxLevel);
 
+    event PromotionalVestingPIDSet(uint16 newPID);
+
+    event USDTTokenSet(IERC20 newToken);
+
+    event USDCTokenSet(IERC20 newToken);
+
     event VestingContractSet(IVesting newContract);
 
     event NftContractSet(INft newContract);
@@ -107,12 +113,18 @@ interface INftSale is INftSaleEvents {
 
     function setMaxLevel(uint16 maxLevel) external;
 
+    function setPromotionalVestingPID(uint16 pid) external;
+
     function setLevelPrice(uint16 level, uint256 price) external;
 
     function setVestingRewardWOWTokens(
         uint16 level,
         uint256 newTokenAmount
     ) external;
+
+    function setUSDTToken(IERC20 newToken) external;
+
+    function setUSDCToken(IERC20 newToken) external;
 
     function setVestingContract(IVesting newContract) external;
 
@@ -134,9 +146,11 @@ interface INftSale is INftSaleEvents {
 
     function getBand(uint256 tokenId) external view returns (Band memory);
 
-    function getLevelPriceInUSD(uint16 level) external view returns (uint256);
-
     function getMaxLevel() external view returns (uint16);
+
+    function getPromotionalPID() external view returns (uint16);
+
+    function getLevelPriceInUSD(uint16 level) external view returns (uint256);
 
     function getVestingRewardWOWTokens(uint16) external view returns (uint256);
 }
