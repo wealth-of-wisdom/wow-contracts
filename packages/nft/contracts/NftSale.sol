@@ -28,8 +28,24 @@ contract NftSale is
     //////////////////////////////////////////////////////////////////////////*/
 
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
-    uint64 public constant USD_DECIMALS = 10 ** 6;
-    uint256 public constant WOW_DECIMALS = 10 ** 18;
+    uint16 internal constant INIT_MAX_LEVEL = 5;
+    uint64 internal constant USD_DECIMALS = 10 ** 6;
+    uint256 internal constant WOW_DECIMALS = 10 ** 18;
+    uint256 internal constant INIT_LEVEL_1_PRICE = 1_000 * USD_DECIMALS;
+    uint256 internal constant INIT_LEVEL_2_PRICE = 5_000 * USD_DECIMALS;
+    uint256 internal constant INIT_LEVEL_3_PRICE = 10_000 * USD_DECIMALS;
+    uint256 internal constant INIT_LEVEL_4_PRICE = 33_000 * USD_DECIMALS;
+    uint256 internal constant INIT_LEVEL_5_PRICE = 100_000 * USD_DECIMALS;
+    uint256 internal constant INIT_LEVEL_1_VESTING_REWARD =
+        1_000 * WOW_DECIMALS;
+    uint256 internal constant INIT_LEVEL_2_VESTING_REWARD =
+        25_000 * WOW_DECIMALS;
+    uint256 internal constant INIT_LEVEL_3_VESTING_REWARD =
+        100_000 * WOW_DECIMALS;
+    uint256 internal constant INIT_LEVEL_4_VESTING_REWARD =
+        660_000 * WOW_DECIMALS;
+    uint256 internal constant INIT_LEVEL_5_VESTING_REWARD =
+        3_000_000 * WOW_DECIMALS;
 
     /*//////////////////////////////////////////////////////////////////////////
                                 PUBLIC STORAGE
@@ -114,28 +130,28 @@ contract NftSale is
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(UPGRADER_ROLE, msg.sender);
 
-        s_maxLevel = 5;
+        s_maxLevel = INIT_MAX_LEVEL;
         s_promotionalVestingPID = promotionalVestingPID;
 
         s_nftLevels[1] = NftLevel({
-            price: 1_000 * USD_DECIMALS,
-            vestingRewardWOWTokens: 1_000 * WOW_DECIMALS
+            price: INIT_LEVEL_1_PRICE,
+            vestingRewardWOWTokens: INIT_LEVEL_1_VESTING_REWARD
         });
         s_nftLevels[2] = NftLevel({
-            price: 5_000 * USD_DECIMALS,
-            vestingRewardWOWTokens: 25_000 * WOW_DECIMALS
+            price: INIT_LEVEL_2_PRICE,
+            vestingRewardWOWTokens: INIT_LEVEL_2_VESTING_REWARD
         });
         s_nftLevels[3] = NftLevel({
-            price: 10_000 * USD_DECIMALS,
-            vestingRewardWOWTokens: 100_000 * WOW_DECIMALS
+            price: INIT_LEVEL_3_PRICE,
+            vestingRewardWOWTokens: INIT_LEVEL_3_VESTING_REWARD
         });
         s_nftLevels[4] = NftLevel({
-            price: 33_000 * USD_DECIMALS,
-            vestingRewardWOWTokens: 660_000 * WOW_DECIMALS
+            price: INIT_LEVEL_4_PRICE,
+            vestingRewardWOWTokens: INIT_LEVEL_4_VESTING_REWARD
         });
         s_nftLevels[5] = NftLevel({
-            price: 100_000 * USD_DECIMALS,
-            vestingRewardWOWTokens: 3_000_000 * WOW_DECIMALS
+            price: INIT_LEVEL_5_PRICE,
+            vestingRewardWOWTokens: INIT_LEVEL_5_VESTING_REWARD
         });
 
         s_usdtToken = usdtToken;
