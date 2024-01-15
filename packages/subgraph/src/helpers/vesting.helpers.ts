@@ -16,7 +16,7 @@ import { stringifyUnlockType } from "../utils/utils";
 export function getOrInitVestingContract(vestingContractAddress: Address): VestingContract {
 
     //  @note: redundant ID and vesting contract address.
-    let vestingContractId = BIGINT_ZERO.toHex()
+    let vestingContractId = BIGINT_ZERO.toString();
     let vestingContract = VestingContract.load(vestingContractId);
 
     if (!vestingContract) {
@@ -42,7 +42,7 @@ export function getOrInitVestingContract(vestingContractAddress: Address): Vesti
  */
 export function getOrInitVestingPool(vestingContractAddress: Address, poolId: BigInt): VestingPool {
 
-    let vestingPoolId = vestingContractAddress.toHex() + "-" + poolId.toString();
+    let vestingPoolId = poolId.toString();
     let vestingPool = VestingPool.load(vestingPoolId);
 
     if (!vestingPool) {

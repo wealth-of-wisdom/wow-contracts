@@ -55,6 +55,7 @@ export function handleVestingPoolAdded(event: VestingPoolAddedEvent): void {
     const dedicatedPoolTokenAmount = generalData.value3;
   
     const vestingEndDate = vestingData.value0;
+    
     const vestingDurationInDays = BigInt.fromI32(vestingData.value2);
   
     const listingPercentageDividend = BigInt.fromI32(listingData.value0);
@@ -69,6 +70,7 @@ export function handleVestingPoolAdded(event: VestingPoolAddedEvent): void {
     vestingPool.poolId = poolIndex;
     vestingPool.name = poolName;
     vestingPool.unlockType = stringifyUnlockType(getUnlockTypeFromBigInt(BigInt.fromI32(unlockType)));
+    // TotalPoolTokens is the total number of tokens that are allocated for each pool
     vestingPool.totalPoolTokenAmount = totalPoolTokenAmount;
     vestingPool.dedicatedPoolTokens = dedicatedPoolTokenAmount;
     vestingPool.listingPercentageDividend = listingPercentageDividend;
@@ -93,6 +95,14 @@ export function handleBeneficiaryAdded(event: BeneficiaryAddedEvent): void {
 
     beneficiary.address = event.params.beneficiary;
     beneficiary.vestingPool = event.params.poolIndex.toString();
+
+    const vestingContract: Vesting = Vesting.bind(event.address);
+
+    const beneficiaryData = vestingContract.getBeneficiary(event.params.poolIndex, event.params.beneficiary);
+
+    const structBeneficiary = beneficiaryData.values()
+
+
     // @note total amounts is the tokens are allocated to the person, but i can be done more than once
     beneficiary.totalTokens = beneficiary.totalTokens.plus(event.params.addedTokenAmount);
 
