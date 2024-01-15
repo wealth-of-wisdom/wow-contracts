@@ -2,47 +2,44 @@
 pragma solidity 0.8.20;
 
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
-import {INftSale} from "@wealth-of-wisdom/nft/contracts/interfaces/INftSale.sol";
 import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
-import {NftSale_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftSaleUnit.t.sol";
+import {Nft_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftUnit.t.sol";
 
-contract Nft_TransferFrom_Unit_Test is NftSale_Unit_Test {
-    function test_transferFrom_RevertIf_AccessControlUnauthorizedAccount()
-        external
-    {
+contract Nft_TransferFrom_Unit_Test is Nft_Unit_Test {
+    function setUp() public override {
+        Nft_Unit_Test.setUp();
+
+        vm.prank(admin);
+        nftContract.safeMint(alice);
+    }
+
+    function test_transferFrom_RevertIf_NotWhitelistedSender() external {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
                 alice,
-                MINTER_ROLE
+                WHITELISTED_SENDER_ROLE
             )
         );
         vm.prank(alice);
-        nftContract.transferFrom(admin, alice, STARTER_TOKEN_ID);
+        nftContract.transferFrom(alice, bob, NFT_TOKEN_ID_0);
     }
 
-    function test_transferFrom_transferTokenOnlyWithMinterRole() external {
-        assertEq(nftContract.balanceOf(admin), 0, "NFT pre-minted to admin");
-        assertEq(nftContract.balanceOf(alice), 0, "NFT pre-minted to alice");
+    function test_transferFrom_TransfersNftSuccessfully() external {
+        assertEq(nftContract.balanceOf(alice), 1, "NFT not minted to alice");
+        assertEq(nftContract.balanceOf(bob), 0, "NFT minted to bob");
 
-        vm.startPrank(admin);
-        nftContract.safeMint(admin);
+        vm.prank(admin);
+        nftContract.grantRole(WHITELISTED_SENDER_ROLE, alice);
 
-        assertEq(
-            nftContract.balanceOf(admin),
-            1,
-            "NFT minted to incorrect address"
-        );
+        vm.prank(alice);
+        nftContract.transferFrom(alice, bob, NFT_TOKEN_ID_0);
+
         assertEq(
             nftContract.balanceOf(alice),
             0,
-            "NFT minted to incorrect address"
+            "NFT not transferred from alice"
         );
-
-        nftContract.transferFrom(admin, alice, STARTER_TOKEN_ID);
-        vm.stopPrank();
-
-        assertEq(nftContract.balanceOf(admin), 0, "NFT transfer not complete");
-        assertEq(nftContract.balanceOf(alice), 1, "NFT transfer not complete");
+        assertEq(nftContract.balanceOf(bob), 1, "NFT not transferred to bob");
     }
 }
