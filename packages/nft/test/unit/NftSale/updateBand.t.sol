@@ -2,205 +2,241 @@
 pragma solidity 0.8.20;
 
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
+import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {INftSale} from "@wealth-of-wisdom/nft/contracts/interfaces/INftSale.sol";
 import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
 import {NftSale_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftSaleUnit.t.sol";
-import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 
 contract NftSale_UpdateBand_Unit_Test is NftSale_Unit_Test {
+    uint256 internal upgradePrice;
+
+    function setUp() public override {
+        NftSale_Unit_Test.setUp();
+
+        uint256 newPrice = sale.getLevelPriceInUSD(LEVEL_3);
+        uint256 oldPrice = sale.getLevelPriceInUSD(DEFAULT_LEVEL_2);
+        upgradePrice = newPrice - oldPrice;
+    }
+
     function test_updateBand_RevertIf_InvalidLevel()
         external
-        mintOneBandForUser
+        mintLevel2BandForAlice
     {
         uint16 fakeLevel = 16;
         vm.expectRevert(
-            abi.encodeWithSelector(Errors.Nft__InvalidLevel.selector, fakeLevel)
+            abi.encodeWithSelector(
+                Errors.NftSale__InvalidLevel.selector,
+                fakeLevel
+            )
         );
         vm.prank(admin);
-        sale.updateBand(STARTER_TOKEN_ID, fakeLevel, tokenUSDT);
+        sale.updateBand(NFT_TOKEN_ID_0, fakeLevel, tokenUSDT);
     }
 
     function test_updateBand_RevertIf_NonExistantPayment()
         external
-        mintOneBandForUser
+        mintLevel2BandForAlice
     {
-        vm.expectRevert(Errors.Nft__NonExistantPayment.selector);
+        vm.expectRevert(Errors.NftSale__NonExistantPayment.selector);
         vm.prank(admin);
-        sale.updateBand(STARTER_TOKEN_ID, DEFAULT_LEVEL, IERC20(ZERO_ADDRESS));
+        sale.updateBand(
+            NFT_TOKEN_ID_0,
+            DEFAULT_LEVEL_2,
+            IERC20(makeAddr("FakeToken"))
+        );
+    }
+
+    function test_updateBand_RevertIf_TokenIsZeroAddress() external {
+        vm.expectRevert(Errors.NftSale__NonExistantPayment.selector);
+        vm.prank(admin);
+        sale.updateBand(NFT_TOKEN_ID_0, DEFAULT_LEVEL_2, IERC20(ZERO_ADDRESS));
     }
 
     function test_updateBand_RevertIf_NotBandOwner()
         external
-        mintOneBandForUser
+        mintLevel2BandForAlice
     {
-        vm.expectRevert(Errors.Nft__NotBandOwner.selector);
+        vm.expectRevert(Errors.NftSale__NotBandOwner.selector);
         vm.prank(bob);
-        sale.updateBand(STARTER_TOKEN_ID, DEFAULT_LEVEL, tokenUSDT);
+        sale.updateBand(NFT_TOKEN_ID_0, DEFAULT_LEVEL_2, tokenUSDT);
     }
 
     function test_updateBand_RevertIf_UnupdatableBandIsGenesis() external {
         vm.prank(admin);
-        sale.mintGenesisBand(alice, DEFAULT_LEVEL, DEFAULT_GENESIS_AMOUNT);
+        sale.mintGenesisBand(alice, DEFAULT_LEVEL_2, DEFAULT_GENESIS_AMOUNT);
 
         vm.startPrank(alice);
-        vm.expectRevert(Errors.Nft__UnupdatableBand.selector);
-        sale.updateBand(STARTER_TOKEN_ID, DEFAULT_LEVEL, tokenUSDT);
+        vm.expectRevert(Errors.NftSale__UnupdatableBand.selector);
+        sale.updateBand(NFT_TOKEN_ID_0, DEFAULT_LEVEL_2, tokenUSDT);
         vm.stopPrank();
     }
 
     function test_updateBand_RevertIf_UnupdatableBandIsDisabled()
         external
-        mintOneBandForUser
+        mintLevel2BandForAlice
     {
-        uint256 newPrice = sale.getLevelPriceInUSD(DEFAULT_NEW_LEVEL);
-        uint256 oldPrice = sale.getLevelPriceInUSD(DEFAULT_LEVEL);
-        uint256 upgradePrice = newPrice - oldPrice;
-
         vm.startPrank(alice);
         tokenUSDT.approve(address(sale), upgradePrice);
-        sale.updateBand(STARTER_TOKEN_ID, DEFAULT_NEW_LEVEL, tokenUSDT);
-        vm.expectRevert(Errors.Nft__UnupdatableBand.selector);
-        sale.updateBand(STARTER_TOKEN_ID, DEFAULT_LEVEL, tokenUSDT);
+        sale.updateBand(NFT_TOKEN_ID_0, LEVEL_3, tokenUSDT);
+        vm.expectRevert(Errors.NftSale__UnupdatableBand.selector);
+        sale.updateBand(NFT_TOKEN_ID_0, DEFAULT_LEVEL_2, tokenUSDT);
         vm.stopPrank();
     }
 
-    function test_updateBand_EmitsBandUpdated() external mintOneBandForUser {
-        uint256 newPrice = sale.getLevelPriceInUSD(DEFAULT_NEW_LEVEL);
-        uint256 oldPrice = sale.getLevelPriceInUSD(DEFAULT_LEVEL);
-        uint256 upgradePrice = newPrice - oldPrice;
-
-        vm.startPrank(alice);
-        tokenUSDT.approve(address(sale), upgradePrice);
-        vm.expectEmit(true, true, true, true);
-        emit BandUpdated(
-            alice,
-            STARTER_TOKEN_ID,
-            DEFAULT_LEVEL,
-            DEFAULT_NEW_LEVEL
-        );
-        sale.updateBand(STARTER_TOKEN_ID, DEFAULT_NEW_LEVEL, tokenUSDT);
-        vm.stopPrank();
-    }
-
-    function test_updateBand_UpdatesBandToNewLevel()
+    function test_updateBand_RevertIf_NewLevelIsTheSame()
         external
-        mintOneBandForUser
+        mintLevel2BandForAlice
     {
-        uint256 newPrice = sale.getLevelPriceInUSD(DEFAULT_NEW_LEVEL);
-        uint256 oldPrice = sale.getLevelPriceInUSD(DEFAULT_LEVEL);
-        uint256 upgradePrice = newPrice - oldPrice;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.NftSale__InvalidLevel.selector,
+                DEFAULT_LEVEL_2
+            )
+        );
+        vm.prank(alice);
+        sale.updateBand(NFT_TOKEN_ID_0, DEFAULT_LEVEL_2, tokenUSDT);
+    }
 
+    function test_updateBand_RevertIf_NewLevelIsTheSmaller()
+        external
+        mintLevel2BandForAlice
+    {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.NftSale__InvalidLevel.selector,
+                LEVEL_1
+            )
+        );
+        vm.prank(alice);
+        sale.updateBand(NFT_TOKEN_ID_0, LEVEL_1, tokenUSDT);
+    }
+
+    function test_updateBand_ChangesOldNftActivityTypeOnly()
+        external
+        mintLevel2BandForAlice
+    {
         vm.startPrank(alice);
         tokenUSDT.approve(address(sale), upgradePrice);
-        sale.updateBand(STARTER_TOKEN_ID, DEFAULT_NEW_LEVEL, tokenUSDT);
+        sale.updateBand(NFT_TOKEN_ID_0, LEVEL_3, tokenUSDT);
         vm.stopPrank();
 
-        INftSale.Band memory bandData = sale.getBand(STARTER_TOKEN_ID);
-        INftSale.Band memory newBandData = sale.getBand(FIRST_MINTED_TOKEN_ID);
+        INftSale.Band memory bandData = sale.getBand(NFT_TOKEN_ID_0);
 
-        assertEq(
-            nftContract.getNextTokenId(),
-            FIRST_MINTED_TOKEN_ID + 1,
-            "Token was not minted and ID not changed"
-        );
+        assertEq(bandData.level, DEFAULT_LEVEL_2, "Band level set incorrectly");
+        assertFalse(bandData.isGenesis, "Band set as genesis");
         assertEq(
             uint8(bandData.activityType),
             uint8(NFT_ACTIVITY_TYPE_DEACTIVATED),
             "Band not deactivated"
         );
-        assertEq(
-            uint8(newBandData.activityType),
-            uint8(NFT_ACTIVITY_TYPE_INACTIVE),
-            "Band not activated"
-        );
+    }
+
+    function test_updateBand_CreatesNewBand() external mintLevel2BandForAlice {
+        vm.startPrank(alice);
+        tokenUSDT.approve(address(sale), upgradePrice);
+        sale.updateBand(NFT_TOKEN_ID_0, LEVEL_3, tokenUSDT);
+        vm.stopPrank();
+
+        INftSale.Band memory bandData = sale.getBand(NFT_TOKEN_ID_1);
+
+        assertEq(bandData.level, LEVEL_3, "Band level set incorrectly");
         assertFalse(bandData.isGenesis, "Band set as genesis");
         assertEq(
-            newBandData.level,
-            DEFAULT_NEW_LEVEL,
-            "Band level set incorrectly"
-        );
-        assertEq(
-            nftContract.balanceOf(alice),
-            2,
-            "User did not receive new nft"
-        );
-        assertEq(
-            tokenUSDT.balanceOf(address(sale)),
-            oldPrice + upgradePrice,
-            "Funds not transfered"
+            uint8(bandData.activityType),
+            uint8(NFT_ACTIVITY_TYPE_INACTIVE),
+            "Band not deactivated"
         );
     }
 
-    function test_updateBand_TransferNftAndUpdateBand()
+    function test_updateBand_TransfersTokensFromMsgSender()
         external
-        mintOneBandForUser
+        mintLevel2BandForAlice
     {
-        assertEq(nftContract.balanceOf(admin), 0, "NFT pre-minted to admin");
-        assertEq(
-            nftContract.balanceOf(alice),
-            1,
-            "NFT not pre-minted to alice"
-        );
+        uint256 startingAliceBalance = tokenUSDT.balanceOf(alice);
 
-        uint256 newPrice = sale.getLevelPriceInUSD(DEFAULT_NEW_LEVEL);
-        uint256 oldPrice = sale.getLevelPriceInUSD(DEFAULT_LEVEL);
-        uint256 upgradePrice = newPrice - oldPrice;
-
-        vm.prank(admin);
-        nftContract.grantRole(MINTER_ROLE, address(alice));
-
-        vm.prank(alice);
-        nftContract.safeTransferFrom(alice, admin, STARTER_TOKEN_ID);
-
-        assertEq(
-            nftContract.balanceOf(admin),
-            1,
-            "NFT transfered to incorrect address"
-        );
-        assertEq(
-            nftContract.balanceOf(alice),
-            0,
-            "NFT transfered to incorrect address"
-        );
-
-        vm.startPrank(admin);
+        vm.startPrank(alice);
         tokenUSDT.approve(address(sale), upgradePrice);
-        sale.updateBand(STARTER_TOKEN_ID, DEFAULT_NEW_LEVEL, tokenUSDT);
+        sale.updateBand(NFT_TOKEN_ID_0, LEVEL_3, tokenUSDT);
         vm.stopPrank();
 
-        INftSale.Band memory starterBandData = sale.getBand(STARTER_TOKEN_ID);
-        INftSale.Band memory newBandData = sale.getBand(FIRST_MINTED_TOKEN_ID);
+        uint256 endingAliceBalance = tokenUSDT.balanceOf(alice);
 
         assertEq(
+            startingAliceBalance - upgradePrice,
+            endingAliceBalance,
+            "Tokens not transferred"
+        );
+    }
+
+    function test_updateBand_TransfersTokensToContract()
+        external
+        mintLevel2BandForAlice
+    {
+        uint256 startingContractBalance = tokenUSDT.balanceOf(address(sale));
+
+        vm.startPrank(alice);
+        tokenUSDT.approve(address(sale), upgradePrice);
+        sale.updateBand(NFT_TOKEN_ID_0, LEVEL_3, tokenUSDT);
+        vm.stopPrank();
+
+        uint256 endingContractBalance = tokenUSDT.balanceOf(address(sale));
+
+        assertEq(
+            startingContractBalance + upgradePrice,
+            endingContractBalance,
+            "Tokens not transferred"
+        );
+    }
+
+    function test_updateBand_MintsNewNft() external mintLevel2BandForAlice {
+        vm.startPrank(alice);
+        tokenUSDT.approve(address(sale), upgradePrice);
+        sale.updateBand(NFT_TOKEN_ID_0, LEVEL_3, tokenUSDT);
+        vm.stopPrank();
+
+        assertEq(nftContract.balanceOf(alice), 2, "User did not receive nft");
+        assertEq(
+            nftContract.ownerOf(NFT_TOKEN_ID_0),
+            alice,
+            "NFT not minted to correct address"
+        );
+        assertEq(
+            nftContract.ownerOf(NFT_TOKEN_ID_1),
+            alice,
+            "NFT not minted to correct address"
+        );
+        assertEq(
             nftContract.getNextTokenId(),
-            FIRST_MINTED_TOKEN_ID + 1,
+            NFT_TOKEN_ID_2,
             "Token was not minted and ID not changed"
         );
-        assertEq(
-            uint8(starterBandData.activityType),
-            uint8(NFT_ACTIVITY_TYPE_DEACTIVATED),
-            "Band not deactivated"
-        );
-        assertEq(
-            uint8(newBandData.activityType),
-            uint8(NFT_ACTIVITY_TYPE_INACTIVE),
-            "Band not activated"
-        );
-        assertFalse(starterBandData.isGenesis, "Band set as genesis");
-        assertEq(
-            newBandData.level,
-            DEFAULT_NEW_LEVEL,
-            "Band level set incorrectly"
-        );
-        assertEq(
-            nftContract.ownerOf(STARTER_TOKEN_ID),
-            admin,
-            "User did not receive new nft"
-        );
-        assertEq(
-            tokenUSDT.balanceOf(address(sale)),
-            oldPrice + upgradePrice,
-            "Funds not transfered"
-        );
+    }
+
+    function test_updateBand_EmitsPurchasePaidEvent()
+        external
+        mintLevel2BandForAlice
+    {
+        vm.prank(alice);
+        tokenUSDT.approve(address(sale), upgradePrice);
+
+        vm.expectEmit(true, true, true, true);
+        emit PurchasePaid(tokenUSDT, upgradePrice);
+
+        vm.prank(alice);
+        sale.mintBand(DEFAULT_LEVEL_2, tokenUSDT);
+    }
+
+    function test_updateBand_EmitsBandUpdated()
+        external
+        mintLevel2BandForAlice
+    {
+        vm.prank(alice);
+        tokenUSDT.approve(address(sale), upgradePrice);
+
+        vm.expectEmit(true, true, true, true);
+        emit BandUpdated(alice, NFT_TOKEN_ID_0, DEFAULT_LEVEL_2, LEVEL_3);
+
+        vm.prank(alice);
+        sale.updateBand(NFT_TOKEN_ID_0, LEVEL_3, tokenUSDT);
     }
 }

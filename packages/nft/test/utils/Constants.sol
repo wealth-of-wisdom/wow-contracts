@@ -1,28 +1,36 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
+
 import {INftSale} from "@wealth-of-wisdom/nft/contracts/interfaces/INftSale.sol";
 import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
 
 abstract contract Constants {
     bytes32 internal constant DEFAULT_ADMIN_ROLE = 0x00;
     bytes32 internal constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 internal constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+    bytes32 public constant WHITELISTED_SENDER_ROLE =
+        keccak256("WHITELISTED_SENDER_ROLE");
     bytes32 internal constant BENEFICIARIES_MANAGER_ROLE =
         keccak256("BENEFICIARIES_MANAGER_ROLE");
+
+    uint64 internal constant USD_DECIMALS = 10 ** 6;
+    uint256 internal constant WOW_DECIMALS = 10 ** 18;
 
     address internal constant ZERO_ADDRESS = address(0x0);
     uint256 internal constant INIT_ETH_BALANCE = type(uint128).max;
     uint256 internal constant INIT_TOKEN_BALANCE = type(uint128).max;
+    uint256 internal constant INITIAL_TOKEN_AMOUNT = 100_000 ether;
 
-    uint16 internal constant DEFAULT_LEVEL = 2;
-    uint16 internal constant DEFAULT_NEW_LEVEL = 3;
-    uint16 internal constant DEFAULT_PRICE = 500;
+    uint16 internal constant LEVEL_1 = 1;
+    uint16 internal constant DEFAULT_LEVEL_2 = 2;
+    uint16 internal constant LEVEL_3 = 3;
 
     uint16 internal constant DEFAULT_GENESIS_AMOUNT = 5;
-    uint256 internal constant TOTAL_TOKEN_AMOUNT = 100_000 ether;
-    uint256 internal constant STARTER_TOKEN_ID = 0;
-    uint256 internal constant FIRST_MINTED_TOKEN_ID = 1;
+    uint256 internal constant NFT_TOKEN_ID_0 = 0;
+    uint256 internal constant NFT_TOKEN_ID_1 = 1;
+    uint256 internal constant NFT_TOKEN_ID_2 = 2;
 
-    uint16 internal constant DEFAULT_PID = 0;
+    uint16 internal constant DEFAULT_VESTING_PID = 0;
     string internal constant POOL_NAME = "Test1";
     uint16 internal constant LISTING_PERCENTAGE_DIVIDEND = 1;
     uint16 internal constant LISTING_PERCENTAGE_DIVISOR = 20;
