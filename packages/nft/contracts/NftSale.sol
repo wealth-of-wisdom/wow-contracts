@@ -29,7 +29,6 @@ contract NftSale is
     //////////////////////////////////////////////////////////////////////////*/
 
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
-    bytes32 public constant BAND_MANAGER = keccak256("BAND_MANAGER");
 
     /*//////////////////////////////////////////////////////////////////////////
                                 PUBLIC STORAGE
@@ -57,7 +56,7 @@ contract NftSale is
         _;
     }
 
-    modifier mValidBandLevel(uint16 level) {
+    modifier mValidNftLevel(uint16 level) {
         if (level == 0 || level > s_nftContract.getMaxLevel()) {
             revert Errors.NftSale__InvalidLevel(level);
         }
@@ -84,7 +83,6 @@ contract NftSale is
 
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(UPGRADER_ROLE, msg.sender);
-        _grantRole(BAND_MANAGER, msg.sender);
 
         s_usdtToken = usdtToken;
         s_usdcToken = usdcToken;
@@ -95,49 +93,51 @@ contract NftSale is
                             EXTERNAL FUNCTIONS FOR USERS
     //////////////////////////////////////////////////////////////////////////*/
 
-    function mintBand(
+    function mintNft(
         uint16 level,
         IERC20 token
-    ) external mValidBandLevel(level) mTokenExists(token) {
+    ) external mValidNftLevel(level) mTokenExists(token) {
         uint256 cost = s_nftContract.getLevelData(level).price;
         uint256 tokenId = s_nftContract.getNextTokenId();
 
-        // Effects: set the band data
-        s_nftContract.setBandData(
+        // Effects: set nft data
+        s_nftContract.setNftData(
             tokenId,
             level,
             false,
-            INft.ActivityType.INACTIVE,
+            INft.ActivityType.NOT_ACTIVATED,
             0,
             0
         );
 
         // Effects: Transfer the payment to the contract
-        _purchaseBand(token, cost);
+        _purchaseNft(token, cost);
 
-        // Interaction: mint the band
+        // Interaction: mint the nft
         s_nftContract.safeMint(msg.sender);
-        emit BandMinted(msg.sender, tokenId, level, false, 0);
+        emit NftMinted(msg.sender, tokenId, level, false, 0);
     }
 
-    function updateBand(
+    function updateNft(
         uint256 tokenId,
         uint16 newLevel,
         IERC20 token
-    ) external mValidBandLevel(newLevel) mTokenExists(token) {
+    ) external mValidNftLevel(newLevel) mTokenExists(token) {
         if (s_nftContract.ownerOf(tokenId) != msg.sender) {
-            revert Errors.NftSale__NotBandOwner();
+            revert Errors.NftSale__NotNftOwner();
         }
 
-        INft.Band memory bandData = s_nftContract.getBand(tokenId);
-        uint16 currentLevel = bandData.level;
+        INft.NftData memory nftData = s_nftContract.getNftData(tokenId);
+        uint16 currentLevel = nftData.level;
 
-        // Checks: the band cannot be genesis or deactivated
+        // Checks: data cannot be genesis or deactivated
         if (
-            bandData.isGenesis ||
-            bandData.activityType == INft.ActivityType.DEACTIVATED
+            nftData.isGenesis ||
+            nftData.activityType == INft.ActivityType.DEACTIVATED ||
+            (nftData.activityType == INft.ActivityType.ACTIVATION_TRIGGERED &&
+                nftData.activityEndTimestamp <= block.timestamp)
         ) {
-            revert Errors.NftSale__UnupdatableBand();
+            revert Errors.NftSale__UnupdatableNft();
         }
 
         // Checks: the new level must be greater than current level
@@ -148,42 +148,42 @@ contract NftSale is
         uint256 upgradeCost = s_nftContract.getLevelData(newLevel).price -
             s_nftContract.getLevelData(currentLevel).price;
 
-        // Effects: Update the old band data and add new band
-        _updateBand(tokenId, currentLevel, newLevel);
+        // Effects: Update the old data and add new nft data
+        _updateNft(tokenId, currentLevel, newLevel);
 
         // Effects: Transfer the payment to the contract
-        _purchaseBand(token, upgradeCost);
+        _purchaseNft(token, upgradeCost);
 
-        // Interaction: mint the new band (we don't burn the old one)
+        // Interaction: mint the new data (we don't burn the old one)
         s_nftContract.safeMint(msg.sender);
 
-        emit BandUpdated(msg.sender, tokenId, currentLevel, newLevel);
+        emit NftUpdated(msg.sender, tokenId, currentLevel, newLevel);
     }
 
-    function mintGenesisBands(
-        address[] memory receiver,
-        uint16[] memory level
+    function mintGenesisNfts(
+        address[] memory receivers,
+        uint16[] memory levels
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        if (receiver.length != level.length)
+        if (receivers.length != levels.length)
             revert Errors.NftSale__MismatchInVariableLength();
         uint256 tokenId;
-        for (uint256 i; i < receiver.length; i++) {
+        for (uint256 i; i < receivers.length; i++) {
             tokenId = s_nftContract.getNextTokenId();
 
-            // Effects: set the band data
-            s_nftContract.setBandData(
+            // Effects: set nft data
+            s_nftContract.setNftData(
                 tokenId,
-                level[i],
+                levels[i],
                 true,
-                INft.ActivityType.INACTIVE,
+                INft.ActivityType.NOT_ACTIVATED,
                 0,
                 0
             );
 
-            // Interactions: mint genesis band
-            s_nftContract.safeMint(receiver[i]);
+            // Interactions: mint genesis nft
+            s_nftContract.safeMint(receivers[i]);
 
-            emit BandMinted(receiver[i], tokenId, level[i], true, 0);
+            emit NftMinted(receivers[i], tokenId, levels[i], true, 0);
         }
     }
 
@@ -236,15 +236,15 @@ contract NftSale is
         emit NftContractSet(newContract);
     }
 
-    function getTokenUSDT() public view returns (IERC20) {
+    function getTokenUSDT() external view returns (IERC20) {
         return s_usdtToken;
     }
 
-    function getTokenUSDC() public view returns (IERC20) {
+    function getTokenUSDC() external view returns (IERC20) {
         return s_usdcToken;
     }
 
-    function getNftContract() public view returns (INft) {
+    function getNftContract() external view returns (INft) {
         return s_nftContract;
     }
 
@@ -274,7 +274,7 @@ contract NftSale is
                             INTERAL FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
-    function _purchaseBand(
+    function _purchaseNft(
         IERC20 token,
         uint256 cost
     ) internal virtual mTokenExists(token) {
@@ -284,12 +284,12 @@ contract NftSale is
         emit PurchasePaid(token, cost);
     }
 
-    function _updateBand(
+    function _updateNft(
         uint256 tokenId,
         uint16 oldLevel,
         uint16 newLevel
     ) internal virtual {
-        s_nftContract.setBandData(
+        s_nftContract.setNftData(
             tokenId,
             oldLevel,
             false,
@@ -299,11 +299,11 @@ contract NftSale is
         );
 
         uint256 newTokenId = s_nftContract.getNextTokenId();
-        s_nftContract.setBandData(
+        s_nftContract.setNftData(
             newTokenId,
             newLevel,
             false,
-            INft.ActivityType.INACTIVE,
+            INft.ActivityType.NOT_ACTIVATED,
             0,
             0
         );

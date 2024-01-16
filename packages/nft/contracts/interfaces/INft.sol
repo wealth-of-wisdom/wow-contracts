@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
-import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
 
 interface INftEvents {
@@ -16,7 +15,7 @@ interface INftEvents {
 
     event VestingContractSet(IVesting newContract);
 
-    event BandActivated(
+    event NftDataActivated(
         address indexed receiver,
         uint256 indexed tokenId,
         uint16 level,
@@ -30,14 +29,14 @@ interface INftEvents {
         uint256 newPrice,
         uint256 newVestingRewardWOWTokens,
         uint256 newlifecycleTimestamp,
-        uint256 newLifecycleExtensionInMonths,
+        uint256 newlifecycleExtensionTimestamp,
         uint256 allocationPerProject
     );
 
     event ProjectPerLifecycle(
         uint16 level,
         uint8 project,
-        uint16 NftLifecycleProjectAmount
+        uint16 projectsQuantityInLifecycle
     );
 }
 
@@ -48,14 +47,14 @@ interface INft is INftEvents {
 
     enum ActivityType {
         DEACTIVATED,
-        INACTIVE,
-        ACTIVATED
+        NOT_ACTIVATED,
+        ACTIVATION_TRIGGERED
     }
     /*//////////////////////////////////////////////////////////////////////////
                                        STRUCTS
     //////////////////////////////////////////////////////////////////////////*/
 
-    struct Band {
+    struct NftData {
         uint16 level;
         bool isGenesis;
         ActivityType activityType;
@@ -65,14 +64,14 @@ interface INft is INftEvents {
 
     /**
      * @param price -Price for NFT level purchase
-     * @param vBandActivatedestingRewardWOWTokens -  Tokens that will be invested into the
+     * @param vestingRewardWOWTokens -  Tokens that will be invested into the
      * vesting pool as a reward for purchasing this NFT level
      **/
     struct NftLevel {
         uint256 price;
         uint256 vestingRewardWOWTokens;
         uint256 lifecycleTimestamp;
-        uint256 lifecycleExtensionInMonths;
+        uint256 lifecycleExtensionTimestamp;
         uint256 allocationPerProject;
     }
 
@@ -87,9 +86,9 @@ interface INft is INftEvents {
 
     function safeMint(address to) external;
 
-    function activateBand(uint256 tokenId) external;
+    function activateNftData(uint256 tokenId) external;
 
-    function setBandData(
+    function setNftData(
         uint256 tokenId,
         uint16 level,
         bool isGenesis,
@@ -109,24 +108,26 @@ interface INft is INftEvents {
         uint256 newPrice,
         uint256 newVestingRewardWOWTokens,
         uint256 newlifecycleTimestamp,
-        uint256 newLifecycleExtensionInMonths,
+        uint256 newlifecycleExtensionTimestamp,
         uint256 newAllocationPerProject
     ) external;
 
     function setProjectLifecycle(
         uint16 level,
         uint8 project,
-        uint16 NftLifecycleProjectAmount
+        uint16 projectsQuantityInLifecycle
     ) external;
 
     function setMultipleLevelLifecyclesPerProject(
         uint8 project,
-        uint16[] memory nftLifecycleProjectAmount
+        uint16[] memory projectsQuantityInLifecycle
     ) external;
 
     function setVestingContract(IVesting newContract) external;
 
-    function getBand(uint256 tokenId) external view returns (Band memory);
+    function transferFrom(address from, address to, uint256 tokenId) external;
+
+    function getNftData(uint256 tokenId) external view returns (NftData memory);
 
     function getLevelData(uint16 level) external view returns (NftLevel memory);
 
@@ -144,8 +145,6 @@ interface INft is INftEvents {
     ) external view returns (uint16);
 
     function ownerOf(uint256 tokenId) external view returns (address owner);
-
-    function transferFrom(address from, address to, uint256 tokenId) external;
 
     function supportsInterface(bytes4 interfaceId) external view returns (bool);
 

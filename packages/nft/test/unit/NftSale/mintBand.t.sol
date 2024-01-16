@@ -22,13 +22,13 @@ contract NftSale_MintBand_Unit_Test is NftSale_Unit_Test {
     function test_mintBand_RevertIf_NonExistantPayment() external {
         vm.expectRevert(Errors.NftSale__NonExistantPayment.selector);
         vm.prank(alice);
-        sale.mintBand(DEFAULT_LEVEL_2, IERC20(makeAddr("FakeToken")));
+        sale.mintNft(DEFAULT_LEVEL_2, IERC20(makeAddr("FakeToken")));
     }
 
     function test_mintBand_RevertIf_TokenIsZeroAddress() external {
         vm.expectRevert(Errors.NftSale__NonExistantPayment.selector);
         vm.prank(alice);
-        sale.mintBand(DEFAULT_LEVEL_2, IERC20(ZERO_ADDRESS));
+        sale.mintNft(DEFAULT_LEVEL_2, IERC20(ZERO_ADDRESS));
     }
 
     function test_mintBand_RevertIf_InvalidLevel() external {
@@ -40,28 +40,28 @@ contract NftSale_MintBand_Unit_Test is NftSale_Unit_Test {
             )
         );
         vm.prank(alice);
-        sale.mintBand(fakeLevel, tokenUSDT);
+        sale.mintNft(fakeLevel, tokenUSDT);
     }
 
     function test_mintBand_SetsBandDataCorrectly() external {
         vm.prank(alice);
-        sale.mintBand(DEFAULT_LEVEL_2, tokenUSDT);
+        sale.mintNft(DEFAULT_LEVEL_2, tokenUSDT);
 
-        INftSale.Band memory bandData = sale.getBand(NFT_TOKEN_ID_0);
+        INftSale.Band memory nftData = sale.getNftData(NFT_TOKEN_ID_0);
         assertEq(
-            uint8(bandData.activityType),
+            uint8(nftData.activityType),
             uint8(NFT_ACTIVITY_TYPE_INACTIVE),
             "Band not activated"
         );
-        assertFalse(bandData.isGenesis, "Band set as genesis");
-        assertEq(bandData.level, DEFAULT_LEVEL_2, "Band level set incorrectly");
+        assertFalse(nftData.isGenesis, "Band set as genesis");
+        assertEq(nftData.level, DEFAULT_LEVEL_2, "Band level set incorrectly");
     }
 
     function test_mintBand_TransfersTokensFromMsgSender() external {
         uint256 startingAliceBalance = tokenUSDT.balanceOf(alice);
 
         vm.prank(alice);
-        sale.mintBand(DEFAULT_LEVEL_2, tokenUSDT);
+        sale.mintNft(DEFAULT_LEVEL_2, tokenUSDT);
 
         uint256 endingAliceBalance = tokenUSDT.balanceOf(alice);
 
@@ -76,7 +76,7 @@ contract NftSale_MintBand_Unit_Test is NftSale_Unit_Test {
         uint256 startingContractBalance = tokenUSDT.balanceOf(address(sale));
 
         vm.prank(alice);
-        sale.mintBand(DEFAULT_LEVEL_2, tokenUSDT);
+        sale.mintNft(DEFAULT_LEVEL_2, tokenUSDT);
 
         uint256 endingContractBalance = tokenUSDT.balanceOf(address(sale));
 
@@ -89,7 +89,7 @@ contract NftSale_MintBand_Unit_Test is NftSale_Unit_Test {
 
     function test_mintBand_MintsNewNft() external {
         vm.prank(alice);
-        sale.mintBand(DEFAULT_LEVEL_2, tokenUSDT);
+        sale.mintNft(DEFAULT_LEVEL_2, tokenUSDT);
 
         assertEq(nftContract.balanceOf(alice), 1, "User did not receive nft");
         assertEq(
@@ -109,14 +109,14 @@ contract NftSale_MintBand_Unit_Test is NftSale_Unit_Test {
         emit PurchasePaid(tokenUSDT, level2Price);
 
         vm.prank(alice);
-        sale.mintBand(DEFAULT_LEVEL_2, tokenUSDT);
+        sale.mintNft(DEFAULT_LEVEL_2, tokenUSDT);
     }
 
     function test_mintBand_EmitsBandMintedEvent() external {
         vm.expectEmit(true, true, true, true);
-        emit BandMinted(alice, NFT_TOKEN_ID_0, DEFAULT_LEVEL_2, false);
+        emit NftMinted(alice, NFT_TOKEN_ID_0, DEFAULT_LEVEL_2, false);
 
         vm.prank(alice);
-        sale.mintBand(DEFAULT_LEVEL_2, tokenUSDT);
+        sale.mintNft(DEFAULT_LEVEL_2, tokenUSDT);
     }
 }

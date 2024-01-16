@@ -2,7 +2,6 @@
 pragma solidity 0.8.20;
 
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
-import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
 import {INft} from "../interfaces/INft.sol";
 
 interface INftSaleEvents {
@@ -10,7 +9,7 @@ interface INftSaleEvents {
                                        EVENTS
     //////////////////////////////////////////////////////////////////////////*/
 
-    event BandMinted(
+    event NftMinted(
         address indexed receiver,
         uint256 indexed tokenId,
         uint16 level,
@@ -18,7 +17,7 @@ interface INftSaleEvents {
         uint256 activityEndTimestamp
     );
 
-    event BandUpdated(
+    event NftUpdated(
         address indexed owner,
         uint256 indexed tokenId,
         uint16 oldLevel,
@@ -44,7 +43,7 @@ interface INftSaleEvents {
         uint256 newPrice,
         uint256 newVestingRewardWOWTokens,
         uint256 newlifecycleTimestamp,
-        uint256 newLifecycleExtensionInMonths,
+        uint256 newlifecycleExtensionTimestamp,
         uint256 allocationPerProject
     );
 
@@ -64,19 +63,15 @@ interface INftSale is INftSaleEvents {
         INft contractNFT
     ) external;
 
-    function mintBand(uint16 level, IERC20 token) external;
+    function mintNft(uint16 level, IERC20 token) external;
 
-    function updateBand(
-        uint256 tokenId,
-        uint16 newLevel,
-        IERC20 token
-    ) external;
+    function updateNft(uint256 tokenId, uint16 newLevel, IERC20 token) external;
 
     function withdrawTokens(IERC20 token, uint256 amount) external;
 
-    function mintGenesisBands(
-        address[] memory receiver,
-        uint16[] memory level
+    function mintGenesisNfts(
+        address[] memory receivers,
+        uint16[] memory levels
     ) external;
 
     function setUSDTToken(IERC20 newToken) external;

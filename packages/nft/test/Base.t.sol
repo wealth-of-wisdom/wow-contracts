@@ -79,7 +79,7 @@ contract Base_Test is Test, Constants, Events {
         vm.startPrank(alice);
         uint256 price = sale.getLevelPriceInUSD(DEFAULT_LEVEL_2);
         tokenUSDT.approve(address(sale), price);
-        sale.mintBand(DEFAULT_LEVEL_2, tokenUSDT);
+        sale.mintNft(DEFAULT_LEVEL_2, tokenUSDT);
         vm.stopPrank();
     }
 }

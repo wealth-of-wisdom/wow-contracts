@@ -65,22 +65,22 @@ contract NftSale_MintGenesisBand_Unit_Test is NftSale_Unit_Test {
         vm.prank(admin);
         sale.mintGenesisBand(alice, DEFAULT_LEVEL_2, 1);
 
-        INftSale.Band memory bandData = sale.getBand(NFT_TOKEN_ID_0);
-        assertGenesisBand(bandData, DEFAULT_LEVEL_2);
+        INftSale.Band memory nftData = sale.getNftData(NFT_TOKEN_ID_0);
+        assertGenesisBand(nftData, DEFAULT_LEVEL_2);
     }
 
     function test_mintGenesisBand_Creates5NewBands() external {
         vm.prank(admin);
         sale.mintGenesisBand(alice, DEFAULT_LEVEL_2, DEFAULT_GENESIS_AMOUNT);
 
-        INftSale.Band memory bandData = sale.getBand(NFT_TOKEN_ID_0);
-        assertGenesisBand(bandData, DEFAULT_LEVEL_2);
+        INftSale.Band memory nftData = sale.getNftData(NFT_TOKEN_ID_0);
+        assertGenesisBand(nftData, DEFAULT_LEVEL_2);
 
-        assertGenesisBand(sale.getBand(NFT_TOKEN_ID_0), DEFAULT_LEVEL_2);
-        assertGenesisBand(sale.getBand(NFT_TOKEN_ID_1), DEFAULT_LEVEL_2);
-        assertGenesisBand(sale.getBand(NFT_TOKEN_ID_2), DEFAULT_LEVEL_2);
-        assertGenesisBand(sale.getBand(3), DEFAULT_LEVEL_2);
-        assertGenesisBand(sale.getBand(4), DEFAULT_LEVEL_2);
+        assertGenesisBand(sale.getNftData(NFT_TOKEN_ID_0), DEFAULT_LEVEL_2);
+        assertGenesisBand(sale.getNftData(NFT_TOKEN_ID_1), DEFAULT_LEVEL_2);
+        assertGenesisBand(sale.getNftData(NFT_TOKEN_ID_2), DEFAULT_LEVEL_2);
+        assertGenesisBand(sale.getNftData(3), DEFAULT_LEVEL_2);
+        assertGenesisBand(sale.getNftData(4), DEFAULT_LEVEL_2);
     }
 
     function test_mintGenesisBand_Mints1Nft() external {
@@ -139,19 +139,19 @@ contract NftSale_MintGenesisBand_Unit_Test is NftSale_Unit_Test {
 
     function test_mintGenesisBand_EmitsBandMintedEvent5Times() external {
         vm.expectEmit(true, true, true, true);
-        emit BandMinted(alice, NFT_TOKEN_ID_0, DEFAULT_LEVEL_2, true);
+        emit NftMinted(alice, NFT_TOKEN_ID_0, DEFAULT_LEVEL_2, true);
 
         vm.expectEmit(true, true, true, true);
-        emit BandMinted(alice, NFT_TOKEN_ID_1, DEFAULT_LEVEL_2, true);
+        emit NftMinted(alice, NFT_TOKEN_ID_1, DEFAULT_LEVEL_2, true);
 
         vm.expectEmit(true, true, true, true);
-        emit BandMinted(alice, NFT_TOKEN_ID_2, DEFAULT_LEVEL_2, true);
+        emit NftMinted(alice, NFT_TOKEN_ID_2, DEFAULT_LEVEL_2, true);
 
         vm.expectEmit(true, true, true, true);
-        emit BandMinted(alice, 3, DEFAULT_LEVEL_2, true);
+        emit NftMinted(alice, 3, DEFAULT_LEVEL_2, true);
 
         vm.expectEmit(true, true, true, true);
-        emit BandMinted(alice, 4, DEFAULT_LEVEL_2, true);
+        emit NftMinted(alice, 4, DEFAULT_LEVEL_2, true);
 
         vm.prank(admin);
         sale.mintGenesisBand(alice, DEFAULT_LEVEL_2, DEFAULT_GENESIS_AMOUNT);

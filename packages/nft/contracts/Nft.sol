@@ -25,8 +25,8 @@ contract Nft is
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     bytes32 public constant WHITELISTED_SENDER_ROLE =
-        keccak256("WHITELISTED_SENDER_ROLE");
-    bytes32 public constant BAND_MANAGER = keccak256("BAND_MANAGER");
+        keccak256("WHITELISTED_SENDER_ROLE"); // for transfer authorization
+    bytes32 public constant NFT_DATA_MANAGER = keccak256("NFT_DATA_MANAGER");
 
     /*//////////////////////////////////////////////////////////////////////////
                                 PUBLIC STORAGE
@@ -39,10 +39,10 @@ contract Nft is
     //////////////////////////////////////////////////////////////////////////*/
 
     /* solhint-disable var-name-mixedcase */
-    mapping(uint256 => Band) internal s_bands; // token ID => band
+    mapping(uint256 => NftData) internal s_nftData; // token ID => nft data
     mapping(uint16 => NftLevel) internal s_nftLevels; // level => level data
     // level => project => project amount
-    mapping(uint16 => mapping(uint8 => uint16)) internal s_projectsPerNft;
+    mapping(uint16 => mapping(uint16 => uint16)) internal s_projectsPerNft;
     uint16 internal s_maxLevel;
     uint16 internal s_promotionalVestingPID;
     uint256 internal s_genesisTokenDivisor;
@@ -82,6 +82,7 @@ contract Nft is
         _grantRole(MINTER_ROLE, msg.sender);
         _grantRole(UPGRADER_ROLE, msg.sender);
         _grantRole(WHITELISTED_SENDER_ROLE, msg.sender);
+        _grantRole(NFT_DATA_MANAGER, msg.sender);
 
         s_maxLevel = maxLevel;
         s_promotionalVestingPID = promotionalVestingPID;
@@ -95,38 +96,39 @@ contract Nft is
         _safeMint(to, tokenId);
     }
 
-    function activateBand(uint256 tokenId) external {
+    function activateNftData(uint256 tokenId) external {
         if (ownerOf(tokenId) != msg.sender) {
-            revert Errors.NftSale__NotBandOwner();
+            revert Errors.NftSale__NotNftOwner();
         }
 
-        Band memory bandData = s_bands[tokenId];
+        NftData memory nftData = s_nftData[tokenId];
 
-        // Checks: the band must not be activated
-        if (bandData.activityType == ActivityType.ACTIVATED) {
+        // Checks: data must not be activated
+        if (nftData.activityType != ActivityType.NOT_ACTIVATED) {
             revert Errors.NftSale__AlreadyActivated();
         }
 
-        // Effects: update the band activity
-        bandData.activityType = ActivityType.ACTIVATED;
-        bandData.activityEndTimestamp =
+        // Effects: update data activity
+        nftData.activityType = ActivityType.ACTIVATION_TRIGGERED;
+        nftData.activityEndTimestamp =
             block.timestamp +
-            s_nftLevels[bandData.level].lifecycleTimestamp;
-        bandData.extendedActivityEndTimestamp =
-            bandData.activityEndTimestamp +
-            s_nftLevels[bandData.level].lifecycleExtensionInMonths;
+            s_nftLevels[nftData.level].lifecycleTimestamp;
+        nftData.extendedActivityEndTimestamp =
+            nftData.activityEndTimestamp +
+            s_nftLevels[nftData.level].lifecycleExtensionTimestamp;
 
-        (, , , uint256 vestingPoolBalance) = s_vestingContract
-            .getGeneralPoolData(s_promotionalVestingPID);
-        NftLevel memory nftLevelData = s_nftLevels[bandData.level];
+        (, , , uint256 dedicatedTokens) = s_vestingContract.getGeneralPoolData(
+            s_promotionalVestingPID
+        );
+        NftLevel memory nftLevelData = s_nftLevels[nftData.level];
 
-        uint256 rewardTokens = bandData.isGenesis
-            ? (nftLevelData.vestingRewardWOWTokens * nftLevelData.price) /
-                s_genesisTokenDivisor
+        uint256 rewardTokens = nftData.isGenesis
+            ? nftLevelData.vestingRewardWOWTokens *
+                (nftLevelData.price / s_genesisTokenDivisor)
             : nftLevelData.vestingRewardWOWTokens;
 
-        rewardTokens = (vestingPoolBalance < rewardTokens)
-            ? vestingPoolBalance
+        rewardTokens = (dedicatedTokens < rewardTokens)
+            ? dedicatedTokens
             : rewardTokens;
 
         if (rewardTokens > 0) {
@@ -136,13 +138,13 @@ contract Nft is
                 rewardTokens
             );
         }
-        emit BandActivated(
+        emit NftDataActivated(
             msg.sender,
             tokenId,
-            bandData.level,
-            bandData.isGenesis,
-            uint256(bandData.activityType),
-            bandData.activityEndTimestamp
+            nftData.level,
+            nftData.isGenesis,
+            uint256(nftData.activityType),
+            nftData.activityEndTimestamp
         );
     }
 
@@ -150,15 +152,15 @@ contract Nft is
                             FUNCTIONS FOR ADMIN ROLE
     //////////////////////////////////////////////////////////////////////////*/
 
-    function setBandData(
+    function setNftData(
         uint256 tokenId,
         uint16 level,
         bool isGenesis,
         ActivityType activityType,
         uint256 activityEndTimestamp,
         uint256 extendedActivityEndTimestamp
-    ) external onlyRole(BAND_MANAGER) {
-        s_bands[tokenId] = Band({
+    ) external onlyRole(NFT_DATA_MANAGER) {
+        s_nftData[tokenId] = NftData({
             level: level,
             isGenesis: isGenesis,
             activityType: activityType,
@@ -205,14 +207,14 @@ contract Nft is
         uint256 newPrice,
         uint256 newVestingRewardWOWTokens,
         uint256 newLifecycleTimestamp,
-        uint256 newLifecycleExtensionInMonths,
+        uint256 newlifecycleExtensionTimestamp,
         uint256 newAllocationPerProject
     ) external onlyRole(DEFAULT_ADMIN_ROLE) mAmountNotZero(newPrice) {
         s_nftLevels[level] = NftLevel({
             price: newPrice,
             vestingRewardWOWTokens: newVestingRewardWOWTokens,
             lifecycleTimestamp: newLifecycleTimestamp,
-            lifecycleExtensionInMonths: newLifecycleExtensionInMonths,
+            lifecycleExtensionTimestamp: newlifecycleExtensionTimestamp,
             allocationPerProject: newAllocationPerProject
         });
         emit LevelDataSet(
@@ -220,7 +222,7 @@ contract Nft is
             newPrice,
             newVestingRewardWOWTokens,
             newLifecycleTimestamp,
-            newLifecycleExtensionInMonths,
+            newlifecycleExtensionTimestamp,
             newAllocationPerProject
         );
     }
@@ -228,24 +230,26 @@ contract Nft is
     function setProjectLifecycle(
         uint16 level,
         uint8 project,
-        uint16 nftLifecycleProjectAmount
+        uint16 projectsQuantityInLifecycle
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        s_projectsPerNft[level][project] = nftLifecycleProjectAmount;
-        emit ProjectPerLifecycle(level, project, nftLifecycleProjectAmount);
+        s_projectsPerNft[level][project] = projectsQuantityInLifecycle;
+        emit ProjectPerLifecycle(level, project, projectsQuantityInLifecycle);
     }
 
     function setMultipleLevelLifecyclesPerProject(
         uint8 project,
-        uint16[] memory nftLifecycleProjectAmount
+        uint16[] memory projectsQuantityInLifecycle
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        if (nftLifecycleProjectAmount.length != s_maxLevel)
+        if (projectsQuantityInLifecycle.length != s_maxLevel)
             revert Errors.NftSale__MismatchInVariableLength();
         for (uint16 level; level < s_maxLevel; level++) {
-            s_projectsPerNft[level][project] = nftLifecycleProjectAmount[level];
+            s_projectsPerNft[level][project] = projectsQuantityInLifecycle[
+                level
+            ];
             emit ProjectPerLifecycle(
                 level,
                 project,
-                nftLifecycleProjectAmount[level]
+                projectsQuantityInLifecycle[level]
             );
         }
     }
@@ -264,8 +268,8 @@ contract Nft is
                             EXTERNAL VIEW/PURE FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
-    function getBand(uint256 tokenId) public view returns (Band memory) {
-        return s_bands[tokenId];
+    function getNftData(uint256 tokenId) public view returns (NftData memory) {
+        return s_nftData[tokenId];
     }
 
     function getLevelData(uint16 level) public view returns (NftLevel memory) {

@@ -20,9 +20,9 @@ library Errors {
     error NftSale__TransferFailed();
     error NftSale__MismatchInVariableLength();
     error NftSale__InvalidTokenId();
-    error NftSale__NotBandOwner();
+    error NftSale__NotNftOwner();
     error NftSale__NonExistantPayment();
-    error NftSale__UnupdatableBand();
+    error NftSale__UnupdatableNft();
     error NftSale__PassedZeroAmount();
     error NftSale__ZeroAddress();
     error NftSale__AlreadyActivated();
