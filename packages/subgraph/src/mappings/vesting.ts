@@ -108,9 +108,6 @@ export function handleBeneficiaryAdded(event: BeneficiaryAddedEvent): void {
     beneficiary.stakedTokens = beneficiaryData.stakedTokenAmount;
     beneficiary.claimedTokens = beneficiaryData.claimedTokenAmount;
 
-    // @note total amounts is the tokens are allocated to the person, but i can be done more than once
-    beneficiary.totalTokens = beneficiary.totalTokens.plus(event.params.addedTokenAmount);
-
     beneficiary.save();
 
 }
@@ -199,9 +196,6 @@ export function handleTokensClaimed(event: TokensClaimedEvent): void {
 
     // sum claimed amount
     beneficiary.claimedTokens = beneficiary.claimedTokens.plus(event.params.tokenAmount);
-
-    // remove vested tokens because they are claimed
-    beneficiary.vestedTokens = beneficiary.vestedTokens.minus(event.params.tokenAmount);
 
     // @note I think also needed total tokens that are claimed removed from total tokens (not sure about that)
     beneficiary.save();
