@@ -108,8 +108,8 @@ contract NftSale is
             level,
             false,
             INft.ActivityType.INACTIVE,
-            block.timestamp,
-            block.timestamp
+            0,
+            0
         );
 
         // Effects: Transfer the payment to the contract
@@ -117,7 +117,7 @@ contract NftSale is
 
         // Interaction: mint the band
         s_nftContract.safeMint(msg.sender);
-        emit BandMinted(msg.sender, tokenId, level, false, block.timestamp);
+        emit BandMinted(msg.sender, tokenId, level, false, 0);
     }
 
     function updateBand(
@@ -176,20 +176,14 @@ contract NftSale is
                 level[i],
                 true,
                 INft.ActivityType.INACTIVE,
-                block.timestamp,
-                block.timestamp
+                0,
+                0
             );
 
             // Interactions: mint genesis band
             s_nftContract.safeMint(receiver[i]);
 
-            emit BandMinted(
-                receiver[i],
-                tokenId,
-                level[i],
-                true,
-                block.timestamp
-            );
+            emit BandMinted(receiver[i], tokenId, level[i], true, 0);
         }
     }
 
@@ -300,8 +294,8 @@ contract NftSale is
             oldLevel,
             false,
             INft.ActivityType.DEACTIVATED,
-            block.timestamp,
-            block.timestamp
+            0,
+            0
         );
 
         uint256 newTokenId = s_nftContract.getNextTokenId();
@@ -310,8 +304,8 @@ contract NftSale is
             newLevel,
             false,
             INft.ActivityType.INACTIVE,
-            block.timestamp,
-            block.timestamp
+            0,
+            0
         );
     }
 
