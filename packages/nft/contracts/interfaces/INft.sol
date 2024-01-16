@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
+import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
 
 interface INftEvents {
     /*//////////////////////////////////////////////////////////////////////////
@@ -12,6 +13,17 @@ interface INftEvents {
     event DivisorSet(uint256 newGenesisTokenDivisor);
 
     event PromotionalVestingPIDSet(uint16 newPID);
+
+    event VestingContractSet(IVesting newContract);
+
+    event BandActivated(
+        address indexed receiver,
+        uint256 indexed tokenId,
+        uint16 level,
+        bool isGenesis,
+        uint256 activityType,
+        uint256 activityEndTimestamp
+    );
 
     event LevelDataSet(
         uint16 newLevel,
@@ -37,8 +49,7 @@ interface INft is INftEvents {
     enum ActivityType {
         DEACTIVATED,
         INACTIVE,
-        ACTIVATED,
-        EXTENDED
+        ACTIVATED
     }
     /*//////////////////////////////////////////////////////////////////////////
                                        STRUCTS
@@ -48,7 +59,8 @@ interface INft is INftEvents {
         uint16 level;
         bool isGenesis;
         ActivityType activityType;
-        uint256 activityTimestamp;
+        uint256 activityEndTimestamp;
+        uint256 extendedActivityEndTimestamp;
     }
 
     /**
@@ -67,6 +79,7 @@ interface INft is INftEvents {
     function initialize(
         string memory name,
         string memory symbol,
+        IVesting vestingContract,
         uint16 maxLevel,
         uint16 promotionalVestingPID,
         uint256 genesisTokenDivisor
@@ -74,11 +87,15 @@ interface INft is INftEvents {
 
     function safeMint(address to) external;
 
+    function activateBand(uint256 tokenId) external;
+
     function setBandData(
         uint256 tokenId,
         uint16 level,
         bool isGenesis,
-        ActivityType activityType
+        ActivityType activityType,
+        uint256 activityEndTimestamp,
+        uint256 extendedActivityEndTimestamp
     ) external;
 
     function setMaxLevel(uint16 maxLevel) external;
@@ -107,6 +124,8 @@ interface INft is INftEvents {
         uint16[] memory nftLifecycleProjectAmount
     ) external;
 
+    function setVestingContract(IVesting newContract) external;
+
     function getBand(uint256 tokenId) external view returns (Band memory);
 
     function getLevelData(uint16 level) external view returns (NftLevel memory);
@@ -129,4 +148,6 @@ interface INft is INftEvents {
     function transferFrom(address from, address to, uint256 tokenId) external;
 
     function supportsInterface(bytes4 interfaceId) external view returns (bool);
+
+    function getVestingContract() external view returns (IVesting);
 }

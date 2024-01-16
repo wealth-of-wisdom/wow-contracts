@@ -8,6 +8,7 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
 import {INft} from "@wealth-of-wisdom/nft/contracts/interfaces/INft.sol";
+import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
 
 contract Nft is
     INft,
@@ -26,6 +27,12 @@ contract Nft is
     bytes32 public constant WHITELISTED_SENDER_ROLE =
         keccak256("WHITELISTED_SENDER_ROLE");
     bytes32 public constant BAND_MANAGER = keccak256("BAND_MANAGER");
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                PUBLIC STORAGE
+    //////////////////////////////////////////////////////////////////////////*/
+
+    IVesting internal s_vestingContract;
 
     /*//////////////////////////////////////////////////////////////////////////
                                 INTERNAL STORAGE
@@ -57,6 +64,7 @@ contract Nft is
     function initialize(
         string memory name,
         string memory symbol,
+        IVesting vestingContract,
         uint16 maxLevel,
         uint16 promotionalVestingPID,
         uint256 genesisTokenDivisor
@@ -78,11 +86,64 @@ contract Nft is
         s_maxLevel = maxLevel;
         s_promotionalVestingPID = promotionalVestingPID;
         s_genesisTokenDivisor = genesisTokenDivisor;
+
+        s_vestingContract = vestingContract;
     }
 
     function safeMint(address to) external onlyRole(MINTER_ROLE) {
         uint256 tokenId = s_nextTokenId++;
         _safeMint(to, tokenId);
+    }
+
+    function activateBand(uint256 tokenId) external {
+        if (ownerOf(tokenId) != msg.sender) {
+            revert Errors.NftSale__NotBandOwner();
+        }
+
+        Band memory bandData = s_bands[tokenId];
+
+        // Checks: the band must not be activated
+        if (bandData.activityType == ActivityType.ACTIVATED) {
+            revert Errors.NftSale__AlreadyActivated();
+        }
+
+        // Effects: update the band activity
+        bandData.activityType = ActivityType.ACTIVATED;
+        bandData.activityEndTimestamp =
+            block.timestamp +
+            s_nftLevels[bandData.level].lifecycleTimestamp;
+        bandData.extendedActivityEndTimestamp =
+            bandData.activityEndTimestamp +
+            s_nftLevels[bandData.level].lifecycleExtensionInMonths;
+
+        (, , , uint256 vestingPoolBalance) = s_vestingContract
+            .getGeneralPoolData(s_promotionalVestingPID);
+        NftLevel memory nftLevelData = s_nftLevels[bandData.level];
+
+        uint256 rewardTokens = bandData.isGenesis
+            ? (nftLevelData.vestingRewardWOWTokens * nftLevelData.price) /
+                s_genesisTokenDivisor
+            : nftLevelData.vestingRewardWOWTokens;
+
+        rewardTokens = (vestingPoolBalance < rewardTokens)
+            ? vestingPoolBalance
+            : rewardTokens;
+
+        if (rewardTokens > 0) {
+            s_vestingContract.addBeneficiary(
+                s_promotionalVestingPID,
+                msg.sender,
+                rewardTokens
+            );
+        }
+        emit BandActivated(
+            msg.sender,
+            tokenId,
+            bandData.level,
+            bandData.isGenesis,
+            uint256(bandData.activityType),
+            bandData.activityEndTimestamp
+        );
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -93,13 +154,16 @@ contract Nft is
         uint256 tokenId,
         uint16 level,
         bool isGenesis,
-        ActivityType activityType
+        ActivityType activityType,
+        uint256 activityEndTimestamp,
+        uint256 extendedActivityEndTimestamp
     ) external onlyRole(BAND_MANAGER) {
         s_bands[tokenId] = Band({
             level: level,
             isGenesis: isGenesis,
             activityType: activityType,
-            activityTimestamp: block.timestamp
+            activityEndTimestamp: activityEndTimestamp,
+            extendedActivityEndTimestamp: extendedActivityEndTimestamp
         });
     }
 
@@ -186,11 +250,21 @@ contract Nft is
         }
     }
 
+    function setVestingContract(
+        IVesting newContract
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (address(newContract) == address(0)) {
+            revert Errors.NftSale__ZeroAddress();
+        }
+        s_vestingContract = newContract;
+        emit VestingContractSet(newContract);
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                             EXTERNAL VIEW/PURE FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
-    function getBand(uint256 tokenId) external view returns (Band memory) {
+    function getBand(uint256 tokenId) public view returns (Band memory) {
         return s_bands[tokenId];
     }
 
@@ -198,11 +272,11 @@ contract Nft is
         return s_nftLevels[level];
     }
 
-    function getNextTokenId() external view returns (uint256) {
+    function getNextTokenId() public view returns (uint256) {
         return s_nextTokenId;
     }
 
-    function getMaxLevel() external view returns (uint16) {
+    function getMaxLevel() public view returns (uint16) {
         return s_maxLevel;
     }
 
@@ -210,7 +284,7 @@ contract Nft is
         return s_genesisTokenDivisor;
     }
 
-    function getPromotionalPID() external view returns (uint16) {
+    function getPromotionalPID() public view returns (uint16) {
         return s_promotionalVestingPID;
     }
 
@@ -219,6 +293,10 @@ contract Nft is
         uint8 project
     ) public view returns (uint16) {
         return s_projectsPerNft[level][project];
+    }
+
+    function getVestingContract() external view returns (IVesting) {
+        return s_vestingContract;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -259,6 +337,6 @@ contract Nft is
     ) internal override onlyRole(UPGRADER_ROLE) {}
 
     // The following functions are overrides required by Solidity.
- 
+
     uint256[50] private __gap;
 }

@@ -15,7 +15,7 @@ interface INftSaleEvents {
         uint256 indexed tokenId,
         uint16 level,
         bool isGenesis,
-        uint256 activityTimestamp
+        uint256 activityEndTimestamp
     );
 
     event BandUpdated(
@@ -23,21 +23,6 @@ interface INftSaleEvents {
         uint256 indexed tokenId,
         uint16 oldLevel,
         uint16 newLevel
-    );
-
-    event BandActivated(
-        address indexed receiver,
-        uint256 indexed tokenId,
-        uint16 level,
-        bool isGenesis,
-        uint256 activityType,
-        uint256 activityTimestamp
-    );
-
-    event BandUpdated(
-        uint256 indexed tokenId,
-        uint256 activityType,
-        uint256 activityTimestamp
     );
 
     event TokensWithdrawn(IERC20 token, address receiver, uint256 amount);
@@ -51,8 +36,6 @@ interface INftSaleEvents {
     event USDTTokenSet(IERC20 newToken);
 
     event USDCTokenSet(IERC20 newToken);
-
-    event VestingContractSet(IVesting newContract);
 
     event NftContractSet(INft newContract);
 
@@ -78,8 +61,7 @@ interface INftSale is INftSaleEvents {
     function initialize(
         IERC20 tokenUSDT,
         IERC20 tokenUSDC,
-        INft contractNFT,
-        IVesting contractVesting
+        INft contractNFT
     ) external;
 
     function mintBand(uint16 level, IERC20 token) external;
@@ -89,12 +71,6 @@ interface INftSale is INftSaleEvents {
         uint16 newLevel,
         IERC20 token
     ) external;
-
-    function activateBand(uint256 tokenId) external;
-
-    function deactivateBandOnExpiration(uint256 tokenId) external;
-
-    function extendBand(uint256 tokenId) external;
 
     function withdrawTokens(IERC20 token, uint256 amount) external;
 
@@ -107,8 +83,6 @@ interface INftSale is INftSaleEvents {
 
     function setUSDCToken(IERC20 newToken) external;
 
-    function setVestingContract(IVesting newContract) external;
-
     function setNftContract(INft newContract) external;
 
     function getTokenUSDT() external view returns (IERC20);
@@ -116,6 +90,4 @@ interface INftSale is INftSaleEvents {
     function getTokenUSDC() external view returns (IERC20);
 
     function getNftContract() external view returns (INft);
-
-    function getVestingContract() external view returns (IVesting);
 }
