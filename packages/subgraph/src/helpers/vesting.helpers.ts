@@ -92,6 +92,8 @@ export function getOrInitBeneficiaries(vestingContractAddress: Address, benefici
         beneficiary.address = beneficiaryAddress;
         beneficiary.vestingPool = getOrInitVestingPool(vestingContractAddress, poolId).id;
         beneficiary.totalTokens = BIGINT_ZERO;
+        beneficiary.cliffTokens = BIGINT_ZERO;
+        beneficiary.listingTokens = BIGINT_ZERO;
         beneficiary.vestedTokens = BIGINT_ZERO;
         beneficiary.stakedTokens = BIGINT_ZERO;
         beneficiary.claimedTokens = BIGINT_ZERO;

@@ -36,6 +36,8 @@ type Beneficiary @entity {
   vestingPool: VestingPool!
   totalTokens: BigInt!
   vestedTokens: BigInt!
+  cliffTokens: BigInt!
+  listingTokens: BigInt!
   stakedTokens: BigInt!
   claimedTokens: BigInt!
 }

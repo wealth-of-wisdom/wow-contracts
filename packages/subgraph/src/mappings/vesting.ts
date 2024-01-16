@@ -100,8 +100,13 @@ export function handleBeneficiaryAdded(event: BeneficiaryAddedEvent): void {
 
     const beneficiaryData = vestingContract.getBeneficiary(event.params.poolIndex, event.params.beneficiary);
 
-    const structBeneficiary = beneficiaryData.values()
-
+    // Updated user data
+    beneficiary.totalTokens = beneficiaryData.totalTokenAmount;
+    beneficiary.listingTokens = beneficiaryData.listingTokenAmount;
+    beneficiary.cliffTokens= beneficiaryData.cliffTokenAmount;
+    beneficiary.vestedTokens = beneficiaryData.vestedTokenAmount;
+    beneficiary.stakedTokens = beneficiaryData.stakedTokenAmount;
+    beneficiary.claimedTokens = beneficiaryData.claimedTokenAmount;
 
     // @note total amounts is the tokens are allocated to the person, but i can be done more than once
     beneficiary.totalTokens = beneficiary.totalTokens.plus(event.params.addedTokenAmount);
