@@ -92,11 +92,16 @@ contract Nft is
         s_vestingContract = vestingContract;
     }
 
-    function safeMint(address to) external onlyRole(MINTER_ROLE) {
+    function safeMint(address to) public onlyRole(MINTER_ROLE) {
         uint256 tokenId = s_nextTokenId++;
         _safeMint(to, tokenId);
     }
 
+    /**
+     * @notice  sets Nft data state as ACTIVATION_TRIGGERED,
+     * manages other data about the Nft and adds its holder to vesting pool
+     * @param   tokenId  user minted and owned token id
+     */
     function activateNftData(uint256 tokenId) external {
         if (ownerOf(tokenId) != msg.sender) {
             revert Errors.Nft__NotNftOwner();
@@ -161,6 +166,16 @@ contract Nft is
                             FUNCTIONS FOR ADMIN ROLE
     //////////////////////////////////////////////////////////////////////////*/
 
+    /**
+     * @notice  sets all necesary information about the
+     * users Nft and its current state
+     * @param   tokenId  user minted and owned token id
+     * @param   level  nft level purchased
+     * @param   isGenesis  is it a genesis nft
+     * @param   activityType  activity state of the Nft
+     * @param   activityEndTimestamp  Nft regular expiration date
+     * @param   extendedActivityEndTimestamp  Nft extended expiration date
+     */
     function setNftData(
         uint256 tokenId,
         uint16 level,
@@ -178,32 +193,41 @@ contract Nft is
         });
     }
 
+    /**
+     * @notice  mints Nft to user and sets required data
+     * @param   receiver  user who will get the Nft
+     * @param   level  nft level purchased
+     * @param   isGenesis  is it a genesis nft
+     */
     function mintAndSetNftData(
         address receiver,
-        uint256 tokenId,
         uint16 level,
-        bool isGenesis,
-        ActivityType activityType,
-        uint256 activityEndTimestamp,
-        uint256 extendedActivityEndTimestamp
+        bool isGenesis
     ) external onlyRole(NFT_DATA_MANAGER) {
         setNftData(
-            tokenId,
+            s_nextTokenId,
             level,
             isGenesis,
-            activityType,
-            activityEndTimestamp,
-            extendedActivityEndTimestamp
+            INft.ActivityType.NOT_ACTIVATED,
+            0,
+            0
         );
-        this.safeMint(receiver);
+        safeMint(receiver);
     }
 
+    /**
+     * @notice  updates data for old Nft token and new one.
+     * Sets necesary states for upgrade - from one level to another
+     * @param   receiver  user who will get the Nft
+     * @param   oldTokenId  previously owned Nft id, which is being upgraded
+     * @param   newLevel  level upgraded to
+     */
     function updateLevelDataAndMint(
         address receiver,
-        uint256 oldtokenId,
+        uint256 oldTokenId,
         uint16 newLevel
     ) external onlyRole(NFT_DATA_MANAGER) {
-        s_nftData[oldtokenId].activityType = ActivityType.DEACTIVATED;
+        s_nftData[oldTokenId].activityType = ActivityType.DEACTIVATED;
 
         uint256 newTokenId = getNextTokenId();
         setNftData(
@@ -214,7 +238,7 @@ contract Nft is
             0,
             0
         );
-        this.safeMint(receiver);
+        safeMint(receiver);
     }
 
     function setMaxLevel(
@@ -257,7 +281,12 @@ contract Nft is
         uint256 newLifecycleTimestamp,
         uint256 newlifecycleExtensionTimestamp,
         uint256 newAllocationPerProject
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) mAmountNotZero(newPrice) {
+    )
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        mAmountNotZero(newPrice)
+        mAmountNotZero(newLifecycleTimestamp)
+    {
         s_nftLevels[level] = NftLevel({
             price: newPrice,
             vestingRewardWOWTokens: newVestingRewardWOWTokens,
@@ -275,16 +304,33 @@ contract Nft is
         );
     }
 
-    function setProjectLifecycle(
+    /**
+     * @notice  Sets accessible project amounts for each defined project in a level
+     * @param   level  level, for which project data is being set
+     * @param   project  project type (0 - Standard, 1 - Premium, 2- Limited)
+     * @param   projectsQuantityInLifecycle  how many projects are going to
+     * be accessible for its type and level
+     */
+    function setProjectsQuantity(
         uint16 level,
         uint8 project,
         uint16 projectsQuantityInLifecycle
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         s_projectsPerNft[level][project] = projectsQuantityInLifecycle;
-        emit ProjectPerLifecycle(level, project, projectsQuantityInLifecycle);
+        emit ProjectsQuantityInLifecycleSet(
+            level,
+            project,
+            projectsQuantityInLifecycle
+        );
     }
 
-    function setMultipleLevelLifecyclesPerProject(
+    /**
+     * @notice  Sets multiple accessible project amounts for a project in all levels
+     * @param   project  project type (0 - Standard, 1 - Premium, 2- Limited)
+     * @param   projectsQuantityInLifecycle  how many multiple projects are going to
+     * be accessible for its type and level
+     */
+    function setMultipleProjectsQuantity(
         uint8 project,
         uint16[] memory projectsQuantityInLifecycle
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -294,7 +340,7 @@ contract Nft is
             s_projectsPerNft[level][project] = projectsQuantityInLifecycle[
                 level
             ];
-            emit ProjectPerLifecycle(
+            emit ProjectsQuantityInLifecycleSet(
                 level,
                 project,
                 projectsQuantityInLifecycle[level]

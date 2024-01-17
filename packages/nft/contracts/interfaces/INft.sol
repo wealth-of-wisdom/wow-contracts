@@ -33,7 +33,7 @@ interface INftEvents {
         uint256 allocationPerProject
     );
 
-    event ProjectPerLifecycle(
+    event ProjectsQuantityInLifecycleSet(
         uint16 level,
         uint8 project,
         uint16 projectsQuantityInLifecycle
@@ -105,12 +105,8 @@ interface INft is INftEvents {
 
     function mintAndSetNftData(
         address receiver,
-        uint256 tokenId,
         uint16 level,
-        bool isGenesis,
-        ActivityType activityType,
-        uint256 activityEndTimestamp,
-        uint256 extendedActivityEndTimestamp
+        bool isGenesis
     ) external;
 
     function setMaxLevel(uint16 maxLevel) external;
@@ -128,13 +124,13 @@ interface INft is INftEvents {
         uint256 newAllocationPerProject
     ) external;
 
-    function setProjectLifecycle(
+    function setProjectsQuantity(
         uint16 level,
         uint8 project,
         uint16 projectsQuantityInLifecycle
     ) external;
 
-    function setMultipleLevelLifecyclesPerProject(
+    function setMultipleProjectsQuantity(
         uint8 project,
         uint16[] memory projectsQuantityInLifecycle
     ) external;

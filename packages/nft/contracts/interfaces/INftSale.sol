@@ -11,7 +11,6 @@ interface INftSaleEvents {
 
     event NftMinted(
         address indexed receiver,
-        uint256 indexed tokenId,
         uint16 level,
         bool isGenesis,
         uint256 activityEndTimestamp

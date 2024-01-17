@@ -97,24 +97,15 @@ contract NftSale is
         IERC20 token
     ) external mValidNftLevel(level) mTokenExists(token) {
         uint256 cost = s_nftContract.getLevelData(level).price;
-        uint256 tokenId = s_nftContract.getNextTokenId();
 
         // Effects: Transfer the payment to the contract
         _purchaseNft(token, cost);
 
         // Effects: set nft data
         // Interaction: mint the nft
-        s_nftContract.mintAndSetNftData(
-            msg.sender,
-            tokenId,
-            level,
-            false,
-            INft.ActivityType.NOT_ACTIVATED,
-            0,
-            0
-        );
+        s_nftContract.mintAndSetNftData(msg.sender, level, false);
 
-        emit NftMinted(msg.sender, tokenId, level, false, 0);
+        emit NftMinted(msg.sender, level, false, 0);
     }
 
     function updateNft(
@@ -163,23 +154,12 @@ contract NftSale is
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         if (receivers.length != levels.length)
             revert Errors.Nft__MismatchInVariableLength();
-        uint256 tokenId;
         for (uint256 i; i < receivers.length; i++) {
-            tokenId = s_nftContract.getNextTokenId();
-
             // Effects: set nft data
             // Interactions: mint genesis nft
-            s_nftContract.mintAndSetNftData(
-                receivers[i],
-                tokenId,
-                levels[i],
-                true,
-                INft.ActivityType.NOT_ACTIVATED,
-                0,
-                0
-            );
+            s_nftContract.mintAndSetNftData(receivers[i], levels[i], true);
 
-            emit NftMinted(receivers[i], tokenId, levels[i], true, 0);
+            emit NftMinted(receivers[i], levels[i], true, 0);
         }
     }
 
