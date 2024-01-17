@@ -56,7 +56,7 @@ contract NftSale_UpdateBand_Unit_Test is NftSale_Unit_Test {
         external
         mintLevel2BandForAlice
     {
-        vm.expectRevert(Errors.NftSale__NotNftOwner.selector);
+        vm.expectRevert(Errors.Nft__NotNftOwner.selector);
         vm.prank(bob);
         sale.updateNft(NFT_TOKEN_ID_0, DEFAULT_LEVEL_2, tokenUSDT);
     }

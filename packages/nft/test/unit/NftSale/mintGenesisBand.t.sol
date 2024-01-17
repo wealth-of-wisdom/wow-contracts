@@ -34,7 +34,7 @@ contract NftSale_MintGenesisBand_Unit_Test is NftSale_Unit_Test {
     }
 
     function test_mintGenesisBand_RevertIf_ReceiverIsZeroAddress() external {
-        vm.expectRevert(Errors.NftSale__ZeroAddress.selector);
+        vm.expectRevert(Errors.Nft__ZeroAddress.selector);
         vm.prank(admin);
         sale.mintGenesisBand(
             ZERO_ADDRESS,
@@ -56,7 +56,7 @@ contract NftSale_MintGenesisBand_Unit_Test is NftSale_Unit_Test {
     }
 
     function test_mintGenesisBand_RevertIf_PassedZeroAmount() external {
-        vm.expectRevert(Errors.NftSale__PassedZeroAmount.selector);
+        vm.expectRevert(Errors.Nft__PassedZeroAmount.selector);
         vm.prank(admin);
         sale.mintGenesisBand(alice, DEFAULT_LEVEL_2, 0);
     }

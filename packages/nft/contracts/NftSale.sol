@@ -43,7 +43,7 @@ contract NftSale is
 
     modifier mAddressNotZero(address addr) {
         if (addr == address(0)) {
-            revert Errors.NftSale__ZeroAddress();
+            revert Errors.Nft__ZeroAddress();
         }
         _;
     }
@@ -123,7 +123,7 @@ contract NftSale is
         IERC20 token
     ) external mValidNftLevel(newLevel) mTokenExists(token) {
         if (s_nftContract.ownerOf(tokenId) != msg.sender) {
-            revert Errors.NftSale__NotNftOwner();
+            revert Errors.Nft__NotNftOwner();
         }
 
         INft.NftData memory nftData = s_nftContract.getNftData(tokenId);
@@ -162,7 +162,7 @@ contract NftSale is
         uint16[] memory levels
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         if (receivers.length != levels.length)
-            revert Errors.NftSale__MismatchInVariableLength();
+            revert Errors.Nft__MismatchInVariableLength();
         uint256 tokenId;
         for (uint256 i; i < receivers.length; i++) {
             tokenId = s_nftContract.getNextTokenId();
@@ -192,7 +192,7 @@ contract NftSale is
         uint256 amount
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         if (amount == 0) {
-            revert Errors.NftSale__PassedZeroAmount();
+            revert Errors.Nft__PassedZeroAmount();
         }
         uint256 balance = token.balanceOf(address(this));
 

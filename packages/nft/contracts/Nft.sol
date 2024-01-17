@@ -57,7 +57,7 @@ contract Nft is
 
     modifier mAmountNotZero(uint256 amount) {
         if (amount == 0) {
-            revert Errors.NftSale__PassedZeroAmount();
+            revert Errors.Nft__PassedZeroAmount();
         }
         _;
     }
@@ -99,14 +99,14 @@ contract Nft is
 
     function activateNftData(uint256 tokenId) external {
         if (ownerOf(tokenId) != msg.sender) {
-            revert Errors.NftSale__NotNftOwner();
+            revert Errors.Nft__NotNftOwner();
         }
 
         NftData memory nftData = s_nftData[tokenId];
 
         // Checks: data must not be activated
         if (nftData.activityType != ActivityType.NOT_ACTIVATED) {
-            revert Errors.NftSale__AlreadyActivated();
+            revert Errors.Nft__AlreadyActivated();
         }
 
         // Effects: update data activity
@@ -222,7 +222,7 @@ contract Nft is
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         // Checks: the new max level must be greater than the current max level
         if (maxLevel <= s_maxLevel) {
-            revert Errors.NftSale__InvalidMaxLevel(maxLevel);
+            revert Errors.Nft__InvalidMaxLevel(maxLevel);
         }
 
         // Effects: set the new max level
@@ -289,7 +289,7 @@ contract Nft is
         uint16[] memory projectsQuantityInLifecycle
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         if (projectsQuantityInLifecycle.length != s_maxLevel)
-            revert Errors.NftSale__MismatchInVariableLength();
+            revert Errors.Nft__MismatchInVariableLength();
         for (uint16 level; level < s_maxLevel; level++) {
             s_projectsPerNft[level][project] = projectsQuantityInLifecycle[
                 level
@@ -306,7 +306,7 @@ contract Nft is
         IVesting newContract
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         if (address(newContract) == address(0)) {
-            revert Errors.NftSale__ZeroAddress();
+            revert Errors.Nft__ZeroAddress();
         }
         s_vestingContract = newContract;
         emit VestingContractSet(newContract);

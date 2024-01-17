@@ -13,7 +13,7 @@ contract NftSale_ActivateBand_Unit_Test is NftSale_Unit_Test, IVestingEvents {
         external
         mintLevel2BandForAlice
     {
-        vm.expectRevert(Errors.NftSale__NotNftOwner.selector);
+        vm.expectRevert(Errors.Nft__NotNftOwner.selector);
         vm.prank(bob);
         sale.activateNftData(NFT_TOKEN_ID_0);
     }
@@ -24,7 +24,7 @@ contract NftSale_ActivateBand_Unit_Test is NftSale_Unit_Test, IVestingEvents {
     {
         vm.startPrank(alice);
         sale.activateNftData(NFT_TOKEN_ID_0);
-        vm.expectRevert(Errors.NftSale__AlreadyActivated.selector);
+        vm.expectRevert(Errors.Nft__AlreadyActivated.selector);
         sale.activateNftData(NFT_TOKEN_ID_0);
         vm.stopPrank();
     }

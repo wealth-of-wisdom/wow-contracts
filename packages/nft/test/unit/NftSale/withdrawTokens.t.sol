@@ -23,7 +23,7 @@ contract NftSale_WithdrawTokens_Unit_Test is NftSale_Unit_Test {
     }
 
     function test_withdrawTokens_RevertIf_PassedZeroAmount() external {
-        vm.expectRevert(Errors.NftSale__PassedZeroAmount.selector);
+        vm.expectRevert(Errors.Nft__PassedZeroAmount.selector);
         vm.prank(admin);
         sale.withdrawTokens(tokenUSDT, 0);
     }
@@ -75,11 +75,7 @@ contract NftSale_WithdrawTokens_Unit_Test is NftSale_Unit_Test {
 
         uint256 contractEndingBalance = tokenUSDT.balanceOf(address(sale));
 
-        assertEq(
-            contractEndingBalance,
-            0,
-            "Funds not transfered"
-        );
+        assertEq(contractEndingBalance, 0, "Funds not transfered");
     }
 
     function test_withdrawTokens_EmitsTokensWithdrawnEvent()

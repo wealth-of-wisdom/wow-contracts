@@ -35,7 +35,7 @@ contract NftSale_Initialize_Unit_Test is NftSale_Unit_Test {
     }
 
     function test_initialize_RevertIf_USDTTokenIsZeroAddress() external {
-        vm.expectRevert(Errors.NftSale__ZeroAddress.selector);
+        vm.expectRevert(Errors.Nft__ZeroAddress.selector);
         sale.initialize(
             IERC20(ZERO_ADDRESS),
             tokenUSDC,
@@ -46,7 +46,7 @@ contract NftSale_Initialize_Unit_Test is NftSale_Unit_Test {
     }
 
     function test_initialize_RevertIf_USDCTokenIsZeroAddress() external {
-        vm.expectRevert(Errors.NftSale__ZeroAddress.selector);
+        vm.expectRevert(Errors.Nft__ZeroAddress.selector);
         sale.initialize(
             tokenUSDT,
             IERC20(ZERO_ADDRESS),
@@ -57,7 +57,7 @@ contract NftSale_Initialize_Unit_Test is NftSale_Unit_Test {
     }
 
     function test_initialize_RevertIf_NftContractIsZeroAddress() external {
-        vm.expectRevert(Errors.NftSale__ZeroAddress.selector);
+        vm.expectRevert(Errors.Nft__ZeroAddress.selector);
         sale.initialize(
             tokenUSDT,
             tokenUSDC,
@@ -68,7 +68,7 @@ contract NftSale_Initialize_Unit_Test is NftSale_Unit_Test {
     }
 
     function test_initialize_RevertIf_VestingContractIsZeroAddress() external {
-        vm.expectRevert(Errors.NftSale__ZeroAddress.selector);
+        vm.expectRevert(Errors.Nft__ZeroAddress.selector);
         sale.initialize(
             tokenUSDT,
             tokenUSDC,
@@ -234,7 +234,10 @@ contract NftSale_Initialize_Unit_Test is NftSale_Unit_Test {
         );
     }
 
-    function test_initialize_RevertIf_AlreadyInitialized() external initializeNftSale {
+    function test_initialize_RevertIf_AlreadyInitialized()
+        external
+        initializeNftSale
+    {
         vm.expectRevert(Initializable.InvalidInitialization.selector);
         sale.initialize(
             tokenUSDT,
