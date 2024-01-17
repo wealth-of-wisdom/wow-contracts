@@ -97,6 +97,22 @@ interface INft is INftEvents {
         uint256 extendedActivityEndTimestamp
     ) external;
 
+    function updateLevelDataAndMint(
+        address receiver,
+        uint256 oldtokenId,
+        uint16 newLevel
+    ) external;
+
+    function mintAndSetNftData(
+        address receiver,
+        uint256 tokenId,
+        uint16 level,
+        bool isGenesis,
+        ActivityType activityType,
+        uint256 activityEndTimestamp,
+        uint256 extendedActivityEndTimestamp
+    ) external;
+
     function setMaxLevel(uint16 maxLevel) external;
 
     function setGenesisTokenDivisor(uint256 newGenesisTokenDivisor) external;
@@ -144,9 +160,9 @@ interface INft is INftEvents {
         uint8 project
     ) external view returns (uint16);
 
-    function ownerOf(uint256 tokenId) external view returns (address owner);
-
     function supportsInterface(bytes4 interfaceId) external view returns (bool);
+
+    function ownerOf(uint256 tokenId) external view returns (address owner);
 
     function getVestingContract() external view returns (IVesting);
 }

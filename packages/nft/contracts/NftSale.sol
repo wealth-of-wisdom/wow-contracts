@@ -6,7 +6,6 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
-import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
 import {INftSale} from "@wealth-of-wisdom/nft/contracts/interfaces/INftSale.sol";
 import {INft} from "@wealth-of-wisdom/nft/contracts/interfaces/INft.sol";
 import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
@@ -100,8 +99,13 @@ contract NftSale is
         uint256 cost = s_nftContract.getLevelData(level).price;
         uint256 tokenId = s_nftContract.getNextTokenId();
 
+        // Effects: Transfer the payment to the contract
+        _purchaseNft(token, cost);
+
         // Effects: set nft data
-        s_nftContract.setNftData(
+        // Interaction: mint the nft
+        s_nftContract.mintAndSetNftData(
+            msg.sender,
             tokenId,
             level,
             false,
@@ -110,11 +114,6 @@ contract NftSale is
             0
         );
 
-        // Effects: Transfer the payment to the contract
-        _purchaseNft(token, cost);
-
-        // Interaction: mint the nft
-        s_nftContract.safeMint(msg.sender);
         emit NftMinted(msg.sender, tokenId, level, false, 0);
     }
 
@@ -148,14 +147,12 @@ contract NftSale is
         uint256 upgradeCost = s_nftContract.getLevelData(newLevel).price -
             s_nftContract.getLevelData(currentLevel).price;
 
-        // Effects: Update the old data and add new nft data
-        _updateNft(tokenId, currentLevel, newLevel);
-
         // Effects: Transfer the payment to the contract
         _purchaseNft(token, upgradeCost);
 
+        // Effects: Update the old data and add new nft data
         // Interaction: mint the new data (we don't burn the old one)
-        s_nftContract.safeMint(msg.sender);
+        s_nftContract.updateLevelDataAndMint(msg.sender, tokenId, newLevel);
 
         emit NftUpdated(msg.sender, tokenId, currentLevel, newLevel);
     }
@@ -171,7 +168,9 @@ contract NftSale is
             tokenId = s_nftContract.getNextTokenId();
 
             // Effects: set nft data
-            s_nftContract.setNftData(
+            // Interactions: mint genesis nft
+            s_nftContract.mintAndSetNftData(
+                receivers[i],
                 tokenId,
                 levels[i],
                 true,
@@ -179,9 +178,6 @@ contract NftSale is
                 0,
                 0
             );
-
-            // Interactions: mint genesis nft
-            s_nftContract.safeMint(receivers[i]);
 
             emit NftMinted(receivers[i], tokenId, levels[i], true, 0);
         }
@@ -282,31 +278,6 @@ contract NftSale is
         token.safeTransferFrom(msg.sender, address(this), cost);
 
         emit PurchasePaid(token, cost);
-    }
-
-    function _updateNft(
-        uint256 tokenId,
-        uint16 oldLevel,
-        uint16 newLevel
-    ) internal virtual {
-        s_nftContract.setNftData(
-            tokenId,
-            oldLevel,
-            false,
-            INft.ActivityType.DEACTIVATED,
-            0,
-            0
-        );
-
-        uint256 newTokenId = s_nftContract.getNextTokenId();
-        s_nftContract.setNftData(
-            newTokenId,
-            newLevel,
-            false,
-            INft.ActivityType.NOT_ACTIVATED,
-            0,
-            0
-        );
     }
 
     uint256[50] private __gap;

@@ -39,10 +39,11 @@ contract Nft is
     //////////////////////////////////////////////////////////////////////////*/
 
     /* solhint-disable var-name-mixedcase */
-    mapping(uint256 => NftData) internal s_nftData; // token ID => nft data
-    mapping(uint16 => NftLevel) internal s_nftLevels; // level => level data
-    // level => project => project amount
-    mapping(uint16 => mapping(uint16 => uint16)) internal s_projectsPerNft;
+    mapping(uint256 tokenId => NftData) internal s_nftData; // token ID => nft data
+    mapping(uint16 level => NftLevel) internal s_nftLevels; // level => level data
+    // level => project (Standard, Premium, Limited) => project amount
+    mapping(uint16 level => mapping(uint16 project => uint16 projectAmount))
+        internal s_projectsPerNft;
     uint16 internal s_maxLevel;
     uint16 internal s_promotionalVestingPID;
     uint256 internal s_genesisTokenDivisor;
@@ -117,18 +118,26 @@ contract Nft is
             nftData.activityEndTimestamp +
             s_nftLevels[nftData.level].lifecycleExtensionTimestamp;
 
-        (, , , uint256 dedicatedTokens) = s_vestingContract.getGeneralPoolData(
-            s_promotionalVestingPID
-        );
+        (
+            ,
+            ,
+            uint256 totalPoolTokenAmount,
+            uint256 dedicatedPoolTokenAmount
+        ) = s_vestingContract.getGeneralPoolData(s_promotionalVestingPID);
+        uint256 nonDedicatedTokens = totalPoolTokenAmount -
+            dedicatedPoolTokenAmount;
         NftLevel memory nftLevelData = s_nftLevels[nftData.level];
 
+        // example calculations:
+        // 200k rewards = 40k WoW tokens * ( 5k price / 1k )
+        // (40k tokens per 1k spent)
         uint256 rewardTokens = nftData.isGenesis
             ? nftLevelData.vestingRewardWOWTokens *
                 (nftLevelData.price / s_genesisTokenDivisor)
             : nftLevelData.vestingRewardWOWTokens;
 
-        rewardTokens = (dedicatedTokens < rewardTokens)
-            ? dedicatedTokens
+        rewardTokens = (nonDedicatedTokens < rewardTokens)
+            ? nonDedicatedTokens
             : rewardTokens;
 
         if (rewardTokens > 0) {
@@ -159,7 +168,7 @@ contract Nft is
         ActivityType activityType,
         uint256 activityEndTimestamp,
         uint256 extendedActivityEndTimestamp
-    ) external onlyRole(NFT_DATA_MANAGER) {
+    ) public onlyRole(NFT_DATA_MANAGER) {
         s_nftData[tokenId] = NftData({
             level: level,
             isGenesis: isGenesis,
@@ -167,6 +176,45 @@ contract Nft is
             activityEndTimestamp: activityEndTimestamp,
             extendedActivityEndTimestamp: extendedActivityEndTimestamp
         });
+    }
+
+    function mintAndSetNftData(
+        address receiver,
+        uint256 tokenId,
+        uint16 level,
+        bool isGenesis,
+        ActivityType activityType,
+        uint256 activityEndTimestamp,
+        uint256 extendedActivityEndTimestamp
+    ) external onlyRole(NFT_DATA_MANAGER) {
+        setNftData(
+            tokenId,
+            level,
+            isGenesis,
+            activityType,
+            activityEndTimestamp,
+            extendedActivityEndTimestamp
+        );
+        this.safeMint(receiver);
+    }
+
+    function updateLevelDataAndMint(
+        address receiver,
+        uint256 oldtokenId,
+        uint16 newLevel
+    ) external onlyRole(NFT_DATA_MANAGER) {
+        s_nftData[oldtokenId].activityType = ActivityType.DEACTIVATED;
+
+        uint256 newTokenId = getNextTokenId();
+        setNftData(
+            newTokenId,
+            newLevel,
+            false,
+            INft.ActivityType.NOT_ACTIVATED,
+            0,
+            0
+        );
+        this.safeMint(receiver);
     }
 
     function setMaxLevel(
@@ -306,7 +354,6 @@ contract Nft is
     /*//////////////////////////////////////////////////////////////////////////
                             INHERITED OVERRIDEN FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
-
     function transferFrom(
         address from,
         address to,
