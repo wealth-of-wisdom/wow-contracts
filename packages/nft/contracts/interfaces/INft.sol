@@ -25,12 +25,14 @@ interface INftEvents {
     );
 
     event LevelDataSet(
-        uint16 newLevel,
-        uint256 newPrice,
-        uint256 newVestingRewardWOWTokens,
-        uint256 newlifecycleTimestamp,
-        uint256 newlifecycleExtensionTimestamp,
-        uint256 allocationPerProject
+        uint16 level,
+        uint256 price,
+        uint256 vestingRewardWOWTokens,
+        uint256 lifecycleTimestamp,
+        uint256 lifecycleExtensionTimestamp,
+        uint256 allocationPerProject,
+        uint256 currentNftAmount,
+        string baseURI
     );
 
     event ProjectsQuantityInLifecycleSet(
@@ -73,6 +75,8 @@ interface INft is INftEvents {
         uint256 lifecycleTimestamp;
         uint256 lifecycleExtensionTimestamp;
         uint256 allocationPerProject;
+        uint256 currentNftAmount;
+        string baseURI;
     }
 
     function initialize(
@@ -84,7 +88,7 @@ interface INft is INftEvents {
         uint256 genesisTokenDivisor
     ) external;
 
-    function safeMint(address to) external;
+    function safeMint(address to, uint16 level) external;
 
     function activateNftData(uint256 tokenId) external;
 
@@ -116,12 +120,14 @@ interface INft is INftEvents {
     function setPromotionalVestingPID(uint16 pid) external;
 
     function setLevelData(
-        uint16 newLevel,
+        uint16 level,
         uint256 newPrice,
         uint256 newVestingRewardWOWTokens,
-        uint256 newlifecycleTimestamp,
+        uint256 newLifecycleTimestamp,
         uint256 newlifecycleExtensionTimestamp,
-        uint256 newAllocationPerProject
+        uint256 newAllocationPerProject,
+        uint256 newCurrentNftAmount,
+        string calldata newBaseURI
     ) external;
 
     function setProjectsQuantity(

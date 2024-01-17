@@ -23,7 +23,7 @@ contract NftSale_WithdrawTokens_Unit_Test is NftSale_Unit_Test {
     }
 
     function test_withdrawTokens_RevertIf_PassedZeroAmount() external {
-        vm.expectRevert(Errors.Nft__PassedZeroAmount.selector);
+        vm.expectRevert(Errors.NftSale__ZeroAmount.selector);
         vm.prank(admin);
         sale.withdrawTokens(tokenUSDT, 0);
     }

@@ -43,7 +43,7 @@ contract NftSale is
 
     modifier mAddressNotZero(address addr) {
         if (addr == address(0)) {
-            revert Errors.Nft__ZeroAddress();
+            revert Errors.NftSale__ZeroAddress();
         }
         _;
     }
@@ -114,7 +114,7 @@ contract NftSale is
         IERC20 token
     ) external mValidNftLevel(newLevel) mTokenExists(token) {
         if (s_nftContract.ownerOf(tokenId) != msg.sender) {
-            revert Errors.Nft__NotNftOwner();
+            revert Errors.NftSale__NotNftOwner();
         }
 
         INft.NftData memory nftData = s_nftContract.getNftData(tokenId);
@@ -153,7 +153,7 @@ contract NftSale is
         uint16[] memory levels
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         if (receivers.length != levels.length)
-            revert Errors.Nft__MismatchInVariableLength();
+            revert Errors.NftSale__MismatchInVariableLength();
         for (uint256 i; i < receivers.length; i++) {
             // Effects: set nft data
             // Interactions: mint genesis nft
@@ -172,7 +172,7 @@ contract NftSale is
         uint256 amount
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         if (amount == 0) {
-            revert Errors.Nft__PassedZeroAmount();
+            revert Errors.NftSale__ZeroAmount();
         }
         uint256 balance = token.balanceOf(address(this));
 
