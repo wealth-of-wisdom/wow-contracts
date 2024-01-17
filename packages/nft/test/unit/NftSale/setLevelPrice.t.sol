@@ -31,7 +31,7 @@ contract NftSale_SetLevelPrice_Unit_Test is NftSale_Unit_Test {
     }
 
     function test_setLevelPrice_RevertIf_PassedZeroAmount() external {
-        vm.expectRevert(Errors.NftSale__PassedZeroAmount.selector);
+        vm.expectRevert(Errors.Nft__PassedZeroAmount.selector);
         vm.prank(admin);
         sale.setLevelPrice(DEFAULT_LEVEL_2, 0);
     }

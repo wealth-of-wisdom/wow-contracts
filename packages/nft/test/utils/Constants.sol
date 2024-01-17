@@ -43,9 +43,9 @@ abstract contract Constants {
     uint256 internal constant TOTAL_POOL_TOKEN_AMOUNT = 100_000 ether;
 
     INftSale.ActivityType internal constant NFT_ACTIVITY_TYPE_ACTIVATED =
-        INftSale.ActivityType.ACTIVATED;
+        INftSale.ActivityType.ACTIVATION_TRIGGERED;
     INftSale.ActivityType internal constant NFT_ACTIVITY_TYPE_INACTIVE =
-        INftSale.ActivityType.INACTIVE;
+        INftSale.ActivityType.NOT_ACTIVATED;
     INftSale.ActivityType internal constant NFT_ACTIVITY_TYPE_DEACTIVATED =
         INftSale.ActivityType.DEACTIVATED;
 }

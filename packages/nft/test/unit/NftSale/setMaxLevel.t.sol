@@ -23,7 +23,7 @@ contract NftSale_SetMaxLevel_Unit_Test is INftSaleEvents, NftSale_Unit_Test {
     function test_setMaxLevel_RevertIf_InvalidMaxLevel() external {
         vm.expectRevert(
             abi.encodeWithSelector(
-                Errors.NftSale__InvalidMaxLevel.selector,
+                Errors.Nft__InvalidMaxLevel.selector,
                 DEFAULT_LEVEL_2
             )
         );

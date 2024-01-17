@@ -12,17 +12,19 @@ library Errors {
                                     NFT SALE
     //////////////////////////////////////////////////////////////////////////*/
     error NftSale__InvalidLevel(uint16 level);
-    error NftSale__InvalidMaxLevel(uint16 maxLevel);
+    error Nft__InvalidMaxLevel(uint16 maxLevel);
     error NftSale__InsufficientContractBalance(
         uint256 contractBalance,
         uint256 requiredAmount
     );
     error NftSale__TransferFailed();
+    error Nft__MismatchInVariableLength();
     error NftSale__InvalidTokenId();
-    error NftSale__NotBandOwner();
+    error Nft__NotNftOwner();
     error NftSale__NonExistantPayment();
-    error NftSale__UnupdatableBand();
-    error NftSale__PassedZeroAmount();
-    error NftSale__ZeroAddress();
-    error NftSale__AlreadyActivated();
+    error NftSale__UnupdatableNft();
+    error Nft__PassedZeroAmount();
+    error Nft__ZeroAddress();
+    error Nft__AlreadyActivated();
+    error NftSale__NotActivated();
 }

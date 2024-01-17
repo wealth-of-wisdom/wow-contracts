@@ -13,9 +13,9 @@ contract NftSale_ActivateBand_Unit_Test is NftSale_Unit_Test, IVestingEvents {
         external
         mintLevel2BandForAlice
     {
-        vm.expectRevert(Errors.NftSale__NotBandOwner.selector);
+        vm.expectRevert(Errors.Nft__NotNftOwner.selector);
         vm.prank(bob);
-        sale.activateBand(NFT_TOKEN_ID_0);
+        sale.activateNftData(NFT_TOKEN_ID_0);
     }
 
     function test_activateBand_RevertIf_BandAlreadyActivated()
@@ -23,9 +23,9 @@ contract NftSale_ActivateBand_Unit_Test is NftSale_Unit_Test, IVestingEvents {
         mintLevel2BandForAlice
     {
         vm.startPrank(alice);
-        sale.activateBand(NFT_TOKEN_ID_0);
-        vm.expectRevert(Errors.NftSale__AlreadyActivated.selector);
-        sale.activateBand(NFT_TOKEN_ID_0);
+        sale.activateNftData(NFT_TOKEN_ID_0);
+        vm.expectRevert(Errors.Nft__AlreadyActivated.selector);
+        sale.activateNftData(NFT_TOKEN_ID_0);
         vm.stopPrank();
     }
 
@@ -34,14 +34,14 @@ contract NftSale_ActivateBand_Unit_Test is NftSale_Unit_Test, IVestingEvents {
         mintLevel2BandForAlice
     {
         vm.prank(alice);
-        sale.activateBand(NFT_TOKEN_ID_0);
+        sale.activateNftData(NFT_TOKEN_ID_0);
 
-        INftSale.Band memory bandData = sale.getBand(NFT_TOKEN_ID_0);
+        INftSale.Band memory nftData = sale.getNftData(NFT_TOKEN_ID_0);
 
-        assertFalse(bandData.isGenesis, "Token genesis state changed");
-        assertEq(bandData.level, DEFAULT_LEVEL_2, "Level data changed");
+        assertFalse(nftData.isGenesis, "Token genesis state changed");
+        assertEq(nftData.level, DEFAULT_LEVEL_2, "Level data changed");
         assertEq(
-            uint8(bandData.activityType),
+            uint8(nftData.activityType),
             uint8(NFT_ACTIVITY_TYPE_ACTIVATED),
             "Band was not activated"
         );
@@ -52,7 +52,7 @@ contract NftSale_ActivateBand_Unit_Test is NftSale_Unit_Test, IVestingEvents {
         mintLevel2BandForAlice
     {
         vm.prank(alice);
-        sale.activateBand(NFT_TOKEN_ID_0);
+        sale.activateNftData(NFT_TOKEN_ID_0);
 
         IVesting.Beneficiary memory beneficiary = vesting.getBeneficiary(
             DEFAULT_VESTING_PID,
@@ -81,7 +81,7 @@ contract NftSale_ActivateBand_Unit_Test is NftSale_Unit_Test, IVestingEvents {
         );
 
         vm.prank(alice);
-        sale.activateBand(NFT_TOKEN_ID_0);
+        sale.activateNftData(NFT_TOKEN_ID_0);
     }
 
     function test_activateBand_EmitsBandActivatedEvent()
@@ -89,9 +89,9 @@ contract NftSale_ActivateBand_Unit_Test is NftSale_Unit_Test, IVestingEvents {
         mintLevel2BandForAlice
     {
         vm.expectEmit(true, true, true, true);
-        emit BandActivated(alice, NFT_TOKEN_ID_0, DEFAULT_LEVEL_2, false);
+        emit NftDataActivated(alice, NFT_TOKEN_ID_0, DEFAULT_LEVEL_2, false);
 
         vm.prank(alice);
-        sale.activateBand(NFT_TOKEN_ID_0);
+        sale.activateNftData(NFT_TOKEN_ID_0);
     }
 }

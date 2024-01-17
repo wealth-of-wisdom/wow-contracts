@@ -18,10 +18,10 @@
         "vesting_in_months": 18
     },
     {
-        "name": "Whitelist Sale 0.01",
+        "name": "Whitelist Sale 0.001",
         "tokens_amount": 5000000,
         "listing_release_percentage": 55,
-        "listing_amount": 250000,
+        "listing_amount": 0,
         "remaining_amount_after_listing": 4750000,
         "cliff_in_months": 18,
         "vesting_in_months": 12

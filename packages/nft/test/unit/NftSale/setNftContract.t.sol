@@ -24,7 +24,7 @@ contract NftSale_SetNftContract_Unit_Test is NftSale_Unit_Test {
     }
 
     function test_setNftContract_RevertIf_ZeroAddress() external {
-        vm.expectRevert(Errors.NftSale__ZeroAddress.selector);
+        vm.expectRevert(Errors.Nft__ZeroAddress.selector);
         vm.prank(admin);
         sale.setNftContract(INft(ZERO_ADDRESS));
     }
