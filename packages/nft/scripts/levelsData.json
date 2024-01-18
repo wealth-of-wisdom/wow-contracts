@@ -1,0 +1,52 @@
+[
+    {
+        "level": 1,
+        "price_in_usd": 1000,
+        "vesting_rewards_in_wow": 1000,
+        "lifecycle_duration_in_months": 12,
+        "extension_duration_in_months": 0,
+        "allocation_per_project_in_usd": 1000,
+        "main_base_uri": "ipfs://",
+        "genesis_base_uri": "ipfs://"
+    },
+    {
+        "level": 2,
+        "price_in_usd": 5000,
+        "vesting_rewards_in_wow": 25000,
+        "lifecycle_duration_in_months": 15,
+        "extension_duration_in_months": 15,
+        "allocation_per_project_in_usd": 10000,
+        "main_base_uri": "ipfs://",
+        "genesis_base_uri": "ipfs://"
+    },
+    {
+        "level": 3,
+        "price_in_usd": 10000,
+        "vesting_rewards_in_wow": 100000,
+        "lifecycle_duration_in_months": 24,
+        "extension_duration_in_months": 18,
+        "allocation_per_project_in_usd": 25000,
+        "main_base_uri": "ipfs://",
+        "genesis_base_uri": "ipfs://"
+    },
+    {
+        "level": 4,
+        "price_in_usd": 33000,
+        "vesting_rewards_in_wow": 660000,
+        "lifecycle_duration_in_months": 40,
+        "extension_duration_in_months": -1,
+        "allocation_per_project_in_usd": 100000,
+        "main_base_uri": "ipfs://",
+        "genesis_base_uri": "ipfs://"
+    },
+    {
+        "level": 5,
+        "price_in_usd": 100000,
+        "vesting_rewards_in_wow": 3000000,
+        "lifecycle_duration_in_months": -1,
+        "extension_duration_in_months": -1,
+        "allocation_per_project_in_usd": 500000,
+        "main_base_uri": "ipfs://",
+        "genesis_base_uri": "ipfs://"
+    }
+]
