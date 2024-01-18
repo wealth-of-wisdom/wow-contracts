@@ -461,7 +461,7 @@ contract Nft is
             vestingRewards,
             lifecycleTimestamp,
             lifecycleExtensionTimestamp,
-            allocationPerProject
+            allocationPerProject,
             mainBaseURI,
             genesisBaseURI
         );
@@ -673,7 +673,6 @@ contract Nft is
     /*//////////////////////////////////////////////////////////////////////////
                             FUNCTIONS FOR UPGRADER ROLE
     //////////////////////////////////////////////////////////////////////////*/
-
 
     function _authorizeUpgrade(
         address newImplementation

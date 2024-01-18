@@ -12,6 +12,8 @@
         "deploy:sale:sepolia": "npx hardhat run scripts/deployNftSale.js --network sepolia",
         "deploy:nft:ethereum": "npx hardhat run scripts/deployNft.js --network mainnet",
         "deploy:nft:sepolia": "npx hardhat run scripts/deployNft.js --network sepolia",
+        "deploy:all:ethereum": "npx hardhat run scripts/deployNftAndNftSale.js --network mainnet",
+        "deploy:all:sepolia": "npx hardhat run scripts/deployNftAndNftSale.js --network sepolia",
         "verify:ethereum": "npx hardhat verify --network mainnet",
         "verify:sepolia": "npx hardhat verify --network sepolia"
     },
