@@ -411,8 +411,6 @@ contract Nft is
      * @param   lifecycleTimestamp  duration of the lifecycle
      * @param   lifecycleExtensionTimestamp  duration of the lifecycle extension
      * @param   allocationPerProject  @question what is this for?
-     * @param   mainNftAmount  amount of main NFTs that have been minted with this level
-     * @param   genesisNftAmount  amount of Genesis NFTs that have been minted with this level
      * @param   mainBaseURI  base URI for the main NFT
      * @param   genesisBaseURI  base URI for the Genesis NFT
      */
@@ -461,7 +459,7 @@ contract Nft is
             vestingRewards,
             lifecycleTimestamp,
             lifecycleExtensionTimestamp,
-            allocationPerProject
+            allocationPerProject,
             mainBaseURI,
             genesisBaseURI
         );
@@ -673,7 +671,6 @@ contract Nft is
     /*//////////////////////////////////////////////////////////////////////////
                             FUNCTIONS FOR UPGRADER ROLE
     //////////////////////////////////////////////////////////////////////////*/
-
 
     function _authorizeUpgrade(
         address newImplementation
