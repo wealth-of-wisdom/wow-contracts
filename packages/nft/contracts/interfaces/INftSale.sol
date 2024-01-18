@@ -25,26 +25,11 @@ interface INftSaleEvents {
 
     event TokensWithdrawn(IERC20 token, address receiver, uint256 amount);
 
-    event MaxLevelSet(uint16 newMaxLevel);
-
-    event DivisorSet(uint256 newGenesisTokenDivisor);
-
-    event PromotionalVestingPIDSet(uint16 newPID);
-
     event USDTTokenSet(IERC20 newToken);
 
     event USDCTokenSet(IERC20 newToken);
 
     event NftContractSet(INft newContract);
-
-    event LevelDataSet(
-        uint16 newLevel,
-        uint256 newPrice,
-        uint256 newVestingRewardWOWTokens,
-        uint256 newlifecycleTimestamp,
-        uint256 newlifecycleExtensionTimestamp,
-        uint256 allocationPerProject
-    );
 
     event PurchasePaid(IERC20 token, uint256 amount);
 

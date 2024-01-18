@@ -66,6 +66,13 @@ contract Nft is
         _;
     }
 
+    modifier mStringNotEmpty(string memory str) {
+        if (bytes(str).length == 0) {
+            revert Errors.Nft__EmptyString();
+        }
+        _;
+    }
+
     function initialize(
         string memory name,
         string memory symbol,
@@ -73,11 +80,7 @@ contract Nft is
         uint16 maxLevel,
         uint16 promotionalVestingPID,
         uint256 genesisTokenDivisor
-    ) external initializer {
-        if (bytes(name).length == 0 || bytes(symbol).length == 0) {
-            revert Errors.Nft__EmptyString();
-        }
-
+    ) external initializer mStringNotEmpty(name) mStringNotEmpty(symbol) {
         __ERC721_init(name, symbol);
         __ERC721URIStorage_init();
         __ERC721Burnable_init();
@@ -97,23 +100,44 @@ contract Nft is
         s_vestingContract = vestingContract;
     }
 
-    function safeMint(address to, uint16 level) public onlyRole(MINTER_ROLE) {
+    /**
+     * @notice  Mints Nft to user with defined level and type
+     * @notice  Sets the token URI using the base URI and the token ID
+     * @dev     Only MINTER_ROLE can call this function
+     * @param   to  user who will get the Nft
+     * @param   level  nft level purchased
+     * @param   isGenesis  is it a genesis nft
+     */
+    function safeMint(
+        address to,
+        uint16 level,
+        bool isGenesis
+    ) public onlyRole(MINTER_ROLE) {
         // tokenId is assigned prior to incrementing the token id, so it starts from 0
         uint256 tokenId = s_nextTokenId++;
         _safeMint(to, tokenId);
 
+        NftLevel storage nftLevel = s_nftLevels[level];
+
         // idInLevel is assigned prior to incrementing the token quantity, so it starts from 0
-        uint256 idInLevel = s_nftLevels[level].currentNftAmount++;
+        uint256 idInLevel = isGenesis
+            ? nftLevel.genesisNftAmount++
+            : nftLevel.mainNftAmount++;
+
+        string memory baseURI = isGenesis
+            ? nftLevel.genesisBaseURI
+            : nftLevel.mainBaseURI;
 
         // Concatenate base URI, id in level and suffix to get the full URI
         string memory uri = string(
             abi.encodePacked(
-                s_nftLevels[level].baseURI,
+                baseURI,
                 Strings.toString(idInLevel),
                 NFT_URI_SUFFIX
             )
         );
 
+        // Set the token metadata URI (URI for each token is assigned before minting)
         _setTokenURI(tokenId, uri);
     }
 
@@ -232,7 +256,7 @@ contract Nft is
             0,
             0
         );
-        safeMint(receiver, level);
+        safeMint(receiver, level, isGenesis);
     }
 
     /**
@@ -257,7 +281,7 @@ contract Nft is
             0,
             0
         );
-        safeMint(receiver, newLevel);
+        safeMint(receiver, newLevel, false);
     }
 
     function setMaxLevel(
@@ -295,38 +319,41 @@ contract Nft is
     //NOTE: convert necesary lifecycle time into timestamp
     function setLevelData(
         uint16 level,
-        uint256 newPrice,
-        uint256 newVestingRewardWOWTokens,
-        uint256 newLifecycleTimestamp,
-        uint256 newlifecycleExtensionTimestamp,
-        uint256 newAllocationPerProject,
-        uint256 newCurrentNftAmount,
-        string calldata newBaseURI
+        uint256 price,
+        uint256 vestingRewards,
+        uint256 lifecycleTimestamp,
+        uint256 lifecycleExtensionTimestamp,
+        uint256 allocationPerProject,
+        string calldata mainBaseURI,
+        string calldata genesisBaseURI
     )
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
-        mAmountNotZero(newPrice)
-        mAmountNotZero(newLifecycleTimestamp)
+        mAmountNotZero(price)
+        mAmountNotZero(lifecycleTimestamp)
+        mStringNotEmpty(mainBaseURI)
+        mStringNotEmpty(genesisBaseURI)
     {
-        s_nftLevels[level] = NftLevel({
-            price: newPrice,
-            vestingRewardWOWTokens: newVestingRewardWOWTokens,
-            lifecycleTimestamp: newLifecycleTimestamp,
-            lifecycleExtensionTimestamp: newlifecycleExtensionTimestamp,
-            allocationPerProject: newAllocationPerProject,
-            currentNftAmount: newCurrentNftAmount,
-            baseURI: newBaseURI
-        });
+        NftLevel storage nftLevel = s_nftLevels[level];
+        nftLevel.price = price;
+        nftLevel.vestingRewardWOWTokens = vestingRewards;
+        nftLevel.lifecycleTimestamp = lifecycleTimestamp;
+        nftLevel.lifecycleExtensionTimestamp = lifecycleExtensionTimestamp;
+        nftLevel.allocationPerProject = allocationPerProject;
+        nftLevel.mainBaseURI = mainBaseURI;
+        nftLevel.genesisBaseURI = genesisBaseURI;
+
+        /// @dev mainNftAmount and genesisNftAmount are set to 0 by default
 
         emit LevelDataSet(
             level,
-            newPrice,
-            newVestingRewardWOWTokens,
-            newLifecycleTimestamp,
-            newlifecycleExtensionTimestamp,
-            newAllocationPerProject,
-            newCurrentNftAmount,
-            newBaseURI
+            price,
+            vestingRewards,
+            lifecycleTimestamp,
+            lifecycleExtensionTimestamp,
+            allocationPerProject
+            mainBaseURI,
+            genesisBaseURI
         );
     }
 
