@@ -11,10 +11,12 @@
         "deploy:ethereum": "npx hardhat run scripts/deployVesting.js --network mainnet",
         "deploy:sepolia": "npx hardhat run scripts/deployVesting.js --network sepolia",
         "verify:ethereum": "npx hardhat verify --network mainnet",
-        "verify:sepolia": "npx hardhat verify --network sepolia"
+        "verify:sepolia": "npx hardhat verify --network sepolia",
+        "addPools:sepolia": "npx hardhat run scripts/addVestingPools.js --network sepolia"
     },
     "dependencies": {
         "@nomicfoundation/hardhat-ethers": "^3.0.5",
+        "@nomiclabs/hardhat-waffle": "^2.0.6",
         "@openzeppelin/contracts": "5.0.1",
         "@openzeppelin/contracts-upgradeable": "^5.0.0",
         "dotenv": "^16.3.1"

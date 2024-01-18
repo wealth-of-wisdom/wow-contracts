@@ -1,9 +1,6 @@
 const { ethers, upgrades } = require("hardhat")
 
-async function main() {
-    const name = "Wealth-Of-Wisdom"
-    const symbol = "WOW"
-    const initialAmount = ethers.parseEther("2100000000") // 2100 mln.
+async function deployWOWToken(name, symbol, initialAmount) {
     const WOWToken = await ethers.getContractFactory("WOWToken")
     const token = await upgrades.deployProxy(WOWToken, [
         name,
@@ -11,10 +8,22 @@ async function main() {
         initialAmount,
     ])
     await token.waitForDeployment()
-    console.log("WOWToken deployed to:", await token.getAddress())
+
+    const tokenAddress = await token.getAddress()
+    console.log("WOWToken deployed to: ", tokenAddress)
+
+    return tokenAddress
+}
+
+async function main() {
+    await deployWOWToken("Wealth-Of-Wisdom", "WOW", 2_100_000_000)
 }
 
 main().catch((error) => {
     console.error(error)
     process.exitCode = 1
 })
+
+module.exports = {
+    deployWOWToken: deployWOWToken,
+}

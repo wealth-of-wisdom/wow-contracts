@@ -22,3 +22,5 @@ lcov.info
 #Gas report
 .gas-snapshot
 .gas-snapshot2
+
+debug.txt

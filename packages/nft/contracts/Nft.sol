@@ -1,111 +1,85 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import {ERC721URIStorageUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import {ERC721BurnableUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721BurnableUpgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
-import {INft} from "./interfaces/INft.sol";
+import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
+import {INft} from "@wealth-of-wisdom/nft/contracts/interfaces/INft.sol";
+import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
 
 contract Nft is
     INft,
     Initializable,
     ERC721Upgradeable,
+    ERC721URIStorageUpgradeable,
     ERC721BurnableUpgradeable,
     AccessControlUpgradeable,
     UUPSUpgradeable
 {
-    /*//////////////////////////////////////////////////////////////////////////
-                                    LIBRARIES
-    //////////////////////////////////////////////////////////////////////////*/
-
-    using SafeERC20 for IERC20;
-
     /*//////////////////////////////////////////////////////////////////////////
                                 PUBLIC CONSTANTS
     //////////////////////////////////////////////////////////////////////////*/
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+    bytes32 public constant WHITELISTED_SENDER_ROLE =
+        keccak256("WHITELISTED_SENDER_ROLE"); // for transfer authorization
+    bytes32 public constant NFT_DATA_MANAGER = keccak256("NFT_DATA_MANAGER");
+    string private constant NFT_URI_SUFFIX = ".json";
 
     /*//////////////////////////////////////////////////////////////////////////
                                 PUBLIC STORAGE
     //////////////////////////////////////////////////////////////////////////*/
 
-    IERC20 internal s_tokenUSDT;
-    IERC20 internal s_tokenUSDC;
+    IVesting internal s_vestingContract;
 
     /*//////////////////////////////////////////////////////////////////////////
                                 INTERNAL STORAGE
     //////////////////////////////////////////////////////////////////////////*/
 
     /* solhint-disable var-name-mixedcase */
-    mapping(uint256 => Band) internal s_bands; // token ID => band
-    mapping(uint16 => uint256) internal s_levelToPrice; // level => price in USD
-    uint256 internal s_nextTokenId;
+    mapping(uint256 tokenId => NftData) internal s_nftData; // token ID => nft data
+    mapping(uint16 level => NftLevel) internal s_nftLevels; // level => level data
+    // level => project (Standard, Premium, Limited) => project amount
+    mapping(uint16 level => mapping(uint16 project => uint16 projectAmount))
+        internal s_projectsPerNft;
     uint16 internal s_maxLevel;
+    uint16 internal s_promotionalVestingPID;
+    uint256 internal s_genesisTokenDivisor;
+    uint256 internal s_nextTokenId;
+
     /* solhint-enable */
 
     /*//////////////////////////////////////////////////////////////////////////
                                   MODIFIERS
     //////////////////////////////////////////////////////////////////////////*/
 
-    modifier mAddressNotZero(address addr) {
-        if (addr == address(0)) {
-            revert Nft__ZeroAddress();
-        }
-        _;
-    }
-
-    modifier mTokenExists(IERC20 token) {
-        if (token != s_tokenUSDT && token != s_tokenUSDC) {
-            revert Nft__NonExistantPayment();
-        }
-        _;
-    }
-
     modifier mAmountNotZero(uint256 amount) {
         if (amount == 0) {
-            revert Nft__PassedZeroAmount();
+            revert Errors.Nft__ZeroAmount();
         }
         _;
     }
-
-    modifier mValidBandLevel(uint16 level) {
-        if (level == 0 || level > s_maxLevel) {
-            revert Nft__InvalidLevel(level);
-        }
-        _;
-    }
-
-    /*//////////////////////////////////////////////////////////////////////////
-                                  CONSTRUCTOR
-    //////////////////////////////////////////////////////////////////////////*/
-
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
-        _disableInitializers();
-    }
-
-    /*//////////////////////////////////////////////////////////////////////////
-                                  INITIALIZER
-    //////////////////////////////////////////////////////////////////////////*/
 
     function initialize(
         string memory name,
         string memory symbol,
-        IERC20 tokenUSDT,
-        IERC20 tokenUSDC
-    )
-        external
-        initializer
-        mAddressNotZero(address(tokenUSDT))
-        mAddressNotZero(address(tokenUSDC))
-    {
+        IVesting vestingContract,
+        uint16 maxLevel,
+        uint16 promotionalVestingPID,
+        uint256 genesisTokenDivisor
+    ) external initializer {
+        if (bytes(name).length == 0 || bytes(symbol).length == 0) {
+            revert Errors.Nft__EmptyString();
+        }
+
         __ERC721_init(name, symbol);
+        __ERC721URIStorage_init();
         __ERC721Burnable_init();
         __AccessControl_init();
         __UUPSUpgradeable_init();
@@ -113,123 +87,177 @@ contract Nft is
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, msg.sender);
         _grantRole(UPGRADER_ROLE, msg.sender);
+        _grantRole(WHITELISTED_SENDER_ROLE, msg.sender);
+        _grantRole(NFT_DATA_MANAGER, msg.sender);
 
-        s_maxLevel = 5;
-        s_levelToPrice[1] = 1_000 * 10 ** 6;
-        s_levelToPrice[2] = 5_000 * 10 ** 6;
-        s_levelToPrice[3] = 10_000 * 10 ** 6;
-        s_levelToPrice[4] = 33_000 * 10 ** 6;
-        s_levelToPrice[5] = 100_000 * 10 ** 6;
+        s_maxLevel = maxLevel;
+        s_promotionalVestingPID = promotionalVestingPID;
+        s_genesisTokenDivisor = genesisTokenDivisor;
 
-        s_tokenUSDT = tokenUSDT;
-        s_tokenUSDC = tokenUSDC;
+        s_vestingContract = vestingContract;
     }
 
-    /*//////////////////////////////////////////////////////////////////////////
-                            EXTERNAL FUNCTIONS FOR USERS
-    //////////////////////////////////////////////////////////////////////////*/
-
-    function mintBand(
-        uint16 level,
-        IERC20 token
-    ) external mValidBandLevel(level) mTokenExists(token) {
-        uint256 cost = s_levelToPrice[level];
-
-        // Effects: Transfer the payment to the contract
-        _purchaseBand(token, cost);
-
-        // Effects: Increment the token ID
-        // The tokenId is set to the current s_nextTokenId (pre-increment)
+    function safeMint(address to, uint16 level) public onlyRole(MINTER_ROLE) {
+        // tokenId is assigned prior to incrementing the token id, so it starts from 0
         uint256 tokenId = s_nextTokenId++;
+        _safeMint(to, tokenId);
 
-        // Effects: mint the band
-        _safeMint(msg.sender, tokenId);
+        // idInLevel is assigned prior to incrementing the token quantity, so it starts from 0
+        uint256 idInLevel = s_nftLevels[level].currentNftAmount++;
 
-        // Effects: set the band data
-        s_bands[tokenId] = Band({level: level, isGenesis: false});
+        // Concatenate base URI, id in level and suffix to get the full URI
+        string memory uri = string(
+            abi.encodePacked(
+                s_nftLevels[level].baseURI,
+                Strings.toString(idInLevel),
+                NFT_URI_SUFFIX
+            )
+        );
 
-        emit BandMinted(msg.sender, tokenId, level, false);
+        _setTokenURI(tokenId, uri);
     }
 
-    function updateBand(
-        uint256 tokenId,
-        uint16 newLevel,
-        IERC20 token
-    ) external mValidBandLevel(newLevel) mTokenExists(token) {
-        // Checks: the sender must be the owner of the band
+    /**
+     * @notice  sets Nft data state as ACTIVATION_TRIGGERED,
+     * manages other data about the Nft and adds its holder to vesting pool
+     * @param   tokenId  user minted and owned token id
+     */
+    function activateNftData(uint256 tokenId) external {
         if (ownerOf(tokenId) != msg.sender) {
-            revert Nft__NotBandOwner();
+            revert Errors.Nft__NotNftOwner();
         }
 
-        Band storage band = s_bands[tokenId];
-        uint16 currentLevel = band.level;
+        NftData memory nftData = s_nftData[tokenId];
 
-        // Checks: the new level must be different from the current level
-        if (newLevel == currentLevel) {
-            revert Nft__InvalidLevel(newLevel);
+        // Checks: data must not be activated
+        if (nftData.activityType != ActivityType.NOT_ACTIVATED) {
+            revert Errors.Nft__AlreadyActivated();
         }
 
-        // Effects: Update the band level
-        band.level = newLevel;
+        // Effects: update data activity
+        nftData.activityType = ActivityType.ACTIVATION_TRIGGERED;
+        nftData.activityEndTimestamp =
+            block.timestamp +
+            s_nftLevels[nftData.level].lifecycleTimestamp;
+        nftData.extendedActivityEndTimestamp =
+            nftData.activityEndTimestamp +
+            s_nftLevels[nftData.level].lifecycleExtensionTimestamp;
 
-        if (newLevel > currentLevel) {
-            uint256 upgradeCost = s_levelToPrice[newLevel] -
-                s_levelToPrice[currentLevel];
+        (
+            ,
+            ,
+            uint256 totalPoolTokenAmount,
+            uint256 dedicatedPoolTokenAmount
+        ) = s_vestingContract.getGeneralPoolData(s_promotionalVestingPID);
+        uint256 nonDedicatedTokens = totalPoolTokenAmount -
+            dedicatedPoolTokenAmount;
+        NftLevel memory nftLevelData = s_nftLevels[nftData.level];
 
-            // Effects: Increment the token ID
-            // The newTokenId is set to the current s_nextTokenId (pre-increment)
-            uint256 newTokenId = s_nextTokenId++;
+        // example calculations:
+        // 200k rewards = 40k WoW tokens * ( 5k price / 1k )
+        // (40k tokens per 1k spent)
+        uint256 rewardTokens = nftData.isGenesis
+            ? nftLevelData.vestingRewardWOWTokens *
+                (nftLevelData.price / s_genesisTokenDivisor)
+            : nftLevelData.vestingRewardWOWTokens;
 
-            // Effects: burn previously owned band
-            _burn(tokenId);
+        rewardTokens = (nonDedicatedTokens < rewardTokens)
+            ? nonDedicatedTokens
+            : rewardTokens;
 
-            // Effects: purchase new band
-            _purchaseBand(token, upgradeCost);
-
-            // Effects: mint the band
-            _safeMint(msg.sender, newTokenId);
+        if (rewardTokens > 0) {
+            s_vestingContract.addBeneficiary(
+                s_promotionalVestingPID,
+                msg.sender,
+                rewardTokens
+            );
         }
-        // newLevel < currentLevel
-        else {
-            uint256 downgradeRefund = s_levelToPrice[currentLevel] -
-                s_levelToPrice[newLevel];
-
-            // Effects: Increment the token ID
-            // The newTokenId is set to the current s_nextTokenId (pre-increment)
-            uint256 newTokenId = s_nextTokenId++;
-
-            // Effects: burn previously owned band
-            _burn(tokenId);
-
-            // Effects: refund the user
-            _refundBandDowngrade(token, downgradeRefund);
-
-            // Effects: mint the band
-            _safeMint(msg.sender, newTokenId);
-        }
-
-        emit BandUpdated(msg.sender, tokenId, currentLevel, newLevel);
+        emit NftDataActivated(
+            msg.sender,
+            tokenId,
+            nftData.level,
+            nftData.isGenesis,
+            uint256(nftData.activityType),
+            nftData.activityEndTimestamp
+        );
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                             FUNCTIONS FOR ADMIN ROLE
     //////////////////////////////////////////////////////////////////////////*/
 
-    function withdrawTokens(
-        IERC20 token,
-        uint256 amount
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) mAmountNotZero(amount) {
-        uint256 balance = token.balanceOf(address(this));
+    /**
+     * @notice  sets all necesary information about the
+     * users Nft and its current state
+     * @param   tokenId  user minted and owned token id
+     * @param   level  nft level purchased
+     * @param   isGenesis  is it a genesis nft
+     * @param   activityType  activity state of the Nft
+     * @param   activityEndTimestamp  Nft regular expiration date
+     * @param   extendedActivityEndTimestamp  Nft extended expiration date
+     */
+    function setNftData(
+        uint256 tokenId,
+        uint16 level,
+        bool isGenesis,
+        ActivityType activityType,
+        uint256 activityEndTimestamp,
+        uint256 extendedActivityEndTimestamp
+    ) public onlyRole(NFT_DATA_MANAGER) {
+        s_nftData[tokenId] = NftData({
+            level: level,
+            isGenesis: isGenesis,
+            activityType: activityType,
+            activityEndTimestamp: activityEndTimestamp,
+            extendedActivityEndTimestamp: extendedActivityEndTimestamp
+        });
+    }
 
-        // Checks: the contract must have enough balance to withdraw
-        if (balance < amount) {
-            revert Nft__InsufficientContractBalance(balance, amount);
-        }
+    /**
+     * @notice  mints Nft to user and sets required data
+     * @param   receiver  user who will get the Nft
+     * @param   level  nft level purchased
+     * @param   isGenesis  is it a genesis nft
+     */
+    function mintAndSetNftData(
+        address receiver,
+        uint16 level,
+        bool isGenesis
+    ) external onlyRole(NFT_DATA_MANAGER) {
+        setNftData(
+            s_nextTokenId,
+            level,
+            isGenesis,
+            INft.ActivityType.NOT_ACTIVATED,
+            0,
+            0
+        );
+        safeMint(receiver, level);
+    }
 
-        // Interaction: transfer the tokens to the sender
-        token.safeTransfer(msg.sender, amount);
+    /**
+     * @notice  updates data for old Nft token and new one.
+     * Sets necesary states for upgrade - from one level to another
+     * @param   receiver  user who will get the Nft
+     * @param   oldTokenId  previously owned Nft id, which is being upgraded
+     * @param   newLevel  level upgraded to
+     */
+    function updateLevelDataAndMint(
+        address receiver,
+        uint256 oldTokenId,
+        uint16 newLevel
+    ) external onlyRole(NFT_DATA_MANAGER) {
+        s_nftData[oldTokenId].activityType = ActivityType.DEACTIVATED;
 
-        emit TokensWithdrawn(token, msg.sender, amount);
+        setNftData(
+            s_nextTokenId,
+            newLevel,
+            false,
+            INft.ActivityType.NOT_ACTIVATED,
+            0,
+            0
+        );
+        safeMint(receiver, newLevel);
     }
 
     function setMaxLevel(
@@ -237,7 +265,7 @@ contract Nft is
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         // Checks: the new max level must be greater than the current max level
         if (maxLevel <= s_maxLevel) {
-            revert Nft__InvalidMaxLevel(maxLevel);
+            revert Errors.Nft__InvalidMaxLevel(maxLevel);
         }
 
         // Effects: set the new max level
@@ -246,129 +274,209 @@ contract Nft is
         emit MaxLevelSet(maxLevel);
     }
 
-    function setLevelPrice(
-        uint16 level,
-        uint256 price
+    function setGenesisTokenDivisor(
+        uint256 newGenesisTokenDivisor
     )
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
-        mValidBandLevel(level)
-        mAmountNotZero(price)
+        mAmountNotZero(newGenesisTokenDivisor)
     {
-        s_levelToPrice[level] = price;
-
-        emit LevelPriceSet(level, price);
+        s_genesisTokenDivisor = newGenesisTokenDivisor;
+        emit DivisorSet(newGenesisTokenDivisor);
     }
 
-    function mintGenesisBand(
-        address receiver,
+    function setPromotionalVestingPID(
+        uint16 pid
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        s_promotionalVestingPID = pid;
+        emit PromotionalVestingPIDSet(pid);
+    }
+
+    //NOTE: convert necesary lifecycle time into timestamp
+    function setLevelData(
         uint16 level,
-        uint16 amount
+        uint256 newPrice,
+        uint256 newVestingRewardWOWTokens,
+        uint256 newLifecycleTimestamp,
+        uint256 newlifecycleExtensionTimestamp,
+        uint256 newAllocationPerProject,
+        uint256 newCurrentNftAmount,
+        string calldata newBaseURI
     )
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
-        mAddressNotZero(receiver)
-        mValidBandLevel(level)
-        mAmountNotZero(amount)
+        mAmountNotZero(newPrice)
+        mAmountNotZero(newLifecycleTimestamp)
     {
-        for (uint256 i = 0; i < amount; i++) {
-            // Effects: Increment the token ID
-            // The tokenId is set to the current s_nextTokenId (pre-increment)
-            uint256 tokenId = s_nextTokenId++;
+        s_nftLevels[level] = NftLevel({
+            price: newPrice,
+            vestingRewardWOWTokens: newVestingRewardWOWTokens,
+            lifecycleTimestamp: newLifecycleTimestamp,
+            lifecycleExtensionTimestamp: newlifecycleExtensionTimestamp,
+            allocationPerProject: newAllocationPerProject,
+            currentNftAmount: newCurrentNftAmount,
+            baseURI: newBaseURI
+        });
 
-            // Effects: mint genesis band
-            _safeMint(receiver, tokenId);
+        emit LevelDataSet(
+            level,
+            newPrice,
+            newVestingRewardWOWTokens,
+            newLifecycleTimestamp,
+            newlifecycleExtensionTimestamp,
+            newAllocationPerProject,
+            newCurrentNftAmount,
+            newBaseURI
+        );
+    }
 
-            // Effects: set the band data
-            s_bands[tokenId] = Band({level: level, isGenesis: true});
+    /**
+     * @notice  Sets accessible project amounts for each defined project in a level
+     * @param   level  level, for which project data is being set
+     * @param   project  project type (0 - Standard, 1 - Premium, 2- Limited)
+     * @param   projectsQuantityInLifecycle  how many projects are going to
+     * be accessible for its type and level
+     */
+    function setProjectsQuantity(
+        uint16 level,
+        uint8 project,
+        uint16 projectsQuantityInLifecycle
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        s_projectsPerNft[level][project] = projectsQuantityInLifecycle;
+        emit ProjectsQuantityInLifecycleSet(
+            level,
+            project,
+            projectsQuantityInLifecycle
+        );
+    }
 
-            emit BandMinted(receiver, tokenId, level, true);
+    /**
+     * @notice  Sets multiple accessible project amounts for a project in all levels
+     * @param   project  project type (0 - Standard, 1 - Premium, 2- Limited)
+     * @param   projectsQuantityInLifecycle  how many multiple projects are going to
+     * be accessible for its type and level
+     */
+    function setMultipleProjectsQuantity(
+        uint8 project,
+        uint16[] memory projectsQuantityInLifecycle
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (projectsQuantityInLifecycle.length != s_maxLevel)
+            revert Errors.Nft__MismatchInVariableLength();
+        for (uint16 level; level < s_maxLevel; level++) {
+            s_projectsPerNft[level][project] = projectsQuantityInLifecycle[
+                level
+            ];
+            emit ProjectsQuantityInLifecycleSet(
+                level,
+                project,
+                projectsQuantityInLifecycle[level]
+            );
         }
+    }
+
+    function setVestingContract(
+        IVesting newContract
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (address(newContract) == address(0)) {
+            revert Errors.Nft__ZeroAddress();
+        }
+        s_vestingContract = newContract;
+        emit VestingContractSet(newContract);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                             EXTERNAL VIEW/PURE FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
-    function getTokenUSDT() external view returns (IERC20) {
-        return s_tokenUSDT;
+    function getNftData(uint256 tokenId) public view returns (NftData memory) {
+        return s_nftData[tokenId];
     }
 
-    function getTokenUSDC() external view returns (IERC20) {
-        return s_tokenUSDC;
+    function getLevelData(uint16 level) public view returns (NftLevel memory) {
+        return s_nftLevels[level];
     }
 
-    function getBand(uint256 tokenId) external view returns (Band memory) {
-        return s_bands[tokenId];
-    }
-
-    function getLevelPriceInUSD(uint16 level) external view returns (uint256) {
-        return s_levelToPrice[level];
-    }
-
-    function getMaxLevel() external view returns (uint16) {
-        return s_maxLevel;
-    }
-
-    function getNextTokenId() external view returns (uint256) {
+    function getNextTokenId() public view returns (uint256) {
         return s_nextTokenId;
     }
 
+    function getMaxLevel() public view returns (uint16) {
+        return s_maxLevel;
+    }
+
+    function getGenesisTokenDivisor() public view returns (uint256) {
+        return s_genesisTokenDivisor;
+    }
+
+    function getPromotionalPID() public view returns (uint16) {
+        return s_promotionalVestingPID;
+    }
+
+    function getProjectLifecycle(
+        uint16 level,
+        uint8 project
+    ) public view returns (uint16) {
+        return s_projectsPerNft[level][project];
+    }
+
+    function getVestingContract() external view returns (IVesting) {
+        return s_vestingContract;
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
-                                OVERRIDE FUNCTIONS
+                            INHERITED OVERRIDEN FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
+    function transferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    )
+        public
+        override(ERC721Upgradeable, INft)
+        onlyRole(WHITELISTED_SENDER_ROLE)
+    {
+        ERC721Upgradeable.transferFrom(from, to, tokenId);
+    }
+
+    function ownerOf(
+        uint256 tokenId
+    ) public view override(ERC721Upgradeable, INft) returns (address) {
+        return _requireOwned(tokenId);
+    }
 
     // The following functions are overrides required by Solidity.
+
+    function tokenURI(
+        uint256 tokenId
+    )
+        public
+        view
+        override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
+        returns (string memory)
+    {
+        return super.tokenURI(tokenId);
+    }
 
     function supportsInterface(
         bytes4 interfaceId
     )
         public
         view
-        override(ERC721Upgradeable, AccessControlUpgradeable)
+        override(
+            ERC721Upgradeable,
+            ERC721URIStorageUpgradeable,
+            AccessControlUpgradeable
+        )
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
     }
 
-    /*//////////////////////////////////////////////////////////////////////////
-                            FUNCTIONS FOR UPGRADER ROLE
-    //////////////////////////////////////////////////////////////////////////*/
-
     function _authorizeUpgrade(
         address newImplementation
-    ) internal override onlyRole(UPGRADER_ROLE) {
-        /// @dev This function is empty but uses a modifier to restrict access
-    }
+    ) internal override onlyRole(UPGRADER_ROLE) {}
 
-    /*//////////////////////////////////////////////////////////////////////////
-                            INTERAL FUNCTIONS
-    //////////////////////////////////////////////////////////////////////////*/
+    // The following functions are overrides required by Solidity.
 
-    function _purchaseBand(
-        IERC20 token,
-        uint256 cost
-    ) internal virtual mTokenExists(token) {
-        // Interaction: transfer the payment to the contract
-        token.safeTransferFrom(msg.sender, address(this), cost);
-
-        emit PurchasePaid(token, cost);
-    }
-
-    function _refundBandDowngrade(
-        IERC20 token,
-        uint256 cost
-    ) internal virtual mTokenExists(token) {
-        uint256 balance = token.balanceOf(address(this));
-
-        // Checks: the contract must have enough balance to refund
-        if (balance < cost) {
-            revert Nft__InsufficientContractBalance(balance, cost);
-        }
-
-        // Interaction: transfer the refund to the user
-        token.safeTransfer(msg.sender, cost);
-
-        emit RefundPaid(token, cost);
-    }
+    uint256[50] private __gap;
 }
