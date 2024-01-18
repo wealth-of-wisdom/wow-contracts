@@ -9,7 +9,7 @@ import {Nft} from "@wealth-of-wisdom/nft/contracts/Nft.sol";
 import {INft} from "@wealth-of-wisdom/nft/contracts/interfaces/INft.sol";
 import {Base_Test} from "@wealth-of-wisdom/nft/test/Base.t.sol";
 
-contract Nft_Unit_Test is Base_Test {
+contract Nft_Unit_Test is Base_Test, INftSaleEvents {
     constructor() Base_Test() {}
 
     function setUp() public virtual override {

@@ -91,12 +91,13 @@ contract Nft_ActivateNftData_Unit_Test is Nft_Unit_Test, IVestingEvents {
     //TODO: check point of failue
     // function test_activateNftData_EmitsNftDataActivatedEvent()
     //     external
+    //     setNftDataForContract
     //     mintLevel2NftDataForAlice
     // {
     //     uint256 activityEndTimestamp = block.timestamp +
     //         LEVEL_2_LIFECYCLE_TIMESTAMP;
     //     vm.expectEmit(true, true, true, true);
-    //     emit INftEvents.NftDataActivated(
+    //     emit NftDataActivated(
     //         alice,
     //         NFT_TOKEN_ID_0,
     //         LEVEL_2,

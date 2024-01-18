@@ -5,9 +5,9 @@
 // import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 // import {INftSale} from "@wealth-of-wisdom/nft/contracts/interfaces/INftSale.sol";
 // import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
-// import {NftSale_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftSaleUnit.t.sol";
+// import {Nft_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftUnit.t.sol";
 
-// contract NftSale_SetPromotionalVestingPID_Unit_Test is NftSale_Unit_Test {
+// contract NftSale_SetPromotionalVestingPID_Unit_Test is Nft_Unit_Test {
 //     uint16 internal constant NEW_PROMOTIONAL_VESTING_PID = 4;
 
 //     function test_setPromotionalVestingPID_RevertIf_NotDefaultAdmin() external {

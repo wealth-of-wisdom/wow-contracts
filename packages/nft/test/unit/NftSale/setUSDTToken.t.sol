@@ -5,9 +5,9 @@
 // import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 // import {INftSale} from "@wealth-of-wisdom/nft/contracts/interfaces/INftSale.sol";
 // import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
-// import {NftSale_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftSaleUnit.t.sol";
+// import {Nft_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftUnit.t.sol";
 
-// contract NftSale_SetUSDTToken_Unit_Test is NftSale_Unit_Test {
+// contract NftSale_SetUSDTToken_Unit_Test is Nft_Unit_Test {
 //     IERC20 internal constant NEW_USDT_TOKEN = IERC20(address(100));
 
 //     function test_setUSDTToken_RevertIf_NotDefaultAdmin() external {

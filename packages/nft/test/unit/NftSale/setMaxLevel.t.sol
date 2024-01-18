@@ -5,9 +5,9 @@
 // import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 // import {INftSale, INftSaleEvents} from "@wealth-of-wisdom/nft/contracts/interfaces/INftSale.sol";
 // import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
-// import {NftSale_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftSaleUnit.t.sol";
+// import {Nft_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftUnit.t.sol";
 
-// contract NftSale_SetMaxLevel_Unit_Test is INftSaleEvents, NftSale_Unit_Test {
+// contract NftSale_SetMaxLevel_Unit_Test is INftSaleEvents, Nft_Unit_Test {
 //     function test_setMaxLevel_RevertIf_NotDefaultAdmin() external {
 //         vm.expectRevert(
 //             abi.encodeWithSelector(

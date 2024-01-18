@@ -5,13 +5,13 @@
 // import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 // import {INftSale} from "@wealth-of-wisdom/nft/contracts/interfaces/INftSale.sol";
 // import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
-// import {NftSale_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftSaleUnit.t.sol";
+// import {Nft_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftUnit.t.sol";
 
-// contract NftSale_UpdateBand_Unit_Test is NftSale_Unit_Test {
+// contract NftSale_UpdateBand_Unit_Test is Nft_Unit_Test {
 //     uint256 internal upgradePrice;
 
 //     function setUp() public override {
-//         NftSale_Unit_Test.setUp();
+//         Nft_Unit_Test.setUp();
 
 //         uint256 newPrice = sale.getLevelPriceInUSD(LEVEL_3);
 //         uint256 oldPrice = sale.getLevelPriceInUSD(LEVEL_2);
