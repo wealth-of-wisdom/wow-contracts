@@ -423,8 +423,6 @@ contract Nft is
         uint256 lifecycleTimestamp,
         uint256 lifecycleExtensionTimestamp,
         uint256 allocationPerProject,
-        uint256 mainNftAmount,
-        uint256 genesisNftAmount,
         string calldata mainBaseURI,
         string calldata genesisBaseURI
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -446,17 +444,16 @@ contract Nft is
         }
 
         // Effects: set level data
-        s_nftLevels[level] = NftLevel({
-            price: price,
-            vestingRewardWOWTokens: vestingRewards,
-            lifecycleTimestamp: lifecycleTimestamp,
-            lifecycleExtensionTimestamp: lifecycleExtensionTimestamp,
-            allocationPerProject: allocationPerProject,
-            mainNftAmount: mainNftAmount,
-            genesisNftAmount: genesisNftAmount,
-            mainBaseURI: mainBaseURI,
-            genesisBaseURI: genesisBaseURI
-        });
+        NftLevel storage nftLevel = s_nftLevels[level];
+        nftLevel.price = price;
+        nftLevel.vestingRewardWOWTokens = vestingRewards;
+        nftLevel.lifecycleTimestamp = lifecycleTimestamp;
+        nftLevel.lifecycleExtensionTimestamp = lifecycleExtensionTimestamp;
+        nftLevel.allocationPerProject = allocationPerProject;
+        nftLevel.mainBaseURI = mainBaseURI;
+        nftLevel.genesisBaseURI = genesisBaseURI;
+
+        /// @dev mainNftAmount and genesisNftAmount are set to 0 by default
 
         emit LevelDataSet(
             level,
@@ -464,9 +461,7 @@ contract Nft is
             vestingRewards,
             lifecycleTimestamp,
             lifecycleExtensionTimestamp,
-            allocationPerProject,
-            mainNftAmount,
-            genesisNftAmount,
+            allocationPerProject
             mainBaseURI,
             genesisBaseURI
         );
