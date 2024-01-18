@@ -20,6 +20,7 @@
 
 //     function test_activateNftData_RevertIf_NftDataAlreadyActivated()
 //         external
+//         setNftDataForContract
 //         mintLevel2NftDataForAlice
 //     {
 //         vm.startPrank(alice);
@@ -31,6 +32,7 @@
 
 //     function test_activateNftData_UpdatesNftDataActivity()
 //         external
+//         setNftDataForContract
 //         mintLevel2NftDataForAlice
 //     {
 //         vm.prank(alice);
@@ -49,6 +51,7 @@
 
 //     function test_activateNftData_AddsBeneficiaryInVestingContract()
 //         external
+//         setNftDataForContract
 //         mintLevel2NftDataForAlice
 //     {
 //         vm.prank(alice);
@@ -71,6 +74,7 @@
 
 //     function test_activateNftData_EmitsBeneficiaryAddedEvent()
 //         external
+//         setNftDataForContract
 //         mintLevel2NftDataForAlice
 //     {
 //         vm.expectEmit(true, true, true, true);

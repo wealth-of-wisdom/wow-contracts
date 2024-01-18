@@ -24,38 +24,6 @@ contract Nft_Initialize_Unit_Test is Nft_Unit_Test {
             DEFAULT_VESTING_PID,
             GENESIS_TOKEN_DIVISOR
         );
-        nftContract.setLevelData(
-            LEVEL_4,
-            LEVEL_4_PRICE,
-            LEVEL_4_VESTING_REWARD,
-            LEVEL_4_LIFECYCLE_TIMESTAMP,
-            LEVEL_4_EXTENDED_LIFECYCLE_TIMESTAMP,
-            LEVEL_4_ALLOCATION_PER_PROJECT
-        );
-        nftContract.setLevelData(
-            LEVEL_1,
-            LEVEL_1_PRICE,
-            LEVEL_1_VESTING_REWARD,
-            LEVEL_1_LIFECYCLE_TIMESTAMP,
-            LEVEL_1_EXTENDED_LIFECYCLE_TIMESTAMP,
-            LEVEL_1_ALLOCATION_PER_PROJECT
-        );
-        nftContract.setLevelData(
-            LEVEL_2,
-            LEVEL_2_PRICE,
-            LEVEL_2_VESTING_REWARD,
-            LEVEL_2_LIFECYCLE_TIMESTAMP,
-            LEVEL_2_EXTENDED_LIFECYCLE_TIMESTAMP,
-            LEVEL_2_ALLOCATION_PER_PROJECT
-        );
-        nftContract.setLevelData(
-            LEVEL_3,
-            LEVEL_3_PRICE,
-            LEVEL_3_VESTING_REWARD,
-            LEVEL_3_LIFECYCLE_TIMESTAMP,
-            LEVEL_3_EXTENDED_LIFECYCLE_TIMESTAMP,
-            LEVEL_3_ALLOCATION_PER_PROJECT
-        );
         _;
     }
 
@@ -113,6 +81,7 @@ contract Nft_Initialize_Unit_Test is Nft_Unit_Test {
     function test_initialize_SetsPromotionalVestingPIDCorrectly()
         external
         initializeNft
+        setNftDataForContract
     {
         assertEq(
             nftContract.getPromotionalPID(),
@@ -124,6 +93,7 @@ contract Nft_Initialize_Unit_Test is Nft_Unit_Test {
     function test_initialize_SetsNftLevelPricesCorrectly()
         external
         initializeNft
+        setNftDataForContract
     {
         assertEq(
             nftContract.getLevelData(1).price,
@@ -150,6 +120,7 @@ contract Nft_Initialize_Unit_Test is Nft_Unit_Test {
     function test_initialize_SetsNftLevelVestingRewardWOWTokensCorrectly()
         external
         initializeNft
+        setNftDataForContract
     {
         assertEq(
             nftContract.getLevelData(1).vestingRewardWOWTokens,
@@ -184,6 +155,7 @@ contract Nft_Initialize_Unit_Test is Nft_Unit_Test {
     function test_initialize_SetsVestingContractCorrectly()
         external
         initializeNft
+        setNftDataForContract
     {
         assertEq(
             address(nftContract.getVestingContract()),
@@ -207,6 +179,7 @@ contract Nft_Initialize_Unit_Test is Nft_Unit_Test {
     function test_initialize_GrantsDefaultAdminRoleToDeployer()
         external
         initializeNft
+        setNftDataForContract
     {
         assertTrue(
             nftContract.hasRole(DEFAULT_ADMIN_ROLE, admin),
@@ -217,6 +190,7 @@ contract Nft_Initialize_Unit_Test is Nft_Unit_Test {
     function test_initialize_GrantsMinterRoleToDeployer()
         external
         initializeNft
+        setNftDataForContract
     {
         assertTrue(
             nftContract.hasRole(MINTER_ROLE, admin),
@@ -227,6 +201,7 @@ contract Nft_Initialize_Unit_Test is Nft_Unit_Test {
     function test_initialize_GrantsUpgraderRoleToDeployer()
         external
         initializeNft
+        setNftDataForContract
     {
         assertTrue(
             nftContract.hasRole(UPGRADER_ROLE, admin),
@@ -237,6 +212,7 @@ contract Nft_Initialize_Unit_Test is Nft_Unit_Test {
     function test_initialize_GrantsWhitelistedSenderRoleToDeployer()
         external
         initializeNft
+        setNftDataForContract
     {
         assertTrue(
             nftContract.hasRole(WHITELISTED_SENDER_ROLE, admin),
@@ -255,6 +231,7 @@ contract Nft_Initialize_Unit_Test is Nft_Unit_Test {
     function test_initialize_RevertIf_ContractAlreadyInitialized()
         external
         initializeNft
+        setNftDataForContract
     {
         vm.expectRevert(Initializable.InvalidInitialization.selector);
         nftContract.initialize(
