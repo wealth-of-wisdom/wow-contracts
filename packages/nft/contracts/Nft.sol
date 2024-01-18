@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import {ERC721URIStorageUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import {ERC721BurnableUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721BurnableUpgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -14,6 +16,7 @@ contract Nft is
     INft,
     Initializable,
     ERC721Upgradeable,
+    ERC721URIStorageUpgradeable,
     ERC721BurnableUpgradeable,
     AccessControlUpgradeable,
     UUPSUpgradeable
@@ -27,6 +30,7 @@ contract Nft is
     bytes32 public constant WHITELISTED_SENDER_ROLE =
         keccak256("WHITELISTED_SENDER_ROLE"); // for transfer authorization
     bytes32 public constant NFT_DATA_MANAGER = keccak256("NFT_DATA_MANAGER");
+    string private constant NFT_URI_SUFFIX = ".json";
 
     /*//////////////////////////////////////////////////////////////////////////
                                 PUBLIC STORAGE
@@ -57,7 +61,7 @@ contract Nft is
 
     modifier mAmountNotZero(uint256 amount) {
         if (amount == 0) {
-            revert Errors.Nft__PassedZeroAmount();
+            revert Errors.Nft__ZeroAmount();
         }
         _;
     }
@@ -75,6 +79,7 @@ contract Nft is
         }
 
         __ERC721_init(name, symbol);
+        __ERC721URIStorage_init();
         __ERC721Burnable_init();
         __AccessControl_init();
         __UUPSUpgradeable_init();
@@ -92,9 +97,24 @@ contract Nft is
         s_vestingContract = vestingContract;
     }
 
-    function safeMint(address to) public onlyRole(MINTER_ROLE) {
+    function safeMint(address to, uint16 level) public onlyRole(MINTER_ROLE) {
+        // tokenId is assigned prior to incrementing the token id, so it starts from 0
         uint256 tokenId = s_nextTokenId++;
         _safeMint(to, tokenId);
+
+        // idInLevel is assigned prior to incrementing the token quantity, so it starts from 0
+        uint256 idInLevel = s_nftLevels[level].currentNftAmount++;
+
+        // Concatenate base URI, id in level and suffix to get the full URI
+        string memory uri = string(
+            abi.encodePacked(
+                s_nftLevels[level].baseURI,
+                Strings.toString(idInLevel),
+                NFT_URI_SUFFIX
+            )
+        );
+
+        _setTokenURI(tokenId, uri);
     }
 
     /**
@@ -212,7 +232,7 @@ contract Nft is
             0,
             0
         );
-        safeMint(receiver);
+        safeMint(receiver, level);
     }
 
     /**
@@ -229,16 +249,15 @@ contract Nft is
     ) external onlyRole(NFT_DATA_MANAGER) {
         s_nftData[oldTokenId].activityType = ActivityType.DEACTIVATED;
 
-        uint256 newTokenId = getNextTokenId();
         setNftData(
-            newTokenId,
+            s_nextTokenId,
             newLevel,
             false,
             INft.ActivityType.NOT_ACTIVATED,
             0,
             0
         );
-        safeMint(receiver);
+        safeMint(receiver, newLevel);
     }
 
     function setMaxLevel(
@@ -280,7 +299,9 @@ contract Nft is
         uint256 newVestingRewardWOWTokens,
         uint256 newLifecycleTimestamp,
         uint256 newlifecycleExtensionTimestamp,
-        uint256 newAllocationPerProject
+        uint256 newAllocationPerProject,
+        uint256 newCurrentNftAmount,
+        string calldata newBaseURI
     )
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
@@ -292,15 +313,20 @@ contract Nft is
             vestingRewardWOWTokens: newVestingRewardWOWTokens,
             lifecycleTimestamp: newLifecycleTimestamp,
             lifecycleExtensionTimestamp: newlifecycleExtensionTimestamp,
-            allocationPerProject: newAllocationPerProject
+            allocationPerProject: newAllocationPerProject,
+            currentNftAmount: newCurrentNftAmount,
+            baseURI: newBaseURI
         });
+
         emit LevelDataSet(
             level,
             newPrice,
             newVestingRewardWOWTokens,
             newLifecycleTimestamp,
             newlifecycleExtensionTimestamp,
-            newAllocationPerProject
+            newAllocationPerProject,
+            newCurrentNftAmount,
+            newBaseURI
         );
     }
 
@@ -409,13 +435,26 @@ contract Nft is
         override(ERC721Upgradeable, INft)
         onlyRole(WHITELISTED_SENDER_ROLE)
     {
-        super.transferFrom(from, to, tokenId);
+        ERC721Upgradeable.transferFrom(from, to, tokenId);
     }
 
     function ownerOf(
-        uint256 s_nextTokenId
+        uint256 tokenId
     ) public view override(ERC721Upgradeable, INft) returns (address) {
-        return _requireOwned(s_nextTokenId);
+        return _requireOwned(tokenId);
+    }
+
+    // The following functions are overrides required by Solidity.
+
+    function tokenURI(
+        uint256 tokenId
+    )
+        public
+        view
+        override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
+        returns (string memory)
+    {
+        return super.tokenURI(tokenId);
     }
 
     function supportsInterface(
@@ -423,7 +462,11 @@ contract Nft is
     )
         public
         view
-        override(ERC721Upgradeable, AccessControlUpgradeable, INft)
+        override(
+            ERC721Upgradeable,
+            ERC721URIStorageUpgradeable,
+            AccessControlUpgradeable
+        )
         returns (bool)
     {
         return super.supportsInterface(interfaceId);

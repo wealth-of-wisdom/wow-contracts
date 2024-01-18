@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import {INftSale} from "@wealth-of-wisdom/nft/contracts/interfaces/INftSale.sol";
+import {INft} from "@wealth-of-wisdom/nft/contracts/interfaces/INft.sol";
 import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
 
 abstract contract Constants {
@@ -42,10 +42,10 @@ abstract contract Constants {
         IVesting.UnlockTypes.MONTHLY;
     uint256 internal constant TOTAL_POOL_TOKEN_AMOUNT = 100_000 ether;
 
-    INftSale.ActivityType internal constant NFT_ACTIVITY_TYPE_ACTIVATED =
-        INftSale.ActivityType.ACTIVATION_TRIGGERED;
-    INftSale.ActivityType internal constant NFT_ACTIVITY_TYPE_INACTIVE =
-        INftSale.ActivityType.NOT_ACTIVATED;
-    INftSale.ActivityType internal constant NFT_ACTIVITY_TYPE_DEACTIVATED =
-        INftSale.ActivityType.DEACTIVATED;
+    INft.ActivityType internal constant NFT_ACTIVITY_TYPE_ACTIVATED =
+        INft.ActivityType.ACTIVATION_TRIGGERED;
+    INft.ActivityType internal constant NFT_ACTIVITY_TYPE_INACTIVE =
+        INft.ActivityType.NOT_ACTIVATED;
+    INft.ActivityType internal constant NFT_ACTIVITY_TYPE_DEACTIVATED =
+        INft.ActivityType.DEACTIVATED;
 }
