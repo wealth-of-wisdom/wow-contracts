@@ -31,8 +31,10 @@ interface INftEvents {
         uint256 lifecycleTimestamp,
         uint256 lifecycleExtensionTimestamp,
         uint256 allocationPerProject,
-        uint256 currentNftAmount,
-        string baseURI
+        uint256 mainNftAmount,
+        uint256 genesisNftAmount,
+        string mainBaseURI,
+        string genesisBaseURI
     );
 
     event ProjectsQuantityInLifecycleSet(
@@ -70,13 +72,15 @@ interface INft is INftEvents {
      * vesting pool as a reward for purchasing this NFT level
      **/
     struct NftLevel {
-        uint256 price;
-        uint256 vestingRewardWOWTokens;
-        uint256 lifecycleTimestamp;
-        uint256 lifecycleExtensionTimestamp;
+        uint256 price; // Price for NFT level purchase in USDC/USDT
+        uint256 vestingRewardWOWTokens; // WOW Tokens that will be locked into the vesting pool as a reward for purchasing this NFT level
+        uint256 lifecycleTimestamp; // Duration of the lifecycle
+        uint256 lifecycleExtensionTimestamp; // Duration of the lifecycle extension
         uint256 allocationPerProject;
-        uint256 currentNftAmount;
-        string baseURI;
+        uint256 mainNftAmount; // Amount of main NFTs that have been minted with this level
+        uint256 genesisNftAmount; // Amount of Genesis NFTs that have been minted with this level
+        string mainBaseURI; // Base URI for the amin NFT
+        string genesisBaseURI; // Base URI for the Genesis NFT
     }
 
     function initialize(
@@ -88,7 +92,7 @@ interface INft is INftEvents {
         uint256 genesisTokenDivisor
     ) external;
 
-    function safeMint(address to, uint16 level) external;
+    function safeMint(address to, uint16 level, bool isGenesis) external;
 
     function activateNftData(uint256 tokenId) external;
 
@@ -121,13 +125,15 @@ interface INft is INftEvents {
 
     function setLevelData(
         uint16 level,
-        uint256 newPrice,
-        uint256 newVestingRewardWOWTokens,
-        uint256 newLifecycleTimestamp,
-        uint256 newlifecycleExtensionTimestamp,
-        uint256 newAllocationPerProject,
-        uint256 newCurrentNftAmount,
-        string calldata newBaseURI
+        uint256 price,
+        uint256 vestingRewards,
+        uint256 lifecycleTimestamp,
+        uint256 lifecycleExtensionTimestamp,
+        uint256 allocationPerProject,
+        uint256 mainNftAmount,
+        uint256 genesisNftAmount,
+        string calldata mainBaseURI,
+        string calldata genesisBaseURI
     ) external;
 
     function setProjectsQuantity(
