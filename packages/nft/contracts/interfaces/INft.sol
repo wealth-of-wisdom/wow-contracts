@@ -31,8 +31,6 @@ interface INftEvents {
         uint256 lifecycleTimestamp,
         uint256 lifecycleExtensionTimestamp,
         uint256 allocationPerProject,
-        uint256 mainNftAmount,
-        uint256 genesisNftAmount,
         string mainBaseURI,
         string genesisBaseURI
     );
