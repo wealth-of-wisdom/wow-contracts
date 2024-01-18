@@ -6,9 +6,9 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
-import {INftSale} from "@wealth-of-wisdom/nft/contracts/interfaces/INftSale.sol";
-import {INft} from "@wealth-of-wisdom/nft/contracts/interfaces/INft.sol";
-import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
+import {INftSale} from "./interfaces/INftSale.sol";
+import {INft} from "./interfaces/INft.sol";
+import {Errors} from "./libraries/Errors.sol";
 
 contract NftSale is
     INftSale,

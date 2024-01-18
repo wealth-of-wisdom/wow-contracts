@@ -6,8 +6,8 @@ import {ERC721BurnableUpgradeable} from "@openzeppelin/contracts-upgradeable/tok
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
-import {INft} from "@wealth-of-wisdom/nft/contracts/interfaces/INft.sol";
+import {Errors} from "./libraries/Errors.sol";
+import {INft} from "./interfaces/INft.sol";
 import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
 
 contract Nft is
@@ -62,6 +62,13 @@ contract Nft is
         _;
     }
 
+    modifier mAddressNotZero(address addr) {
+        if (addr == address(0)) {
+            revert Errors.Nft__ZeroAddress();
+        }
+        _;
+    }
+
     function initialize(
         string memory name,
         string memory symbol,
@@ -69,7 +76,7 @@ contract Nft is
         uint16 maxLevel,
         uint16 promotionalVestingPID,
         uint256 genesisTokenDivisor
-    ) external initializer {
+    ) external initializer mAddressNotZero(address(vestingContract)) {
         if (bytes(name).length == 0 || bytes(symbol).length == 0) {
             revert Errors.Nft__EmptyString();
         }
@@ -92,7 +99,9 @@ contract Nft is
         s_vestingContract = vestingContract;
     }
 
-    function safeMint(address to) public onlyRole(MINTER_ROLE) {
+    function safeMint(
+        address to
+    ) public onlyRole(MINTER_ROLE) mAddressNotZero(to) {
         uint256 tokenId = s_nextTokenId++;
         _safeMint(to, tokenId);
     }
@@ -413,9 +422,9 @@ contract Nft is
     }
 
     function ownerOf(
-        uint256 s_nextTokenId
+        uint256 nextTokenId
     ) public view override(ERC721Upgradeable, INft) returns (address) {
-        return _requireOwned(s_nextTokenId);
+        return _requireOwned(nextTokenId);
     }
 
     function supportsInterface(

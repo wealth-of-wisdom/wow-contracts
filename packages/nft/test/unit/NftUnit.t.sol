@@ -16,8 +16,31 @@ contract Nft_Unit_Test is Base_Test {
         Base_Test.setUp();
 
         vm.startPrank(admin);
+
+        vesting = new VestingMock();
+        vesting.initialize(tokenUSDT, staking, LISTING_DATE);
+        tokenUSDT.approve(address(vesting), TOTAL_POOL_TOKEN_AMOUNT);
+        vesting.addVestingPool(
+            POOL_NAME,
+            LISTING_PERCENTAGE_DIVIDEND,
+            LISTING_PERCENTAGE_DIVISOR,
+            CLIFF_IN_DAYS,
+            CLIFF_PERCENTAGE_DIVIDEND,
+            CLIFF_PERCENTAGE_DIVISOR,
+            VESTING_DURATION_IN_MONTHS,
+            VESTING_UNLOCK_TYPE,
+            TOTAL_POOL_TOKEN_AMOUNT
+        );
+
         nftContract = new Nft();
-        nftContract.initialize("WOW nft", "NFT");
+        nftContract.initialize(
+            "Wealth of Wisdom",
+            "WOW",
+            vesting,
+            MAXIMUM_LEVEL_AMOUNT,
+            DEFAULT_VESTING_PID,
+            GENESIS_TOKEN_DIVISOR
+        );
         vm.stopPrank();
     }
 }

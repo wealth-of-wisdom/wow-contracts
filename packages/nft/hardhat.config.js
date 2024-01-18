@@ -13,23 +13,23 @@ module.exports = {
             },
         },
     },
-    etherscan: {
-        apiKey: {
-            sepolia: process.env.SEPOLIA_API_KEY,
-            mainnet: process.env.ETHEREUM_API_KEY,
-        },
-    },
-    sourcify: {
-        enabled: true,
-    },
-    networks: {
-        sepolia: {
-            url: process.env.SEPOLIA_HOST,
-            accounts: [process.env.PRIVATE_KEY],
-        },
-        mainnet: {
-            url: process.env.ETHEREUM_HOST,
-            accounts: [process.env.PRIVATE_KEY],
-        },
-    },
+    // etherscan: {
+    //     apiKey: {
+    //         sepolia: process.env.SEPOLIA_API_KEY,
+    //         mainnet: process.env.ETHEREUM_API_KEY,
+    //     },
+    // },
+    // sourcify: {
+    //     enabled: true,
+    // },
+    // networks: {
+    //     sepolia: {
+    //         url: process.env.SEPOLIA_HOST,
+    //         accounts: [process.env.PRIVATE_KEY],
+    //     },
+    //     mainnet: {
+    //         url: process.env.ETHEREUM_HOST,
+    //         accounts: [process.env.PRIVATE_KEY],
+    //     },
+    // },
 }

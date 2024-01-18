@@ -70,16 +70,16 @@ contract Base_Test is Test, Constants, Events {
     //////////////////////////////////////////////////////////////////////////*/
 
     // Pools
-    modifier mintLevel2BandForAlice() {
-        _mintLevel2BandForAlice();
+    modifier mintLevel2NftDataForAlice() {
+        _mintLevel2NftDataForAlice();
         _;
     }
 
-    function _mintLevel2BandForAlice() internal {
+    function _mintLevel2NftDataForAlice() internal {
         vm.startPrank(alice);
-        uint256 price = sale.getLevelPriceInUSD(DEFAULT_LEVEL_2);
+        uint256 price = nftContract.getLevelData(LEVEL_2).price;
         tokenUSDT.approve(address(sale), price);
-        sale.mintNft(DEFAULT_LEVEL_2, tokenUSDT);
+        sale.mintNft(LEVEL_2, tokenUSDT);
         vm.stopPrank();
     }
 }

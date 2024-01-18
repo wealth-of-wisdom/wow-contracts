@@ -33,18 +33,20 @@ contract NftSale_Unit_Test is Base_Test, INftSaleEvents {
         );
 
         nftContract = new Nft();
-        nftContract.initialize("WOW nft", "NFT");
-
-        sale = new NftSaleMock();
-        sale.initialize(
-            tokenUSDT,
-            tokenUSDC,
-            INft(address(nftContract)),
+        nftContract.initialize(
+            "Wealth of Wisdom",
+            "WOW",
             vesting,
-            DEFAULT_VESTING_PID
+            MAXIMUM_LEVEL_AMOUNT,
+            DEFAULT_VESTING_PID,
+            GENESIS_TOKEN_DIVISOR
         );
 
+        sale = new NftSaleMock();
+        sale.initialize(tokenUSDT, tokenUSDC, INft(address(nftContract)));
+
         nftContract.grantRole(MINTER_ROLE, address(sale));
+        nftContract.grantRole(NFT_DATA_MANAGER, address(sale));
         vesting.grantRole(BENEFICIARIES_MANAGER_ROLE, address(sale));
 
         vm.stopPrank();
