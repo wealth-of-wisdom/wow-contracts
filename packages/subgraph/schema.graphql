@@ -1,0 +1,212 @@
+enum UnlockType {
+    DAILY # Unlock type for daily vesting
+    MONTHLY # Unlock type for monthly vesting
+}
+
+# Entity representing Vesting Contract
+type VestingContract @entity {
+    """
+    Unique identifier for the vesting contract.
+    Always equal to 0.
+    Value is static.
+    Type: ID
+    Example: "0"
+    """
+    id: ID!
+
+    """
+    Hexadecimal address of the vesting contract.
+    Type: Bytes
+    Example: "0xabc123"
+    """
+    vestingContractAddress: Bytes!
+
+    """
+    Hexadecimal address of the associated staking contract.
+    Type: Bytes
+    Example: "0xdef456"
+    """
+    stakingContractAddress: Bytes!
+
+    """
+    Date when the vesting contract was listed.
+    Type: BigInt
+    Example: 1642402345000
+    """
+    listingDate: BigInt!
+}
+
+# Entity representing Vesting Pool
+type VestingPool @entity {
+    """
+    Unique identifier for the vesting pool.
+    Type: ID
+    Example: "456"
+    """
+    id: ID!
+
+    """
+    Numeric identifier for the pool.
+    Type: BigInt
+    Example: 789
+    """
+    poolId: BigInt!
+
+    """
+    Associated Vesting Contract for the pool.
+    """
+    vestingContract: VestingContract!
+
+    """
+    Name of the vesting pool.
+    Type: String
+    Example: "Main Pool"
+    """
+    name: String!
+
+    """
+    Listing percentage dividend for the pool.
+    Type: BigInt
+    Example: 100
+    """
+    listingPercentageDividend: BigInt!
+
+    """
+    Listing percentage divisor for the pool.
+    Type: BigInt
+    Example: 1000
+    """
+    listingPercentageDivisor: BigInt!
+
+    """
+    Duration of the cliff period.
+    Type: BigInt
+    Example: 2592000000 (30 days in milliseconds)
+    """
+    cliffDuration: BigInt!
+
+    """
+    End date of the cliff period.
+    Type: BigInt
+    Example: 1645000000000
+    """
+    cliffEndDate: BigInt!
+
+    """
+    Cliff percentage dividend for the pool.
+    Type: BigInt
+    Example: 200
+    """
+    cliffPercentageDividend: BigInt!
+
+    """
+    Cliff percentage divisor for the pool.
+    Type: BigInt
+    Example: 1000
+    """
+    cliffPercentageDivisor: BigInt!
+
+    """
+    Duration of the vesting period.
+    Type: BigInt
+    Example: 7776000000 (90 days in milliseconds)
+    """
+    vestingDuration: BigInt!
+
+    """
+    End date of the vesting period.
+    Type: BigInt
+    Example: 1648000000000
+    """
+    vestingEndDate: BigInt!
+
+    """
+    Type of unlocking mechanism (DAILY or MONTHLY).
+    Type: UnlockType
+    Example: DAILY
+    """
+    unlockType: UnlockType!
+
+    """
+    Amount of dedicated tokens for the pool.
+    Type: BigInt
+    Example: 1000
+    """
+    dedicatedPoolTokens: BigInt!
+
+    """
+    Total amount of tokens in the pool.
+    Type: BigInt
+    Example: 100000
+    """
+    totalPoolTokenAmount: BigInt!
+
+    """
+    List of beneficiaries associated with the pool.
+    """
+    beneficiaries: [Beneficiary!] @derivedFrom(field: "vestingPool")
+}
+
+# Entity representing Beneficiary
+type Beneficiary @entity {
+    """
+    Unique identifier for the beneficiary.
+    Type: ID
+    Example: "789"
+    """
+    id: ID!
+
+    """
+    Hexadecimal address of the beneficiary.
+    Type: Bytes
+    Example: "0x123abc"
+    """
+    address: Bytes!
+
+    """
+    Associated Vesting Pool for the beneficiary.
+    """
+    vestingPool: VestingPool!
+
+    """
+    Total tokens allocated to the beneficiary.
+    Type: BigInt
+    Example: 5000
+    """
+    totalTokens: BigInt!
+
+    """
+    Tokens vested to the beneficiary.
+    Type: BigInt
+    Example: 2500
+    """
+    vestedTokens: BigInt!
+
+    """
+    Tokens vested during the cliff period.
+    Type: BigInt
+    Example: 1000
+    """
+    cliffTokens: BigInt!
+
+    """
+    Tokens vested during the listing period.
+    Type: BigInt
+    Example: 500
+    """
+    listingTokens: BigInt!
+
+    """
+    Tokens staked by the beneficiary.
+    Type: BigInt
+    Example: 1000
+    """
+    stakedTokens: BigInt!
+
+    """
+    Tokens claimed by the beneficiary.
+    Type: BigInt
+    Example: 2000
+    """
+    claimedTokens: BigInt!
+}
