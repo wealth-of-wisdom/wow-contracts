@@ -124,11 +124,11 @@ contract Nft is
         }
 
         // Effects: update data activity
-        nftData.activityType = ActivityType.ACTIVATION_TRIGGERED;
-        nftData.activityEndTimestamp =
+        s_nftData[tokenId].activityType = ActivityType.ACTIVATION_TRIGGERED;
+        s_nftData[tokenId].activityEndTimestamp =
             block.timestamp +
             s_nftLevels[nftData.level].lifecycleTimestamp;
-        nftData.extendedActivityEndTimestamp =
+        s_nftData[tokenId].extendedActivityEndTimestamp =
             nftData.activityEndTimestamp +
             s_nftLevels[nftData.level].lifecycleExtensionTimestamp;
 

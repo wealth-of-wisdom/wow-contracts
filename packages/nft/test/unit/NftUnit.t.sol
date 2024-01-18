@@ -41,6 +41,14 @@ contract Nft_Unit_Test is Base_Test {
             DEFAULT_VESTING_PID,
             GENESIS_TOKEN_DIVISOR
         );
+
+        sale = new NftSaleMock();
+        sale.initialize(tokenUSDT, tokenUSDC, INft(address(nftContract)));
+
+        nftContract.grantRole(MINTER_ROLE, address(sale));
+        nftContract.grantRole(NFT_DATA_MANAGER, address(sale));
+        vesting.grantRole(BENEFICIARIES_MANAGER_ROLE, address(nftContract));
+
         vm.stopPrank();
     }
 }
