@@ -139,8 +139,6 @@ interface INft is INftEvents {
         uint256 lifecycleTimestamp,
         uint256 lifecycleExtensionTimestamp,
         uint256 allocationPerProject,
-        uint256 mainNftAmount,
-        uint256 genesisNftAmount,
         string calldata mainBaseURI,
         string calldata genesisBaseURI
     ) external;
@@ -179,8 +177,7 @@ interface INft is INftEvents {
 
     function supportsInterface(bytes4 interfaceId) external view returns (bool);
 
-        function transferFrom(address from, address to, uint256 tokenId) external;
-
+    function transferFrom(address from, address to, uint256 tokenId) external;
 
     function ownerOf(uint256 tokenId) external view returns (address owner);
 }
