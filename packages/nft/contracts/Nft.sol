@@ -39,11 +39,13 @@ contract Nft is
     //////////////////////////////////////////////////////////////////////////*/
 
     /* solhint-disable var-name-mixedcase */
-    mapping(uint256 tokenId => NftData) internal s_nftData; // token ID => nft data
-    mapping(uint16 level => NftLevel) internal s_nftLevels; // level => level data
-    // level => project (Standard, Premium, Limited) => project amount
-    mapping(uint16 level => mapping(uint16 project => uint16 projectAmount))
-        internal s_projectsPerNft;
+    mapping(uint256 tokenId => NftData nftData) internal s_nftData;
+
+    // Hash = keccak256(level, isGenesis)
+    mapping(bytes32 configHash => NftLevel levelData) internal s_nftLevels;
+
+    // Hash = keccak256(level, isGenesis, project type number (0 - Standard, 1 - Premium, 2- Limited)))
+    mapping(bytes32 configHash => uint16 quantity) internal s_projectsPerNft;
 
     IVesting internal s_vestingContract;
 
@@ -155,22 +157,18 @@ contract Nft is
         // Effects: mint the token
         _safeMint(to, tokenId);
 
-        NftLevel storage nftLevel = s_nftLevels[level];
+        NftLevel storage nftLevel = s_nftLevels[
+            _getLevelHash(level, isGenesis)
+        ];
 
         // Effects: increment the token quantity in the level
         // idInLevel is assigned prior to incrementing the token quantity, so it starts from 0
-        uint256 idInLevel = isGenesis
-            ? nftLevel.genesisNftAmount++
-            : nftLevel.mainNftAmount++;
-
-        string memory baseURI = isGenesis
-            ? nftLevel.genesisBaseURI
-            : nftLevel.mainBaseURI;
+        uint256 idInLevel = nftLevel.nftAmount++;
 
         // Concatenate base URI, id in level and suffix to get the full URI
         string memory uri = string(
             abi.encodePacked(
-                baseURI,
+                nftLevel.baseURI,
                 Strings.toString(idInLevel),
                 NFT_URI_SUFFIX
             )
@@ -198,7 +196,9 @@ contract Nft is
         }
 
         NftData storage nftData = s_nftData[tokenId];
-        NftLevel memory levelData = s_nftLevels[nftData.level];
+        NftLevel memory levelData = s_nftLevels[
+            _getLevelHash(nftData.level, nftData.isGenesis)
+        ];
 
         // Checks: data must not be activated
         if (nftData.activityType != ActivityType.NOT_ACTIVATED) {
@@ -209,10 +209,10 @@ contract Nft is
         nftData.activityType = ActivityType.ACTIVATION_TRIGGERED;
         nftData.activityEndTimestamp =
             block.timestamp +
-            levelData.lifecycleTimestamp;
+            levelData.lifecycleDuration;
         nftData.extendedActivityEndTimestamp =
             nftData.activityEndTimestamp +
-            levelData.lifecycleExtensionTimestamp;
+            levelData.extensionDuration;
 
         (
             ,
@@ -226,20 +226,14 @@ contract Nft is
             dedicatedPoolTokenAmount;
 
         if (nonDedicatedTokens > 0) {
-            // If NFT is not genesis, then the reward is fixed
-            // If NFT is genesis, then the reward is calculated based on the price
-            // Example calculations (40k tokens per 1k spent):
-            // 200k rewards = 40k WoW tokens * ( 5k price / 1k )
-            uint256 rewardTokens = nftData.isGenesis
-                ? levelData.vestingRewardWOWTokens *
-                    (levelData.price / s_genesisTokenDivisor)
-                : levelData.vestingRewardWOWTokens;
+            // Rewards are fixed for each level
+            uint256 rewardTokens = levelData.vestingRewardWOWTokens;
 
-            // If there are enough tokens, then the reward is the minimum of the two
+            // If there are enough tokens, then the reward is vestingRewardWOWTokens
             // Otherwise, the reward is the amount of tokens that can still be distributed
-            rewardTokens = (nonDedicatedTokens < rewardTokens)
-                ? nonDedicatedTokens
-                : rewardTokens;
+            if (nonDedicatedTokens < rewardTokens) {
+                rewardTokens = nonDedicatedTokens;
+            }
 
             // Effects: add the holder to the vesting pool
             s_vestingContract.addBeneficiary(
@@ -406,23 +400,23 @@ contract Nft is
      * @notice  Sets all data for a level
      * @dev     We don't use modifiers to solve stack too deep error
      * @param   level  level, for which data is being set
+     * @param   isGenesis  is it a genesis Nft
      * @param   price  price of the Nft in USDT/USDC
      * @param   vestingRewards  amount of WOW tokens that will be locked into the vesting pool
-     * @param   lifecycleTimestamp  duration of the lifecycle
-     * @param   lifecycleExtensionTimestamp  duration of the lifecycle extension
-     * @param   allocationPerProject  @question what is this for?
-     * @param   mainBaseURI  base URI for the main NFT
-     * @param   genesisBaseURI  base URI for the Genesis NFT
+     * @param   lifecycleDuration  duration of the lifecycle
+     * @param   extensionDuration  duration of the lifecycle extension
+     * @param   allocationPerProject  allocation per project in USDT/USDC
+     * @param   baseURI  base URI for the main NFT
      */
     function setLevelData(
         uint16 level,
+        bool isGenesis,
         uint256 price,
         uint256 vestingRewards,
-        uint256 lifecycleTimestamp,
-        uint256 lifecycleExtensionTimestamp,
+        uint256 lifecycleDuration,
+        uint256 extensionDuration,
         uint256 allocationPerProject,
-        string calldata mainBaseURI,
-        string calldata genesisBaseURI
+        string calldata baseURI
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         // Checks: level must be valid
         if (level == 0 || level > s_maxLevel) {
@@ -430,38 +424,38 @@ contract Nft is
         }
 
         // Checks: amounts must be greater than 0
-        if (price == 0 || lifecycleTimestamp == 0) {
+        if (price == 0 || lifecycleDuration == 0) {
             revert Errors.Nft__ZeroAmount();
         }
 
         // Checks: base URIs must not be empty
-        if (
-            bytes(mainBaseURI).length == 0 || bytes(genesisBaseURI).length == 0
-        ) {
+        if (bytes(baseURI).length == 0) {
             revert Errors.Nft__EmptyString();
         }
 
         // Effects: set level data
-        NftLevel storage nftLevel = s_nftLevels[level];
+        NftLevel storage nftLevel = s_nftLevels[
+            _getLevelHash(level, isGenesis)
+        ];
+
         nftLevel.price = price;
         nftLevel.vestingRewardWOWTokens = vestingRewards;
-        nftLevel.lifecycleTimestamp = lifecycleTimestamp;
-        nftLevel.lifecycleExtensionTimestamp = lifecycleExtensionTimestamp;
+        nftLevel.lifecycleDuration = lifecycleDuration;
+        nftLevel.extensionDuration = extensionDuration;
         nftLevel.allocationPerProject = allocationPerProject;
-        nftLevel.mainBaseURI = mainBaseURI;
-        nftLevel.genesisBaseURI = genesisBaseURI;
+        nftLevel.baseURI = baseURI;
 
-        /// @dev mainNftAmount and genesisNftAmount are set to 0 by default
+        /// @dev nftAmount should not be set here, because it is incremented when minting
 
         emit LevelDataSet(
             level,
+            isGenesis,
             price,
             vestingRewards,
-            lifecycleTimestamp,
-            lifecycleExtensionTimestamp,
+            lifecycleDuration,
+            extensionDuration,
             allocationPerProject,
-            mainBaseURI,
-            genesisBaseURI
+            baseURI
         );
     }
 
@@ -469,24 +463,21 @@ contract Nft is
      * @notice  Sets accessible project amounts for each defined project in a level
      * @param   level  level, for which project data is being set
      * @param   project  project type (0 - Standard, 1 - Premium, 2- Limited)
-     * @param   projectsQuantityInLifecycle  how many projects are going to
+     * @param   quantity  how many projects are going to
      * be accessible for its type and level
      */
     function setProjectsQuantity(
         uint16 level,
-        uint8 project,
-        uint16 projectsQuantityInLifecycle
+        bool isGenesis,
+        uint16 projectType,
+        uint16 quantity
     ) public onlyRole(DEFAULT_ADMIN_ROLE) mValidLevel(level) {
-        // @question: should we check if the project type is valid?
-
         // Effects: set the projects quantity
-        s_projectsPerNft[level][project] = projectsQuantityInLifecycle;
+        s_projectsPerNft[
+            _getProjectHash(level, isGenesis, projectType)
+        ] = quantity;
 
-        emit ProjectsQuantityInLifecycleSet(
-            level,
-            project,
-            projectsQuantityInLifecycle
-        );
+        emit ProjectsQuantitySet(level, isGenesis, projectType, quantity);
     }
 
     /**
@@ -552,9 +543,10 @@ contract Nft is
      * @return  NftLevel  level data
      */
     function getLevelData(
-        uint16 level
+        uint16 level,
+        bool isGenesis
     ) external view returns (NftLevel memory) {
-        return s_nftLevels[level];
+        return s_nftLevels[_getLevelHash(level, isGenesis)];
     }
 
     /**
@@ -677,4 +669,23 @@ contract Nft is
     ) internal override onlyRole(UPGRADER_ROLE) {}
 
     uint256[50] private __gap; // @question Why are we adding this at the end?
+
+    /*//////////////////////////////////////////////////////////////////////////
+                              INTERNAL FUNCTIONS
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function _getLevelHash(
+        uint16 level,
+        bool isGenesis
+    ) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked(level, isGenesis));
+    }
+
+    function _getProjectHash(
+        uint16 level,
+        bool isGenesis,
+        uint16 project // 0 - Standard, 1 - Premium, 2- Limited
+    ) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked(level, isGenesis, project));
+    }
 }

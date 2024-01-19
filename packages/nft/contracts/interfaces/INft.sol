@@ -42,13 +42,13 @@ interface INftEvents {
 
     event LevelDataSet(
         uint16 level,
+        bool isGenesis,
         uint256 price,
         uint256 vestingRewardWOWTokens,
-        uint256 lifecycleTimestamp,
-        uint256 lifecycleExtensionTimestamp,
+        uint256 lifecycleDuration,
+        uint256 extensionDuration,
         uint256 allocationPerProject,
-        string mainBaseURI,
-        string genesisBaseURI
+        string baseURI
     );
 
     event ProjectsQuantityInLifecycleSet(
@@ -81,15 +81,13 @@ interface INft is INftEvents {
     }
 
     struct NftLevel {
-        uint256 price; // Price for NFT level purchase in USDC/USDT
-        uint256 vestingRewardWOWTokens; // WOW Tokens that will be locked into the vesting pool as a reward for purchasing this NFT level
-        uint256 lifecycleTimestamp; // Duration of the lifecycle
-        uint256 lifecycleExtensionTimestamp; // Duration of the lifecycle extension
-        uint256 allocationPerProject;
-        uint256 mainNftAmount; // Amount of main NFTs that have been minted with this level
-        uint256 genesisNftAmount; // Amount of Genesis NFTs that have been minted with this level
-        string mainBaseURI; // Base URI for the amin NFT
-        string genesisBaseURI; // Base URI for the Genesis NFT
+        uint256 price; // Price for NFT level purchase in USDC/USDT (6 decimals)
+        uint256 vestingRewardWOWTokens; // WOW Tokens (18 decimals) that will be locked into the vesting pool as a reward for purchasing this NFT level
+        uint256 lifecycleDuration; // Duration of the lifecycle (in seconds)
+        uint256 extensionDuration; // Duration of the lifecycle extension (in seconds)
+        uint256 allocationPerProject; // Allocation per project (in USDC/USDT Tokens) for this NFT level
+        uint256 nftAmount; // Amount of main/genesis NFTs that have been minted with this level
+        string baseURI; // Base URI for this level NFT
     }
 
     function initialize(
@@ -134,14 +132,14 @@ interface INft is INftEvents {
 
     function setLevelData(
         uint16 level,
+        bool isGenesis,
         uint256 price,
         uint256 vestingRewards,
-        uint256 lifecycleTimestamp,
-        uint256 lifecycleExtensionTimestamp,
+        uint256 lifecycleDuration,
+        uint256 extensionDuration,
         uint256 allocationPerProject,
-        string calldata mainBaseURI,
-        string calldata genesisBaseURI
-    ) external;
+        string calldata baseURI
+    ) external
 
     function setProjectsQuantity(
         uint16 level,
