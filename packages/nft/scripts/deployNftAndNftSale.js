@@ -65,27 +65,45 @@ async function main() {
     await tx3.wait()
     console.log("BENEFICIARIES_MANAGER_ROLE granted to:", nftSaleAddress)
 
+    // levelsData.json contains some numbers that are -1, which means that the
+    // value is infinite. In order to set the data in the contract, we need to
+    // convert those numbers to max uint256 or uint16, which is the maximum value that
+    // can be stored in a smart contract.
+
     /*//////////////////////////////////////////////////////////////////////////
-                              SET 1-5 LEVELS DATA
+                              SET LEVELS
     //////////////////////////////////////////////////////////////////////////*/
 
+    const USD_DECIMALS = 6
+    const SECONDS_IN_MONTH = 30 * 24 * 60 * 60
+    const MAX_UINT16 = 65535
+    const MAX_UINT256 = ethers.MaxUint256
+    const projectsQuantities = [[], [], []]
+
     for (let i = 0; i < levelsData.length; i++) {
+        /*//////////////////////////////////////////////////////////////////////////
+                              SET LEVELS DATA
+        //////////////////////////////////////////////////////////////////////////*/
+
         const data = levelsData[i]
-        const price = ethers.parseUnits(data.price_in_usd.toString(), 6)
+        const price = ethers.parseUnits(
+            data.price_in_usd.toString(),
+            USD_DECIMALS,
+        )
         const vestingRewards = ethers.parseEther(
             data.vesting_rewards_in_wow.toString(),
         )
         const lifecycleDuration =
-            data.lifecycle_duration_in_months == -1
-                ? ethers.MaxUint256
-                : data.lifecycle_duration_in_months * 30 * 24 * 60 * 60 // seconds
+            data.lifecycle_duration_in_months === -1
+                ? MAX_UINT256
+                : data.lifecycle_duration_in_months * SECONDS_IN_MONTH
         const extensionDuration =
-            data.extension_duration_in_months == -1
-                ? ethers.MaxUint256
-                : data.extension_duration_in_months * 30 * 24 * 60 * 60 // seconds
+            data.extension_duration_in_months === -1
+                ? MAX_UINT256
+                : data.extension_duration_in_months * SECONDS_IN_MONTH
         const allocationPerProject = ethers.parseUnits(
             data.allocation_per_project_in_usd.toString(),
-            6,
+            USD_DECIMALS,
         )
 
         const tx4 = await nft.setLevelData(
@@ -100,6 +118,39 @@ async function main() {
         )
         await tx4.wait()
         console.log(`Level ${data.level} data set`)
+
+        /*//////////////////////////////////////////////////////////////////////////
+                              SET PROJECTS QUANTITY DATA
+        //////////////////////////////////////////////////////////////////////////*/
+
+        const standardQuantity =
+            data.standard_projects_quantity === -1
+                ? MAX_UINT16
+                : data.standard_projects_quantity
+        const premiumQuantity =
+            data.premium_projects_quantity === -1
+                ? MAX_UINT16
+                : data.premium_projects_quantity
+        const limitedQuantity =
+            data.limited_projects_quantity === -1
+                ? MAX_UINT16
+                : data.limited_projects_quantity
+
+        projectsQuantities[0].push(standardQuantity) // standard
+        projectsQuantities[1].push(premiumQuantity) // premium
+        projectsQuantities[2].push(limitedQuantity) // limited
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                            SET PROJECTS QUANTITY DATA
+    //////////////////////////////////////////////////////////////////////////*/
+
+    for (let i = 0; i < 3; i++) {
+        const quantities = projectsQuantities[i]
+        const tx5 = await nft.setMultipleProjectsQuantity(i, quantities)
+        await tx5.wait()
+
+        console.log(`Project type ${i} quantities set`)
     }
 
     console.log("Done!")

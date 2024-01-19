@@ -10,9 +10,10 @@
         "coverage:lcov": "forge coverage --report lcov && genhtml -o report --branch-coverage lcov.info",
         "deploy:ethereum": "npx hardhat run scripts/deployVesting.js --network mainnet",
         "deploy:sepolia": "npx hardhat run scripts/deployVesting.js --network sepolia",
+        "addPools:ethereum": "npx hardhat run scripts/addVestingPools.js --network mainnet",
+        "addPools:sepolia": "npx hardhat run scripts/addVestingPools.js --network sepolia",
         "verify:ethereum": "npx hardhat verify --network mainnet",
-        "verify:sepolia": "npx hardhat verify --network sepolia",
-        "addPools:sepolia": "npx hardhat run scripts/addVestingPools.js --network sepolia"
+        "verify:sepolia": "npx hardhat verify --network sepolia"
     },
     "dependencies": {
         "@nomicfoundation/hardhat-ethers": "^3.0.5",
