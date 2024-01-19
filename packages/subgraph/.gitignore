@@ -1,0 +1,15 @@
+# The Graph generated files
+types
+build
+generated
+
+
+# Internally generated files
+*.subgraph.yaml
+subgraph.yaml
+
+# Matchstick generated files
+**/*.wasm
+**/*.latest.json
+
+node_modules

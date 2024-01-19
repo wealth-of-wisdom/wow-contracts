@@ -1,0 +1,7 @@
+{
+    "network": "sepolia",
+    "vestingAddress": "0x155b151a75788C30B968De92D72e32AeA4f466dC",
+    "stakingAddress": "0x00000000000000000000000000000000000",
+    "nftSalesAddress": "0x623f4BA2b0CEE3d49a7A17ECA20E3Bb348D08F2C",
+    "startBlock": 5065677
+}
