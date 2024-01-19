@@ -48,7 +48,7 @@ contract Nft is
     mapping(bytes32 configHash => uint16 quantity) internal s_projectsPerNft;
 
     uint256 internal s_nextTokenId;
-    uint16 internal s_maxProjectType;
+    uint8 internal s_totalProjectTypes; // Standard, Premium, Limited
     uint16 internal s_maxLevel;
     uint16 internal s_promotionalVestingPID;
 
@@ -87,6 +87,13 @@ contract Nft is
         _;
     }
 
+    modifier mValidProject(uint8 project) {
+        if (project >= s_totalProjectTypes) {
+            revert Errors.Nft__InvalidProjectType(project);
+        }
+        _;
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                   INITIALIZER
     //////////////////////////////////////////////////////////////////////////*/
@@ -103,13 +110,15 @@ contract Nft is
         string memory name,
         string memory symbol,
         IVesting vestingContract,
+        uint16 promotionalVestingPID,
         uint16 maxLevel,
-        uint16 promotionalVestingPID
+        uint8 totalProjectTypes
     )
         external
         initializer
         mAddressNotZero(address(vestingContract))
         mAmountNotZero(maxLevel)
+        mAmountNotZero(totalProjectTypes)
     {
         // Checks: name and symbol must not be empty
         if (bytes(name).length == 0 || bytes(symbol).length == 0) {
@@ -131,8 +140,9 @@ contract Nft is
 
         // Effects: Set up storage
         s_vestingContract = vestingContract;
-        s_maxLevel = maxLevel;
         s_promotionalVestingPID = promotionalVestingPID;
+        s_maxLevel = maxLevel;
+        s_totalProjectTypes = totalProjectTypes;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -372,6 +382,20 @@ contract Nft is
         emit MaxLevelSet(maxLevel);
     }
 
+    function setTotalProjectTypes(
+        uint8 newCount
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        // Checks: the new project types count must be greater than the current project types count
+        if (newCount <= s_totalProjectTypes) {
+            revert Errors.Nft__InvalidTotalProjectTypes(newCount);
+        }
+
+        // Effects: set the new project types count
+        s_totalProjectTypes = newCount;
+
+        emit TotalProjectTypesSet(newCount);
+    }
+
     /**
      * @notice  Sets the new promotional vesting pool ID
      * @param   pid   new vesting pool ID
@@ -460,7 +484,12 @@ contract Nft is
         bool isGenesis,
         uint8 project,
         uint16 quantity
-    ) public onlyRole(DEFAULT_ADMIN_ROLE) mValidLevel(level) {
+    )
+        public
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        mValidLevel(level)
+        mValidProject(project)
+    {
         // Effects: set the projects quantity
         s_projectsPerNft[_getProjectHash(level, isGenesis, project)] = quantity;
 
@@ -566,6 +595,10 @@ contract Nft is
      */
     function getMaxLevel() external view returns (uint16) {
         return s_maxLevel;
+    }
+
+    function getTotalProjectTypes() external view returns (uint8) {
+        return s_totalProjectTypes;
     }
 
     /**

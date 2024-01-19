@@ -8,6 +8,8 @@ library Errors {
 
     error Nft__InvalidMaxLevel(uint16 maxLevel);
     error Nft__InvalidLevel(uint16 level);
+    error Nft__InvalidTotalProjectTypes(uint8 count);
+    error Nft__InvalidProjectType(uint8 project);
     error Nft__EmptyString();
     error Nft__MismatchInVariableLength();
     error Nft__NotNftOwner();

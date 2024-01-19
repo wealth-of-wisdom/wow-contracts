@@ -34,6 +34,8 @@ interface INftEvents {
 
     event MaxLevelSet(uint16 newMaxLevel);
 
+    event TotalProjectTypesSet(uint8 newCount);
+
     event PromotionalVestingPIDSet(uint16 newPID);
 
     event VestingContractSet(IVesting newContract);
@@ -98,8 +100,9 @@ interface INft is INftEvents {
         string memory name,
         string memory symbol,
         IVesting vestingContract,
+        uint16 promotionalVestingPID,
         uint16 maxLevel,
-        uint16 promotionalVestingPID
+        uint8 totalProjectTypes
     ) external;
 
     function safeMint(address to, uint16 level, bool isGenesis) external;
@@ -128,6 +131,8 @@ interface INft is INftEvents {
     ) external;
 
     function setMaxLevel(uint16 maxLevel) external;
+
+    function setTotalProjectTypes(uint8 newCount) external;
 
     function setPromotionalVestingPID(uint16 pid) external;
 
@@ -173,6 +178,8 @@ interface INft is INftEvents {
     function getNextTokenId() external view returns (uint256);
 
     function getMaxLevel() external view returns (uint16);
+
+    function getTotalProjectTypes() external view returns (uint8);
 
     function getPromotionalPID() external view returns (uint16);
 
