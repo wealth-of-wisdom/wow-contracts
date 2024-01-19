@@ -23,6 +23,10 @@ module.exports = {
         enabled: true,
     },
     networks: {
+        anvil: {
+            url: process.env.ANVIL_HOST,
+            accounts: [process.env.ANVIL_PRIVATE_KEY],
+        },
         sepolia: {
             url: process.env.SEPOLIA_HOST,
             accounts: [process.env.PRIVATE_KEY],

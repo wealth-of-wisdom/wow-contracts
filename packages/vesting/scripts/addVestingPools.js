@@ -8,28 +8,40 @@ async function addVestingPools(vestingTokenContract, vestingContract, pools) {
 
     const Vesting = await ethers.getContractFactory("Vesting")
     const vesting = Vesting.attach(vestingContract)
-    const divisor = 100
+    const DIVISOR = 100
 
-    await token.approve(vestingContract, process.env.FULL_POOL_TOKEN_AMOUNT);
+    const tx1 = await token.approve(
+        vestingContract,
+        process.env.FULL_POOL_TOKEN_AMOUNT,
+    )
+    await tx1.wait()
+
+    console.log("Approval complete!")
 
     for (var pool of pools) {
-        console.log(pool)
-        await vesting.addVestingPool(
+        const tx2 = await vesting.addVestingPool(
             pool.name,
             pool.listing_release_percentage,
-            divisor,
+            DIVISOR,
             pool.cliff_in_months * 30,
             0,
-            divisor,
+            DIVISOR,
             pool.vesting_in_months,
             0, // DAILY
-            pool.tokens_amount)
-        console.log("Vesting pool added!")
+            pool.tokens_amount,
+        )
+        tx2.wait()
+
+        console.log(`Vesting pool ${pool.name} added!`)
     }
 }
 
 async function main() {
-    await addVestingPools(process.env.VESTING_TOKEN, process.env.VESTING_CONTRACT, poolsData)
+    await addVestingPools(
+        process.env.VESTING_TOKEN,
+        process.env.VESTING_CONTRACT,
+        poolsData,
+    )
 }
 
 main().catch((error) => {
