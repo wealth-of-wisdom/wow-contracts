@@ -49,11 +49,25 @@ contract NftSale_MintNft_Unit_Test is Nft_Unit_Test {
         sale.mintNft(LEVEL_2, tokenUSDT);
 
         INft.NftData memory nftData = nftContract.getNftData(NFT_TOKEN_ID_0);
+
+        assertEq(uint8(nftData.level), uint8(LEVEL_2), "Nft didnt set level");
+        assertEq(nftData.isGenesis, false, "Nft didnt set genesis type");
         assertEq(
             uint8(nftData.activityType),
             uint8(NFT_ACTIVITY_TYPE_NOT_ACTIVATED),
             "Nft not activated"
         );
+        assertEq(
+            nftData.activityEndTimestamp,
+            0,
+            "Nft didnt assign natural lifecycle"
+        );
+        assertEq(
+            nftData.extendedActivityEndTimestamp,
+            0,
+            "Nft didnt assign extended lifecycle"
+        );
+
         assertFalse(nftData.isGenesis, "Nft set as genesis");
         assertEq(nftData.level, LEVEL_2, "Nft level set incorrectly");
     }
