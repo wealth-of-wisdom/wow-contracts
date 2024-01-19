@@ -47,14 +47,20 @@ contract Nft is
     // Hash = keccak256(level, isGenesis, project type number (0 - Standard, 1 - Premium, 2- Limited)))
     mapping(bytes32 configHash => uint16 quantity) internal s_projectsPerNft;
 
-    IVesting internal s_vestingContract;
-
+    uint256 internal s_nextTokenId;
+    uint16 internal s_maxProjectType;
     uint16 internal s_maxLevel;
     uint16 internal s_promotionalVestingPID;
-    uint256 internal s_genesisTokenDivisor;
-    uint256 internal s_nextTokenId;
+
+    IVesting internal s_vestingContract;
 
     /* solhint-enable */
+
+    /*//////////////////////////////////////////////////////////////////////////
+                            STORAGE FOR FUTURE UPGRADES
+    //////////////////////////////////////////////////////////////////////////*/
+
+    uint256[50] private __gap;
 
     /*//////////////////////////////////////////////////////////////////////////
                                   MODIFIERS
@@ -92,21 +98,18 @@ contract Nft is
      * @param   vestingContract  address of the vesting contract for promotional rewards
      * @param   maxLevel  maximum level of the Nft (levels start from 1)
      * @param   promotionalVestingPID  vesting pool ID for promotional rewards
-     * @param   genesisTokenDivisor  divisor for genesis token rewards
      */
     function initialize(
         string memory name,
         string memory symbol,
         IVesting vestingContract,
         uint16 maxLevel,
-        uint16 promotionalVestingPID,
-        uint256 genesisTokenDivisor
+        uint16 promotionalVestingPID
     )
         external
         initializer
         mAddressNotZero(address(vestingContract))
         mAmountNotZero(maxLevel)
-        mAmountNotZero(genesisTokenDivisor)
     {
         // Checks: name and symbol must not be empty
         if (bytes(name).length == 0 || bytes(symbol).length == 0) {
@@ -130,7 +133,6 @@ contract Nft is
         s_vestingContract = vestingContract;
         s_maxLevel = maxLevel;
         s_promotionalVestingPID = promotionalVestingPID;
-        s_genesisTokenDivisor = genesisTokenDivisor;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -371,19 +373,6 @@ contract Nft is
     }
 
     /**
-     * @notice  Sets the new genesis token divisor
-     * @param   divisor   new divisor
-     */
-    function setGenesisTokenDivisor(
-        uint256 divisor
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) mAmountNotZero(divisor) {
-        // Effects: set the new divisor
-        s_genesisTokenDivisor = divisor;
-
-        emit DivisorSet(divisor);
-    }
-
-    /**
      * @notice  Sets the new promotional vesting pool ID
      * @param   pid   new vesting pool ID
      */
@@ -469,29 +458,28 @@ contract Nft is
     function setProjectsQuantity(
         uint16 level,
         bool isGenesis,
-        uint16 projectType,
+        uint8 project,
         uint16 quantity
     ) public onlyRole(DEFAULT_ADMIN_ROLE) mValidLevel(level) {
         // Effects: set the projects quantity
-        s_projectsPerNft[
-            _getProjectHash(level, isGenesis, projectType)
-        ] = quantity;
+        s_projectsPerNft[_getProjectHash(level, isGenesis, project)] = quantity;
 
-        emit ProjectsQuantitySet(level, isGenesis, projectType, quantity);
+        emit ProjectsQuantitySet(level, isGenesis, project, quantity);
     }
 
     /**
      * @notice  Sets multiple accessible project amounts for a project in all levels
      * @param   project  project type (0 - Standard, 1 - Premium, 2- Limited)
-     * @param   projectsQuantityInLifecycle  how many multiple projects are going to
+     * @param   quantities  how many multiple projects are going to
      * be accessible for its type and level
      */
     function setMultipleProjectsQuantity(
+        bool isGenesis,
         uint8 project,
-        uint16[] memory projectsQuantityInLifecycle
+        uint16[] memory quantities
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         // Checks: the length of the array must be equal to the max level
-        if (projectsQuantityInLifecycle.length != s_maxLevel) {
+        if (quantities.length != s_maxLevel) {
             revert Errors.Nft__MismatchInVariableLength();
         }
 
@@ -499,8 +487,9 @@ contract Nft is
         for (uint16 level = 1; level <= s_maxLevel; level++) {
             setProjectsQuantity(
                 level,
+                isGenesis,
                 project,
-                projectsQuantityInLifecycle[level - 1]
+                quantities[level - 1]
             );
         }
     }
@@ -550,6 +539,20 @@ contract Nft is
     }
 
     /**
+     * @notice  Returns the amount of projects that are accessible for a given level
+     * @param   level  level of the Nft
+     * @param   project  project type (0 - Standard, 1 - Premium, 2- Limited)
+     * @return  uint16  amount of projects
+     */
+    function getProjectsQuantity(
+        uint16 level,
+        bool isGenesis,
+        uint8 project
+    ) external view returns (uint16) {
+        return s_projectsPerNft[_getProjectHash(level, isGenesis, project)];
+    }
+
+    /**
      * @notice  Returns the next token ID that will be minted
      * @return  uint256  next token ID
      */
@@ -566,32 +569,11 @@ contract Nft is
     }
 
     /**
-     * @notice  Returns the genesis token divisor used for rewards calculation
-     * @return  uint256  genesis token divisor
-     */
-    function getGenesisTokenDivisor() external view returns (uint256) {
-        return s_genesisTokenDivisor;
-    }
-
-    /**
      * @notice  Returns the promotional vesting pool ID used for rewards distribution
      * @return  uint16  promotional vesting pool ID
      */
     function getPromotionalPID() external view returns (uint16) {
         return s_promotionalVestingPID;
-    }
-
-    /**
-     * @notice  Returns the amount of projects that are accessible for a given level
-     * @param   level  level of the Nft
-     * @param   project  project type (0 - Standard, 1 - Premium, 2- Limited)
-     * @return  uint16  amount of projects
-     */
-    function getProjectsQuantity(
-        uint16 level,
-        uint8 project
-    ) external view returns (uint16) {
-        return s_projectsPerNft[level][project];
     }
 
     /**
@@ -668,8 +650,6 @@ contract Nft is
         address newImplementation
     ) internal override onlyRole(UPGRADER_ROLE) {}
 
-    uint256[50] private __gap; // @question Why are we adding this at the end?
-
     /*//////////////////////////////////////////////////////////////////////////
                               INTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
@@ -684,7 +664,7 @@ contract Nft is
     function _getProjectHash(
         uint16 level,
         bool isGenesis,
-        uint16 project // 0 - Standard, 1 - Premium, 2- Limited
+        uint8 project // 0 - Standard, 1 - Premium, 2- Limited
     ) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked(level, isGenesis, project));
     }

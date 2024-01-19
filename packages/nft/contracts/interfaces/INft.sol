@@ -34,8 +34,6 @@ interface INftEvents {
 
     event MaxLevelSet(uint16 newMaxLevel);
 
-    event DivisorSet(uint256 newGenesisTokenDivisor);
-
     event PromotionalVestingPIDSet(uint16 newPID);
 
     event VestingContractSet(IVesting newContract);
@@ -51,10 +49,11 @@ interface INftEvents {
         string baseURI
     );
 
-    event ProjectsQuantityInLifecycleSet(
+    event ProjectsQuantitySet(
         uint16 level,
+        bool isGenesis,
         uint8 project,
-        uint16 projectsQuantityInLifecycle
+        uint16 quantity
     );
 }
 
@@ -68,6 +67,7 @@ interface INft is INftEvents {
         NOT_ACTIVATED,
         ACTIVATION_TRIGGERED
     }
+
     /*//////////////////////////////////////////////////////////////////////////
                                        STRUCTS
     //////////////////////////////////////////////////////////////////////////*/
@@ -90,13 +90,16 @@ interface INft is INftEvents {
         string baseURI; // Base URI for this level NFT
     }
 
+    /*//////////////////////////////////////////////////////////////////////////
+                                    FUNCTIONS
+    //////////////////////////////////////////////////////////////////////////*/
+
     function initialize(
         string memory name,
         string memory symbol,
         IVesting vestingContract,
         uint16 maxLevel,
-        uint16 promotionalVestingPID,
-        uint256 genesisTokenDivisor
+        uint16 promotionalVestingPID
     ) external;
 
     function safeMint(address to, uint16 level, bool isGenesis) external;
@@ -126,8 +129,6 @@ interface INft is INftEvents {
 
     function setMaxLevel(uint16 maxLevel) external;
 
-    function setGenesisTokenDivisor(uint256 newGenesisTokenDivisor) external;
-
     function setPromotionalVestingPID(uint16 pid) external;
 
     function setLevelData(
@@ -139,37 +140,41 @@ interface INft is INftEvents {
         uint256 extensionDuration,
         uint256 allocationPerProject,
         string calldata baseURI
-    ) external
+    ) external;
 
     function setProjectsQuantity(
         uint16 level,
+        bool isGenesis,
         uint8 project,
-        uint16 projectsQuantityInLifecycle
+        uint16 quantity
     ) external;
 
     function setMultipleProjectsQuantity(
+        bool isGenesis,
         uint8 project,
-        uint16[] memory projectsQuantityInLifecycle
+        uint16[] memory quantities
     ) external;
 
     function setVestingContract(IVesting newContract) external;
 
     function getNftData(uint256 tokenId) external view returns (NftData memory);
 
-    function getLevelData(uint16 level) external view returns (NftLevel memory);
+    function getLevelData(
+        uint16 level,
+        bool isGenesis
+    ) external view returns (NftLevel memory);
+
+    function getProjectsQuantity(
+        uint16 level,
+        bool isGenesis,
+        uint8 project
+    ) external view returns (uint16);
 
     function getNextTokenId() external view returns (uint256);
 
     function getMaxLevel() external view returns (uint16);
 
-    function getGenesisTokenDivisor() external view returns (uint256);
-
     function getPromotionalPID() external view returns (uint16);
-
-    function getProjectsQuantity(
-        uint16 level,
-        uint8 project
-    ) external view returns (uint16);
 
     function getVestingContract() external view returns (IVesting);
 
