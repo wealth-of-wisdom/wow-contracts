@@ -4,6 +4,7 @@
 // import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 // import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 // import {INftSale} from "@wealth-of-wisdom/nft/contracts/interfaces/INftSale.sol";
+// import {INft} from "@wealth-of-wisdom/nft/contracts/interfaces/INft.sol";
 // import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
 // import {Nft_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftUnit.t.sol";
 
@@ -13,7 +14,7 @@
 //     function setUp() public override {
 //         Nft_Unit_Test.setUp();
 
-//         level2Price = sale.getLevelPriceInUSD(LEVEL_2);
+//         level2Price = nftContract.getLevelData(LEVEL_2).price;
 
 //         vm.prank(alice);
 //         tokenUSDT.approve(address(sale), level2Price);
@@ -47,7 +48,7 @@
 //         vm.prank(alice);
 //         sale.mintNft(LEVEL_2, tokenUSDT);
 
-//         INftSale.NftData memory nftData = sale.getNftData(NFT_TOKEN_ID_0);
+//         INft.NftData memory nftData = nftContract.getNftData(NFT_TOKEN_ID_0);
 //         assertEq(
 //             uint8(nftData.activityType),
 //             uint8(NFT_ACTIVITY_TYPE_NOT_ACTIVATED),

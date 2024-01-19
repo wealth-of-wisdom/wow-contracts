@@ -7,7 +7,8 @@ import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.
 abstract contract Constants {
     bytes32 internal constant DEFAULT_ADMIN_ROLE = 0x00;
     bytes32 internal constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    bytes32 internal constant NFT_DATA_MANAGER = keccak256("NFT_DATA_MANAGER");
+    bytes32 internal constant NFT_DATA_MANAGER_ROLE =
+        keccak256("NFT_DATA_MANAGER_ROLE");
     bytes32 internal constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     bytes32 public constant WHITELISTED_SENDER_ROLE =
         keccak256("WHITELISTED_SENDER_ROLE");
@@ -50,6 +51,8 @@ abstract contract Constants {
 
     uint16 internal constant MAXIMUM_LEVEL_AMOUNT = 5;
     uint256 internal constant SECONDS_IN_MONTH = 2592000;
+    string internal constant MAIN_BASE_URI = "mainBaseUri/18eh7wcg/";
+    string internal constant GENESIS_BASE_URI = "genesisBaseUri/kmdq124c/";
 
     uint16 internal constant LEVEL_1 = 1;
     uint256 internal constant LEVEL_1_PRICE = 1_000 * USD_DECIMALS;
@@ -81,7 +84,7 @@ abstract contract Constants {
     uint256 internal constant LEVEL_3_ALLOCATION_PER_PROJECT =
         20 * USD_DECIMALS;
 
-    uint16 internal constant LEVEL_4 = 0;
+    uint16 internal constant LEVEL_4 = 4;
     uint256 internal constant LEVEL_4_PRICE = 50 * USD_DECIMALS;
     uint256 internal constant LEVEL_4_VESTING_REWARD = 50 * WOW_DECIMALS;
     uint256 internal constant LEVEL_4_LIFECYCLE_TIMESTAMP = type(uint256).max;

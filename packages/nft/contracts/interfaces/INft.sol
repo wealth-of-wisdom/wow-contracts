@@ -1,11 +1,36 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
+
 import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
 
 interface INftEvents {
     /*//////////////////////////////////////////////////////////////////////////
                                        EVENTS
     //////////////////////////////////////////////////////////////////////////*/
+
+    event NftMinted(
+        address indexed receiver,
+        uint256 indexed tokenId,
+        string tokenURI
+    );
+
+    event NftDataActivated(
+        address indexed receiver,
+        uint256 indexed tokenId,
+        uint16 level,
+        bool isGenesis,
+        uint256 activityEndTimestamp,
+        uint256 extendedActivityEndTimestamp
+    );
+
+    event NftDataSet(
+        uint256 indexed tokenId,
+        uint16 level,
+        bool isGenesis,
+        uint256 activityType,
+        uint256 activityEndTimestamp,
+        uint256 extendedActivityEndTimestamp
+    );
 
     event MaxLevelSet(uint16 newMaxLevel);
 
@@ -15,22 +40,15 @@ interface INftEvents {
 
     event VestingContractSet(IVesting newContract);
 
-    event NftDataActivated(
-        address indexed receiver,
-        uint256 indexed tokenId,
-        uint16 level,
-        bool isGenesis,
-        uint256 activityType,
-        uint256 activityEndTimestamp
-    );
-
     event LevelDataSet(
-        uint16 newLevel,
-        uint256 newPrice,
-        uint256 newVestingRewardWOWTokens,
-        uint256 newlifecycleTimestamp,
-        uint256 newlifecycleExtensionTimestamp,
-        uint256 allocationPerProject
+        uint16 level,
+        uint256 price,
+        uint256 vestingRewardWOWTokens,
+        uint256 lifecycleTimestamp,
+        uint256 lifecycleExtensionTimestamp,
+        uint256 allocationPerProject,
+        string mainBaseURI,
+        string genesisBaseURI
     );
 
     event ProjectsQuantityInLifecycleSet(
@@ -62,17 +80,16 @@ interface INft is INftEvents {
         uint256 extendedActivityEndTimestamp;
     }
 
-    /**
-     * @param price -Price for NFT level purchase
-     * @param vestingRewardWOWTokens -  Tokens that will be invested into the
-     * vesting pool as a reward for purchasing this NFT level
-     **/
     struct NftLevel {
-        uint256 price;
-        uint256 vestingRewardWOWTokens;
-        uint256 lifecycleTimestamp;
-        uint256 lifecycleExtensionTimestamp;
+        uint256 price; // Price for NFT level purchase in USDC/USDT
+        uint256 vestingRewardWOWTokens; // WOW Tokens that will be locked into the vesting pool as a reward for purchasing this NFT level
+        uint256 lifecycleTimestamp; // Duration of the lifecycle
+        uint256 lifecycleExtensionTimestamp; // Duration of the lifecycle extension
         uint256 allocationPerProject;
+        uint256 mainNftAmount; // Amount of main NFTs that have been minted with this level
+        uint256 genesisNftAmount; // Amount of Genesis NFTs that have been minted with this level
+        string mainBaseURI; // Base URI for the amin NFT
+        string genesisBaseURI; // Base URI for the Genesis NFT
     }
 
     function initialize(
@@ -84,7 +101,7 @@ interface INft is INftEvents {
         uint256 genesisTokenDivisor
     ) external;
 
-    function safeMint(address to) external;
+    function safeMint(address to, uint16 level, bool isGenesis) external;
 
     function activateNftData(uint256 tokenId) external;
 
@@ -97,16 +114,16 @@ interface INft is INftEvents {
         uint256 extendedActivityEndTimestamp
     ) external;
 
-    function updateLevelDataAndMint(
-        address receiver,
-        uint256 oldtokenId,
-        uint16 newLevel
-    ) external;
-
     function mintAndSetNftData(
         address receiver,
         uint16 level,
         bool isGenesis
+    ) external;
+
+    function mintAndUpdateNftData(
+        address receiver,
+        uint256 oldtokenId,
+        uint16 newLevel
     ) external;
 
     function setMaxLevel(uint16 maxLevel) external;
@@ -116,12 +133,14 @@ interface INft is INftEvents {
     function setPromotionalVestingPID(uint16 pid) external;
 
     function setLevelData(
-        uint16 newLevel,
-        uint256 newPrice,
-        uint256 newVestingRewardWOWTokens,
-        uint256 newlifecycleTimestamp,
-        uint256 newlifecycleExtensionTimestamp,
-        uint256 newAllocationPerProject
+        uint16 level,
+        uint256 price,
+        uint256 vestingRewards,
+        uint256 lifecycleTimestamp,
+        uint256 lifecycleExtensionTimestamp,
+        uint256 allocationPerProject,
+        string calldata mainBaseURI,
+        string calldata genesisBaseURI
     ) external;
 
     function setProjectsQuantity(
@@ -137,8 +156,6 @@ interface INft is INftEvents {
 
     function setVestingContract(IVesting newContract) external;
 
-    function transferFrom(address from, address to, uint256 tokenId) external;
-
     function getNftData(uint256 tokenId) external view returns (NftData memory);
 
     function getLevelData(uint16 level) external view returns (NftLevel memory);
@@ -151,14 +168,16 @@ interface INft is INftEvents {
 
     function getPromotionalPID() external view returns (uint16);
 
-    function getProjectLifecycle(
+    function getProjectsQuantity(
         uint16 level,
         uint8 project
     ) external view returns (uint16);
 
+    function getVestingContract() external view returns (IVesting);
+
     function supportsInterface(bytes4 interfaceId) external view returns (bool);
 
-    function ownerOf(uint256 tokenId) external view returns (address owner);
+    function transferFrom(address from, address to, uint256 tokenId) external;
 
-    function getVestingContract() external view returns (IVesting);
+    function ownerOf(uint256 tokenId) external view returns (address owner);
 }

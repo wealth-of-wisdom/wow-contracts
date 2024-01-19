@@ -10,7 +10,7 @@ contract Nft_TransferFrom_Unit_Test is Nft_Unit_Test {
         Nft_Unit_Test.setUp();
 
         vm.prank(admin);
-        nftContract.safeMint(alice);
+        nftContract.safeMint(alice, LEVEL_1, false);
     }
 
     function test_transferFrom_RevertIf_NotWhitelistedSender() external {

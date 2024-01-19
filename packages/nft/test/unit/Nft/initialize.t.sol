@@ -111,7 +111,7 @@ contract Nft_Initialize_Unit_Test is Nft_Unit_Test {
             "Level 3 price should be set to 10_000 USD"
         );
         assertEq(
-            nftContract.getLevelData(0).price,
+            nftContract.getLevelData(4).price,
             LEVEL_4_PRICE,
             "Level 0 price should be set to 50 USD"
         );
@@ -138,7 +138,7 @@ contract Nft_Initialize_Unit_Test is Nft_Unit_Test {
             "Level 3 vesting reward should be set to 100_000 WOW"
         );
         assertEq(
-            nftContract.getLevelData(0).vestingRewardWOWTokens,
+            nftContract.getLevelData(4).vestingRewardWOWTokens,
             LEVEL_4_VESTING_REWARD,
             "Level 1 vesting reward should be set to 50 WOW"
         );

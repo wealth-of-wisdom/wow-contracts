@@ -96,7 +96,9 @@ contract Base_Test is Test, Constants, Events {
             LEVEL_1_VESTING_REWARD,
             LEVEL_1_LIFECYCLE_TIMESTAMP,
             LEVEL_1_EXTENDED_LIFECYCLE_TIMESTAMP,
-            LEVEL_1_ALLOCATION_PER_PROJECT
+            LEVEL_1_ALLOCATION_PER_PROJECT,
+            MAIN_BASE_URI,
+            GENESIS_BASE_URI
         );
         nftContract.setLevelData(
             LEVEL_2,
@@ -104,7 +106,9 @@ contract Base_Test is Test, Constants, Events {
             LEVEL_2_VESTING_REWARD,
             LEVEL_2_LIFECYCLE_TIMESTAMP,
             LEVEL_2_EXTENDED_LIFECYCLE_TIMESTAMP,
-            LEVEL_2_ALLOCATION_PER_PROJECT
+            LEVEL_2_ALLOCATION_PER_PROJECT,
+            MAIN_BASE_URI,
+            GENESIS_BASE_URI
         );
         nftContract.setLevelData(
             LEVEL_3,
@@ -112,7 +116,9 @@ contract Base_Test is Test, Constants, Events {
             LEVEL_3_VESTING_REWARD,
             LEVEL_3_LIFECYCLE_TIMESTAMP,
             LEVEL_3_EXTENDED_LIFECYCLE_TIMESTAMP,
-            LEVEL_3_ALLOCATION_PER_PROJECT
+            LEVEL_3_ALLOCATION_PER_PROJECT,
+            MAIN_BASE_URI,
+            GENESIS_BASE_URI
         );
         nftContract.setLevelData(
             LEVEL_4,
@@ -120,7 +126,9 @@ contract Base_Test is Test, Constants, Events {
             LEVEL_4_VESTING_REWARD,
             LEVEL_4_LIFECYCLE_TIMESTAMP,
             LEVEL_4_EXTENDED_LIFECYCLE_TIMESTAMP,
-            LEVEL_4_ALLOCATION_PER_PROJECT
+            LEVEL_4_ALLOCATION_PER_PROJECT,
+            MAIN_BASE_URI,
+            GENESIS_BASE_URI
         );
         vm.stopPrank();
     }

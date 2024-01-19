@@ -29,7 +29,7 @@ contract NftSale_Initialize_Unit_Test is Nft_Unit_Test {
     }
 
     function test_initialize_RevertIf_USDTTokenIsZeroAddress() external {
-        vm.expectRevert(Errors.Nft__ZeroAddress.selector);
+        vm.expectRevert(Errors.NftSale__ZeroAddress.selector);
         sale.initialize(
             IERC20(ZERO_ADDRESS),
             tokenUSDC,
@@ -38,7 +38,7 @@ contract NftSale_Initialize_Unit_Test is Nft_Unit_Test {
     }
 
     function test_initialize_RevertIf_USDCTokenIsZeroAddress() external {
-        vm.expectRevert(Errors.Nft__ZeroAddress.selector);
+        vm.expectRevert(Errors.NftSale__ZeroAddress.selector);
         sale.initialize(
             tokenUSDT,
             IERC20(ZERO_ADDRESS),
@@ -47,7 +47,7 @@ contract NftSale_Initialize_Unit_Test is Nft_Unit_Test {
     }
 
     function test_initialize_RevertIf_NftContractIsZeroAddress() external {
-        vm.expectRevert(Errors.Nft__ZeroAddress.selector);
+        vm.expectRevert(Errors.NftSale__ZeroAddress.selector);
         sale.initialize(tokenUSDT, tokenUSDC, INft(ZERO_ADDRESS));
     }
 

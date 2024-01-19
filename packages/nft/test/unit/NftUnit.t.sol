@@ -46,7 +46,7 @@ contract Nft_Unit_Test is Base_Test, INftSaleEvents {
         sale.initialize(tokenUSDT, tokenUSDC, INft(address(nftContract)));
 
         nftContract.grantRole(MINTER_ROLE, address(sale));
-        nftContract.grantRole(NFT_DATA_MANAGER, address(sale));
+        nftContract.grantRole(NFT_DATA_MANAGER_ROLE, address(sale));
         vesting.grantRole(BENEFICIARIES_MANAGER_ROLE, address(nftContract));
 
         vm.stopPrank();
