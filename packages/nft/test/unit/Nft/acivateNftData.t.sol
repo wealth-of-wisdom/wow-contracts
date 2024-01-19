@@ -8,7 +8,11 @@ import {INft, INftEvents} from "@wealth-of-wisdom/nft/contracts/interfaces/INft.
 import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
 import {Nft_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftUnit.t.sol";
 
-contract Nft_ActivateNftData_Unit_Test is Nft_Unit_Test, IVestingEvents {
+contract Nft_ActivateNftData_Unit_Test is
+    Nft_Unit_Test,
+    IVestingEvents,
+    INftEvents
+{
     function test_activateNftData_RevertIf_NotNftDataOwner()
         external
         mintLevel2NftDataForAlice
@@ -88,25 +92,26 @@ contract Nft_ActivateNftData_Unit_Test is Nft_Unit_Test, IVestingEvents {
         nftContract.activateNftData(NFT_TOKEN_ID_0);
     }
 
-    //TODO: check point of failue
-    // function test_activateNftData_EmitsNftDataActivatedEvent()
-    //     external
-    //     setNftDataForContract
-    //     mintLevel2NftDataForAlice
-    // {
-    //     uint256 activityEndTimestamp = block.timestamp +
-    //         LEVEL_2_LIFECYCLE_TIMESTAMP;
-    //     vm.expectEmit(true, true, true, true);
-    //     emit NftDataActivated(
-    //         alice,
-    //         NFT_TOKEN_ID_0,
-    //         LEVEL_2,
-    //         false,
-    //         NFT_ACTIVITY_TYPE_ACTIVATION_TRIGGERED,
-    //         activityEndTimestamp
-    //     );
+    function test_activateNftData_EmitsNftDataActivatedEvent()
+        external
+        setNftDataForContract
+        mintLevel2NftDataForAlice
+    {
+        uint256 activityEndTimestamp = block.timestamp +
+            LEVEL_2_LIFECYCLE_TIMESTAMP;
+        uint256 extendedActivityEndTimestamp = activityEndTimestamp +
+            LEVEL_2_EXTENDED_LIFECYCLE_TIMESTAMP;
+        vm.expectEmit(true, true, true, true);
+        emit NftDataActivated(
+            alice,
+            NFT_TOKEN_ID_0,
+            LEVEL_2,
+            false,
+            activityEndTimestamp,
+            extendedActivityEndTimestamp
+        );
 
-    //     vm.prank(alice);
-    //     nftContract.activateNftData(NFT_TOKEN_ID_0);
-    // }
+        vm.prank(alice);
+        nftContract.activateNftData(NFT_TOKEN_ID_0);
+    }
 }
