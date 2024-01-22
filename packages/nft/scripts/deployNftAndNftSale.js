@@ -12,9 +12,10 @@ async function main() {
         process.env.NFT_NAME,
         process.env.NFT_SYMBOL,
         process.env.VESTING_CONTRACT,
-        process.env.MAX_LEVEL,
+        process.env.LEVEL5_SUPPLY_CAP,
         process.env.VESTING_POOL_ID,
-        process.env.GENESIS_TOKEN_DIVISOR,
+        process.env.MAX_LEVEL,
+        process.env.TOTAL_PROJECT_TYPES,
     ])
     await nft.waitForDeployment()
     const nftAddress = await nft.getAddress()
@@ -37,9 +38,9 @@ async function main() {
     /*//////////////////////////////////////////////////////////////////////////
                                 GET VESTING CONTRACT
     //////////////////////////////////////////////////////////////////////////*/
-
-    const Vesting = await ethers.getContractFactory("Vesting")
-    const vesting = Vesting.attach(process.env.VESTING_CONTRACT)
+    //NOTE: no Vesting deployed for NFT stage
+    // const Vesting = await ethers.getContractFactory("Vesting")
+    // const vesting = Vesting.attach(process.env.VESTING_CONTRACT)
 
     /*//////////////////////////////////////////////////////////////////////////
                                 GRANT PERMISSIONS
@@ -47,8 +48,9 @@ async function main() {
 
     const MINTER_ROLE = await nft.MINTER_ROLE()
     const NFT_DATA_MANAGER_ROLE = await nft.NFT_DATA_MANAGER_ROLE()
-    const BENEFICIARIES_MANAGER_ROLE =
-        await vesting.BENEFICIARIES_MANAGER_ROLE()
+    //NOTE: no Vesting deployed for NFT stage
+    // const BENEFICIARIES_MANAGER_ROLE =
+    //     await vesting.BENEFICIARIES_MANAGER_ROLE()
 
     const tx1 = await nft.grantRole(MINTER_ROLE, nftSaleAddress)
     await tx1.wait()
@@ -58,12 +60,13 @@ async function main() {
     await tx2.wait()
     console.log("NFT_DATA_MANAGER_ROLE granted to:", nftSaleAddress)
 
-    const tx3 = await vesting.grantRole(
-        BENEFICIARIES_MANAGER_ROLE,
-        nftSaleAddress,
-    )
-    await tx3.wait()
-    console.log("BENEFICIARIES_MANAGER_ROLE granted to:", nftSaleAddress)
+    //NOTE: no Vesting deployed for NFT stage
+    // const tx3 = await vesting.grantRole(
+    //     BENEFICIARIES_MANAGER_ROLE,
+    //     nftSaleAddress,
+    // )
+    // await tx3.wait()
+    // console.log("BENEFICIARIES_MANAGER_ROLE granted to:", nftSaleAddress)
 
     // levelsData.json contains some numbers that are -1, which means that the
     // value is infinite. In order to set the data in the contract, we need to
@@ -108,50 +111,52 @@ async function main() {
 
         const tx4 = await nft.setLevelData(
             data.level,
+            data.isGenesis,
             price,
             vestingRewards,
             lifecycleDuration,
             extensionDuration,
             allocationPerProject,
-            data.main_base_uri,
-            data.genesis_base_uri,
+            data.base_uri,
         )
+
         await tx4.wait()
         console.log(`Level ${data.level} data set`)
 
         /*//////////////////////////////////////////////////////////////////////////
                               SET PROJECTS QUANTITY DATA
         //////////////////////////////////////////////////////////////////////////*/
+        //NOTE: no projects set for NFT stage
+        // const standardQuantity =
+        //     data.standard_projects_quantity === -1
+        //         ? MAX_UINT16
+        //         : data.standard_projects_quantity
+        // const premiumQuantity =
+        //     data.premium_projects_quantity === -1
+        //         ? MAX_UINT16
+        //         : data.premium_projects_quantity
+        // const limitedQuantity =
+        //     data.limited_projects_quantity === -1
+        //         ? MAX_UINT16
+        //         : data.limited_projects_quantity
 
-        const standardQuantity =
-            data.standard_projects_quantity === -1
-                ? MAX_UINT16
-                : data.standard_projects_quantity
-        const premiumQuantity =
-            data.premium_projects_quantity === -1
-                ? MAX_UINT16
-                : data.premium_projects_quantity
-        const limitedQuantity =
-            data.limited_projects_quantity === -1
-                ? MAX_UINT16
-                : data.limited_projects_quantity
-
-        projectsQuantities[0].push(standardQuantity) // standard
-        projectsQuantities[1].push(premiumQuantity) // premium
-        projectsQuantities[2].push(limitedQuantity) // limited
+        // projectsQuantities[0].push(standardQuantity) // standard
+        // projectsQuantities[1].push(premiumQuantity) // premium
+        // projectsQuantities[2].push(limitedQuantity) // limited
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                             SET PROJECTS QUANTITY DATA
     //////////////////////////////////////////////////////////////////////////*/
 
-    for (let i = 0; i < 3; i++) {
-        const quantities = projectsQuantities[i]
-        const tx5 = await nft.setMultipleProjectsQuantity(i, quantities)
-        await tx5.wait()
+    //NOTE: no projects set for NFT stage
+    // for (let i = 0; i < 3; i++) {
+    //     const quantities = projectsQuantities[i]
+    //     const tx5 = await nft.setMultipleProjectsQuantity(false, i, quantities)
+    //     await tx5.wait()
 
-        console.log(`Project type ${i} quantities set`)
-    }
+    //     console.log(`Project type ${i} quantities set`)
+    // }
 
     console.log("Done!")
 }
