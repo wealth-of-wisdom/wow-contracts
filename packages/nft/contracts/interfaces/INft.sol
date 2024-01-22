@@ -32,9 +32,11 @@ interface INftEvents {
         uint256 extendedActivityEndTimestamp
     );
 
+    event Level5SupplyCapSet(uint256 newSupplyCap);
+
     event MaxLevelSet(uint16 newMaxLevel);
 
-    event DivisorSet(uint256 newGenesisTokenDivisor);
+    event TotalProjectTypesSet(uint8 newCount);
 
     event PromotionalVestingPIDSet(uint16 newPID);
 
@@ -42,19 +44,20 @@ interface INftEvents {
 
     event LevelDataSet(
         uint16 level,
+        bool isGenesis,
         uint256 price,
         uint256 vestingRewardWOWTokens,
-        uint256 lifecycleTimestamp,
-        uint256 lifecycleExtensionTimestamp,
+        uint256 lifecycleDuration,
+        uint256 extensionDuration,
         uint256 allocationPerProject,
-        string mainBaseURI,
-        string genesisBaseURI
+        string baseURI
     );
 
-    event ProjectsQuantityInLifecycleSet(
+    event ProjectsQuantitySet(
         uint16 level,
+        bool isGenesis,
         uint8 project,
-        uint16 projectsQuantityInLifecycle
+        uint16 quantity
     );
 }
 
@@ -68,6 +71,7 @@ interface INft is INftEvents {
         NOT_ACTIVATED,
         ACTIVATION_TRIGGERED
     }
+
     /*//////////////////////////////////////////////////////////////////////////
                                        STRUCTS
     //////////////////////////////////////////////////////////////////////////*/
@@ -81,24 +85,27 @@ interface INft is INftEvents {
     }
 
     struct NftLevel {
-        uint256 price; // Price for NFT level purchase in USDC/USDT
-        uint256 vestingRewardWOWTokens; // WOW Tokens that will be locked into the vesting pool as a reward for purchasing this NFT level
-        uint256 lifecycleTimestamp; // Duration of the lifecycle
-        uint256 lifecycleExtensionTimestamp; // Duration of the lifecycle extension
-        uint256 allocationPerProject;
-        uint256 mainNftAmount; // Amount of main NFTs that have been minted with this level
-        uint256 genesisNftAmount; // Amount of Genesis NFTs that have been minted with this level
-        string mainBaseURI; // Base URI for the amin NFT
-        string genesisBaseURI; // Base URI for the Genesis NFT
+        uint256 price; // Price for NFT level purchase in USDC/USDT (6 decimals)
+        uint256 vestingRewardWOWTokens; // WOW Tokens (18 decimals) that will be locked into the vesting pool as a reward for purchasing this NFT level
+        uint256 lifecycleDuration; // Duration of the lifecycle (in seconds)
+        uint256 extensionDuration; // Duration of the lifecycle extension (in seconds)
+        uint256 allocationPerProject; // Allocation per project (in USDC/USDT Tokens) for this NFT level
+        uint256 nftAmount; // Amount of main/genesis NFTs that have been minted with this level
+        string baseURI; // Base URI for this level NFT
     }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                    FUNCTIONS
+    //////////////////////////////////////////////////////////////////////////*/
 
     function initialize(
         string memory name,
         string memory symbol,
         IVesting vestingContract,
-        uint16 maxLevel,
+        uint256 level5MaxSupply,
         uint16 promotionalVestingPID,
-        uint256 genesisTokenDivisor
+        uint16 maxLevel,
+        uint8 totalProjectTypes
     ) external;
 
     function safeMint(address to, uint16 level, bool isGenesis) external;
@@ -126,52 +133,62 @@ interface INft is INftEvents {
         uint16 newLevel
     ) external;
 
+    function setLevel5SupplyCap(uint256 newCap) external;
+
     function setMaxLevel(uint16 maxLevel) external;
 
-    function setGenesisTokenDivisor(uint256 newGenesisTokenDivisor) external;
+    function setTotalProjectTypes(uint8 newCount) external;
 
     function setPromotionalVestingPID(uint16 pid) external;
 
     function setLevelData(
         uint16 level,
+        bool isGenesis,
         uint256 price,
         uint256 vestingRewards,
-        uint256 lifecycleTimestamp,
-        uint256 lifecycleExtensionTimestamp,
+        uint256 lifecycleDuration,
+        uint256 extensionDuration,
         uint256 allocationPerProject,
-        string calldata mainBaseURI,
-        string calldata genesisBaseURI
+        string calldata baseURI
     ) external;
 
     function setProjectsQuantity(
         uint16 level,
+        bool isGenesis,
         uint8 project,
-        uint16 projectsQuantityInLifecycle
+        uint16 quantity
     ) external;
 
     function setMultipleProjectsQuantity(
+        bool isGenesis,
         uint8 project,
-        uint16[] memory projectsQuantityInLifecycle
+        uint16[] memory quantities
     ) external;
 
     function setVestingContract(IVesting newContract) external;
 
     function getNftData(uint256 tokenId) external view returns (NftData memory);
 
-    function getLevelData(uint16 level) external view returns (NftLevel memory);
-
-    function getNextTokenId() external view returns (uint256);
-
-    function getMaxLevel() external view returns (uint16);
-
-    function getGenesisTokenDivisor() external view returns (uint256);
-
-    function getPromotionalPID() external view returns (uint16);
+    function getLevelData(
+        uint16 level,
+        bool isGenesis
+    ) external view returns (NftLevel memory);
 
     function getProjectsQuantity(
         uint16 level,
+        bool isGenesis,
         uint8 project
     ) external view returns (uint16);
+
+    function getNextTokenId() external view returns (uint256);
+
+    function getLevel5SupplyCap() external view returns (uint256);
+
+    function getMaxLevel() external view returns (uint16);
+
+    function getTotalProjectTypes() external view returns (uint8);
+
+    function getPromotionalPID() external view returns (uint16);
 
     function getVestingContract() external view returns (IVesting);
 

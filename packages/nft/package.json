@@ -8,6 +8,8 @@
         "build": "forge build",
         "coverage": "forge coverage",
         "coverage:lcov": "forge coverage --report lcov && genhtml -o report --branch-coverage lcov.info",
+        "slither": "slither . --foundry-out-directory build",
+        "aderyn": "aderyn .",
         "copy-contracts": "node scripts/copyContracts.js",
         "deploy:sale:ethereum": "npx hardhat run scripts/deployNftSale.js --network mainnet",
         "deploy:sale:sepolia": "npx hardhat run scripts/deployNftSale.js --network sepolia",

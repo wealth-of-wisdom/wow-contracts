@@ -110,7 +110,7 @@ contract NftSale is
         uint16 level,
         IERC20 token
     ) external mValidLevel(level) mTokenExists(token) {
-        uint256 cost = s_nftContract.getLevelData(level).price;
+        uint256 cost = s_nftContract.getLevelData(level, false).price;
 
         // Effects: Transfer the payment to the contract
         _purchaseNft(token, cost);
@@ -155,8 +155,9 @@ contract NftSale is
             revert Errors.NftSale__InvalidLevel(newLevel);
         }
 
-        uint256 upgradeCost = s_nftContract.getLevelData(newLevel).price -
-            s_nftContract.getLevelData(currentLevel).price;
+        uint256 upgradeCost = s_nftContract
+            .getLevelData(newLevel, false)
+            .price - s_nftContract.getLevelData(currentLevel, false).price;
 
         // Effects: Transfer the payment to the contract
         _purchaseNft(token, upgradeCost);
@@ -322,7 +323,6 @@ contract NftSale is
     ) internal override onlyRole(UPGRADER_ROLE) {
         /// @dev This function is empty but uses a modifier to restrict access
     }
-
 
     uint256[50] private __gap; // @question Why are we adding storage at the end of the contract?
 }
