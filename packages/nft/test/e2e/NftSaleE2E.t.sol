@@ -6,49 +6,13 @@ import {VestingMock} from "@wealth-of-wisdom/vesting/test/mocks/VestingMock.sol"
 import {Nft} from "@wealth-of-wisdom/nft/contracts/Nft.sol";
 import {INft} from "@wealth-of-wisdom/nft/contracts/interfaces/INft.sol";
 import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
-import {Base_Test} from "@wealth-of-wisdom/nft/test/Base.t.sol";
+import {Nft_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftUnit.t.sol";
 
-contract NftSale_E2E_Test is Base_Test {
+contract NftSale_E2E_Test is Nft_Unit_Test {
     uint256 internal level2Price;
 
     function setUp() public override {
-        Base_Test.setUp();
-
-        vm.startPrank(admin);
-
-        vesting = new VestingMock();
-        vesting.initialize(tokenUSDT, staking, LISTING_DATE);
-
-        tokenUSDT.approve(address(vesting), TOTAL_POOL_TOKEN_AMOUNT);
-        vesting.addVestingPool(
-            POOL_NAME,
-            LISTING_PERCENTAGE_DIVIDEND,
-            LISTING_PERCENTAGE_DIVISOR,
-            CLIFF_IN_DAYS,
-            CLIFF_PERCENTAGE_DIVIDEND,
-            CLIFF_PERCENTAGE_DIVISOR,
-            VESTING_DURATION_IN_MONTHS,
-            VESTING_UNLOCK_TYPE,
-            TOTAL_POOL_TOKEN_AMOUNT
-        );
-
-        nftContract = new Nft();
-        nftContract.initialize("WOW nft", "NFT");
-
-        sale = new NftSaleMock();
-        sale.initialize(
-            tokenUSDT,
-            tokenUSDC,
-            INft(address(nftContract)),
-            vesting,
-            DEFAULT_VESTING_PID
-        );
-
-        // Grant access control roles
-        nftContract.grantRole(MINTER_ROLE, address(sale));
-        vesting.grantRole(BENEFICIARIES_MANAGER_ROLE, address(sale));
-
-        vm.stopPrank();
+        Nft_Unit_Test.setUp();
     }
 
     function test_With2Users_Mint_Update_Activate_Transfer() external {
@@ -311,9 +275,7 @@ contract NftSale_E2E_Test is Base_Test {
          */
     }
 
-    function test_With3Users_MintGenesis_Activate_Transfer()
-        external
-    {
+    function test_With3Users_MintGenesis_Activate_Transfer() external {
         /**
          * 1. Alice mints Genesis Band level 1
          * 2. Alice activates Genesis Band level 1

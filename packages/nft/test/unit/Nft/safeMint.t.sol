@@ -15,14 +15,14 @@ contract Nft_SafeMint_Unit_Test is Nft_Unit_Test {
             )
         );
         vm.prank(alice);
-        nftContract.safeMint(alice);
+        nftContract.safeMint(alice, LEVEL_1, false);
     }
 
     function test_safeMint_IncreasesNextTokenIdBy1() external {
         assertEq(nftContract.getNextTokenId(), 0, "Next token ID not 0");
 
         vm.prank(admin);
-        nftContract.safeMint(alice);
+        nftContract.safeMint(alice, LEVEL_1, false);
 
         assertEq(nftContract.getNextTokenId(), 1, "Next token ID not 1");
     }
@@ -31,11 +31,11 @@ contract Nft_SafeMint_Unit_Test is Nft_Unit_Test {
         assertEq(nftContract.getNextTokenId(), 0, "Next token ID not 0");
 
         vm.startPrank(admin);
-        nftContract.safeMint(alice);
-        nftContract.safeMint(bob);
-        nftContract.safeMint(alice);
-        nftContract.safeMint(bob);
-        nftContract.safeMint(alice);
+        nftContract.safeMint(alice, LEVEL_1, false);
+        nftContract.safeMint(bob, LEVEL_1, false);
+        nftContract.safeMint(alice, LEVEL_1, false);
+        nftContract.safeMint(bob, LEVEL_1, false);
+        nftContract.safeMint(alice, LEVEL_1, false);
         vm.stopPrank();
 
         assertEq(nftContract.getNextTokenId(), 5, "Next token ID not 5");
@@ -43,7 +43,7 @@ contract Nft_SafeMint_Unit_Test is Nft_Unit_Test {
 
     function test_safeMint_Mints1TokenWithId0() external {
         vm.prank(admin);
-        nftContract.safeMint(alice);
+        nftContract.safeMint(alice, LEVEL_1, false);
 
         assertEq(nftContract.ownerOf(NFT_TOKEN_ID_0), alice, "NFT not minted");
         assertEq(
@@ -55,11 +55,11 @@ contract Nft_SafeMint_Unit_Test is Nft_Unit_Test {
 
     function test_safeMint_Mints5Tokens() external {
         vm.startPrank(admin);
-        nftContract.safeMint(alice);
-        nftContract.safeMint(bob);
-        nftContract.safeMint(alice);
-        nftContract.safeMint(bob);
-        nftContract.safeMint(alice);
+        nftContract.safeMint(alice, LEVEL_1, false);
+        nftContract.safeMint(bob, LEVEL_1, false);
+        nftContract.safeMint(alice, LEVEL_1, false);
+        nftContract.safeMint(bob, LEVEL_1, false);
+        nftContract.safeMint(alice, LEVEL_1, false);
         vm.stopPrank();
 
         assertEq(nftContract.ownerOf(NFT_TOKEN_ID_0), alice, "NFT not minted");

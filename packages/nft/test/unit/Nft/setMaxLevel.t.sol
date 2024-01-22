@@ -3,11 +3,11 @@ pragma solidity 0.8.20;
 
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
-import {INftSale, INftSaleEvents} from "@wealth-of-wisdom/nft/contracts/interfaces/INftSale.sol";
+import {INft, INftEvents} from "@wealth-of-wisdom/nft/contracts/interfaces/INft.sol";
 import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
-import {NftSale_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftSaleUnit.t.sol";
+import {Nft_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftUnit.t.sol";
 
-contract NftSale_SetMaxLevel_Unit_Test is INftSaleEvents, NftSale_Unit_Test {
+contract NftSale_SetMaxLevel_Unit_Test is INftEvents, Nft_Unit_Test {
     function test_setMaxLevel_RevertIf_NotDefaultAdmin() external {
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -17,27 +17,27 @@ contract NftSale_SetMaxLevel_Unit_Test is INftSaleEvents, NftSale_Unit_Test {
             )
         );
         vm.prank(alice);
-        sale.setMaxLevel(DEFAULT_LEVEL_2);
+        nftContract.setMaxLevel(LEVEL_2);
     }
 
     function test_setMaxLevel_RevertIf_InvalidMaxLevel() external {
         vm.expectRevert(
             abi.encodeWithSelector(
                 Errors.Nft__InvalidMaxLevel.selector,
-                DEFAULT_LEVEL_2
+                LEVEL_2
             )
         );
         vm.prank(admin);
-        sale.setMaxLevel(DEFAULT_LEVEL_2);
+        nftContract.setMaxLevel(LEVEL_2);
     }
 
     function test_setMaxLevel_setsNewMaxLevel() external {
         uint16 newLevel = 10;
 
         vm.prank(admin);
-        sale.setMaxLevel(newLevel);
+        nftContract.setMaxLevel(newLevel);
 
-        assertEq(sale.getMaxLevel(), newLevel, "New level not set");
+        assertEq(nftContract.getMaxLevel(), newLevel, "New level not set");
     }
 
     function test_setMaxLevel_EmitsMaxLevelSetEvent() external {
@@ -47,6 +47,6 @@ contract NftSale_SetMaxLevel_Unit_Test is INftSaleEvents, NftSale_Unit_Test {
         emit MaxLevelSet(newLevel);
 
         vm.prank(admin);
-        sale.setMaxLevel(newLevel);
+        nftContract.setMaxLevel(newLevel);
     }
 }

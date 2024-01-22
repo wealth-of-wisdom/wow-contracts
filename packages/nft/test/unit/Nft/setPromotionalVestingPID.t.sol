@@ -3,11 +3,14 @@ pragma solidity 0.8.20;
 
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
-import {INftSale} from "@wealth-of-wisdom/nft/contracts/interfaces/INftSale.sol";
+import {INft, INftEvents} from "@wealth-of-wisdom/nft/contracts/interfaces/INft.sol";
 import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
-import {NftSale_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftSaleUnit.t.sol";
+import {Nft_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftUnit.t.sol";
 
-contract NftSale_SetPromotionalVestingPID_Unit_Test is NftSale_Unit_Test {
+contract NftSale_SetPromotionalVestingPID_Unit_Test is
+    Nft_Unit_Test,
+    INftEvents
+{
     uint16 internal constant NEW_PROMOTIONAL_VESTING_PID = 4;
 
     function test_setPromotionalVestingPID_RevertIf_NotDefaultAdmin() external {
@@ -19,14 +22,14 @@ contract NftSale_SetPromotionalVestingPID_Unit_Test is NftSale_Unit_Test {
             )
         );
         vm.prank(alice);
-        sale.setPromotionalVestingPID(NEW_PROMOTIONAL_VESTING_PID);
+        nftContract.setPromotionalVestingPID(NEW_PROMOTIONAL_VESTING_PID);
     }
 
     function test_setPromotionalVestingPID_SetsVestingPID() external {
         vm.prank(admin);
-        sale.setPromotionalVestingPID(NEW_PROMOTIONAL_VESTING_PID);
+        nftContract.setPromotionalVestingPID(NEW_PROMOTIONAL_VESTING_PID);
         assertEq(
-            sale.getPromotionalPID(),
+            nftContract.getPromotionalPID(),
             NEW_PROMOTIONAL_VESTING_PID,
             "New vesting pool id set incorrectly"
         );
@@ -39,6 +42,6 @@ contract NftSale_SetPromotionalVestingPID_Unit_Test is NftSale_Unit_Test {
         emit PromotionalVestingPIDSet(NEW_PROMOTIONAL_VESTING_PID);
 
         vm.prank(admin);
-        sale.setPromotionalVestingPID(NEW_PROMOTIONAL_VESTING_PID);
+        nftContract.setPromotionalVestingPID(NEW_PROMOTIONAL_VESTING_PID);
     }
 }

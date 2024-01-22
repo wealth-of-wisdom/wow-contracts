@@ -9,23 +9,17 @@ import {Nft} from "@wealth-of-wisdom/nft/contracts/Nft.sol";
 import {INft} from "@wealth-of-wisdom/nft/contracts/interfaces/INft.sol";
 import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
 import {NftSaleMock} from "@wealth-of-wisdom/nft/test/mocks/NftSaleMock.sol";
-import {NftSale_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftSaleUnit.t.sol";
+import {Nft_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftUnit.t.sol";
 
-contract NftSale_Initialize_Unit_Test is NftSale_Unit_Test {
+contract NftSale_Initialize_Unit_Test is Nft_Unit_Test {
     modifier initializeNftSale() {
         vm.prank(admin);
-        sale.initialize(
-            tokenUSDT,
-            tokenUSDC,
-            INft(address(nftContract)),
-            vesting,
-            DEFAULT_VESTING_PID
-        );
+        sale.initialize(tokenUSDT, tokenUSDC, INft(address(nftContract)));
         _;
     }
 
     function setUp() public virtual override {
-        NftSale_Unit_Test.setUp();
+        Nft_Unit_Test.setUp();
 
         vm.startPrank(admin);
         vesting = new VestingMock();
@@ -35,47 +29,26 @@ contract NftSale_Initialize_Unit_Test is NftSale_Unit_Test {
     }
 
     function test_initialize_RevertIf_USDTTokenIsZeroAddress() external {
-        vm.expectRevert(Errors.Nft__ZeroAddress.selector);
+        vm.expectRevert(Errors.NftSale__ZeroAddress.selector);
         sale.initialize(
             IERC20(ZERO_ADDRESS),
             tokenUSDC,
-            INft(address(nftContract)),
-            vesting,
-            DEFAULT_VESTING_PID
+            INft(address(nftContract))
         );
     }
 
     function test_initialize_RevertIf_USDCTokenIsZeroAddress() external {
-        vm.expectRevert(Errors.Nft__ZeroAddress.selector);
+        vm.expectRevert(Errors.NftSale__ZeroAddress.selector);
         sale.initialize(
             tokenUSDT,
             IERC20(ZERO_ADDRESS),
-            INft(address(nftContract)),
-            vesting,
-            DEFAULT_VESTING_PID
+            INft(address(nftContract))
         );
     }
 
     function test_initialize_RevertIf_NftContractIsZeroAddress() external {
-        vm.expectRevert(Errors.Nft__ZeroAddress.selector);
-        sale.initialize(
-            tokenUSDT,
-            tokenUSDC,
-            INft(ZERO_ADDRESS),
-            vesting,
-            DEFAULT_VESTING_PID
-        );
-    }
-
-    function test_initialize_RevertIf_VestingContractIsZeroAddress() external {
-        vm.expectRevert(Errors.Nft__ZeroAddress.selector);
-        sale.initialize(
-            tokenUSDT,
-            tokenUSDC,
-            INft(address(nftContract)),
-            IVesting(ZERO_ADDRESS),
-            DEFAULT_VESTING_PID
-        );
+        vm.expectRevert(Errors.NftSale__ZeroAddress.selector);
+        sale.initialize(tokenUSDT, tokenUSDC, INft(ZERO_ADDRESS));
     }
 
     function test_initialize_GrantsDefaultAdminRoleToDeployer()
@@ -95,98 +68,6 @@ contract NftSale_Initialize_Unit_Test is NftSale_Unit_Test {
         assertTrue(
             sale.hasRole(UPGRADER_ROLE, admin),
             "Admin should have default admin role"
-        );
-    }
-
-    function test_initialize_SetsMaxLevelCorrectly()
-        external
-        initializeNftSale
-    {
-        assertEq(
-            sale.getMaxLevel(),
-            5,
-            "Max level should be set to 5 by default"
-        );
-    }
-
-    function test_initialize_SetsPromotionalVestingPIDCorrectly() external {
-        uint16 pid = 10;
-
-        vm.prank(admin);
-        sale.initialize(
-            tokenUSDT,
-            tokenUSDC,
-            INft(address(nftContract)),
-            vesting,
-            pid
-        );
-
-        assertEq(
-            sale.getPromotionalPID(),
-            pid,
-            "Promotional vesting PID should be set correctly"
-        );
-    }
-
-    function test_initialize_SetsNftLevelPricesCorrectly()
-        external
-        initializeNftSale
-    {
-        assertEq(
-            sale.getLevelPriceInUSD(1),
-            1_000 * USD_DECIMALS,
-            "Level 1 price should be set to 1_000 USD"
-        );
-        assertEq(
-            sale.getLevelPriceInUSD(2),
-            5_000 * USD_DECIMALS,
-            "Level 2 price should be set to 5_000 USD"
-        );
-        assertEq(
-            sale.getLevelPriceInUSD(3),
-            10_000 * USD_DECIMALS,
-            "Level 3 price should be set to 10_000 USD"
-        );
-        assertEq(
-            sale.getLevelPriceInUSD(4),
-            33_000 * USD_DECIMALS,
-            "Level 4 price should be set to 33_000 USD"
-        );
-        assertEq(
-            sale.getLevelPriceInUSD(5),
-            100_000 * USD_DECIMALS,
-            "Level 5 price should be set to 100_000 USD"
-        );
-    }
-
-    function test_initialize_SetsNftLevelVestingRewardWOWTokensCorrectly()
-        external
-        initializeNftSale
-    {
-        assertEq(
-            sale.getVestingRewardWOWTokens(1),
-            1_000 * WOW_DECIMALS,
-            "Level 1 vesting reward should be set to 1_000 WOW"
-        );
-        assertEq(
-            sale.getVestingRewardWOWTokens(2),
-            25_000 * WOW_DECIMALS,
-            "Level 2 vesting reward should be set to 25_000 WOW"
-        );
-        assertEq(
-            sale.getVestingRewardWOWTokens(3),
-            100_000 * WOW_DECIMALS,
-            "Level 3 vesting reward should be set to 100_000 WOW"
-        );
-        assertEq(
-            sale.getVestingRewardWOWTokens(4),
-            660_000 * WOW_DECIMALS,
-            "Level 4 vesting reward should be set to 660_000 WOW"
-        );
-        assertEq(
-            sale.getVestingRewardWOWTokens(5),
-            3_000_000 * WOW_DECIMALS,
-            "Level 5 vesting reward should be set to 3_000_000 WOW"
         );
     }
 
@@ -223,29 +104,12 @@ contract NftSale_Initialize_Unit_Test is NftSale_Unit_Test {
         );
     }
 
-    function test_initialize_SetsVestingContractCorrectly()
-        external
-        initializeNftSale
-    {
-        assertEq(
-            address(sale.getVestingContract()),
-            address(vesting),
-            "Vesting contract should be set correctly"
-        );
-    }
-
     function test_initialize_RevertIf_AlreadyInitialized()
         external
         initializeNftSale
     {
         vm.expectRevert(Initializable.InvalidInitialization.selector);
-        sale.initialize(
-            tokenUSDT,
-            tokenUSDC,
-            INft(address(nftContract)),
-            vesting,
-            DEFAULT_VESTING_PID
-        );
+        sale.initialize(tokenUSDT, tokenUSDC, INft(address(nftContract)));
     }
 
     function test_initialize_EmitsInitializedEvent() external {
@@ -253,12 +117,6 @@ contract NftSale_Initialize_Unit_Test is NftSale_Unit_Test {
         emit Initialized(1);
 
         vm.prank(admin);
-        sale.initialize(
-            tokenUSDT,
-            tokenUSDC,
-            INft(address(nftContract)),
-            vesting,
-            DEFAULT_VESTING_PID
-        );
+        sale.initialize(tokenUSDT, tokenUSDC, INft(address(nftContract)));
     }
 }

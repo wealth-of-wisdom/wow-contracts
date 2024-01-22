@@ -6,9 +6,9 @@ import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {INftSale} from "@wealth-of-wisdom/nft/contracts/interfaces/INftSale.sol";
 import {INft} from "@wealth-of-wisdom/nft/contracts/interfaces/INft.sol";
 import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
-import {NftSale_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftSaleUnit.t.sol";
+import {Nft_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftUnit.t.sol";
 
-contract NftSale_SetNftContract_Unit_Test is NftSale_Unit_Test {
+contract NftSale_SetNftContract_Unit_Test is Nft_Unit_Test {
     INft internal constant newNft = INft(address(100));
 
     function test_setNftContract_RevertIf_NotDefaultAdmin() external {
@@ -24,7 +24,7 @@ contract NftSale_SetNftContract_Unit_Test is NftSale_Unit_Test {
     }
 
     function test_setNftContract_RevertIf_ZeroAddress() external {
-        vm.expectRevert(Errors.Nft__ZeroAddress.selector);
+        vm.expectRevert(Errors.NftSale__ZeroAddress.selector);
         vm.prank(admin);
         sale.setNftContract(INft(ZERO_ADDRESS));
     }
