@@ -32,6 +32,8 @@ interface INftEvents {
         uint256 extendedActivityEndTimestamp
     );
 
+    event Level5SupplyCapSet(uint256 newSupplyCap);
+
     event MaxLevelSet(uint16 newMaxLevel);
 
     event TotalProjectTypesSet(uint8 newCount);
@@ -100,6 +102,7 @@ interface INft is INftEvents {
         string memory name,
         string memory symbol,
         IVesting vestingContract,
+        uint256 level5MaxSupply,
         uint16 promotionalVestingPID,
         uint16 maxLevel,
         uint8 totalProjectTypes
@@ -129,6 +132,8 @@ interface INft is INftEvents {
         uint256 oldtokenId,
         uint16 newLevel
     ) external;
+
+    function setLevel5SupplyCap(uint256 newCap) external;
 
     function setMaxLevel(uint16 maxLevel) external;
 
@@ -176,6 +181,8 @@ interface INft is INftEvents {
     ) external view returns (uint16);
 
     function getNextTokenId() external view returns (uint256);
+
+    function getLevel5SupplyCap() external view returns (uint256);
 
     function getMaxLevel() external view returns (uint16);
 

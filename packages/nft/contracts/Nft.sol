@@ -33,6 +33,7 @@ contract Nft is
     bytes32 public constant NFT_DATA_MANAGER_ROLE =
         keccak256("NFT_DATA_MANAGER_ROLE");
     string public constant NFT_URI_SUFFIX = ".json";
+    uint16 public constant LEVEL_5 = 5;
 
     /*//////////////////////////////////////////////////////////////////////////
                                 INTERNAL STORAGE
@@ -48,6 +49,7 @@ contract Nft is
     mapping(bytes32 configHash => uint16 quantity) internal s_projectsPerNft;
 
     uint256 internal s_nextTokenId;
+    uint256 internal s_level5SupplyCap;
     uint8 internal s_totalProjectTypes; // Standard, Premium, Limited
     uint16 internal s_maxLevel;
     uint16 internal s_promotionalVestingPID;
@@ -110,6 +112,7 @@ contract Nft is
         string memory name,
         string memory symbol,
         IVesting vestingContract,
+        uint256 level5SupplyCap,
         uint16 promotionalVestingPID,
         uint16 maxLevel,
         uint8 totalProjectTypes
@@ -140,6 +143,7 @@ contract Nft is
 
         // Effects: Set up storage
         s_vestingContract = vestingContract;
+        s_level5SupplyCap = level5SupplyCap;
         s_promotionalVestingPID = promotionalVestingPID;
         s_maxLevel = maxLevel;
         s_totalProjectTypes = totalProjectTypes;
@@ -162,6 +166,17 @@ contract Nft is
         uint16 level,
         bool isGenesis
     ) public onlyRole(MINTER_ROLE) mAddressNotZero(to) mValidLevel(level) {
+        NftLevel storage nftLevel = s_nftLevels[
+            _getLevelHash(level, isGenesis)
+        ];
+
+        uint256 nftAmount = nftLevel.nftAmount;
+
+        // Checks: the amount of NFTs minted must not exceed the max supply
+        if (level == LEVEL_5 && !isGenesis && nftAmount >= s_level5SupplyCap) {
+            revert Errors.Nft__SupplyCapReached(level, isGenesis, nftAmount);
+        }
+
         // Effects: increment the token id
         // tokenId is assigned prior to incrementing the token id, so it starts from 0
         uint256 tokenId = s_nextTokenId++;
@@ -169,21 +184,14 @@ contract Nft is
         // Effects: mint the token
         _safeMint(to, tokenId);
 
-        NftLevel storage nftLevel = s_nftLevels[
-            _getLevelHash(level, isGenesis)
-        ];
-
         // Effects: increment the token quantity in the level
-        // idInLevel is assigned prior to incrementing the token quantity, so it starts from 0
-        uint256 idInLevel = nftLevel.nftAmount++;
+        nftLevel.nftAmount++;
 
         // Concatenate base URI, id in level and suffix to get the full URI
-        string memory uri = string(
-            abi.encodePacked(
-                nftLevel.baseURI,
-                Strings.toString(idInLevel),
-                NFT_URI_SUFFIX
-            )
+        string memory uri = string.concat(
+            nftLevel.baseURI,
+            Strings.toString(nftAmount),
+            NFT_URI_SUFFIX
         );
 
         // Effects: set the token metadata URI (URI for each token is assigned before minting)
@@ -363,6 +371,23 @@ contract Nft is
     /*//////////////////////////////////////////////////////////////////////////
                         FUNCTIONS FOR DEFAULT ADMIN ROLE
     //////////////////////////////////////////////////////////////////////////*/
+
+    function setLevel5SupplyCap(
+        uint256 newCap
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        NftLevel storage nftLevel5 = s_nftLevels[_getLevelHash(LEVEL_5, false)];
+        uint256 nftAmount = nftLevel5.nftAmount;
+
+        // Checks: the amount of NFTs minted must not exceed the max supply
+        if (newCap < nftAmount) {
+            revert Errors.Nft__SupplyCapTooLow(newCap);
+        }
+
+        // Effects: set the new max supply
+        s_level5SupplyCap = newCap;
+
+        emit Level5SupplyCapSet(newCap);
+    }
 
     /**
      * @notice  Sets the new max level for NFTs
@@ -590,6 +615,14 @@ contract Nft is
     }
 
     /**
+     * @notice  Returns the supply cap for level 5
+     * @return  uint256 maximum tokens that can be minted for level 5
+     */
+    function getLevel5SupplyCap() external view returns (uint256) {
+        return s_level5SupplyCap;
+    }
+
+    /**
      * @notice  Returns the max level that can be minted
      * @return  uint16  max level
      */
@@ -597,6 +630,10 @@ contract Nft is
         return s_maxLevel;
     }
 
+    /**
+     * @notice  Returns number of project types users can choose from
+     * @return  uint256 total project types
+     */
     function getTotalProjectTypes() external view returns (uint8) {
         return s_totalProjectTypes;
     }
@@ -656,7 +693,7 @@ contract Nft is
         override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
         returns (string memory)
     {
-        return super.tokenURI(tokenId);
+        return ERC721URIStorageUpgradeable.tokenURI(tokenId);
     }
 
     function supportsInterface(
@@ -691,7 +728,7 @@ contract Nft is
         uint16 level,
         bool isGenesis
     ) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(level, isGenesis));
+        return keccak256(abi.encode(level, isGenesis));
     }
 
     function _getProjectHash(
@@ -699,6 +736,6 @@ contract Nft is
         bool isGenesis,
         uint8 project // 0 - Standard, 1 - Premium, 2- Limited
     ) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(level, isGenesis, project));
+        return keccak256(abi.encode(level, isGenesis, project));
     }
 }

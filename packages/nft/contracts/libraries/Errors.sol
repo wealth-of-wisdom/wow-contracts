@@ -10,6 +10,8 @@ library Errors {
     error Nft__InvalidLevel(uint16 level);
     error Nft__InvalidTotalProjectTypes(uint8 count);
     error Nft__InvalidProjectType(uint8 project);
+    error Nft__SupplyCapTooLow(uint256 supplyCap);
+    error Nft__SupplyCapReached(uint16 level, bool isGenesis, uint256 amount);
     error Nft__EmptyString();
     error Nft__MismatchInVariableLength();
     error Nft__NotNftOwner();
