@@ -49,7 +49,10 @@ abstract contract Constants {
     INft.ActivityType internal constant NFT_ACTIVITY_TYPE_DEACTIVATED =
         INft.ActivityType.DEACTIVATED;
 
-    uint16 internal constant MAXIMUM_LEVEL_AMOUNT = 5;
+    uint16 internal constant MAX_LEVEL = 5;
+    uint256 internal constant LEVEL_5_SUPPLY_CAP = 20;
+    uint8 internal constant TOTAL_PROJECT_TYPES = 3;
+
     uint256 internal constant SECONDS_IN_MONTH = 2592000;
     string internal constant MAIN_BASE_URI = "mainBaseUri/18eh7wcg/";
     string internal constant GENESIS_BASE_URI = "genesisBaseUri/kmdq124c/";

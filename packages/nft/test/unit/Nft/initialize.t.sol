@@ -3,13 +3,13 @@ pragma solidity 0.8.20;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
-import {Nft} from "@wealth-of-wisdom/nft/contracts/Nft.sol";
-import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
-import {Nft_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftUnit.t.sol";
+import {Nft} from "../../../contracts/Nft.sol";
+import {Errors} from "../../../contracts/libraries/Errors.sol";
+import {Unit_Test} from "../Unit.t.sol";
 
-contract Nft_Initialize_Unit_Test is Nft_Unit_Test {
+contract Nft_Initialize_Unit_Test is Unit_Test {
     function setUp() public virtual override {
-        Nft_Unit_Test.setUp();
+        Unit_Test.setUp();
 
         nftContract = new Nft();
     }
@@ -20,7 +20,7 @@ contract Nft_Initialize_Unit_Test is Nft_Unit_Test {
             "Wealth of Wisdom",
             "WOW",
             vesting,
-            MAXIMUM_LEVEL_AMOUNT,
+            MAX_LEVEL,
             DEFAULT_VESTING_PID,
             GENESIS_TOKEN_DIVISOR
         );
@@ -34,7 +34,7 @@ contract Nft_Initialize_Unit_Test is Nft_Unit_Test {
             "",
             "WOW",
             vesting,
-            MAXIMUM_LEVEL_AMOUNT,
+            MAX_LEVEL,
             DEFAULT_VESTING_PID,
             GENESIS_TOKEN_DIVISOR
         );
@@ -47,7 +47,7 @@ contract Nft_Initialize_Unit_Test is Nft_Unit_Test {
             "Wealth of Wisdom",
             "",
             vesting,
-            MAXIMUM_LEVEL_AMOUNT,
+            MAX_LEVEL,
             DEFAULT_VESTING_PID,
             GENESIS_TOKEN_DIVISOR
         );
@@ -59,7 +59,7 @@ contract Nft_Initialize_Unit_Test is Nft_Unit_Test {
             "Wealth of Wisdom",
             "WOW",
             IVesting(ZERO_ADDRESS),
-            MAXIMUM_LEVEL_AMOUNT,
+            MAX_LEVEL,
             DEFAULT_VESTING_PID,
             GENESIS_TOKEN_DIVISOR
         );
@@ -72,7 +72,7 @@ contract Nft_Initialize_Unit_Test is Nft_Unit_Test {
             "",
             "",
             vesting,
-            MAXIMUM_LEVEL_AMOUNT,
+            MAX_LEVEL,
             DEFAULT_VESTING_PID,
             GENESIS_TOKEN_DIVISOR
         );
@@ -238,7 +238,7 @@ contract Nft_Initialize_Unit_Test is Nft_Unit_Test {
             "Wealth of Wisdom",
             "WOW",
             vesting,
-            MAXIMUM_LEVEL_AMOUNT,
+            MAX_LEVEL,
             DEFAULT_VESTING_PID,
             GENESIS_TOKEN_DIVISOR
         );
@@ -254,7 +254,7 @@ contract Nft_Initialize_Unit_Test is Nft_Unit_Test {
             "Wealth of Wisdom",
             "WOW",
             vesting,
-            MAXIMUM_LEVEL_AMOUNT,
+            MAX_LEVEL,
             DEFAULT_VESTING_PID,
             GENESIS_TOKEN_DIVISOR
         );

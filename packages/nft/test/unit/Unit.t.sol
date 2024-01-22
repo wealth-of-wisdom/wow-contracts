@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import {INftSaleEvents} from "@wealth-of-wisdom/nft/contracts/interfaces/INftSale.sol";
 import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
-import {NftSaleMock} from "@wealth-of-wisdom/nft/test/mocks/NftSaleMock.sol";
 import {VestingMock} from "@wealth-of-wisdom/vesting/test/mocks/VestingMock.sol";
-import {Nft} from "@wealth-of-wisdom/nft/contracts/Nft.sol";
-import {INft} from "@wealth-of-wisdom/nft/contracts/interfaces/INft.sol";
-import {Base_Test} from "@wealth-of-wisdom/nft/test/Base.t.sol";
+import {Nft} from "../../contracts/Nft.sol";
+import {INft, INftEvents} from "../../contracts/interfaces/INft.sol";
+import {INftSaleEvents} from "../../contracts/interfaces/INftSale.sol";
+import {NftSaleMock} from "../mocks/NftSaleMock.sol";
+import {Base_Test} from "../Base.t.sol";
 
-contract Nft_Unit_Test is Base_Test, INftSaleEvents {
+contract Unit_Test is Base_Test, INftSaleEvents, INftEvents {
     constructor() Base_Test() {}
 
     function setUp() public virtual override {
@@ -37,7 +37,7 @@ contract Nft_Unit_Test is Base_Test, INftSaleEvents {
             "Wealth of Wisdom",
             "WOW",
             vesting,
-            MAXIMUM_LEVEL_AMOUNT,
+            MAX_LEVEL,
             DEFAULT_VESTING_PID,
             GENESIS_TOKEN_DIVISOR
         );
