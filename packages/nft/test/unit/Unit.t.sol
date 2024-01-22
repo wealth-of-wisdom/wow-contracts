@@ -1,12 +1,12 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.20;
 
 import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
-import {VestingMock} from "@wealth-of-wisdom/vesting/test/mocks/VestingMock.sol";
-import {Nft} from "../../contracts/Nft.sol";
 import {INft, INftEvents} from "../../contracts/interfaces/INft.sol";
 import {INftSaleEvents} from "../../contracts/interfaces/INftSale.sol";
+import {NftMock} from "../mocks/NftMock.sol";
 import {NftSaleMock} from "../mocks/NftSaleMock.sol";
+import {VestingMock} from "../mocks/VestingMock.sol";
 import {Base_Test} from "../Base.t.sol";
 
 contract Unit_Test is Base_Test, INftSaleEvents, INftEvents {
@@ -32,22 +32,23 @@ contract Unit_Test is Base_Test, INftSaleEvents, INftEvents {
             TOTAL_POOL_TOKEN_AMOUNT
         );
 
-        nftContract = new Nft();
-        nftContract.initialize(
+        nft = new NftMock();
+        nft.initialize(
             "Wealth of Wisdom",
             "WOW",
             vesting,
-            MAX_LEVEL,
+            LEVEL_5_SUPPLY_CAP,
             DEFAULT_VESTING_PID,
-            GENESIS_TOKEN_DIVISOR
+            MAX_LEVEL,
+            TOTAL_PROJECT_TYPES
         );
 
         sale = new NftSaleMock();
-        sale.initialize(tokenUSDT, tokenUSDC, INft(address(nftContract)));
+        sale.initialize(tokenUSDT, tokenUSDC, INft(address(nft)));
 
-        nftContract.grantRole(MINTER_ROLE, address(sale));
-        nftContract.grantRole(NFT_DATA_MANAGER_ROLE, address(sale));
-        vesting.grantRole(BENEFICIARIES_MANAGER_ROLE, address(nftContract));
+        nft.grantRole(MINTER_ROLE, address(sale));
+        nft.grantRole(NFT_DATA_MANAGER_ROLE, address(sale));
+        vesting.grantRole(BENEFICIARIES_MANAGER_ROLE, address(nft));
 
         vm.stopPrank();
     }

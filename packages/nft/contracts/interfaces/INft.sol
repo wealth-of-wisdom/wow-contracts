@@ -11,7 +11,9 @@ interface INftEvents {
     event NftMinted(
         address indexed receiver,
         uint256 indexed tokenId,
-        string tokenURI
+        uint16 level,
+        bool isGenesis,
+        uint256 idInLevel
     );
 
     event NftDataActivated(

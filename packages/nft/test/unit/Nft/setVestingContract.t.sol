@@ -2,13 +2,11 @@
 pragma solidity 0.8.20;
 
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
-import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
-import {INft, INftEvents} from "@wealth-of-wisdom/nft/contracts/interfaces/INft.sol";
 import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
-import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
-import {Nft_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftUnit.t.sol";
+import {Errors} from "../../../contracts/libraries/Errors.sol";
+import {Unit_Test} from "../Unit.t.sol";
 
-contract NftSale_SetVestingContract_Unit_Test is Nft_Unit_Test, INftEvents {
+contract NftSale_SetVestingContract_Unit_Test is Unit_Test {
     IVesting internal constant newVesting = IVesting(address(100));
 
     function test_setVestingContract_RevertIf_NotDefaultAdmin() external {
@@ -20,20 +18,20 @@ contract NftSale_SetVestingContract_Unit_Test is Nft_Unit_Test, INftEvents {
             )
         );
         vm.prank(alice);
-        nftContract.setVestingContract(newVesting);
+        nft.setVestingContract(newVesting);
     }
 
     function test_setVestingContract_RevertIf_ZeroAddress() external {
         vm.expectRevert(Errors.Nft__ZeroAddress.selector);
         vm.prank(admin);
-        nftContract.setVestingContract(IVesting(ZERO_ADDRESS));
+        nft.setVestingContract(IVesting(ZERO_ADDRESS));
     }
 
     function test_setVestingContract_SetsVestingContract() external {
         vm.prank(admin);
-        nftContract.setVestingContract(newVesting);
+        nft.setVestingContract(newVesting);
         assertEq(
-            address(nftContract.getVestingContract()),
+            address(nft.getVestingContract()),
             address(newVesting),
             "New vesting contract incorrect"
         );
@@ -44,6 +42,6 @@ contract NftSale_SetVestingContract_Unit_Test is Nft_Unit_Test, INftEvents {
         emit VestingContractSet(newVesting);
 
         vm.prank(admin);
-        nftContract.setVestingContract(newVesting);
+        nft.setVestingContract(newVesting);
     }
 }
