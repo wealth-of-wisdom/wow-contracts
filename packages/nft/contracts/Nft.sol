@@ -372,6 +372,18 @@ contract Nft is
                         FUNCTIONS FOR DEFAULT ADMIN ROLE
     //////////////////////////////////////////////////////////////////////////*/
 
+    /**
+     * @notice  set the token metadata URI (URI for each token is assigned before minting)
+     * @param   tokenId  user minted and owned token id
+     * @param   _tokenURI  metadata link
+     */
+    function setTokenURI(
+        uint256 tokenId,
+        string memory _tokenURI
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setTokenURI(tokenId, _tokenURI);
+    }
+
     function setLevel5SupplyCap(
         uint256 newCap
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
