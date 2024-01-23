@@ -59,7 +59,7 @@
         "lifecycle_duration_in_months": -1,
         "extension_duration_in_months": 0,
         "allocation_per_project_in_usd": 500000,
-        "base_uri": "https://ipfs.io/ipfs/QmQuUnRYPJtLdSoGh2wvc5kcQfcRvFRzbTb4JDVLb32pJJ",
+        "base_uri": "https://ipfs.io/ipfs/QmQuUnRYPJtLdSoGh2wvc5kcQfcRvFRzbTb4JDVLb32pJJ/",
         "standard_projects_quantity": -1,
         "premium_projects_quantity": -1,
         "limited_projects_quantity": -1
