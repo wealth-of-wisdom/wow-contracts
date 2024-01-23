@@ -1,5 +1,5 @@
 const { ethers, upgrades } = require("hardhat")
-const levelsData = require("./levelsData.json")
+const levelsData = require("./levelsDataDeployment.json")
 require("dotenv").config()
 
 async function main() {
