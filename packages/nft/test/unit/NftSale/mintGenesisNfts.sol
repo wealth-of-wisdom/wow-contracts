@@ -26,7 +26,7 @@ contract NftSale_MintGenesisNft_Unit_Test is Unit_Test {
         assertEq(nftData.level, level, "Nft level set incorrectly");
         assertEq(
             uint8(nftData.activityType),
-            uint8(NFT_ACTIVITY_TYPE_NOT_ACTIVATED),
+            uint8(NFT_NOT_ACTIVATED),
             "Nft not activated"
         );
         assertTrue(nftData.isGenesis, "Nft not set as genesis");

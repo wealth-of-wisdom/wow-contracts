@@ -50,12 +50,22 @@ abstract contract Constants {
     uint256 internal constant NFT_TOKEN_ID_2 = 2;
     uint256 internal constant NFT_TOKEN_ID_3 = 3;
     uint256 internal constant NFT_TOKEN_ID_4 = 4;
+    uint256 internal constant NFT_TOKEN_ID_5 = 5;
+    uint256 internal constant NFT_TOKEN_ID_6 = 6;
+    uint256 internal constant NFT_TOKEN_ID_7 = 7;
+    uint256 internal constant NFT_TOKEN_ID_8 = 8;
+    uint256 internal constant NFT_TOKEN_ID_9 = 9;
+    uint256 internal constant NFT_TOKEN_ID_10 = 10;
+    uint256 internal constant NFT_TOKEN_ID_11 = 11;
+    uint256 internal constant NFT_TOKEN_ID_12 = 12;
+    uint256 internal constant NFT_TOKEN_ID_13 = 13;
+    uint256 internal constant NFT_TOKEN_ID_14 = 14;
 
-    INft.ActivityType internal constant NFT_ACTIVITY_TYPE_ACTIVATION_TRIGGERED =
+    INft.ActivityType internal constant NFT_ACTIVATION_TRIGGERED =
         INft.ActivityType.ACTIVATION_TRIGGERED;
-    INft.ActivityType internal constant NFT_ACTIVITY_TYPE_NOT_ACTIVATED =
+    INft.ActivityType internal constant NFT_NOT_ACTIVATED =
         INft.ActivityType.NOT_ACTIVATED;
-    INft.ActivityType internal constant NFT_ACTIVITY_TYPE_DEACTIVATED =
+    INft.ActivityType internal constant NFT_DEACTIVATED =
         INft.ActivityType.DEACTIVATED;
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -88,6 +98,7 @@ abstract contract Constants {
 
     uint256 internal constant LEVEL_5_SUPPLY_CAP = 20;
     uint256 internal constant MONTH = 30 days;
+    uint256 internal constant YEAR = 365 days;
     uint16 internal constant MAX_LEVEL = 5;
     uint8 internal constant TOTAL_PROJECT_TYPES = 3;
     string internal constant NFT_URI_SUFFIX = ".json";
@@ -114,13 +125,24 @@ abstract contract Constants {
     uint256 internal constant LEVEL_2_LIFECYCLE_DURATION = 15 * MONTH;
     uint256 internal constant LEVEL_3_LIFECYCLE_DURATION = 24 * MONTH;
     uint256 internal constant LEVEL_4_LIFECYCLE_DURATION = 40 * MONTH;
-    uint256 internal constant LEVEL_5_LIFECYCLE_DURATION = type(uint256).max;
+    uint256 internal constant LEVEL_5_LIFECYCLE_DURATION = 1_000 * YEAR;
 
     uint256 internal constant LEVEL_1_EXTENSION_DURATION = 0;
     uint256 internal constant LEVEL_2_EXTENSION_DURATION = 15 * MONTH;
     uint256 internal constant LEVEL_3_EXTENSION_DURATION = 18 * MONTH;
-    uint256 internal constant LEVEL_4_EXTENSION_DURATION = type(uint256).max;
-    uint256 internal constant LEVEL_5_EXTENSION_DURATION = type(uint256).max;
+    uint256 internal constant LEVEL_4_EXTENSION_DURATION = 1_000 * YEAR;
+    uint256 internal constant LEVEL_5_EXTENSION_DURATION = 1_000 * YEAR;
+
+    uint256 internal constant LEVEL_1_FULL_EXTENDED_DURATION =
+        LEVEL_1_LIFECYCLE_DURATION + LEVEL_1_EXTENSION_DURATION;
+    uint256 internal constant LEVEL_2_FULL_EXTENDED_DURATION =
+        LEVEL_2_LIFECYCLE_DURATION + LEVEL_2_EXTENSION_DURATION;
+    uint256 internal constant LEVEL_3_FULL_EXTENDED_DURATION =
+        LEVEL_3_LIFECYCLE_DURATION + LEVEL_3_EXTENSION_DURATION;
+    uint256 internal constant LEVEL_4_FULL_EXTENDED_DURATION =
+        LEVEL_4_LIFECYCLE_DURATION + LEVEL_4_EXTENSION_DURATION;
+    uint256 internal constant LEVEL_5_FULL_EXTENDED_DURATION =
+        LEVEL_5_LIFECYCLE_DURATION + LEVEL_5_EXTENSION_DURATION;
 
     uint256 internal constant LEVEL_1_ALLOCATION_PER_PROJECT =
         1_000 * USD_DECIMALS;

@@ -26,10 +26,7 @@ contract Nft_MintAndSetNftData_Unit_Test is Unit_Test {
         INft.NftData memory nftData = nft.getNftData(NFT_TOKEN_ID_0);
         assertEq(nftData.level, LEVEL_1);
         assertEq(nftData.isGenesis, false);
-        assertEq(
-            uint8(nftData.activityType),
-            uint8(NFT_ACTIVITY_TYPE_NOT_ACTIVATED)
-        );
+        assertEq(uint8(nftData.activityType), uint8(NFT_NOT_ACTIVATED));
         assertEq(nftData.activityEndTimestamp, 0);
         assertEq(nftData.extendedActivityEndTimestamp, 0);
     }

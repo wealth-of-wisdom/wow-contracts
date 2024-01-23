@@ -20,7 +20,7 @@ contract Nft_SetNftData_Unit_Test is Unit_Test {
             NFT_TOKEN_ID_0,
             LEVEL_1,
             false,
-            NFT_ACTIVITY_TYPE_NOT_ACTIVATED,
+            NFT_NOT_ACTIVATED,
             block.timestamp + LEVEL_1_LIFECYCLE_DURATION,
             block.timestamp +
                 LEVEL_1_LIFECYCLE_DURATION +
@@ -38,7 +38,7 @@ contract Nft_SetNftData_Unit_Test is Unit_Test {
             NFT_TOKEN_ID_0,
             level,
             false,
-            NFT_ACTIVITY_TYPE_NOT_ACTIVATED,
+            NFT_NOT_ACTIVATED,
             block.timestamp + LEVEL_1_LIFECYCLE_DURATION,
             block.timestamp +
                 LEVEL_1_LIFECYCLE_DURATION +
@@ -56,7 +56,7 @@ contract Nft_SetNftData_Unit_Test is Unit_Test {
             NFT_TOKEN_ID_0,
             level,
             false,
-            NFT_ACTIVITY_TYPE_NOT_ACTIVATED,
+            NFT_NOT_ACTIVATED,
             block.timestamp + LEVEL_1_LIFECYCLE_DURATION,
             block.timestamp +
                 LEVEL_1_LIFECYCLE_DURATION +
@@ -70,7 +70,7 @@ contract Nft_SetNftData_Unit_Test is Unit_Test {
             NFT_TOKEN_ID_0,
             LEVEL_1,
             false,
-            NFT_ACTIVITY_TYPE_NOT_ACTIVATED,
+            NFT_NOT_ACTIVATED,
             block.timestamp + LEVEL_1_LIFECYCLE_DURATION,
             block.timestamp +
                 LEVEL_1_LIFECYCLE_DURATION +
@@ -83,7 +83,7 @@ contract Nft_SetNftData_Unit_Test is Unit_Test {
         assertFalse(nftData.isGenesis, "Genesis data not set");
         assertEq(
             uint8(nftData.activityType),
-            uint8(NFT_ACTIVITY_TYPE_NOT_ACTIVATED),
+            uint8(NFT_NOT_ACTIVATED),
             "Activity type not set"
         );
         assertEq(
@@ -106,7 +106,7 @@ contract Nft_SetNftData_Unit_Test is Unit_Test {
             NFT_TOKEN_ID_0,
             LEVEL_1,
             false,
-            uint256(NFT_ACTIVITY_TYPE_NOT_ACTIVATED),
+            uint256(NFT_NOT_ACTIVATED),
             block.timestamp + LEVEL_1_LIFECYCLE_DURATION,
             block.timestamp +
                 LEVEL_1_LIFECYCLE_DURATION +
@@ -118,7 +118,7 @@ contract Nft_SetNftData_Unit_Test is Unit_Test {
             NFT_TOKEN_ID_0,
             LEVEL_1,
             false,
-            NFT_ACTIVITY_TYPE_NOT_ACTIVATED,
+            NFT_NOT_ACTIVATED,
             block.timestamp + LEVEL_1_LIFECYCLE_DURATION,
             block.timestamp +
                 LEVEL_1_LIFECYCLE_DURATION +

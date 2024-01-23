@@ -184,7 +184,7 @@ contract NftSale_UpdateNf_Unit_Test is Unit_Test {
 
         assertEq(
             uint8(nftData.activityType),
-            uint8(NFT_ACTIVITY_TYPE_DEACTIVATED),
+            uint8(NFT_DEACTIVATED),
             "NftData not deactivated"
         );
     }
@@ -234,7 +234,7 @@ contract NftSale_UpdateNf_Unit_Test is Unit_Test {
         assertFalse(nftData.isGenesis, "NftData set as genesis");
         assertEq(
             uint8(nftData.activityType),
-            uint8(NFT_ACTIVITY_TYPE_NOT_ACTIVATED),
+            uint8(NFT_NOT_ACTIVATED),
             "NftData not deactivated"
         );
         assertEq(
