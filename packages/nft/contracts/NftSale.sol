@@ -141,6 +141,7 @@ contract NftSale is
         uint16 currentLevel = nftData.level;
 
         // Checks: data cannot be genesis or deactivated
+        // @todo When Staking contract is ready, check to see if extension is active
         if (
             nftData.isGenesis ||
             nftData.activityType == INft.ActivityType.DEACTIVATED ||
@@ -263,6 +264,10 @@ contract NftSale is
         s_nftContract = newContract;
         emit NftContractSet(newContract);
     }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                            EXTERNAL GETTER FUNCTIONS
+    //////////////////////////////////////////////////////////////////////////*/
 
     /**
      * @notice Get the USDT token
