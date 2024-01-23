@@ -7,7 +7,7 @@
         "lifecycle_duration_in_months": 12,
         "extension_duration_in_months": 0,
         "allocation_per_project_in_usd": 1000,
-        "base_uri": "ipfs://",
+        "base_uri": "https://ipfs.io/ipfs/QmaswdGDr42V7E185NWaZmS35tuN8thoqXkDQin4ZCt49P/",
         "standard_projects_quantity": 3,
         "premium_projects_quantity": 0,
         "limited_projects_quantity": 0
@@ -20,7 +20,7 @@
         "lifecycle_duration_in_months": 15,
         "extension_duration_in_months": 15,
         "allocation_per_project_in_usd": 10000,
-        "base_uri": "ipfs://",
+        "base_uri": "https://ipfs.io/ipfs/QmQtts3VVaxYVWEwLFnQAeBnyZwJg9rGt7kG4SSP1BaGhT/",
         "standard_projects_quantity": 4,
         "premium_projects_quantity": 1,
         "limited_projects_quantity": 0
@@ -33,7 +33,7 @@
         "lifecycle_duration_in_months": 24,
         "extension_duration_in_months": 18,
         "allocation_per_project_in_usd": 25000,
-        "base_uri": "ipfs://",
+        "base_uri": "https://ipfs.io/ipfs/QmVfNYQtkGKTP1K2JwrTqKKM53wLtvpNotAdgQjYZYp235/",
         "standard_projects_quantity": 8,
         "premium_projects_quantity": 2,
         "limited_projects_quantity": 0
@@ -46,7 +46,7 @@
         "lifecycle_duration_in_months": 40,
         "extension_duration_in_months": -1,
         "allocation_per_project_in_usd": 100000,
-        "base_uri": "ipfs://",
+        "base_uri": "https://ipfs.io/ipfs/QmUE6n69w3qVr11555yrDNd7qsbmPJKZ3u792Gcx3FaYwm/",
         "standard_projects_quantity": -1,
         "premium_projects_quantity": -1,
         "limited_projects_quantity": -1
@@ -59,7 +59,7 @@
         "lifecycle_duration_in_months": -1,
         "extension_duration_in_months": 0,
         "allocation_per_project_in_usd": 500000,
-        "base_uri": "ipfs://",
+        "base_uri": "https://ipfs.io/ipfs/QmQuUnRYPJtLdSoGh2wvc5kcQfcRvFRzbTb4JDVLb32pJJ",
         "standard_projects_quantity": -1,
         "premium_projects_quantity": -1,
         "limited_projects_quantity": -1
