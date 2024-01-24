@@ -12,7 +12,6 @@ async function main() {
         process.env.NFT_NAME,
         process.env.NFT_SYMBOL,
         process.env.VESTING_CONTRACT,
-        process.env.LEVEL5_SUPPLY_CAP,
         process.env.VESTING_POOL_ID,
         process.env.MAX_LEVEL,
         process.env.TOTAL_PROJECT_TYPES,
@@ -48,7 +47,7 @@ async function main() {
 
     const MINTER_ROLE = await nft.MINTER_ROLE()
     const NFT_DATA_MANAGER_ROLE = await nft.NFT_DATA_MANAGER_ROLE()
-    //NOTE: no Vesting deployed for NFT stage
+    // NOTE: no Vesting deployed for NFT stage
     // const BENEFICIARIES_MANAGER_ROLE =
     //     await vesting.BENEFICIARIES_MANAGER_ROLE()
 

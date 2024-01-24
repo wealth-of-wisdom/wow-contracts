@@ -7,7 +7,6 @@ async function main() {
         process.env.NFT_NAME,
         process.env.NFT_SYMBOL,
         process.env.VESTING_CONTRACT,
-        process.env.LEVEL5_SUPPLY_CAP,
         process.env.VESTING_POOL_ID,
         process.env.MAX_LEVEL,
         process.env.TOTAL_PROJECT_TYPES,

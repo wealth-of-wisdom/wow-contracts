@@ -63,7 +63,7 @@
         "lifecycle_duration_in_months": -1,
         "extension_duration_in_months": 0,
         "allocation_per_project_in_usd": 500000,
-        "supply_cap": 20,
+        "supply_cap": 17,
         "base_uri": "https://ipfs.io/ipfs/QmXiD9N1QGSJLzX8yaHowwzzmJNzVnXACfaZcbJ8fffjqV/",
         "standard_projects_quantity": -1,
         "premium_projects_quantity": -1,
