@@ -54,7 +54,7 @@
     {
         "level": 5,
         "isGenesis": false,
-        "price_in_usd": 999988,
+        "price_in_usd": 99988,
         "vesting_rewards_in_wow": 3000000,
         "lifecycle_duration_in_months": -1,
         "extension_duration_in_months": 0,

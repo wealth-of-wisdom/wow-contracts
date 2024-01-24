@@ -19,7 +19,7 @@ async function main() {
     ])
     await nft.waitForDeployment()
     const nftAddress = await nft.getAddress()
-    console.log("NFT deployed to:", await nftAddress)
+    console.log("NFT deployed to:", nftAddress)
 
     /*//////////////////////////////////////////////////////////////////////////
                                   DEPLOY NFT SALE
@@ -33,7 +33,7 @@ async function main() {
     ])
     await nftSale.waitForDeployment()
     const nftSaleAddress = await nftSale.getAddress()
-    console.log("NFT Sale deployed to:", await nftSaleAddress)
+    console.log("NFT Sale deployed to:", nftSaleAddress)
 
     /*//////////////////////////////////////////////////////////////////////////
                                 GET VESTING CONTRACT
