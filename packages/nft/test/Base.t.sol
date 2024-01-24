@@ -2,7 +2,9 @@
 pragma solidity 0.8.20;
 
 import {Test} from "forge-std/Test.sol";
+import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
 import {StakingMock} from "@wealth-of-wisdom/vesting/test/mocks/StakingMock.sol";
+import {INft} from "../contracts/interfaces/INft.sol";
 import {Constants} from "./utils/Constants.sol";
 import {Events} from "./utils/Events.sol";
 import {TokenMock} from "./mocks/TokenMock.sol";
@@ -46,22 +48,64 @@ contract Base_Test is Test, Constants, Events {
     //////////////////////////////////////////////////////////////////////////*/
 
     function setUp() public virtual {
-        uint8 accountsNum = uint8(TEST_ACCOUNTS.length);
-
         vm.startPrank(admin);
+
+        // STAKING
         staking = new StakingMock();
 
+        // USDT TOKEN
         tokenUSDT = new TokenMock();
         tokenUSDT.initialize("USDT token", "USDT", INITIAL_TOKEN_AMOUNT);
 
+        // USDC TOKEN
         tokenUSDC = new TokenMock();
         tokenUSDC.initialize("USDC token", "USDTC", INITIAL_TOKEN_AMOUNT);
 
+        // MINT TOKENS TO TEST ACCOUNTS
+        uint8 accountsNum = uint8(TEST_ACCOUNTS.length);
         for (uint8 i = 0; i < accountsNum; ++i) {
             deal(TEST_ACCOUNTS[i], INIT_ETH_BALANCE);
             tokenUSDT.mint(TEST_ACCOUNTS[i], INIT_TOKEN_BALANCE);
             tokenUSDC.mint(TEST_ACCOUNTS[i], INIT_TOKEN_BALANCE);
         }
+
+        // VESTING
+        vesting = new VestingMock();
+        vesting.initialize(tokenUSDT, staking, LISTING_DATE);
+        tokenUSDT.approve(address(vesting), TOTAL_POOL_TOKEN_AMOUNT);
+        vesting.addVestingPool(
+            POOL_NAME,
+            LISTING_PERCENTAGE_DIVIDEND,
+            LISTING_PERCENTAGE_DIVISOR,
+            CLIFF_IN_DAYS,
+            CLIFF_PERCENTAGE_DIVIDEND,
+            CLIFF_PERCENTAGE_DIVISOR,
+            VESTING_DURATION_IN_MONTHS,
+            VESTING_UNLOCK_TYPE,
+            TOTAL_POOL_TOKEN_AMOUNT
+        );
+
+        // NFT
+        nft = new NftMock();
+        nft.initialize(
+            "Wealth of Wisdom",
+            "WOW",
+            vesting,
+            LEVEL_5_SUPPLY_CAP,
+            DEFAULT_VESTING_PID,
+            MAX_LEVEL,
+            TOTAL_PROJECT_TYPES
+        );
+
+        // NFT SALE
+        sale = new NftSaleMock();
+        sale.initialize(tokenUSDT, tokenUSDC, INft(address(nft)));
+
+        // SET UP ROLES
+        nft.grantRole(MINTER_ROLE, address(sale));
+        nft.grantRole(NFT_DATA_MANAGER_ROLE, address(sale));
+        vesting.grantRole(BENEFICIARIES_MANAGER_ROLE, address(nft));
+
         vm.stopPrank();
     }
 

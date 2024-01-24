@@ -7,7 +7,21 @@ import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {Unit_Test} from "../Unit.t.sol";
 
 contract Nft_MintAndSetNftData_Unit_Test is Unit_Test {
-    function test_mintAndSetNftData_RevertIf_NotNftDataManager() external {
+    address internal minter = makeAddr("minter");
+    address internal nftDataManager = makeAddr("nftDataManager");
+
+    function setUp() public virtual override {
+        Unit_Test.setUp();
+
+        vm.startPrank(admin);
+        nft.grantRole(MINTER_ROLE, minter);
+        nft.grantRole(NFT_DATA_MANAGER_ROLE, nftDataManager);
+        vm.stopPrank();
+    }
+
+    function test_mintAndSetNftData_RevertIf_NotNftDataManagerAndMinter()
+        external
+    {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
@@ -17,6 +31,56 @@ contract Nft_MintAndSetNftData_Unit_Test is Unit_Test {
         );
         vm.prank(alice);
         nft.mintAndSetNftData(alice, LEVEL_1, false);
+    }
+
+    function test_mintAndSetNftData_RevertIf_SenderIsOnlyMinter() external {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IAccessControl.AccessControlUnauthorizedAccount.selector,
+                minter,
+                NFT_DATA_MANAGER_ROLE
+            )
+        );
+        vm.prank(minter);
+        nft.mintAndSetNftData(alice, LEVEL_1, false);
+    }
+
+    function test_mintAndSetNftData_RevertIf_SenderIsOnlyNftDataManager()
+        external
+    {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IAccessControl.AccessControlUnauthorizedAccount.selector,
+                nftDataManager,
+                MINTER_ROLE
+            )
+        );
+        vm.prank(nftDataManager);
+        nft.mintAndSetNftData(alice, LEVEL_1, false);
+    }
+
+    function test_mintAndSetNftData_RevertIf_ReceiverAddressIsZero() external {
+        vm.expectRevert(Errors.Nft__ZeroAddress.selector);
+        vm.prank(admin);
+        nft.mintAndSetNftData(ZERO_ADDRESS, LEVEL_1, false);
+    }
+
+    function test_mintAndSetNftData_RevertIf_LevelIsZero() external {
+        uint16 level = 0;
+        vm.expectRevert(
+            abi.encodeWithSelector(Errors.Nft__InvalidLevel.selector, level)
+        );
+        vm.prank(admin);
+        nft.mintAndSetNftData(alice, level, false);
+    }
+
+    function test_mintAndSetNftData_RevertIf_LevelIsTooHigh() external {
+        uint16 level = MAX_LEVEL + 1;
+        vm.expectRevert(
+            abi.encodeWithSelector(Errors.Nft__InvalidLevel.selector, level)
+        );
+        vm.prank(admin);
+        nft.mintAndSetNftData(alice, level, false);
     }
 
     function test_mintAndSetNftData_SetsNftData() external {

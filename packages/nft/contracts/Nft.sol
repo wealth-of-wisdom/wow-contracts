@@ -32,8 +32,8 @@ contract Nft is
         keccak256("WHITELISTED_SENDER_ROLE"); // for transfer authorization
     bytes32 public constant NFT_DATA_MANAGER_ROLE =
         keccak256("NFT_DATA_MANAGER_ROLE");
-    string public constant NFT_URI_SUFFIX = ".json";
-    uint16 public constant LEVEL_5 = 5;
+    string private constant NFT_URI_SUFFIX = ".json";
+    uint16 private constant LEVEL_5 = 5;
 
     /*//////////////////////////////////////////////////////////////////////////
                                 INTERNAL STORAGE
@@ -50,11 +50,13 @@ contract Nft is
 
     uint256 internal s_nextTokenId;
     uint256 internal s_level5SupplyCap;
-    uint8 internal s_totalProjectTypes; // Standard, Premium, Limited
+
+    IVesting internal s_vestingContract;
+
     uint16 internal s_maxLevel;
     uint16 internal s_promotionalVestingPID;
 
-    IVesting internal s_vestingContract;
+    uint8 internal s_totalProjectTypes; // Standard, Premium, Limited
 
     /* solhint-enable */
 
@@ -316,7 +318,7 @@ contract Nft is
         address receiver,
         uint16 level,
         bool isGenesis
-    ) external onlyRole(NFT_DATA_MANAGER_ROLE) {
+    ) external onlyRole(NFT_DATA_MANAGER_ROLE) onlyRole(MINTER_ROLE) {
         // Effects: set nft data with next token id
         setNftData(
             s_nextTokenId,
@@ -342,7 +344,17 @@ contract Nft is
         address receiver,
         uint256 oldTokenId,
         uint16 newLevel
-    ) external onlyRole(NFT_DATA_MANAGER_ROLE) {
+    ) external onlyRole(NFT_DATA_MANAGER_ROLE) onlyRole(MINTER_ROLE) {
+        // Checks: old token must be owned by the receiver
+        if (ownerOf(oldTokenId) != receiver) {
+            revert Errors.Nft__ReceiverNotOwner();
+        }
+
+        // Checks: old token cannot be genesis
+        if (s_nftData[oldTokenId].isGenesis) {
+            revert Errors.Nft__GenesisNftNotUpdatable();
+        }
+
         // Effects: deactivate the old NFT
         s_nftData[oldTokenId].activityType = ActivityType.DEACTIVATED;
 

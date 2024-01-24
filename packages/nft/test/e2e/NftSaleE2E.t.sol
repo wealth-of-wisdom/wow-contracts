@@ -20,41 +20,9 @@ contract NftSale_E2E_Test is Base_Test {
 
         vm.startPrank(admin);
 
-        vesting = new VestingMock();
-        vesting.initialize(tokenUSDT, staking, LISTING_DATE);
-        tokenUSDT.approve(address(vesting), TOTAL_POOL_TOKEN_AMOUNT);
-        vesting.addVestingPool(
-            POOL_NAME,
-            LISTING_PERCENTAGE_DIVIDEND,
-            LISTING_PERCENTAGE_DIVISOR,
-            CLIFF_IN_DAYS,
-            CLIFF_PERCENTAGE_DIVIDEND,
-            CLIFF_PERCENTAGE_DIVISOR,
-            VESTING_DURATION_IN_MONTHS,
-            VESTING_UNLOCK_TYPE,
-            TOTAL_POOL_TOKEN_AMOUNT
-        );
-
-        nft = new NftMock();
-        nft.initialize(
-            "Wealth of Wisdom",
-            "WOW",
-            vesting,
-            LEVEL_5_SUPPLY_CAP,
-            DEFAULT_VESTING_PID,
-            MAX_LEVEL,
-            TOTAL_PROJECT_TYPES
-        );
-
-        sale = new NftSaleMock();
-        sale.initialize(tokenUSDT, tokenUSDC, INft(address(nft)));
-
         nft.grantRole(WHITELISTED_SENDER_ROLE, alice);
         nft.grantRole(WHITELISTED_SENDER_ROLE, bob);
         nft.grantRole(WHITELISTED_SENDER_ROLE, carol);
-        nft.grantRole(MINTER_ROLE, address(sale));
-        nft.grantRole(NFT_DATA_MANAGER_ROLE, address(sale));
-        vesting.grantRole(BENEFICIARIES_MANAGER_ROLE, address(nft));
 
         vm.stopPrank();
 
