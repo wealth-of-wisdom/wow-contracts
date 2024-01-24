@@ -19,7 +19,7 @@ async function main() {
     ])
     await nft.waitForDeployment()
     const nftAddress = await nft.getAddress()
-    console.log("NFT deployed to:", await nftAddress)
+    console.log("NFT deployed to:", nftAddress)
 
     /*//////////////////////////////////////////////////////////////////////////
                                   DEPLOY NFT SALE
@@ -33,12 +33,12 @@ async function main() {
     ])
     await nftSale.waitForDeployment()
     const nftSaleAddress = await nftSale.getAddress()
-    console.log("NFT Sale deployed to:", await nftSaleAddress)
+    console.log("NFT Sale deployed to:", nftSaleAddress)
 
     /*//////////////////////////////////////////////////////////////////////////
                                 GET VESTING CONTRACT
     //////////////////////////////////////////////////////////////////////////*/
-    //NOTE: no Vesting deployed for NFT stage
+    // NOTE: no Vesting deployed for NFT stage
     // const Vesting = await ethers.getContractFactory("Vesting")
     // const vesting = Vesting.attach(process.env.VESTING_CONTRACT)
 
@@ -60,7 +60,7 @@ async function main() {
     await tx2.wait()
     console.log("NFT_DATA_MANAGER_ROLE granted to:", nftSaleAddress)
 
-    //NOTE: no Vesting deployed for NFT stage
+    // NOTE: no Vesting deployed for NFT stage
     // const tx3 = await vesting.grantRole(
     //     BENEFICIARIES_MANAGER_ROLE,
     //     nftSaleAddress,
@@ -78,8 +78,8 @@ async function main() {
     //////////////////////////////////////////////////////////////////////////*/
 
     const USD_DECIMALS = 6
-    const SECONDS_IN_YEAR = 12 * SECONDS_IN_MONTH
     const SECONDS_IN_MONTH = 30 * 24 * 60 * 60
+    const SECONDS_IN_YEAR = 12 * SECONDS_IN_MONTH
     const MAX_UINT16 = 65535
     const MAX_UINT256 = ethers.MaxUint256
     const projectsQuantities = [[], [], []]
@@ -127,7 +127,7 @@ async function main() {
         /*//////////////////////////////////////////////////////////////////////////
                               SET PROJECTS QUANTITY DATA
         //////////////////////////////////////////////////////////////////////////*/
-        //NOTE: no projects set for NFT stage
+        // NOTE: no projects set for NFT stage
         // const standardQuantity =
         //     data.standard_projects_quantity === -1
         //         ? MAX_UINT16
@@ -150,7 +150,7 @@ async function main() {
                             SET PROJECTS QUANTITY DATA
     //////////////////////////////////////////////////////////////////////////*/
 
-    //NOTE: no projects set for NFT stage
+    // NOTE: no projects set for NFT stage
     // for (let i = 0; i < 3; i++) {
     //     const quantities = projectsQuantities[i]
     //     const tx5 = await nft.setMultipleProjectsQuantity(false, i, quantities)

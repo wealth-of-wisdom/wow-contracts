@@ -6,7 +6,6 @@ module.exports = {
     solidity: {
         version: "0.8.20",
         settings: {
-            viaIR: true,
             optimizer: {
                 enabled: true,
                 runs: 200,
@@ -16,11 +15,8 @@ module.exports = {
     etherscan: {
         apiKey: {
             sepolia: process.env.SEPOLIA_API_KEY,
-            // mainnet: process.env.ETHEREUM_API_KEY,
+            mainnet: process.env.ETHEREUM_API_KEY,
         },
-    },
-    sourcify: {
-        enabled: true,
     },
     networks: {
         anvil: {
@@ -31,9 +27,9 @@ module.exports = {
             url: process.env.SEPOLIA_HOST,
             accounts: [process.env.PRIVATE_KEY],
         },
-        // mainnet: {
-        //     url: process.env.ETHEREUM_HOST,
-        //     accounts: [process.env.PRIVATE_KEY],
-        // },
+        mainnet: {
+            url: process.env.ETHEREUM_HOST,
+            accounts: [process.env.PRIVATE_KEY],
+        },
     },
 }
