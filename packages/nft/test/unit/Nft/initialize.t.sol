@@ -20,7 +20,6 @@ contract Nft_Initialize_Unit_Test is Unit_Test {
             "Wealth of Wisdom",
             "WOW",
             vesting,
-            LEVEL_5_SUPPLY_CAP,
             DEFAULT_VESTING_PID,
             MAX_LEVEL,
             TOTAL_PROJECT_TYPES
@@ -35,7 +34,6 @@ contract Nft_Initialize_Unit_Test is Unit_Test {
             "",
             "WOW",
             vesting,
-            LEVEL_5_SUPPLY_CAP,
             DEFAULT_VESTING_PID,
             MAX_LEVEL,
             TOTAL_PROJECT_TYPES
@@ -49,7 +47,6 @@ contract Nft_Initialize_Unit_Test is Unit_Test {
             "Wealth of Wisdom",
             "",
             vesting,
-            LEVEL_5_SUPPLY_CAP,
             DEFAULT_VESTING_PID,
             MAX_LEVEL,
             TOTAL_PROJECT_TYPES
@@ -62,7 +59,6 @@ contract Nft_Initialize_Unit_Test is Unit_Test {
             "Wealth of Wisdom",
             "WOW",
             IVesting(ZERO_ADDRESS),
-            LEVEL_5_SUPPLY_CAP,
             DEFAULT_VESTING_PID,
             MAX_LEVEL,
             TOTAL_PROJECT_TYPES
@@ -76,7 +72,6 @@ contract Nft_Initialize_Unit_Test is Unit_Test {
             "",
             "",
             vesting,
-            LEVEL_5_SUPPLY_CAP,
             DEFAULT_VESTING_PID,
             MAX_LEVEL,
             TOTAL_PROJECT_TYPES
@@ -90,7 +85,6 @@ contract Nft_Initialize_Unit_Test is Unit_Test {
             "Wealth of Wisdom",
             "WOW",
             vesting,
-            LEVEL_5_SUPPLY_CAP,
             DEFAULT_VESTING_PID,
             0,
             TOTAL_PROJECT_TYPES
@@ -104,7 +98,6 @@ contract Nft_Initialize_Unit_Test is Unit_Test {
             "Wealth of Wisdom",
             "WOW",
             vesting,
-            LEVEL_5_SUPPLY_CAP,
             DEFAULT_VESTING_PID,
             MAX_LEVEL,
             0
@@ -172,17 +165,6 @@ contract Nft_Initialize_Unit_Test is Unit_Test {
         );
     }
 
-    function test_initialize_SetsLevel5SupplyCapCorrectly()
-        external
-        initializeNft
-    {
-        assertEq(
-            nft.getLevel5SupplyCap(),
-            LEVEL_5_SUPPLY_CAP,
-            "Level 5 supply cap should be set correctly"
-        );
-    }
-
     function test_initialize_SetsPromotionalVestingPIDCorrectly()
         external
         initializeNft
@@ -235,7 +217,6 @@ contract Nft_Initialize_Unit_Test is Unit_Test {
             "Wealth of Wisdom",
             "WOW",
             vesting,
-            LEVEL_5_SUPPLY_CAP,
             DEFAULT_VESTING_PID,
             MAX_LEVEL,
             TOTAL_PROJECT_TYPES
@@ -251,7 +232,6 @@ contract Nft_Initialize_Unit_Test is Unit_Test {
             "Wealth of Wisdom",
             "WOW",
             vesting,
-            LEVEL_5_SUPPLY_CAP,
             DEFAULT_VESTING_PID,
             MAX_LEVEL,
             TOTAL_PROJECT_TYPES

@@ -96,7 +96,6 @@ abstract contract Constants {
                                 NFT LEVELS DATA
     //////////////////////////////////////////////////////////////////////////*/
 
-    uint256 internal constant LEVEL_5_SUPPLY_CAP = 20;
     uint256 internal constant MONTH = 30 days;
     uint256 internal constant YEAR = 365 days;
     uint16 internal constant MAX_LEVEL = 5;
@@ -109,11 +108,11 @@ abstract contract Constants {
     uint16 internal constant LEVEL_4 = 4;
     uint16 internal constant LEVEL_5 = 5;
 
-    uint256 internal constant LEVEL_1_PRICE = 1_000 * USD_DECIMALS;
-    uint256 internal constant LEVEL_2_PRICE = 5_000 * USD_DECIMALS;
-    uint256 internal constant LEVEL_3_PRICE = 10_000 * USD_DECIMALS;
-    uint256 internal constant LEVEL_4_PRICE = 33_000 * USD_DECIMALS;
-    uint256 internal constant LEVEL_5_PRICE = 100_000 * USD_DECIMALS;
+    uint256 internal constant LEVEL_1_PRICE = 988 * USD_DECIMALS;
+    uint256 internal constant LEVEL_2_PRICE = 4_988 * USD_DECIMALS;
+    uint256 internal constant LEVEL_3_PRICE = 9_988 * USD_DECIMALS;
+    uint256 internal constant LEVEL_4_PRICE = 32_988 * USD_DECIMALS;
+    uint256 internal constant LEVEL_5_PRICE = 99_988 * USD_DECIMALS;
 
     uint256 internal constant LEVEL_1_VESTING_REWARD = 1_000 * WOW_DECIMALS;
     uint256 internal constant LEVEL_2_VESTING_REWARD = 25_000 * WOW_DECIMALS;
@@ -154,6 +153,12 @@ abstract contract Constants {
         100_000 * USD_DECIMALS;
     uint256 internal constant LEVEL_5_ALLOCATION_PER_PROJECT =
         500_000 * USD_DECIMALS;
+
+    uint256 internal constant LEVEL_1_SUPPLY_CAP = type(uint256).max;
+    uint256 internal constant LEVEL_2_SUPPLY_CAP = type(uint256).max;
+    uint256 internal constant LEVEL_3_SUPPLY_CAP = type(uint256).max;
+    uint256 internal constant LEVEL_4_SUPPLY_CAP = type(uint256).max;
+    uint256 internal constant LEVEL_5_SUPPLY_CAP = 20;
 
     string internal constant LEVEL_1_BASE_URI = "ipfs://level1BaseUri/";
     string internal constant LEVEL_2_BASE_URI = "ipfs://level2BaseUri/";

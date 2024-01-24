@@ -80,6 +80,7 @@ async function main() {
     const USD_DECIMALS = 6
     const SECONDS_IN_MONTH = 30 * 24 * 60 * 60
     const SECONDS_IN_YEAR = 12 * SECONDS_IN_MONTH
+    const MILLION_YEARS = 1_000_000 * SECONDS_IN_YEAR
     const MAX_UINT16 = 65535
     const MAX_UINT256 = ethers.MaxUint256
     const projectsQuantities = [[], [], []]
@@ -90,25 +91,32 @@ async function main() {
         //////////////////////////////////////////////////////////////////////////*/
 
         const data = levelsData[i]
+
         const price = ethers.parseUnits(
             data.price_in_usd.toString(),
             USD_DECIMALS,
         )
+
         const vestingRewards = ethers.parseEther(
             data.vesting_rewards_in_wow.toString(),
         )
+
         const lifecycleDuration =
             data.lifecycle_duration_in_months === -1
-                ? SECONDS_IN_YEAR * 100000
+                ? MILLION_YEARS
                 : data.lifecycle_duration_in_months * SECONDS_IN_MONTH
+
         const extensionDuration =
             data.extension_duration_in_months === -1
-                ? SECONDS_IN_YEAR * 100000
+                ? MILLION_YEARS
                 : data.extension_duration_in_months * SECONDS_IN_MONTH
+
         const allocationPerProject = ethers.parseUnits(
             data.allocation_per_project_in_usd.toString(),
             USD_DECIMALS,
         )
+
+        const supplyCap = data.supply_cap === -1 ? MAX_UINT256 : data.supply_cap
 
         const tx4 = await nft.setLevelData(
             data.level,
@@ -118,6 +126,7 @@ async function main() {
             lifecycleDuration,
             extensionDuration,
             allocationPerProject,
+            supplyCap,
             data.base_uri,
         )
 

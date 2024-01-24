@@ -25,8 +25,6 @@ contract NftSale_E2E_Test is Base_Test {
         nft.grantRole(WHITELISTED_SENDER_ROLE, carol);
 
         vm.stopPrank();
-
-        _setNftLevels();
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -1185,5 +1183,31 @@ contract NftSale_E2E_Test is Base_Test {
             block.timestamp + LEVEL_3_FULL_EXTENDED_DURATION
         );
         assertTotalNftData(zeroAmounts, [1, 1, 1, 0, 0]);
+    }
+
+    function test_mintNft_MintsAllLevel5Nfts() external {
+        /**
+         * 1. Mint Nft level 5 for Alice (20 times)
+         */
+
+        // ARRANGE + ACT
+        vm.startPrank(alice);
+        tokenUSDT.approve(address(sale), type(uint256).max);
+        for (uint256 i; i < 20; i++) {
+            sale.mintNft(LEVEL_5, tokenUSDT);
+        }
+        vm.stopPrank();
+
+        // ASSERT
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.Nft__SupplyCapReached.selector,
+                LEVEL_5,
+                false,
+                LEVEL_5_SUPPLY_CAP
+            )
+        );
+        vm.prank(alice);
+        sale.mintNft(LEVEL_5, tokenUSDT);
     }
 }

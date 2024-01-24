@@ -15,8 +15,6 @@ contract NftSale_UpdateNf_Unit_Test is Unit_Test {
     function setUp() public override {
         Unit_Test.setUp();
 
-        _setNftLevels();
-
         uint256 level2Price = nft.getLevelData(LEVEL_2, false).price;
         uint256 level3Price = nft.getLevelData(LEVEL_3, false).price;
         upgradePrice = level3Price - level2Price;
@@ -284,7 +282,7 @@ contract NftSale_UpdateNf_Unit_Test is Unit_Test {
         emit PurchasePaid(tokenUSDT, upgradePrice);
 
         vm.prank(alice);
-        sale.mintNft(LEVEL_2, tokenUSDT);
+        sale.updateNft(NFT_TOKEN_ID_0, LEVEL_3, tokenUSDT);
     }
 
     function test_updateNftData_EmitsNftDataUpdated()

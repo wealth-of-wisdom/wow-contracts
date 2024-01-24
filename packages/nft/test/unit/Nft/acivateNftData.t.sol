@@ -20,7 +20,6 @@ contract Nft_ActivateNftData_Unit_Test is Unit_Test, IVestingEvents {
 
     function test_activateNftData_RevertIf_NftDataAlreadyActivated()
         external
-        setNftLevels
         mintLevel2NftForAlice
     {
         vm.startPrank(alice);
@@ -32,7 +31,6 @@ contract Nft_ActivateNftData_Unit_Test is Unit_Test, IVestingEvents {
 
     function test_activateNftData_UpdatesNftDataActivity()
         external
-        setNftLevels
         mintLevel2NftForAlice
     {
         vm.prank(alice);
@@ -51,7 +49,6 @@ contract Nft_ActivateNftData_Unit_Test is Unit_Test, IVestingEvents {
 
     function test_activateNftData_UpdatesTimestamps()
         external
-        setNftLevels
         mintLevel2NftForAlice
     {
         uint256 expectedEndTimestamp = block.timestamp +
@@ -78,7 +75,6 @@ contract Nft_ActivateNftData_Unit_Test is Unit_Test, IVestingEvents {
 
     function test_activateNftData_DoesNotAddBeneficiaryIfAllTokensAreDedicated()
         external
-        setNftLevels
         mintLevel2NftForAlice
     {
         // Simulate: Vesting Pool has 0 tokens left to dedicate
@@ -104,7 +100,6 @@ contract Nft_ActivateNftData_Unit_Test is Unit_Test, IVestingEvents {
 
     function test_activateNftData_AddsBeneficiaryInVestingWithFullRewardsAmount()
         external
-        setNftLevels
         mintLevel2NftForAlice
     {
         vm.prank(alice);
@@ -127,7 +122,6 @@ contract Nft_ActivateNftData_Unit_Test is Unit_Test, IVestingEvents {
 
     function test_activateNftData_AddsBeneficiaryInVestingWithPartialRewardsAmount()
         external
-        setNftLevels
         mintLevel2NftForAlice
     {
         uint256 undedicatedAmount = nft
@@ -157,7 +151,6 @@ contract Nft_ActivateNftData_Unit_Test is Unit_Test, IVestingEvents {
 
     function test_activateNftData_RevertIf_VestingContractIsInvalid()
         external
-        setNftLevels
         mintLevel2NftForAlice
     {
         vm.prank(admin);
@@ -170,7 +163,6 @@ contract Nft_ActivateNftData_Unit_Test is Unit_Test, IVestingEvents {
 
     function test_activateNftData_EmitsBeneficiaryAddedEvent()
         external
-        setNftLevels
         mintLevel2NftForAlice
     {
         vm.expectEmit(true, true, true, true);
@@ -186,7 +178,6 @@ contract Nft_ActivateNftData_Unit_Test is Unit_Test, IVestingEvents {
 
     function test_activateNftData_EmitsNftDataActivatedEvent()
         external
-        setNftLevels
         mintLevel2NftForAlice
     {
         uint256 activityEndTimestamp = block.timestamp +

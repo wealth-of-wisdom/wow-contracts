@@ -27,10 +27,7 @@ contract NftSale_WithdrawTokens_Unit_Test is Unit_Test {
         sale.withdrawTokens(tokenUSDT, 0);
     }
 
-    function test_withdrawTokens_RevertIf_ContractBalanceIsZero()
-        external
-        mintLevel2NftForAlice
-    {
+    function test_withdrawTokens_RevertIf_ContractBalanceIsZero() external {
         uint256 amount = 1 wei;
         uint256 contractBalance = tokenUSDT.balanceOf(address(sale));
         vm.expectRevert(
@@ -46,7 +43,6 @@ contract NftSale_WithdrawTokens_Unit_Test is Unit_Test {
 
     function test_withdrawTokens_RevertIf_InsufficientContractBalance()
         external
-        mintLevel2NftForAlice
     {
         uint256 amount = 1 ether;
         uint256 withdrawAmount = amount + 1 wei;
@@ -73,7 +69,6 @@ contract NftSale_WithdrawTokens_Unit_Test is Unit_Test {
         mintLevel2NftForAlice
     {
         vm.startPrank(admin);
-        tokenUSDT.mint(address(sale), INIT_TOKEN_BALANCE);
         uint256 contractBalance = tokenUSDT.balanceOf(address(sale));
 
         uint256 adminStartingBalance = tokenUSDT.balanceOf(admin);
@@ -93,7 +88,6 @@ contract NftSale_WithdrawTokens_Unit_Test is Unit_Test {
         mintLevel2NftForAlice
     {
         vm.startPrank(admin);
-        tokenUSDT.mint(address(sale), INIT_TOKEN_BALANCE);
 
         uint256 contractStartingBalance = tokenUSDT.balanceOf(address(sale));
         sale.withdrawTokens(tokenUSDT, contractStartingBalance);
@@ -102,7 +96,7 @@ contract NftSale_WithdrawTokens_Unit_Test is Unit_Test {
 
         assertEq(
             contractStartingBalance,
-            INIT_TOKEN_BALANCE,
+            LEVEL_2_PRICE,
             "Balance not set"
         );
         assertEq(contractEndingBalance, 0, "Funds not transfered");
@@ -113,7 +107,6 @@ contract NftSale_WithdrawTokens_Unit_Test is Unit_Test {
         mintLevel2NftForAlice
     {
         vm.startPrank(admin);
-        tokenUSDT.mint(address(sale), INIT_TOKEN_BALANCE);
         uint256 contractBalance = tokenUSDT.balanceOf(address(sale));
 
         vm.expectEmit(true, true, true, true);

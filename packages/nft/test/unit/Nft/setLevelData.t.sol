@@ -24,6 +24,7 @@ contract Nft_SetLevelData_Unit_Test is Unit_Test {
             LEVEL_5_LIFECYCLE_DURATION,
             LEVEL_5_EXTENSION_DURATION,
             LEVEL_5_ALLOCATION_PER_PROJECT,
+            LEVEL_5_SUPPLY_CAP,
             LEVEL_5_BASE_URI
         );
     }
@@ -43,6 +44,7 @@ contract Nft_SetLevelData_Unit_Test is Unit_Test {
             LEVEL_5_LIFECYCLE_DURATION,
             LEVEL_5_EXTENSION_DURATION,
             LEVEL_5_ALLOCATION_PER_PROJECT,
+            LEVEL_5_SUPPLY_CAP,
             LEVEL_5_BASE_URI
         );
     }
@@ -62,6 +64,7 @@ contract Nft_SetLevelData_Unit_Test is Unit_Test {
             LEVEL_5_LIFECYCLE_DURATION,
             LEVEL_5_EXTENSION_DURATION,
             LEVEL_5_ALLOCATION_PER_PROJECT,
+            LEVEL_5_SUPPLY_CAP,
             LEVEL_5_BASE_URI
         );
     }
@@ -77,6 +80,7 @@ contract Nft_SetLevelData_Unit_Test is Unit_Test {
             LEVEL_5_LIFECYCLE_DURATION,
             LEVEL_5_EXTENSION_DURATION,
             LEVEL_5_ALLOCATION_PER_PROJECT,
+            LEVEL_5_SUPPLY_CAP,
             LEVEL_5_BASE_URI
         );
     }
@@ -92,6 +96,7 @@ contract Nft_SetLevelData_Unit_Test is Unit_Test {
             0,
             LEVEL_5_EXTENSION_DURATION,
             LEVEL_5_ALLOCATION_PER_PROJECT,
+            LEVEL_5_SUPPLY_CAP,
             LEVEL_5_BASE_URI
         );
     }
@@ -107,7 +112,32 @@ contract Nft_SetLevelData_Unit_Test is Unit_Test {
             LEVEL_5_LIFECYCLE_DURATION,
             LEVEL_5_EXTENSION_DURATION,
             LEVEL_5_ALLOCATION_PER_PROJECT,
+            LEVEL_5_SUPPLY_CAP,
             ""
+        );
+    }
+
+    function test_setLevelData_RevertIf_SupplyCapTooLow() external {
+        uint256 newSupplyCap = 10;
+        nft.mock_setNftAmount(LEVEL_5, false, newSupplyCap);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.Nft__SupplyCapTooLow.selector,
+                newSupplyCap - 1
+            )
+        );
+        vm.prank(admin);
+        nft.setLevelData(
+            LEVEL_5,
+            false,
+            LEVEL_5_PRICE,
+            LEVEL_5_VESTING_REWARD,
+            LEVEL_5_LIFECYCLE_DURATION,
+            LEVEL_5_EXTENSION_DURATION,
+            LEVEL_5_ALLOCATION_PER_PROJECT,
+            newSupplyCap - 1,
+            LEVEL_5_BASE_URI
         );
     }
 
@@ -121,6 +151,7 @@ contract Nft_SetLevelData_Unit_Test is Unit_Test {
             LEVEL_5_LIFECYCLE_DURATION,
             LEVEL_5_EXTENSION_DURATION,
             LEVEL_5_ALLOCATION_PER_PROJECT,
+            LEVEL_5_SUPPLY_CAP,
             LEVEL_5_BASE_URI
         );
 
@@ -146,6 +177,11 @@ contract Nft_SetLevelData_Unit_Test is Unit_Test {
             LEVEL_5_ALLOCATION_PER_PROJECT,
             "Allocation per project incorrect"
         );
+        assertEq(
+            nftLevel.supplyCap,
+            LEVEL_5_SUPPLY_CAP,
+            "Supply cap incorrect"
+        );
         assertEq(nftLevel.nftAmount, 0, "NFT amount incorrect");
         assertEq(nftLevel.baseURI, LEVEL_5_BASE_URI, "Base URI incorrect");
     }
@@ -160,6 +196,7 @@ contract Nft_SetLevelData_Unit_Test is Unit_Test {
             LEVEL_5_LIFECYCLE_DURATION,
             LEVEL_5_EXTENSION_DURATION,
             LEVEL_5_ALLOCATION_PER_PROJECT,
+            LEVEL_5_SUPPLY_CAP,
             LEVEL_5_BASE_URI
         );
 
@@ -172,6 +209,7 @@ contract Nft_SetLevelData_Unit_Test is Unit_Test {
             LEVEL_5_LIFECYCLE_DURATION,
             LEVEL_5_EXTENSION_DURATION,
             LEVEL_5_ALLOCATION_PER_PROJECT,
+            LEVEL_5_SUPPLY_CAP,
             LEVEL_5_BASE_URI
         );
     }
