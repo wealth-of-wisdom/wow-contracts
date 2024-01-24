@@ -78,6 +78,7 @@ async function main() {
     //////////////////////////////////////////////////////////////////////////*/
 
     const USD_DECIMALS = 6
+    const SECONDS_IN_YEAR = 12 * SECONDS_IN_MONTH
     const SECONDS_IN_MONTH = 30 * 24 * 60 * 60
     const MAX_UINT16 = 65535
     const MAX_UINT256 = ethers.MaxUint256
@@ -98,11 +99,11 @@ async function main() {
         )
         const lifecycleDuration =
             data.lifecycle_duration_in_months === -1
-                ? MAX_UINT256
+                ? SECONDS_IN_YEAR * 100000
                 : data.lifecycle_duration_in_months * SECONDS_IN_MONTH
         const extensionDuration =
             data.extension_duration_in_months === -1
-                ? MAX_UINT256
+                ? SECONDS_IN_YEAR * 100000
                 : data.extension_duration_in_months * SECONDS_IN_MONTH
         const allocationPerProject = ethers.parseUnits(
             data.allocation_per_project_in_usd.toString(),
