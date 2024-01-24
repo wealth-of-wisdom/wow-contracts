@@ -1,0 +1,34 @@
+{
+    "nft": {
+      "name_prefix": "WOW-LVL",
+      "description": "WOW Access Pass NFT: Your key to the world of exclusive crypto opportunities. The WOW Access Pass NFT embodies empowerment, knowledge, trust, and community, offering unparalleled access to high-potential early-stage crypto and NFT projects.\nEnhance your financial journey with curated insights, direct access to expertly vetted ventures, and tailored educational content. With the WOW Access Pass, you're not just participating in crypto; you're joining a movement towards informed and empowered digital asset ownership.",
+      "image_urls": [
+        "https://ipfs.io/ipfs/QmQEaeoiWpgnzdiMaxLVMjyAHGY7Q1TwaQsojgiuE1iwLa",
+        "https://ipfs.io/ipfs/QmUbS1fqupPjUEuyzuRFyWHpCgWhAUQYiUqJYKgScExPuM",
+        "https://ipfs.io/ipfs/QmdHg6uYMPqmTWE4x6PvugDYvvsownrQ8CmhDKuDq4EbvY",
+        "https://ipfs.io/ipfs/Qmaayndjwqm8tTngNJLaEpDLmUrnT7MLjKv8fM3khjKyFq",
+        "https://ipfs.io/ipfs/QmWqRPz9D4kiqoDvfXM7kzmGBhSQ7GQKwNGaMVuXApBUtb"
+      ],
+      "author": "Wealth Of Wisdom",
+      "lifecycle": [12, 15, 24, 40, "Unlimited"],
+      "lifecycle_extension": ["Unavailable", 15, 18, "Unlimited", "Unavailable"],
+      "prices": [988, 4988, 9988, 32988, 999988],
+      "level_quantities": [15, 15, 15, 15, 15]
+    },
+    "genesis_nft": {
+      "name_prefix": "WOW-OG-LVL",
+      "description": "WOW Access Pass NFT: Your key to the world of exclusive crypto opportunities. The WOW Access Pass NFT embodies empowerment, knowledge, trust, and community, offering unparalleled access to high-potential early-stage crypto and NFT projects.\nEnhance your financial journey with curated insights, direct access to expertly vetted ventures, and tailored educational content. With the WOW Access Pass, you're not just participating in crypto; you're joining a movement towards informed and empowered digital asset ownership.",
+      "image_urls": [
+        "https://ipfs.io/ipfs/QmQEaeoiWpgnzdiMaxLVMjyAHGY7Q1TwaQsojgiuE1iwLa",
+        "https://ipfs.io/ipfs/QmUbS1fqupPjUEuyzuRFyWHpCgWhAUQYiUqJYKgScExPuM",
+        "https://ipfs.io/ipfs/QmdHg6uYMPqmTWE4x6PvugDYvvsownrQ8CmhDKuDq4EbvY",
+        "https://ipfs.io/ipfs/Qmaayndjwqm8tTngNJLaEpDLmUrnT7MLjKv8fM3khjKyFq",
+        "https://ipfs.io/ipfs/QmWqRPz9D4kiqoDvfXM7kzmGBhSQ7GQKwNGaMVuXApBUtb"
+      ],
+      "author": "Wealth Of Wisdom",
+      "lifecycle": ["Unlimited", "Unlimited", "Unlimited", "Unlimited", "Unlimited"],
+      "lifecycle_extension": ["Unavailable", "Unavailable", "Unavailable", "Unavailable", "Unavailable"],
+      "prices": [988, 4988, 9988, 32988, 999988],
+      "level_quantities": [15, 15, 15, 15, 15]
+    }
+  }
