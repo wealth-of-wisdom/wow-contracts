@@ -89,13 +89,6 @@ contract Nft is
         _;
     }
 
-    modifier mValidProject(uint8 project) {
-        if (project >= s_totalProjectTypes) {
-            revert Errors.Nft__InvalidProjectType(project);
-        }
-        _;
-    }
-
     /*//////////////////////////////////////////////////////////////////////////
                                   INITIALIZER
     //////////////////////////////////////////////////////////////////////////*/
@@ -197,7 +190,7 @@ contract Nft is
         // Effects: set the token metadata URI (URI for each token is assigned before minting)
         _setTokenURI(tokenId, uri);
 
-        emit NftMinted(to, tokenId, uri);
+        emit NftMinted(to, tokenId, level, isGenesis, nftAmount);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -216,7 +209,7 @@ contract Nft is
         }
 
         NftData storage nftData = s_nftData[tokenId];
-        NftLevel memory levelData = s_nftLevels[
+        NftLevel storage levelData = s_nftLevels[
             _getLevelHash(nftData.level, nftData.isGenesis)
         ];
 
@@ -242,17 +235,17 @@ contract Nft is
         ) = s_vestingContract.getGeneralPoolData(s_promotionalVestingPID);
 
         // Calculate the amount of tokens that can still be distributed
-        uint256 nonDedicatedTokens = totalPoolTokenAmount -
+        uint256 undedicatedTokens = totalPoolTokenAmount -
             dedicatedPoolTokenAmount;
 
-        if (nonDedicatedTokens > 0) {
+        if (undedicatedTokens > 0) {
             // Rewards are fixed for each level
             uint256 rewardTokens = levelData.vestingRewardWOWTokens;
 
             // If there are enough tokens, then the reward is vestingRewardWOWTokens
             // Otherwise, the reward is the amount of tokens that can still be distributed
-            if (nonDedicatedTokens < rewardTokens) {
-                rewardTokens = nonDedicatedTokens;
+            if (undedicatedTokens < rewardTokens) {
+                rewardTokens = undedicatedTokens;
             }
 
             // Effects: add the holder to the vesting pool
@@ -278,8 +271,7 @@ contract Nft is
     //////////////////////////////////////////////////////////////////////////*/
 
     /**
-     * @notice  sets all necesary information about the
-     * users Nft and its current state
+     * @notice  sets all necesary information about the users Nft and its current state
      * @param   tokenId  user minted and owned token id
      * @param   level  nft level purchased
      * @param   isGenesis  is it a genesis nft
@@ -525,8 +517,12 @@ contract Nft is
         public
         onlyRole(DEFAULT_ADMIN_ROLE)
         mValidLevel(level)
-        mValidProject(project)
     {
+        // Checks: project must not overflow the total project types count
+        if (project >= s_totalProjectTypes) {
+            revert Errors.Nft__InvalidProjectType(project);
+        }
+
         // Effects: set the projects quantity
         s_projectsPerNft[_getProjectHash(level, isGenesis, project)] = quantity;
 

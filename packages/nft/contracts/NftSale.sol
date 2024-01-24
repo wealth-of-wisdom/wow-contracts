@@ -71,18 +71,18 @@ contract NftSale is
      * @notice Initializes the contract
      * @param usdtToken SDT token
      * @param usdcToken USDC token
-     * @param nftContract NFT contract
+     * @param nft NFT contract
      */
     function initialize(
         IERC20 usdtToken,
         IERC20 usdcToken,
-        INft nftContract
+        INft nft
     )
         external
         initializer
         mAddressNotZero(address(usdtToken))
         mAddressNotZero(address(usdcToken))
-        mAddressNotZero(address(nftContract))
+        mAddressNotZero(address(nft))
     {
         __AccessControl_init();
         __UUPSUpgradeable_init();
@@ -94,7 +94,7 @@ contract NftSale is
         // Effects: set the storage
         s_usdtToken = usdtToken;
         s_usdcToken = usdcToken;
-        s_nftContract = nftContract;
+        s_nftContract = nft;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -141,6 +141,7 @@ contract NftSale is
         uint16 currentLevel = nftData.level;
 
         // Checks: data cannot be genesis or deactivated
+        // @todo When Staking contract is ready, check to see if extension is active
         if (
             nftData.isGenesis ||
             nftData.activityType == INft.ActivityType.DEACTIVATED ||
@@ -263,6 +264,10 @@ contract NftSale is
         s_nftContract = newContract;
         emit NftContractSet(newContract);
     }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                            EXTERNAL GETTER FUNCTIONS
+    //////////////////////////////////////////////////////////////////////////*/
 
     /**
      * @notice Get the USDT token

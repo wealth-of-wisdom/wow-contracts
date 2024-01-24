@@ -1,104 +1,245 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.20;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {Nft} from "@wealth-of-wisdom/nft/contracts/Nft.sol";
-import {Errors} from "@wealth-of-wisdom/nft/contracts/libraries/Errors.sol";
-import {Nft_Unit_Test} from "@wealth-of-wisdom/nft/test/unit/NftUnit.t.sol";
+import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
+import {Errors} from "../../../contracts/libraries/Errors.sol";
+import {NftMock} from "../../mocks/NftMock.sol";
+import {Unit_Test} from "../Unit.t.sol";
 
-contract Nft_Initialize_Unit_Test is Nft_Unit_Test {
+contract Nft_Initialize_Unit_Test is Unit_Test {
     function setUp() public virtual override {
-        Nft_Unit_Test.setUp();
+        Unit_Test.setUp();
 
-        nftContract = new Nft();
+        nft = new NftMock();
+    }
+
+    modifier initializeNft() {
+        vm.prank(admin);
+        nft.initialize(
+            "Wealth of Wisdom",
+            "WOW",
+            vesting,
+            LEVEL_5_SUPPLY_CAP,
+            DEFAULT_VESTING_PID,
+            MAX_LEVEL,
+            TOTAL_PROJECT_TYPES
+        );
+        _;
     }
 
     function test_initialize_RevertIf_NameStringIsEmpty() external {
         vm.expectRevert(Errors.Nft__EmptyString.selector);
         vm.prank(admin);
-        nftContract.initialize("", "WOW");
+        nft.initialize(
+            "",
+            "WOW",
+            vesting,
+            LEVEL_5_SUPPLY_CAP,
+            DEFAULT_VESTING_PID,
+            MAX_LEVEL,
+            TOTAL_PROJECT_TYPES
+        );
     }
 
     function test_initialize_RevertIf_SymbolStringIsEmpty() external {
         vm.expectRevert(Errors.Nft__EmptyString.selector);
         vm.prank(admin);
-        nftContract.initialize("WOW", "");
+        nft.initialize(
+            "Wealth of Wisdom",
+            "",
+            vesting,
+            LEVEL_5_SUPPLY_CAP,
+            DEFAULT_VESTING_PID,
+            MAX_LEVEL,
+            TOTAL_PROJECT_TYPES
+        );
+    }
+
+    function test_initialize_RevertIf_VestingContractIsZeroAddress() external {
+        vm.expectRevert(Errors.Nft__ZeroAddress.selector);
+        nft.initialize(
+            "Wealth of Wisdom",
+            "WOW",
+            IVesting(ZERO_ADDRESS),
+            LEVEL_5_SUPPLY_CAP,
+            DEFAULT_VESTING_PID,
+            MAX_LEVEL,
+            TOTAL_PROJECT_TYPES
+        );
     }
 
     function test_initialize_RevertIf_NameAndSymbolStringsAreEmpty() external {
         vm.expectRevert(Errors.Nft__EmptyString.selector);
         vm.prank(admin);
-        nftContract.initialize("", "");
-    }
-
-    function test_initialize_SetsNameCorrectly() external {
-        vm.prank(admin);
-        nftContract.initialize("Wealth of Wisdom", "WOW");
-        assertEq(
-            nftContract.name(),
-            "Wealth of Wisdom",
-            "Name not set correctly"
+        nft.initialize(
+            "",
+            "",
+            vesting,
+            LEVEL_5_SUPPLY_CAP,
+            DEFAULT_VESTING_PID,
+            MAX_LEVEL,
+            TOTAL_PROJECT_TYPES
         );
     }
 
-    function test_initialize_SetsSymbolCorrectly() external {
+    function test_initialize_RevertIf_MaxLevelIsZero() external {
+        vm.expectRevert(Errors.Nft__ZeroAmount.selector);
         vm.prank(admin);
-        nftContract.initialize("Wealth of Wisdom", "WOW");
-        assertEq(nftContract.symbol(), "WOW", "Symbol not set correctly");
+        nft.initialize(
+            "Wealth of Wisdom",
+            "WOW",
+            vesting,
+            LEVEL_5_SUPPLY_CAP,
+            DEFAULT_VESTING_PID,
+            0,
+            TOTAL_PROJECT_TYPES
+        );
     }
 
-    function test_initialize_GrantsDefaultAdminRoleToDeployer() external {
+    function test_initialize_RevertIf_TotalProjectTypesAmountIsZero() external {
+        vm.expectRevert(Errors.Nft__ZeroAmount.selector);
         vm.prank(admin);
-        nftContract.initialize("Wealth of Wisdom", "WOW");
+        nft.initialize(
+            "Wealth of Wisdom",
+            "WOW",
+            vesting,
+            LEVEL_5_SUPPLY_CAP,
+            DEFAULT_VESTING_PID,
+            MAX_LEVEL,
+            0
+        );
+    }
+
+    function test_initialize_GrantsDefaultAdminRoleToDeployer()
+        external
+        initializeNft
+    {
         assertTrue(
-            nftContract.hasRole(DEFAULT_ADMIN_ROLE, admin),
+            nft.hasRole(DEFAULT_ADMIN_ROLE, admin),
             "Admin role not granted to deployer"
         );
     }
 
-    function test_initialize_GrantsMinterRoleToDeployer() external {
-        vm.prank(admin);
-        nftContract.initialize("Wealth of Wisdom", "WOW");
+    function test_initialize_GrantsMinterRoleToDeployer()
+        external
+        initializeNft
+    {
         assertTrue(
-            nftContract.hasRole(MINTER_ROLE, admin),
+            nft.hasRole(MINTER_ROLE, admin),
             "Minter role not granted to deployer"
         );
     }
 
-    function test_initialize_GrantsUpgraderRoleToDeployer() external {
-        vm.prank(admin);
-        nftContract.initialize("Wealth of Wisdom", "WOW");
+    function test_initialize_GrantsUpgraderRoleToDeployer()
+        external
+        initializeNft
+    {
         assertTrue(
-            nftContract.hasRole(UPGRADER_ROLE, admin),
+            nft.hasRole(UPGRADER_ROLE, admin),
             "Upgrader role not granted to deployer"
         );
     }
 
-    function test_initialize_GrantsWhitelistedSenderRoleToDeployer() external {
-        vm.prank(admin);
-        nftContract.initialize("Wealth of Wisdom", "WOW");
+    function test_initialize_GrantsWhitelistedSenderRoleToDeployer()
+        external
+        initializeNft
+    {
         assertTrue(
-            nftContract.hasRole(WHITELISTED_SENDER_ROLE, admin),
+            nft.hasRole(WHITELISTED_SENDER_ROLE, admin),
             "Whitelisted sender role not granted to deployer"
         );
     }
 
-    function test_initialize_SetsNextTokenIdToZero() external {
-        vm.prank(admin);
-        nftContract.initialize("Wealth of Wisdom", "WOW");
-        assertEq(
-            nftContract.getNextTokenId(),
-            0,
-            "Next token ID not set to zero"
+    function test_initialize_GrantsNftDataManagerRoleToDeployer()
+        external
+        initializeNft
+    {
+        assertTrue(
+            nft.hasRole(NFT_DATA_MANAGER_ROLE, admin),
+            "NFT data manager role not granted to deployer"
         );
     }
 
-    function test_initialize_RevertIf_ContractAlreadyInitialized() external {
-        vm.startPrank(admin);
-        nftContract.initialize("Wealth of Wisdom", "WOW");
+    function test_initialize_SetsVestingContractCorrectly()
+        external
+        initializeNft
+    {
+        assertEq(
+            address(nft.getVestingContract()),
+            address(vesting),
+            "Vesting contract should be set correctly"
+        );
+    }
+
+    function test_initialize_SetsLevel5SupplyCapCorrectly()
+        external
+        initializeNft
+    {
+        assertEq(
+            nft.getLevel5SupplyCap(),
+            LEVEL_5_SUPPLY_CAP,
+            "Level 5 supply cap should be set correctly"
+        );
+    }
+
+    function test_initialize_SetsPromotionalVestingPIDCorrectly()
+        external
+        initializeNft
+    {
+        assertEq(
+            nft.getPromotionalPID(),
+            DEFAULT_VESTING_PID,
+            "Promotional vesting PID should be set correctly"
+        );
+    }
+
+    function test_initialize_SetsMaxLevelCorrectly() external initializeNft {
+        assertEq(
+            nft.getMaxLevel(),
+            MAX_LEVEL,
+            "Max level should be set to 5 by default"
+        );
+    }
+
+    function test_initialize_SetsTotalProjectTypesCorrectly()
+        external
+        initializeNft
+    {
+        assertEq(
+            nft.getTotalProjectTypes(),
+            TOTAL_PROJECT_TYPES,
+            "Total project types should be set correctly"
+        );
+    }
+
+    function test_initialize_SetsNameCorrectly() external initializeNft {
+        assertEq(nft.name(), "Wealth of Wisdom", "Name not set correctly");
+    }
+
+    function test_initialize_SetsSymbolCorrectly() external initializeNft {
+        assertEq(nft.symbol(), "WOW", "Symbol not set correctly");
+    }
+
+    function test_initialize_SetsNextTokenIdToZero() external initializeNft {
+        assertEq(nft.getNextTokenId(), 0, "Next token ID not set to zero");
+    }
+
+    function test_initialize_RevertIf_ContractAlreadyInitialized()
+        external
+        initializeNft
+    {
         vm.expectRevert(Initializable.InvalidInitialization.selector);
-        nftContract.initialize("Wealth of Wisdom", "WOW");
-        vm.stopPrank();
+        vm.prank(admin);
+        nft.initialize(
+            "Wealth of Wisdom",
+            "WOW",
+            vesting,
+            LEVEL_5_SUPPLY_CAP,
+            DEFAULT_VESTING_PID,
+            MAX_LEVEL,
+            TOTAL_PROJECT_TYPES
+        );
     }
 
     function test_initialize_EmitInitializedEvent() external {
@@ -106,6 +247,14 @@ contract Nft_Initialize_Unit_Test is Nft_Unit_Test {
         emit Initialized(1);
 
         vm.prank(admin);
-        nftContract.initialize("Wealth of Wisdom", "WOW");
+        nft.initialize(
+            "Wealth of Wisdom",
+            "WOW",
+            vesting,
+            LEVEL_5_SUPPLY_CAP,
+            DEFAULT_VESTING_PID,
+            MAX_LEVEL,
+            TOTAL_PROJECT_TYPES
+        );
     }
 }
