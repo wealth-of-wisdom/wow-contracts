@@ -7,7 +7,7 @@
         "lifecycle_duration_in_months": 12,
         "extension_duration_in_months": 0,
         "allocation_per_project_in_usd": 1000,
-        "base_uri": "https://ipfs.io/ipfs/QmS4TkD3E2ZVhdLNZhWsKKwhBQTu2sMihJ9GBBSLxwgshK/",
+        "base_uri": "https://ipfs.io/ipfs/QmaqtBBoMzMdndvA1Cn6SPoMPPCdSNXFt6FsFYJRJAii24/",
         "standard_projects_quantity": 3,
         "premium_projects_quantity": 0,
         "limited_projects_quantity": 0
@@ -20,7 +20,7 @@
         "lifecycle_duration_in_months": 15,
         "extension_duration_in_months": 15,
         "allocation_per_project_in_usd": 10000,
-        "base_uri": "https://ipfs.io/ipfs/QmTd5bFzUspJXzfdjHyyn8fxBR9b6fjdpgihjar7pzmxRM/",
+        "base_uri": "https://ipfs.io/ipfs/QmXbvPgBtabe31ttosusVff4U1qy91L2yphqGtCf1bmENe/",
         "standard_projects_quantity": 4,
         "premium_projects_quantity": 1,
         "limited_projects_quantity": 0
@@ -33,7 +33,7 @@
         "lifecycle_duration_in_months": 24,
         "extension_duration_in_months": 18,
         "allocation_per_project_in_usd": 25000,
-        "base_uri": "https://ipfs.io/ipfs/Qmbq5jWuLvC7SP3LGuDNM1sbH4gmR41tW1nv1DBQVB9rXY/",
+        "base_uri": "https://ipfs.io/ipfs/QmeGrEfSE1FTvcR8cWEyXjHvR2TJYmbPNU12wG6KMpEAv3/",
         "standard_projects_quantity": 8,
         "premium_projects_quantity": 2,
         "limited_projects_quantity": 0
@@ -46,7 +46,7 @@
         "lifecycle_duration_in_months": 40,
         "extension_duration_in_months": -1,
         "allocation_per_project_in_usd": 100000,
-        "base_uri": "https://ipfs.io/ipfs/QmR1zcD9ptRnNLEjzoDRu5aXepMW6x9t38NvFkMpSeqHrW/",
+        "base_uri": "https://ipfs.io/ipfs/QmSjyAnJpkeKo8Vk8zvJQnrnJdj8F1EvaGv5QFhn9q4Xwh/",
         "standard_projects_quantity": -1,
         "premium_projects_quantity": -1,
         "limited_projects_quantity": -1
@@ -59,7 +59,7 @@
         "lifecycle_duration_in_months": -1,
         "extension_duration_in_months": 0,
         "allocation_per_project_in_usd": 500000,
-        "base_uri": "https://ipfs.io/ipfs/QmcPPfM2Yyg5JV7T9GFfrTxVT7MKNRDzry7ZNVippQVFxq/",
+        "base_uri": "https://ipfs.io/ipfs/QmXiD9N1QGSJLzX8yaHowwzzmJNzVnXACfaZcbJ8fffjqV/",
         "standard_projects_quantity": -1,
         "premium_projects_quantity": -1,
         "limited_projects_quantity": -1
