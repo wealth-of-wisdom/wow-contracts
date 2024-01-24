@@ -13,8 +13,10 @@ module.exports = {
         },
     },
     etherscan: {
-        apiKey: process.env.SEPOLIA_API_KEY,
-        mainnet: process.env.ETHEREUM_API_KEY,
+        apiKey: {
+            sepolia: process.env.SEPOLIA_API_KEY,
+            mainnet: process.env.ETHEREUM_API_KEY,
+        },
     },
     networks: {
         anvil: {
