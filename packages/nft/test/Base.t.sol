@@ -91,7 +91,6 @@ contract Base_Test is Test, Constants, Events {
             "Wealth of Wisdom",
             "WOW",
             vesting,
-            LEVEL_5_SUPPLY_CAP,
             DEFAULT_VESTING_PID,
             MAX_LEVEL,
             TOTAL_PROJECT_TYPES
@@ -107,6 +106,8 @@ contract Base_Test is Test, Constants, Events {
         vesting.grantRole(BENEFICIARIES_MANAGER_ROLE, address(nft));
 
         vm.stopPrank();
+
+        _setNftLevels();
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -160,6 +161,7 @@ contract Base_Test is Test, Constants, Events {
             LEVEL_1_LIFECYCLE_DURATION,
             LEVEL_1_EXTENSION_DURATION,
             LEVEL_1_ALLOCATION_PER_PROJECT,
+            LEVEL_1_SUPPLY_CAP,
             LEVEL_1_BASE_URI
         );
 
@@ -171,6 +173,7 @@ contract Base_Test is Test, Constants, Events {
             LEVEL_2_LIFECYCLE_DURATION,
             LEVEL_2_EXTENSION_DURATION,
             LEVEL_2_ALLOCATION_PER_PROJECT,
+            LEVEL_2_SUPPLY_CAP,
             LEVEL_2_BASE_URI
         );
 
@@ -182,6 +185,7 @@ contract Base_Test is Test, Constants, Events {
             LEVEL_3_LIFECYCLE_DURATION,
             LEVEL_3_EXTENSION_DURATION,
             LEVEL_3_ALLOCATION_PER_PROJECT,
+            LEVEL_3_SUPPLY_CAP,
             LEVEL_3_BASE_URI
         );
 
@@ -193,6 +197,7 @@ contract Base_Test is Test, Constants, Events {
             LEVEL_4_LIFECYCLE_DURATION,
             LEVEL_4_EXTENSION_DURATION,
             LEVEL_4_ALLOCATION_PER_PROJECT,
+            LEVEL_4_SUPPLY_CAP,
             LEVEL_4_BASE_URI
         );
 
@@ -204,6 +209,7 @@ contract Base_Test is Test, Constants, Events {
             LEVEL_5_LIFECYCLE_DURATION,
             LEVEL_5_EXTENSION_DURATION,
             LEVEL_5_ALLOCATION_PER_PROJECT,
+            LEVEL_5_SUPPLY_CAP,
             LEVEL_5_BASE_URI
         );
 
@@ -218,6 +224,7 @@ contract Base_Test is Test, Constants, Events {
             LEVEL_1_LIFECYCLE_DURATION,
             LEVEL_1_EXTENSION_DURATION,
             LEVEL_1_ALLOCATION_PER_PROJECT,
+            type(uint256).max, // supply cap is ignored for genesis NFTs
             LEVEL_1_GENESIS_BASE_URI
         );
 
@@ -229,6 +236,7 @@ contract Base_Test is Test, Constants, Events {
             LEVEL_2_LIFECYCLE_DURATION,
             LEVEL_2_EXTENSION_DURATION,
             LEVEL_2_ALLOCATION_PER_PROJECT,
+            type(uint256).max, // supply cap is ignored for genesis NFTs
             LEVEL_2_GENESIS_BASE_URI
         );
 
@@ -240,6 +248,7 @@ contract Base_Test is Test, Constants, Events {
             LEVEL_3_LIFECYCLE_DURATION,
             LEVEL_3_EXTENSION_DURATION,
             LEVEL_3_ALLOCATION_PER_PROJECT,
+            type(uint256).max, // supply cap is ignored for genesis NFTs
             LEVEL_3_GENESIS_BASE_URI
         );
 
@@ -251,6 +260,7 @@ contract Base_Test is Test, Constants, Events {
             LEVEL_4_LIFECYCLE_DURATION,
             LEVEL_4_EXTENSION_DURATION,
             LEVEL_4_ALLOCATION_PER_PROJECT,
+            type(uint256).max, // supply cap is ignored for genesis NFTs
             LEVEL_4_GENESIS_BASE_URI
         );
 
@@ -262,6 +272,7 @@ contract Base_Test is Test, Constants, Events {
             LEVEL_5_LIFECYCLE_DURATION,
             LEVEL_5_EXTENSION_DURATION,
             LEVEL_5_ALLOCATION_PER_PROJECT,
+            type(uint256).max, // supply cap is ignored for genesis NFTs
             LEVEL_5_GENESIS_BASE_URI
         );
 

@@ -33,7 +33,6 @@ contract Nft is
     bytes32 public constant NFT_DATA_MANAGER_ROLE =
         keccak256("NFT_DATA_MANAGER_ROLE");
     string private constant NFT_URI_SUFFIX = ".json";
-    uint16 private constant LEVEL_5 = 5;
 
     /*//////////////////////////////////////////////////////////////////////////
                                 INTERNAL STORAGE
@@ -49,7 +48,6 @@ contract Nft is
     mapping(bytes32 configHash => uint16 quantity) internal s_projectsPerNft;
 
     uint256 internal s_nextTokenId;
-    uint256 internal s_level5SupplyCap;
 
     IVesting internal s_vestingContract;
 
@@ -107,7 +105,6 @@ contract Nft is
         string memory name,
         string memory symbol,
         IVesting vestingContract,
-        uint256 level5SupplyCap,
         uint16 promotionalVestingPID,
         uint16 maxLevel,
         uint8 totalProjectTypes
@@ -138,7 +135,6 @@ contract Nft is
 
         // Effects: Set up storage
         s_vestingContract = vestingContract;
-        s_level5SupplyCap = level5SupplyCap;
         s_promotionalVestingPID = promotionalVestingPID;
         s_maxLevel = maxLevel;
         s_totalProjectTypes = totalProjectTypes;
@@ -168,7 +164,7 @@ contract Nft is
         uint256 nftAmount = nftLevel.nftAmount;
 
         // Checks: the amount of NFTs minted must not exceed the max supply
-        if (level == LEVEL_5 && !isGenesis && nftAmount >= s_level5SupplyCap) {
+        if (!isGenesis && nftAmount >= nftLevel.supplyCap) {
             revert Errors.Nft__SupplyCapReached(level, isGenesis, nftAmount);
         }
 
@@ -388,23 +384,6 @@ contract Nft is
         _setTokenURI(tokenId, _tokenURI);
     }
 
-    function setLevel5SupplyCap(
-        uint256 newCap
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        NftLevel storage nftLevel5 = s_nftLevels[_getLevelHash(LEVEL_5, false)];
-        uint256 nftAmount = nftLevel5.nftAmount;
-
-        // Checks: the amount of NFTs minted must not exceed the max supply
-        if (newCap < nftAmount) {
-            revert Errors.Nft__SupplyCapTooLow(newCap);
-        }
-
-        // Effects: set the new max supply
-        s_level5SupplyCap = newCap;
-
-        emit Level5SupplyCapSet(newCap);
-    }
-
     /**
      * @notice  Sets the new max level for NFTs
      * @param   maxLevel   new max level
@@ -470,6 +449,7 @@ contract Nft is
         uint256 lifecycleDuration,
         uint256 extensionDuration,
         uint256 allocationPerProject,
+        uint256 supplyCap,
         string calldata baseURI
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         // Checks: level must be valid
@@ -492,11 +472,17 @@ contract Nft is
             _getLevelHash(level, isGenesis)
         ];
 
+        // Checks: the amount of NFTs minted must not exceed the max supply
+        if (supplyCap < nftLevel.nftAmount) {
+            revert Errors.Nft__SupplyCapTooLow(supplyCap);
+        }
+
         nftLevel.price = price;
         nftLevel.vestingRewardWOWTokens = vestingRewards;
         nftLevel.lifecycleDuration = lifecycleDuration;
         nftLevel.extensionDuration = extensionDuration;
         nftLevel.allocationPerProject = allocationPerProject;
+        nftLevel.supplyCap = supplyCap;
         nftLevel.baseURI = baseURI;
 
         /// @dev nftAmount should not be set here, because it is incremented when minting
@@ -509,6 +495,7 @@ contract Nft is
             lifecycleDuration,
             extensionDuration,
             allocationPerProject,
+            supplyCap,
             baseURI
         );
     }
@@ -628,14 +615,6 @@ contract Nft is
      */
     function getNextTokenId() external view returns (uint256) {
         return s_nextTokenId;
-    }
-
-    /**
-     * @notice  Returns the supply cap for level 5
-     * @return  uint256 maximum tokens that can be minted for level 5
-     */
-    function getLevel5SupplyCap() external view returns (uint256) {
-        return s_level5SupplyCap;
     }
 
     /**

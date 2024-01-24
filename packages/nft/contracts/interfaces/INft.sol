@@ -34,8 +34,6 @@ interface INftEvents {
         uint256 extendedActivityEndTimestamp
     );
 
-    event Level5SupplyCapSet(uint256 newSupplyCap);
-
     event MaxLevelSet(uint16 newMaxLevel);
 
     event TotalProjectTypesSet(uint8 newCount);
@@ -52,6 +50,7 @@ interface INftEvents {
         uint256 lifecycleDuration,
         uint256 extensionDuration,
         uint256 allocationPerProject,
+        uint256 supplyCap,
         string baseURI
     );
 
@@ -93,6 +92,7 @@ interface INft is INftEvents {
         uint256 extensionDuration; // Duration of the lifecycle extension (in seconds)
         uint256 allocationPerProject; // Allocation per project (in USDC/USDT Tokens) for this NFT level
         uint256 nftAmount; // Amount of main/genesis NFTs that have been minted with this level
+        uint256 supplyCap; // Supply cap for this level NFT
         string baseURI; // Base URI for this level NFT
     }
 
@@ -104,7 +104,6 @@ interface INft is INftEvents {
         string memory name,
         string memory symbol,
         IVesting vestingContract,
-        uint256 level5MaxSupply,
         uint16 promotionalVestingPID,
         uint16 maxLevel,
         uint8 totalProjectTypes
@@ -135,7 +134,7 @@ interface INft is INftEvents {
         uint16 newLevel
     ) external;
 
-    function setLevel5SupplyCap(uint256 newCap) external;
+    function setTokenURI(uint256 tokenId, string memory _tokenURI) external;
 
     function setMaxLevel(uint16 maxLevel) external;
 
@@ -151,6 +150,7 @@ interface INft is INftEvents {
         uint256 lifecycleDuration,
         uint256 extensionDuration,
         uint256 allocationPerProject,
+        uint256 supplyCap,
         string calldata baseURI
     ) external;
 
@@ -183,8 +183,6 @@ interface INft is INftEvents {
     ) external view returns (uint16);
 
     function getNextTokenId() external view returns (uint256);
-
-    function getLevel5SupplyCap() external view returns (uint256);
 
     function getMaxLevel() external view returns (uint16);
 

@@ -42,9 +42,9 @@ contract Nft_SafeMint_Unit_Test is Unit_Test {
         nft.safeMint(alice, level, false);
     }
 
-    function test_safeMint_RevertIf_LevelIs5AndSupplyCapIsReached() external {
+    function test_safeMint_RevertIf_SupplyCapIsReached() external {
         // Simulate: 20 tokens minted
-        nft.mock_setNftAmount(LEVEL_5, false, 20);
+        nft.mock_setNftAmount(LEVEL_5, false, LEVEL_5_SUPPLY_CAP);
 
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -168,7 +168,7 @@ contract Nft_SafeMint_Unit_Test is Unit_Test {
         assertEq(nft.getLevelData(LEVEL_5, true).nftAmount, 2, "Wrong amount");
     }
 
-    function test_safeMint_SetsTokenURI() external setNftLevels {
+    function test_safeMint_SetsTokenURI() external {
         vm.prank(admin);
         nft.safeMint(alice, LEVEL_1, false);
 
@@ -182,7 +182,6 @@ contract Nft_SafeMint_Unit_Test is Unit_Test {
 
     function test_safeMint_SetsTokenURIForAllLevels()
         external
-        setNftLevels
         mintEachLevelNft
     {
         string memory expectedURI;
