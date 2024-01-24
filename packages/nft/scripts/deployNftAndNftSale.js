@@ -78,7 +78,7 @@ async function main() {
     //////////////////////////////////////////////////////////////////////////*/
 
     const USD_DECIMALS = 6
-    const SECONDS_IN_YEAR = 12 * 30 * 24 * 60 * 60
+    const SECONDS_IN_YEAR = 12 * SECONDS_IN_MONTH
     const SECONDS_IN_MONTH = 30 * 24 * 60 * 60
     const MAX_UINT16 = 65535
     const MAX_UINT256 = ethers.MaxUint256
