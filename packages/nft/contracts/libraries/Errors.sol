@@ -18,6 +18,8 @@ library Errors {
     error Nft__ZeroAmount();
     error Nft__ZeroAddress();
     error Nft__AlreadyActivated();
+    error Nft__GenesisNftNotUpdatable();
+    error Nft__ReceiverNotOwner();
 
     /*//////////////////////////////////////////////////////////////////////////
                                     NFT SALE

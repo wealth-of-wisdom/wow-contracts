@@ -160,6 +160,15 @@ abstract contract Constants {
     string internal constant LEVEL_3_BASE_URI = "ipfs://level3BaseUri/";
     string internal constant LEVEL_4_BASE_URI = "ipfs://level4BaseUri/";
     string internal constant LEVEL_5_BASE_URI = "ipfs://level5BaseUri/";
+
+    string[] internal BASE_URIS = [
+        LEVEL_1_BASE_URI,
+        LEVEL_2_BASE_URI,
+        LEVEL_3_BASE_URI,
+        LEVEL_4_BASE_URI,
+        LEVEL_5_BASE_URI
+    ];
+
     string internal constant LEVEL_1_GENESIS_BASE_URI =
         "ipfs://level1GenesisUri/";
     string internal constant LEVEL_2_GENESIS_BASE_URI =
@@ -170,4 +179,12 @@ abstract contract Constants {
         "ipfs://level4GenesisUri/";
     string internal constant LEVEL_5_GENESIS_BASE_URI =
         "ipfs://level5GenesisUri/";
+
+    string[] internal GENESIS_BASE_URIS = [
+        LEVEL_1_GENESIS_BASE_URI,
+        LEVEL_2_GENESIS_BASE_URI,
+        LEVEL_3_GENESIS_BASE_URI,
+        LEVEL_4_GENESIS_BASE_URI,
+        LEVEL_5_GENESIS_BASE_URI
+    ];
 }
