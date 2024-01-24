@@ -44,7 +44,7 @@ contract Nft_ActivateNftData_Unit_Test is Unit_Test, IVestingEvents {
         assertEq(nftData.level, LEVEL_2, "Level data changed");
         assertEq(
             uint8(nftData.activityType),
-            uint8(NFT_ACTIVITY_TYPE_ACTIVATION_TRIGGERED),
+            uint8(NFT_ACTIVATION_TRIGGERED),
             "NftData was not activated"
         );
     }

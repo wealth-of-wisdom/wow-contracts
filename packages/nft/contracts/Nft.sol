@@ -513,11 +513,7 @@ contract Nft is
         bool isGenesis,
         uint8 project,
         uint16 quantity
-    )
-        public
-        onlyRole(DEFAULT_ADMIN_ROLE)
-        mValidLevel(level)
-    {
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) mValidLevel(level) {
         // Checks: project must not overflow the total project types count
         if (project >= s_totalProjectTypes) {
             revert Errors.Nft__InvalidProjectType(project);
