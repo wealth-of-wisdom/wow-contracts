@@ -33,6 +33,11 @@ interface IStaking is IStakingEvents {
     /*//////////////////////////////////////////////////////////////////////////
                                        STRUCTS
     //////////////////////////////////////////////////////////////////////////*/
+    struct StakerPoolAmountData {
+        uint16 stakedPoolAmount;
+        mapping(uint256 stakedPoolAmount => StakerPoolData) stakers;
+    }
+
     struct StakerPoolData {
         StakingTypes stakingType;
         uint256 amountStaked;
@@ -59,8 +64,7 @@ interface IStaking is IStakingEvents {
         uint256[] bandAllocationPercentage; // in 10**6, itterate as 0 = 9lvl, 1 = 8lvl...
         uint256 totalUsdtPoolTokenAmount;
         uint256 totalUsdcPoolTokenAmount;
-        // Hash = keccak256(staker + stakeId)
-        mapping(bytes32 configHash => StakerPoolData) stakers;
+        mapping(address stakerAddress => StakerPoolAmountData) stakedPoolAmountData;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
