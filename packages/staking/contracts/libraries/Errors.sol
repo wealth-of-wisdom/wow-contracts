@@ -1,0 +1,11 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.20;
+
+library Errors {
+    /*//////////////////////////////////////////////////////////////////////////
+                                    STAKING
+    //////////////////////////////////////////////////////////////////////////*/
+
+    error Staking__ZeroAddress();
+    error Staking__ZeroAmount();
+}
