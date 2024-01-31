@@ -43,6 +43,8 @@ interface IStaking is IStakingEvents {
 
     struct StakerPoolData {
         StakingTypes stakingType;
+        uint256 stakingStartTimestamp;
+        uint256 stakingTimespan;
         uint256 amountStaked;
         uint256 usdtRewardsClaimed;
         uint256 usdcRewardsClaimed;
