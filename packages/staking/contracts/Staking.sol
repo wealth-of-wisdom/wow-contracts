@@ -43,8 +43,8 @@ contract StakingManager is
                                 INTERNAL STORAGE
     //////////////////////////////////////////////////////////////////////////*/
 
-    EnumerableMap.UintToAddressMap private myMap;
-    mapping(bytes32 hashedStakerAndBandLevel => uint256 lastestId) stakerBandId;
+    //mapping(bytes32 hashedStakerAndBandLevel => uint256 lastestId) stakerBandId;
+    EnumerableMap.Bytes32ToUintMap private stakerBandId;
 
     mapping(address poolId => Pool) internal s_poolData; // Pool data
     mapping(address bandId => Band) internal s_bandData; // Band data
