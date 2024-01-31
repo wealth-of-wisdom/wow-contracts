@@ -4,6 +4,7 @@ pragma solidity ^0.8.4;
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {EnumerableMap} from "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
@@ -20,6 +21,7 @@ contract StakingManager is
     //////////////////////////////////////////////////////////////////////////*/
 
     using SafeERC20 for IERC20; // Wrappers around ERC20 operations that throw on failure
+    using EnumerableMap for EnumerableMap.UintToAddressMap;
 
     /*//////////////////////////////////////////////////////////////////////////
                                 PUBLIC CONSTANTS
@@ -40,6 +42,9 @@ contract StakingManager is
     /*//////////////////////////////////////////////////////////////////////////
                                 INTERNAL STORAGE
     //////////////////////////////////////////////////////////////////////////*/
+
+    EnumerableMap.UintToAddressMap private myMap;
+    mapping(bytes32 hashedStakerAndBandLevel => uint256 lastestId) stakerBandId;
 
     mapping(address poolId => Pool) internal s_poolData; // Pool data
     mapping(address bandId => Band) internal s_bandData; // Band data
@@ -210,9 +215,9 @@ contract StakingManager is
 
     function _getStakingHash(
         address staker,
-        uint16 stakeId
+        uint16 bandLevel
     ) internal pure returns (bytes32) {
-        return keccak256(abi.encode(staker, stakeId));
+        return keccak256(abi.encode(staker, bandLevel));
     }
 
     /*//////////////////////////////////////////////////////////////////////////

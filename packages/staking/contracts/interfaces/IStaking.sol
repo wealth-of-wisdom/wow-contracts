@@ -33,9 +33,12 @@ interface IStaking is IStakingEvents {
     /*//////////////////////////////////////////////////////////////////////////
                                        STRUCTS
     //////////////////////////////////////////////////////////////////////////*/
-    struct StakerPoolAmountData {
-        uint16 stakedPoolAmount;
-        mapping(uint256 stakedPoolAmount => StakerPoolData) stakers;
+
+    struct FundDistribution {
+        IERC20 token;
+        uint256 amount;
+        uint256 distributionPeriodStart;
+        uint256 distributionPeriodEnd;
     }
 
     struct StakerPoolData {
@@ -45,26 +48,18 @@ interface IStaking is IStakingEvents {
         uint256 usdcRewardsClaimed;
         //additional data TBD
     }
-
     struct Band {
         uint256 price;
-        uint256[] accessiblePools;
-    }
-
-    struct FundDistribution {
-        IERC20 token;
-        uint256 amount;
-        uint256 distributionPeriodStart;
-        uint256 distributionPeriodEnd;
+        uint256[] accessiblePools; //1-9
     }
 
     struct Pool {
         string name;
         uint256 distributionPercentage; // in 10**6 integrals, for divident calculation
-        uint256[] bandAllocationPercentage; // in 10**6, itterate as 0 = 9lvl, 1 = 8lvl...
+        uint256[] bandAllocationPercentage; // in 10**6, itterate as 0 = 1lvl, 1 = 2lvl...
         uint256 totalUsdtPoolTokenAmount;
         uint256 totalUsdcPoolTokenAmount;
-        mapping(address stakerAddress => StakerPoolAmountData) stakedPoolAmountData;
+        mapping(bytes32 hashedStakerAndBandId => StakerPoolData) stakedPoolData;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
