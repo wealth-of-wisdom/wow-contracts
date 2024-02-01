@@ -45,7 +45,7 @@ contract StakingManager is
 
     // Enumerable mapping equivalent:
     // mapping(bytes32 hashedStakerAndBandLevel => uint256 lastestId)
-    EnumerableMap.Bytes32ToUintMap internal s_stakerBandId;
+    mapping(bytes32 stakerAndBandLevel => uint256 stakerIds) internal s_stakerBandId;
     mapping(bytes32 stakerAndBandLevel => EnumerableMap.Bytes32ToUintMap)
         internal s_stakerBandState;
 
