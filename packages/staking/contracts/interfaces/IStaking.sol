@@ -20,6 +20,9 @@ interface IStakingEvents {
         uint256 amount
     );
     event PoolCreated(uint256 poolId);
+    event SetBandData(uint16 bandId, uint256 price, uint256[] accessiblePools);
+    event SetTotalBandAmount(uint16 newTotalBandsAmount);
+    event SetTotalPoolAmount(uint16 newTotalPoolAmount);
 }
 
 interface IStaking is IStakingEvents {
@@ -57,8 +60,8 @@ interface IStaking is IStakingEvents {
 
     struct Pool {
         string name;
-        uint256 distributionPercentage; // in 10**6 integrals, for divident calculation
-        uint256[] bandAllocationPercentage; // in 10**6, itterate as 0 = 1lvl, 1 = 2lvl...
+        uint24 distributionPercentage; // in 10**6 integrals, for divident calculation
+        uint24[] bandAllocationPercentage; // in 10**6, itterate as 0 = 9lvl, 1 = 8lvl...
         uint256 totalUsdtPoolTokenAmount;
         uint256 totalUsdcPoolTokenAmount;
         mapping(bytes32 hashedStakerAndBandId => StakerPoolData) stakedPoolData;
@@ -79,4 +82,14 @@ interface IStaking is IStakingEvents {
     //     address beneficiary,
     //     uint256 stakedAmount
     // ) external;
+
+    function setBandData(
+        uint16 bandId,
+        uint256 price,
+        uint256[] memory accessiblePools
+    ) external;
+
+    function setTotalBandAmount(uint16 newTotalBandsAmount) external;
+
+    function setTotalPoolAmount(uint16 newTotalPoolAmount) external;
 }

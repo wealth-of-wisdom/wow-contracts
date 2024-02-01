@@ -21,10 +21,10 @@ contract StakingManager is
     //////////////////////////////////////////////////////////////////////////*/
 
     using SafeERC20 for IERC20; // Wrappers around ERC20 operations that throw on failure
-    using EnumerableMap for EnumerableMap.UintToAddressMap;
+    using EnumerableMap for EnumerableMap.UintToUintMap;
 
     /*//////////////////////////////////////////////////////////////////////////
-                                PUBLIC CONSTANTS
+                                PRIVATE CONSTANTS
     //////////////////////////////////////////////////////////////////////////*/
 
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
@@ -50,8 +50,8 @@ contract StakingManager is
         internal s_stakerBandState;
     mapping(bytes32 stakerAndBandLevel => uint256 bandId) internal s_nextBandId;
 
-    mapping(address poolId => Pool) internal s_poolData; // Pool data
-    mapping(address bandId => Band) internal s_bandData; // Band data
+    mapping(uint16 poolId => Pool) internal s_poolData; // Pool data
+    mapping(uint16 bandId => Band) internal s_bandData; // Band data
     FundDistribution[] internal s_fundDistributionData; // Any added funds data
 
     uint256[] shares; // in 10**6 integrals, for divident calculation
@@ -117,17 +117,62 @@ contract StakingManager is
         s_totalBands = totalBands;
     }
 
-    //NOTE: staking function base
-    // function createPool(
-    //     IERC20 _stakeToken
-    // ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-    //     Pool memory pool;
-    //     pool.stakeToken = _stakeToken;
-    //     pools.push(pool);
-    //     uint256 poolId = pools.length - 1;
-    //     emit PoolCreated(poolId);
-    // }
+    /**
+     * @notice  Sets data of the selected band
+     * @param   bandId  band identification number
+     * @param   price  band purchase price
+     * @param   accessiblePools  list of pools that become
+     *          accessible after band purchase
+     */
+    function setBandData(
+        uint16 bandId,
+        uint256 price,
+        uint256[] memory accessiblePools
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) mAmountNotZero(price) {
+        // Checks: bandId must be in range
+        if (bandId > s_totalBands) {
+            revert Errors.Staking__InvalidBandId(bandId);
+        }
 
+        // Checks: amount must be in pool bounds
+        if (accessiblePools.length > s_totalPools)
+            revert Errors.Staking__MaximumLevelExceeded();
+
+        // Effects: set band storage
+        s_bandData[bandId] = Band({
+            price: price,
+            accessiblePools: accessiblePools
+        });
+        emit SetBandData(bandId, price, accessiblePools);
+    }
+
+    /**
+     * @notice  Sets new total amount of bands used for staking
+     * @param   newTotalBandsAmount  total amount of bands used for staking
+     */
+    function setTotalBandAmount(
+        uint16 newTotalBandsAmount
+    )
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        mAmountNotZero(newTotalBandsAmount)
+    {
+        s_totalBands = newTotalBandsAmount;
+        emit SetTotalBandAmount(newTotalBandsAmount);
+    }
+
+    /**
+     * @notice  Sets new total amount of pools used for staking
+     * @param   newTotalPoolAmount  total amount of pools used for staking
+     */
+    function setTotalPoolAmount(
+        uint16 newTotalPoolAmount
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) mAmountNotZero(newTotalPoolAmount) {
+        s_totalPools = newTotalPoolAmount;
+        emit SetTotalPoolAmount(newTotalPoolAmount);
+    }
+
+    // NOTE: staking function base
     // function addStakerToPoolIfInexistent(
     //     uint256 _poolId,
     //     address depositingStaker

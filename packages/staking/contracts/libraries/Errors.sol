@@ -6,6 +6,8 @@ library Errors {
                                     STAKING
     //////////////////////////////////////////////////////////////////////////*/
 
-    error Staking__ZeroAddress();
+    error Staking__InvalidBandId(uint16 bandId);
+    error Staking__MaximumLevelExceeded();
     error Staking__ZeroAmount();
+    error Staking__ZeroAddress();
 }
