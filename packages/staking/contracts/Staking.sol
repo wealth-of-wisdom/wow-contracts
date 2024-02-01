@@ -153,36 +153,6 @@ contract StakingManager is
             );
         }
 
-        // Checks: the amount of bands should be correct
-        // For pool id 1 there should be 9 bands, for pool id 2 there should be 8 bands, etc.
-        if (bandAllocationPercentage.length != s_totalPools - poolId + 1) {
-            revert Errors.Staking__InvalidBandsAmount();
-        }
-
-        // Only type cast after the length check to not overflow when casting
-        uint16 bandsAmount = uint16(bandAllocationPercentage.length);
-
-        // @question Should we check if the total band allocation percentage does not exceed 100%?
-        // @question Or we will just assume that the admin will not do that?
-        uint24 totalPercentage;
-        for (uint16 i; i < bandsAmount; i++) {
-            uint24 percentage = bandAllocationPercentage[i];
-
-            // Checks: band allocation percentage should not exceed 100%
-            if (percentage > PERCENTAGE_PRECISION) {
-                revert Errors.Staking__BandAllocationExceedsMaximum(percentage);
-            }
-
-            totalPercentage += percentage;
-        }
-
-        // Checks: total band allocation percentage should not exceed 100%
-        if (totalPercentage != PERCENTAGE_PRECISION) {
-            revert Errors.Staking__TotalAllocationExceedsMaximum(
-                totalPercentage
-            );
-        }
-
         // Effects: set the storage
         Pool storage pool = s_poolData[poolId];
         pool.name = name;
