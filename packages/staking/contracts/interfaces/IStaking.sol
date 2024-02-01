@@ -8,7 +8,7 @@ interface IStakingEvents {
                                        EVENTS
     //////////////////////////////////////////////////////////////////////////*/
 
-    event PoolSet(uint256 indexed poolId, string name);
+    event PoolSet(uint16 indexed poolId, string name);
 
     event BandDataSet(uint16 bandId, uint256 price, uint16[] accessiblePools);
 
