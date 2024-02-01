@@ -163,17 +163,62 @@ contract StakingManager is
         emit PoolSet(poolId, name);
     }
 
-    //NOTE: staking function base
-    // function createPool(
-    //     IERC20 _stakeToken
-    // ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-    //     Pool memory pool;
-    //     pool.stakeToken = _stakeToken;
-    //     pools.push(pool);
-    //     uint256 poolId = pools.length - 1;
-    //     emit PoolCreated(poolId);
-    // }
+    /**
+     * @notice  Sets data of the selected band
+     * @param   bandId  band identification number
+     * @param   price  band purchase price
+     * @param   accessiblePools  list of pools that become
+     *          accessible after band purchase
+     */
+    function setBand(
+        uint16 bandId,
+        uint256 price,
+        uint16[] memory accessiblePools
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) mAmountNotZero(price) {
+        // Checks: bandId must be in range
+        if (bandId == 0 || bandId > s_totalBands) {
+            revert Errors.Staking__InvalidBandId(bandId);
+        }
 
+        // Checks: amount must be in pool bounds
+        if (accessiblePools.length > s_totalPools)
+            revert Errors.Staking__MaximumLevelExceeded();
+
+        // Effects: set band storage
+        s_bandData[bandId] = Band({
+            price: price,
+            accessiblePools: accessiblePools
+        });
+        emit BandDataSet(bandId, price, accessiblePools);
+    }
+
+    /**
+     * @notice  Sets new total amount of bands used for staking
+     * @param   newTotalBandsAmount  total amount of bands used for staking
+     */
+    function setTotalBandAmount(
+        uint16 newTotalBandsAmount
+    )
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        mAmountNotZero(newTotalBandsAmount)
+    {
+        s_totalBands = newTotalBandsAmount;
+        emit TotalBandAmountSet(newTotalBandsAmount);
+    }
+
+    /**
+     * @notice  Sets new total amount of pools used for staking
+     * @param   newTotalPoolAmount  total amount of pools used for staking
+     */
+    function setTotalPoolAmount(
+        uint16 newTotalPoolAmount
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) mAmountNotZero(newTotalPoolAmount) {
+        s_totalPools = newTotalPoolAmount;
+        emit TotalPoolAmountSet(newTotalPoolAmount);
+    }
+
+    // NOTE: staking function base
     // function addStakerToPoolIfInexistent(
     //     uint256 _poolId,
     //     address depositingStaker

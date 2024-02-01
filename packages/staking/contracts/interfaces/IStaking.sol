@@ -8,21 +8,13 @@ interface IStakingEvents {
                                        EVENTS
     //////////////////////////////////////////////////////////////////////////*/
 
-    event PoolSet(uint256 indexed poolId, string name);
+    event PoolSet(uint16 indexed poolId, string name);
 
-    event Deposit(address indexed user, uint256 indexed poolId, uint256 amount);
+    event BandDataSet(uint16 bandId, uint256 price, uint16[] accessiblePools);
 
-    event Withdraw(
-        address indexed user,
-        uint256 indexed poolId,
-        uint256 amount
-    );
+    event TotalBandAmountSet(uint16 newTotalBandsAmount);
 
-    event HarvestRewards(
-        address indexed user,
-        uint256 indexed poolId,
-        uint256 amount
-    );
+    event TotalPoolAmountSet(uint16 newTotalPoolAmount);
 }
 
 interface IStaking is IStakingEvents {
@@ -55,7 +47,7 @@ interface IStaking is IStakingEvents {
     }
     struct Band {
         uint256 price;
-        uint256[] accessiblePools; //1-9
+        uint16[] accessiblePools; //1-9
     }
 
     struct Pool {
@@ -89,4 +81,14 @@ interface IStaking is IStakingEvents {
     //     address beneficiary,
     //     uint256 stakedAmount
     // ) external;
+
+    function setBand(
+        uint16 bandId,
+        uint256 price,
+        uint16[] memory accessiblePools
+    ) external;
+
+    function setTotalBandAmount(uint16 newTotalBandsAmount) external;
+
+    function setTotalPoolAmount(uint16 newTotalPoolAmount) external;
 }
