@@ -27,9 +27,10 @@ contract StakingManager is
                                 PRIVATE CONSTANTS
     //////////////////////////////////////////////////////////////////////////*/
 
-    bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
-    uint128 public constant DECIMALS = 10 ** 6;
-    uint128 public constant MONTH = 30 days;
+    bytes32 private constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+    uint128 private constant DECIMALS = 10 ** 6;
+    uint128 private constant MONTH = 30 days;
+    uint24 private constant PERCENTAGE_PRECISION = 10 ** 6; // 100% = 10**6
 
     /*//////////////////////////////////////////////////////////////////////////
                                 PUBLIC STORAGE
@@ -43,11 +44,14 @@ contract StakingManager is
                                 INTERNAL STORAGE
     //////////////////////////////////////////////////////////////////////////*/
 
-    // @Enumerable mapping equivalent:
-    // mapping(bytes32 hashedStakerAndBandLevel => uint256 lastestId)
-    // @returns 0 or 1 as true or false values to determine staker band state
-    mapping(bytes32 stakerAndBandLevel => EnumerableMap.Bytes32ToUintMap)
+    // Enumerable mapping equivalent to:
+    // mapping(uint256 bandId => uint256 bandState)
+    // With normal mapping it would look like this:
+    // mapping(bytes32 stakerAndBandLevel => mapping(uint256 bandId => uint256 bandState)
+    // Returns 1 or 0 as true or false values to determine whether the band exists
+    mapping(bytes32 stakerAndBandLevel => EnumerableMap.UintToUintMap)
         internal s_stakerBandState;
+
     mapping(bytes32 stakerAndBandLevel => uint256 bandId) internal s_nextBandId;
 
     mapping(uint16 poolId => Pool) internal s_poolData; // Pool data
@@ -117,14 +121,55 @@ contract StakingManager is
         s_totalBands = totalBands;
     }
 
+    /*//////////////////////////////////////////////////////////////////////////
+                        EXTERNAL FUNCTIONS FOR DEFAULT ADMIN
+    //////////////////////////////////////////////////////////////////////////*/
+
     /**
+     * @notice Set data for a pool which will be used for rewards distribution
+     * @notice There can be only one pool with the same id
+     * @notice When called for the first time, the pool will be created
+     * @notice When called for the second time, the pool data will be overwritten
+     * @param poolId Id of the pool (1-9)
+     * @param name Name of the pool (e.g. "Pool 1")
+     * @param distributionPercentage Percentage of the total rewards to be distributed to this pool
+     * @param bandAllocationPercentage Percentage of the pool to be distributed to each band
+     */
+    function setPool(
+        uint16 poolId,
+        string memory name,
+        uint24 distributionPercentage,
+        uint24[] memory bandAllocationPercentage
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        // Checks: poolId must be in range
+        if (poolId == 0 || poolId > s_totalPools) {
+            revert Errors.Staking__InvalidPoolId(poolId);
+        }
+
+        // Checks: distribution percentage should not exceed 100%
+        if (distributionPercentage > PERCENTAGE_PRECISION) {
+            revert Errors.Staking__InvalidDistributionPercentage(
+                distributionPercentage
+            );
+        }
+
+        // Effects: set the storage
+        Pool storage pool = s_poolData[poolId];
+        pool.name = name;
+        pool.distributionPercentage = distributionPercentage;
+        pool.bandAllocationPercentage = bandAllocationPercentage;
+
+        // Effects: emit event
+        emit PoolSet(poolId, name);
+    }
+   /**
      * @notice  Sets data of the selected band
      * @param   bandId  band identification number
      * @param   price  band purchase price
      * @param   accessiblePools  list of pools that become
      *          accessible after band purchase
      */
-    function setBandData(
+    function setBand(
         uint16 bandId,
         uint256 price,
         uint256[] memory accessiblePools
@@ -171,7 +216,7 @@ contract StakingManager is
         s_totalPools = newTotalPoolAmount;
         emit SetTotalPoolAmount(newTotalPoolAmount);
     }
-
+    
     // NOTE: staking function base
     // function addStakerToPoolIfInexistent(
     //     uint256 _poolId,

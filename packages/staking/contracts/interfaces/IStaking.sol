@@ -8,20 +8,28 @@ interface IStakingEvents {
                                        EVENTS
     //////////////////////////////////////////////////////////////////////////*/
 
+    event PoolSet(uint256 indexed poolId, string name);
+
     event Deposit(address indexed user, uint256 indexed poolId, uint256 amount);
+
     event Withdraw(
         address indexed user,
         uint256 indexed poolId,
         uint256 amount
     );
+
     event HarvestRewards(
         address indexed user,
         uint256 indexed poolId,
         uint256 amount
     );
+   
     event PoolCreated(uint256 poolId);
+   
     event SetBandData(uint16 bandId, uint256 price, uint256[] accessiblePools);
+   
     event SetTotalBandAmount(uint16 newTotalBandsAmount);
+   
     event SetTotalPoolAmount(uint16 newTotalPoolAmount);
 }
 
@@ -61,7 +69,7 @@ interface IStaking is IStakingEvents {
     struct Pool {
         string name;
         uint24 distributionPercentage; // in 10**6 integrals, for divident calculation
-        uint24[] bandAllocationPercentage; // in 10**6, itterate as 0 = 9lvl, 1 = 8lvl...
+        uint24[] bandAllocationPercentage; // in 10**6, start from the last level: 0 = 9lvl, 1 = 8lvl...
         uint256 totalUsdtPoolTokenAmount;
         uint256 totalUsdcPoolTokenAmount;
         mapping(bytes32 hashedStakerAndBandId => StakerPoolData) stakedPoolData;
@@ -70,6 +78,13 @@ interface IStaking is IStakingEvents {
     /*//////////////////////////////////////////////////////////////////////////
                                        FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
+
+    function setPool(
+        uint16 poolId,
+        string memory name,
+        uint24 distributionPercentage,
+        uint24[] memory bandAllocationPercentage
+    ) external;
 
     // /**
     //  * @notice Stops staking of vested tokens for a beneficiary in a pool
