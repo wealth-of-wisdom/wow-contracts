@@ -21,15 +21,16 @@ contract StakingManager is
     //////////////////////////////////////////////////////////////////////////*/
 
     using SafeERC20 for IERC20; // Wrappers around ERC20 operations that throw on failure
-    using EnumerableMap for EnumerableMap.UintToAddressMap;
+    using EnumerableMap for EnumerableMap.UintToUintMap;
 
     /*//////////////////////////////////////////////////////////////////////////
-                                PUBLIC CONSTANTS
+                                PRIVATE CONSTANTS
     //////////////////////////////////////////////////////////////////////////*/
 
-    bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
-    uint128 public constant DECIMALS = 10 ** 6;
-    uint128 public constant MONTH = 30 days;
+    bytes32 private constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+    uint128 private constant DECIMALS = 10 ** 6;
+    uint128 private constant MONTH = 30 days;
+    uint24 private constant PERCENTAGE_PRECISION = 10 ** 6; // 100% = 10**6
 
     /*//////////////////////////////////////////////////////////////////////////
                                 PUBLIC STORAGE
@@ -43,15 +44,18 @@ contract StakingManager is
                                 INTERNAL STORAGE
     //////////////////////////////////////////////////////////////////////////*/
 
-    // @Enumerable mapping equivalent:
-    // mapping(bytes32 hashedStakerAndBandLevel => uint256 lastestId)
-    // @returns 0 or 1 as true or false values to determine staker band state
-    mapping(bytes32 stakerAndBandLevel => EnumerableMap.Bytes32ToUintMap)
+    // Enumerable mapping equivalent to:
+    // mapping(uint256 bandId => uint256 bandState)
+    // With normal mapping it would look like this:
+    // mapping(bytes32 stakerAndBandLevel => mapping(uint256 bandId => uint256 bandState)
+    // Returns 1 or 0 as true or false values to determine whether the band exists
+    mapping(bytes32 stakerAndBandLevel => EnumerableMap.UintToUintMap)
         internal s_stakerBandState;
+
     mapping(bytes32 stakerAndBandLevel => uint256 bandId) internal s_nextBandId;
 
-    mapping(address poolId => Pool) internal s_poolData; // Pool data
-    mapping(address bandId => Band) internal s_bandData; // Band data
+    mapping(uint16 poolId => Pool) internal s_poolData; // Pool data
+    mapping(uint16 bandId => Band) internal s_bandData; // Band data
     FundDistribution[] internal s_fundDistributionData; // Any added funds data
 
     uint256[] shares; // in 10**6 integrals, for divident calculation
@@ -115,6 +119,68 @@ contract StakingManager is
 
         s_totalPools = totalPools;
         s_totalBands = totalBands;
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                        EXTERNAL FUNCTIONS FOR DEFAULT ADMIN
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function setPool(
+        uint16 poolId,
+        string memory name,
+        uint24 distributionPercentage,
+        uint24[] memory bandAllocationPercentage
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        // Checks: poolId must be in range
+        if (poolId == 0 || poolId > s_totalPools) {
+            revert Errors.Staking__InvalidPoolId(poolId);
+        }
+
+        // Checks: distribution percentage should not exceed 100%
+        if (distributionPercentage > PERCENTAGE_PRECISION) {
+            revert Errors.Staking__InvalidDistributionPercentage(
+                distributionPercentage
+            );
+        }
+
+        // Checks: the amount of bands should be correct
+        // For pool id 1 there should be 9 bands, for pool id 2 there should be 8 bands, etc.
+        if (bandAllocationPercentage.length != s_totalPools - poolId + 1) {
+            revert Errors.Staking__InvalidBandsAmount();
+        }
+
+        // Only type cast after the length check to not overflow when casting
+        uint16 bandsAmount = uint16(bandAllocationPercentage.length);
+
+        // @question Should we check if the total band allocation percentage does not exceed 100%?
+        // @question Or we will just assume that the admin will not do that?
+        uint24 totalPercentage;
+        for (uint16 i; i < bandsAmount; i++) {
+            uint24 percentage = bandAllocationPercentage[i];
+
+            // Checks: band allocation percentage should not exceed 100%
+            if (percentage > PERCENTAGE_PRECISION) {
+                revert Errors.Staking__BandAllocationExceedsMaximum(percentage);
+            }
+
+            totalPercentage += percentage;
+        }
+
+        // Checks: total band allocation percentage should not exceed 100%
+        if (totalPercentage != PERCENTAGE_PRECISION) {
+            revert Errors.Staking__TotalAllocationExceedsMaximum(
+                totalPercentage
+            );
+        }
+
+        // Effects: set the storage
+        Pool storage pool = s_poolData[poolId];
+        pool.name = name;
+        pool.distributionPercentage = distributionPercentage;
+        pool.bandAllocationPercentage = bandAllocationPercentage;
+
+        // Effects: emit event
+        emit PoolSet(poolId, name);
     }
 
     //NOTE: staking function base
