@@ -71,6 +71,13 @@ interface IStaking is IStakingEvents {
                                        FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
+    function setPool(
+        uint16 poolId,
+        string memory name,
+        uint24 distributionPercentage,
+        uint24[] memory bandAllocationPercentage
+    ) external;
+
     // /**
     //  * @notice Stops staking of vested tokens for a beneficiary in a pool
     //  * @notice Beneficiary needs to claim staking rewards with an external call
