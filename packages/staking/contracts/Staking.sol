@@ -35,19 +35,20 @@ contract StakingManager is
                                 PUBLIC STORAGE
     //////////////////////////////////////////////////////////////////////////*/
 
-    IERC20 public s_usdtToken; // Token to be payed as reward
-    IERC20 public s_usdcToken; // Token to be payed as reward
-    IERC20 public s_wowToken; // Token to be staked
+    IERC20 internal s_usdtToken; // Token to be payed as reward
+    IERC20 internal s_usdcToken; // Token to be payed as reward
+    IERC20 internal s_wowToken; // Token to be staked
 
     /*//////////////////////////////////////////////////////////////////////////
                                 INTERNAL STORAGE
     //////////////////////////////////////////////////////////////////////////*/
 
-    // Enumerable mapping equivalent:
+    // @Enumerable mapping equivalent:
     // mapping(bytes32 hashedStakerAndBandLevel => uint256 lastestId)
-    mapping(bytes32 stakerAndBandLevel => uint256 stakerIds) internal s_stakerBandId;
+    // @returns 0 or 1 as true or false values to determine staker band state
     mapping(bytes32 stakerAndBandLevel => EnumerableMap.Bytes32ToUintMap)
         internal s_stakerBandState;
+    mapping(bytes32 stakerAndBandLevel => uint256 bandId) internal s_nextBandId;
 
     mapping(address poolId => Pool) internal s_poolData; // Pool data
     mapping(address bandId => Band) internal s_bandData; // Band data
