@@ -13,7 +13,6 @@ library Errors {
     error Staking__BandAllocationExceedsMaximum(uint24 percentage);
     error Staking__TotalAllocationExceedsMaximum(uint24 percentage);
     error Staking__InvalidBandsAmount();
-    error Staking__ZeroAddress();
     error Staking__ZeroAmount();
     error Staking__ZeroAddress();
 }

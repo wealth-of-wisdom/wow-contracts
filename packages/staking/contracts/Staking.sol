@@ -162,7 +162,8 @@ contract StakingManager is
         // Effects: emit event
         emit PoolSet(poolId, name);
     }
-   /**
+
+    /**
      * @notice  Sets data of the selected band
      * @param   bandId  band identification number
      * @param   price  band purchase price
@@ -172,10 +173,10 @@ contract StakingManager is
     function setBand(
         uint16 bandId,
         uint256 price,
-        uint256[] memory accessiblePools
+        uint16[] memory accessiblePools
     ) external onlyRole(DEFAULT_ADMIN_ROLE) mAmountNotZero(price) {
         // Checks: bandId must be in range
-        if (bandId > s_totalBands) {
+        if (bandId == 0 || bandId > s_totalBands) {
             revert Errors.Staking__InvalidBandId(bandId);
         }
 
@@ -188,7 +189,7 @@ contract StakingManager is
             price: price,
             accessiblePools: accessiblePools
         });
-        emit SetBandData(bandId, price, accessiblePools);
+        emit BandDataSet(bandId, price, accessiblePools);
     }
 
     /**
@@ -203,7 +204,7 @@ contract StakingManager is
         mAmountNotZero(newTotalBandsAmount)
     {
         s_totalBands = newTotalBandsAmount;
-        emit SetTotalBandAmount(newTotalBandsAmount);
+        emit TotalBandAmountSet(newTotalBandsAmount);
     }
 
     /**
@@ -214,9 +215,9 @@ contract StakingManager is
         uint16 newTotalPoolAmount
     ) external onlyRole(DEFAULT_ADMIN_ROLE) mAmountNotZero(newTotalPoolAmount) {
         s_totalPools = newTotalPoolAmount;
-        emit SetTotalPoolAmount(newTotalPoolAmount);
+        emit TotalPoolAmountSet(newTotalPoolAmount);
     }
-    
+
     // NOTE: staking function base
     // function addStakerToPoolIfInexistent(
     //     uint256 _poolId,
