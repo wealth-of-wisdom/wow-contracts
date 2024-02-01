@@ -125,6 +125,16 @@ contract StakingManager is
                         EXTERNAL FUNCTIONS FOR DEFAULT ADMIN
     //////////////////////////////////////////////////////////////////////////*/
 
+    /**
+     * @notice Set data for a pool which will be used for rewards distribution
+     * @notice There can be only one pool with the same id
+     * @notice When called for the first time, the pool will be created
+     * @notice When called for the second time, the pool data will be overwritten
+     * @param poolId Id of the pool (1-9)
+     * @param name Name of the pool (e.g. "Pool 1")
+     * @param distributionPercentage Percentage of the total rewards to be distributed to this pool
+     * @param bandAllocationPercentage Percentage of the pool to be distributed to each band
+     */
     function setPool(
         uint16 poolId,
         string memory name,
