@@ -9,9 +9,9 @@ library Errors {
     error Staking__InvalidBandId(uint16 bandId);
     error Staking__MaximumLevelExceeded();
     error Staking__InvalidPoolId(uint16 poolId);
-    error Staking__InvalidDistributionPercentage(uint24 percentage);
-    error Staking__BandAllocationExceedsMaximum(uint24 percentage);
-    error Staking__TotalAllocationExceedsMaximum(uint24 percentage);
+    error Staking__InvalidDistributionPercentage(uint48 percentage);
+    error Staking__BandAllocationExceedsMaximum(uint48 percentage);
+    error Staking__TotalAllocationExceedsMaximum(uint48 percentage);
     error Staking__InvalidBandsAmount();
     error Staking__ZeroAmount();
     error Staking__ZeroAddress();
