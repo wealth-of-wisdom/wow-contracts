@@ -10,7 +10,7 @@ import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
 import {Errors} from "./libraries/Errors.sol";
 
-contract StakingManager is
+contract Staking is
     IStaking,
     Initializable,
     AccessControlUpgradeable,
@@ -30,7 +30,7 @@ contract StakingManager is
     bytes32 private constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     uint128 private constant DECIMALS = 10 ** 6;
     uint128 private constant MONTH = 30 days;
-    uint24 private constant PERCENTAGE_PRECISION = 10 ** 6; // 100% = 10**6
+    uint48 private constant PERCENTAGE_PRECISION = 10 ** 6; // 100% = 10**6
 
     /*//////////////////////////////////////////////////////////////////////////
                                 PUBLIC STORAGE
@@ -152,8 +152,8 @@ contract StakingManager is
      */
     function setPool(
         uint16 poolId,
-        uint24 distributionPercentage,
-        uint24[] memory bandAllocationPercentage
+        uint48 distributionPercentage,
+        uint48[] memory bandAllocationPercentage
     ) external onlyRole(DEFAULT_ADMIN_ROLE) mPoolExists(poolId) {
         // Checks: distribution percentage should not exceed 100%
         if (distributionPercentage > PERCENTAGE_PRECISION) {
@@ -205,6 +205,8 @@ contract StakingManager is
             accessiblePools: accessiblePools,
             stakingTimespan: stakingTimespan
         });
+
+        // Effects: emit event
         emit BandSet(bandId);
     }
 
@@ -397,7 +399,89 @@ contract StakingManager is
     // }
 
     /*//////////////////////////////////////////////////////////////////////////
-                              INTERNAL FUNCTIONS
+                            EXTERNAL VIEW/PURE FUNCTIONS
+    //////////////////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice Returns the USDT token which is used for rewards distribution
+     * @return IERC20 USDT token
+     */
+    function getTokenUSDT() external view returns (IERC20) {
+        return s_usdtToken;
+    }
+
+    /**
+     * @notice Returns the USDC token which is used for rewards distribution
+     * @return IERC20 USDC token
+     */
+    function getTokenUSDC() external view returns (IERC20) {
+        return s_usdcToken;
+    }
+
+    /**
+     * @notice Returns the WOW token which is used staking by users
+     * @return IERC20 WOW token
+     */
+    function getTokenWOW() external view returns (IERC20) {
+        return s_wowToken;
+    }
+
+    /**
+     * @notice Returns the total amount of pools users can stake in
+     * @return uint16 Total amount of pools
+     */
+    function getTotalPools() external view returns (uint16) {
+        return s_totalPools;
+    }
+
+    /**
+     * @notice Returns the total amount of bands users can buy for staking
+     * @return uint16 Total amount of bands
+     */
+    function getTotalBands() external view returns (uint16) {
+        return s_totalBands;
+    }
+
+    function getPool(
+        uint16 poolId
+    )
+        external
+        view
+        returns (
+            uint48 distributionPercentage,
+            uint48[] memory bandAllocationPercentage,
+            uint256 usdtTokenAmount,
+            uint256 usdcTokenAmount,
+            address[] memory allUsers
+        )
+    {
+        Pool storage pool = s_poolData[poolId];
+        distributionPercentage = pool.distributionPercentage;
+        bandAllocationPercentage = pool.bandAllocationPercentage;
+        usdtTokenAmount = pool.totalUsdtPoolTokenAmount;
+        usdcTokenAmount = pool.totalUsdcPoolTokenAmount;
+        allUsers = pool.allUsers;
+    }
+
+    function getBand(
+        uint16 bandId
+    )
+        external
+        view
+        returns (
+            uint256 price,
+            uint16[] memory accessiblePools,
+            uint256 stakingTimespan
+        )
+    {
+        Band storage band = s_bandData[bandId];
+        price = band.price;
+        accessiblePools = band.accessiblePools;
+        stakingTimespan = band.stakingTimespan;
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                            INTERNAL VIEW/PURE FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
     function _getStakerBandAndLevelHash(
@@ -423,5 +507,16 @@ contract StakingManager is
         address newImplementation
     ) internal override onlyRole(UPGRADER_ROLE) {
         /// @dev This function is empty but uses a modifier to restrict access
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                              INTERNAL VIEW/PURE FUNCTIONS
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function _getStakingHash(
+        address staker,
+        uint16 bandLevel
+    ) internal pure returns (bytes32) {
+        return keccak256(abi.encode(staker, bandLevel));
     }
 }

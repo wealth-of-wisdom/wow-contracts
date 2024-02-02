@@ -51,8 +51,8 @@ interface IStaking is IStakingEvents {
     }
 
     struct Pool {
-        uint24 distributionPercentage; // in 10**6 integrals, for divident calculation
-        uint24[] bandAllocationPercentage; // in 10**6, start from the last level: 0 = 9lvl, 1 = 8lvl...
+        uint48 distributionPercentage; // in 10**6 integrals, for divident calculation
+        uint48[] bandAllocationPercentage; // in 10**6, start from the last level: 0 = 9lvl, 1 = 8lvl...
         uint256 totalUsdtPoolTokenAmount;
         uint256 totalUsdcPoolTokenAmount;
         address[] allUsers;
@@ -65,8 +65,8 @@ interface IStaking is IStakingEvents {
 
     function setPool(
         uint16 poolId,
-        uint24 distributionPercentage,
-        uint24[] memory bandAllocationPercentage
+        uint48 distributionPercentage,
+        uint48[] memory bandAllocationPercentage
     ) external;
 
     // /**
@@ -91,4 +91,38 @@ interface IStaking is IStakingEvents {
     function setTotalBandAmount(uint16 newTotalBandsAmount) external;
 
     function setTotalPoolAmount(uint16 newTotalPoolAmount) external;
+
+    function getTokenUSDT() external view returns (IERC20);
+
+    function getTokenUSDC() external view returns (IERC20);
+
+    function getTokenWOW() external view returns (IERC20);
+
+    function getTotalPools() external view returns (uint16);
+
+    function getTotalBands() external view returns (uint16);
+
+    function getPool(
+        uint16 poolId
+    )
+        external
+        view
+        returns (
+            uint48 distributionPercentage,
+            uint48[] memory bandAllocationPercentage,
+            uint256 usdtTokenAmount,
+            uint256 usdcTokenAmount,
+            address[] memory allUsers
+        );
+
+    function getBand(
+        uint16 bandId
+    )
+        external
+        view
+        returns (
+            uint256 price,
+            uint16[] memory accessiblePools,
+            uint256 stakingTimespan
+        );
 }
