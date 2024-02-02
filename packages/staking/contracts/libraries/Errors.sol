@@ -6,9 +6,10 @@ library Errors {
                                     STAKING
     //////////////////////////////////////////////////////////////////////////*/
 
-    error Staking__InvalidBandId(uint16 bandId);
+    error Staking__InvalidBand(uint16 bandId);
+    error Staking__InvalidStakingType();
     error Staking__MaximumLevelExceeded();
-    error Staking__InvalidStaingTimespan(uint256 stakingTimespan);
+    error Staking__InvalidStakingTimespan(uint256 stakingTimespan);
     error Staking__InvalidPoolId(uint16 poolId);
     error Staking__InsufficientContractBalance(
         uint256 contractBalance,

@@ -97,7 +97,7 @@ contract StakingManager is
 
     modifier mBandExists(uint16 bandId) {
         if (bandId == 0 || bandId > s_totalBands) {
-            revert Errors.Staking__InvalidBandId(bandId);
+            revert Errors.Staking__InvalidBand(bandId);
         }
         _;
     }
@@ -196,7 +196,7 @@ contract StakingManager is
 
         // Checks: checks if timespan valid
         if (stakingTimespan < MONTH) {
-            revert Errors.Staking__InvalidStaingTimespan(stakingTimespan);
+            revert Errors.Staking__InvalidStakingTimespan(stakingTimespan);
         }
 
         // Effects: set band storage
@@ -265,7 +265,14 @@ contract StakingManager is
                             EXTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
-    function stake(StakingTypes stakingType, uint16 bandLevel) external {
+    function stake(
+        StakingTypes stakingType,
+        uint16 bandLevel
+    ) external mBandExists(bandLevel) {
+        if (
+            StakingTypes.FIX != stakingType || StakingTypes.FLEXI != stakingType
+        ) revert Errors.Staking__InvalidStakingType();
+
         bytes32 hashedStakerBandAndLevel = _getStakerBandAndLevelHash(
             msg.sender,
             bandLevel
@@ -289,8 +296,7 @@ contract StakingManager is
         });
 
         s_nextBandId[hashedStakerBandAndLevel]++;
-
-        // s_stakerBandState[hashedStakerBandAndLevel].set(, true);
+        s_stakerBandState[hashedStakerBandAndLevel].set(bandId, 1);
 
         uint16 poolId;
         for (uint i; i < bandData.accessiblePools.length; i++) {
@@ -301,10 +307,8 @@ contract StakingManager is
 
         // Effects: transfer transaction funds to contract
         s_wowToken.safeTransferFrom(msg.sender, address(this), bandData.price);
-        bandId++;
+        s_nextBandId[hashedStakerBandAndLevel]++;
     }
-
-    //set data for staking
 
     // NOTE: staking function base
     // function addStakerToPoolIfInexistent(
