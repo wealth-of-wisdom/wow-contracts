@@ -8,13 +8,15 @@ interface IStakingEvents {
                                        EVENTS
     //////////////////////////////////////////////////////////////////////////*/
 
-    event PoolSet(uint16 indexed poolId, string name);
+    event PoolSet(uint16 indexed poolId);
 
-    event BandDataSet(uint16 bandId, uint256 price, uint16[] accessiblePools);
+    event BandSet(uint16 bandId);
 
     event TotalBandAmountSet(uint16 newTotalBandsAmount);
 
     event TotalPoolAmountSet(uint16 newTotalPoolAmount);
+
+    event TokensWithdrawn(IERC20 token, address receiver, uint256 amount);
 }
 
 interface IStaking is IStakingEvents {
@@ -36,27 +38,25 @@ interface IStaking is IStakingEvents {
         uint256 distributionPeriodEnd;
     }
 
-    struct StakerPoolData {
+    struct StakerBandData {
         StakingTypes stakingType;
         uint256 stakingStartTimestamp;
-        uint256 stakingTimespan;
-        uint256 amountStaked;
         uint256 usdtRewardsClaimed;
         uint256 usdcRewardsClaimed;
-        //additional data TBD
     }
     struct Band {
         uint256 price;
         uint16[] accessiblePools; //1-9
+        uint256 stakingTimespan;
     }
 
     struct Pool {
-        string name;
         uint24 distributionPercentage; // in 10**6 integrals, for divident calculation
         uint24[] bandAllocationPercentage; // in 10**6, start from the last level: 0 = 9lvl, 1 = 8lvl...
         uint256 totalUsdtPoolTokenAmount;
         uint256 totalUsdcPoolTokenAmount;
-        mapping(bytes32 hashedStakerAndBandId => StakerPoolData) stakedPoolData;
+        address[] allUsers;
+        mapping(address staker => bool isUserInPool) userCheck;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -65,7 +65,6 @@ interface IStaking is IStakingEvents {
 
     function setPool(
         uint16 poolId,
-        string memory name,
         uint24 distributionPercentage,
         uint24[] memory bandAllocationPercentage
     ) external;
@@ -85,7 +84,8 @@ interface IStaking is IStakingEvents {
     function setBand(
         uint16 bandId,
         uint256 price,
-        uint16[] memory accessiblePools
+        uint16[] memory accessiblePools,
+        uint256 stakingTimespan
     ) external;
 
     function setTotalBandAmount(uint16 newTotalBandsAmount) external;
