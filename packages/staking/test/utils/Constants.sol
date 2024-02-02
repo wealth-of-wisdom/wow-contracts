@@ -37,7 +37,8 @@ abstract contract Constants {
 
     uint16 internal constant TOTAL_POOLS = 9;
     uint16 internal constant TOTAL_BANDS = 9;
-    uint48 private constant PERCENTAGE_PRECISION = 10 ** 6; // 100% = 10**6
+    uint48 internal constant PERCENTAGE_PRECISION = 10 ** 6; // 100% = 10**6
+    uint128 internal constant MONTH = 30 days;
 
     /*//////////////////////////////////////////////////////////////////////////
                                 STAKING POOL DATA
@@ -142,4 +143,48 @@ abstract contract Constants {
     uint48[] internal POOL_9_BAND_ALLOCATION_PERCENTAGE = [
         PERCENTAGE_PRECISION
     ]; // 100%
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                STAKING BAND DATA
+    //////////////////////////////////////////////////////////////////////////*/
+
+    uint16 internal constant BAND_ID_1 = 1;
+    uint16 internal constant constantBAND_ID_2 = 2;
+    uint16 internal constant BAND_ID_3 = 3;
+    uint16 internal constant BAND_ID_4 = 4;
+    uint16 internal constant BAND_ID_5 = 5;
+    uint16 internal constant BAND_ID_6 = 6;
+    uint16 internal constant BAND_ID_7 = 7;
+    uint16 internal constant BAND_ID_8 = 8;
+    uint16 internal constant BAND_ID_9 = 9;
+
+    uint256 internal constant BAND_1_PRICE = 1_000 * WOW_DECIMALS;
+    uint256 internal constant BAND_2_PRICE = 3_000 * WOW_DECIMALS;
+    uint256 internal constant BAND_3_PRICE = 10_000 * WOW_DECIMALS;
+    uint256 internal constant BAND_4_PRICE = 30_000 * WOW_DECIMALS;
+    uint256 internal constant BAND_5_PRICE = 100_000 * WOW_DECIMALS;
+    uint256 internal constant BAND_6_PRICE = 200_000 * WOW_DECIMALS;
+    uint256 internal constant BAND_7_PRICE = 500_000 * WOW_DECIMALS;
+    uint256 internal constant BAND_8_PRICE = 1_000_000 * WOW_DECIMALS;
+    uint256 internal constant BAND_9_PRICE = 2_000_000 * WOW_DECIMALS;
+
+    uint16[] internal BAND_1_ACCESSIBLE_POOLS = [1];
+    uint16[] internal BAND_2_ACCESSIBLE_POOLS = [1, 2];
+    uint16[] internal BAND_3_ACCESSIBLE_POOLS = [1, 2, 3];
+    uint16[] internal BAND_4_ACCESSIBLE_POOLS = [1, 2, 3, 4];
+    uint16[] internal BAND_5_ACCESSIBLE_POOLS = [1, 2, 3, 4, 5];
+    uint16[] internal BAND_6_ACCESSIBLE_POOLS = [1, 2, 3, 4, 5, 6];
+    uint16[] internal BAND_7_ACCESSIBLE_POOLS = [1, 2, 3, 4, 5, 6, 7];
+    uint16[] internal BAND_8_ACCESSIBLE_POOLS = [1, 2, 3, 4, 5, 6, 7, 8];
+    uint16[] internal BAND_9_ACCESSIBLE_POOLS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+    uint256 internal constant BAND_1_STAKING_TIMESPAN = 24 * MONTH;
+    uint256 internal constant BAND_2_STAKING_TIMESPAN = 24 * MONTH;
+    uint256 internal constant BAND_3_STAKING_TIMESPAN = 24 * MONTH;
+    uint256 internal constant BAND_4_STAKING_TIMESPAN = 24 * MONTH;
+    uint256 internal constant BAND_5_STAKING_TIMESPAN = 24 * MONTH;
+    uint256 internal constant BAND_6_STAKING_TIMESPAN = 24 * MONTH;
+    uint256 internal constant BAND_7_STAKING_TIMESPAN = 24 * MONTH;
+    uint256 internal constant BAND_8_STAKING_TIMESPAN = 24 * MONTH;
+    uint256 internal constant BAND_9_STAKING_TIMESPAN = 24 * MONTH;
 }

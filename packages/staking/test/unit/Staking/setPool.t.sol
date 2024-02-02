@@ -34,6 +34,48 @@ contract Staking_SetPool_Unit_Test is Unit_Test {
         );
     }
 
+    function test_setPool_RevertIf_PoolIdIsZero() external {
+        vm.expectRevert(
+            abi.encodeWithSelector(Errors.Staking__InvalidPoolId.selector, 0)
+        );
+        vm.prank(admin);
+        staking.setPool(
+            0,
+            POOL_1_PERCENTAGE,
+            POOL_1_BAND_ALLOCATION_PERCENTAGE
+        );
+    }
+
+    function test_setPool_RevertIf_PoolIdIsGreaterThanMaxPools() external {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.Staking__InvalidPoolId.selector,
+                TOTAL_POOLS + 1
+            )
+        );
+        vm.prank(admin);
+        staking.setPool(
+            TOTAL_POOLS + 1,
+            POOL_1_PERCENTAGE,
+            POOL_1_BAND_ALLOCATION_PERCENTAGE
+        );
+    }
+
+    function test_setPool_RevertIf_PoolPercentageExeeds100Percent() external {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.Staking__InvalidDistributionPercentage.selector,
+                PERCENTAGE_PRECISION + 1
+            )
+        );
+        vm.prank(admin);
+        staking.setPool(
+            POOL_ID_1,
+            PERCENTAGE_PRECISION + 1,
+            POOL_1_BAND_ALLOCATION_PERCENTAGE
+        );
+    }
+
     function test_setPool_SetsPoolDistributionPercentage() external setPoolId1 {
         (uint48 percentage, , , , ) = staking.getPool(POOL_ID_1);
         assertEq(
@@ -57,5 +99,17 @@ contract Staking_SetPool_Unit_Test is Unit_Test {
                 "Pool band allocation percentage not set"
             );
         }
+    }
+
+    function test_setPool_EmitsPoolSetEvent() external {
+        vm.expectEmit(address(staking));
+        emit PoolSet(POOL_ID_1);
+
+        vm.prank(admin);
+        staking.setPool(
+            POOL_ID_1,
+            POOL_1_PERCENTAGE,
+            POOL_1_BAND_ALLOCATION_PERCENTAGE
+        );
     }
 }

@@ -205,6 +205,8 @@ contract Staking is
             accessiblePools: accessiblePools,
             stakingTimespan: stakingTimespan
         });
+
+        // Effects: emit event
         emit BandSet(bandId);
     }
 
@@ -456,6 +458,27 @@ contract Staking is
         usdcTokenAmount = pool.totalUsdcPoolTokenAmount;
         allUsers = pool.allUsers;
     }
+
+    function getBand(
+        uint16 bandId
+    )
+        external
+        view
+        returns (
+            uint256 price,
+            uint16[] memory accessiblePools,
+            uint256 stakingTimespan
+        )
+    {
+        Band storage band = s_bandData[bandId];
+        price = band.price;
+        accessiblePools = band.accessiblePools;
+        stakingTimespan = band.stakingTimespan;
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                            INTERNAL VIEW/PURE FUNCTIONS
+    //////////////////////////////////////////////////////////////////////////*/
 
     function _getStakerBandAndLevelHash(
         address staker,

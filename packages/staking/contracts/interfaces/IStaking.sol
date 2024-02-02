@@ -114,4 +114,15 @@ interface IStaking is IStakingEvents {
             uint256 usdcTokenAmount,
             address[] memory allUsers
         );
+
+    function getBand(
+        uint16 bandId
+    )
+        external
+        view
+        returns (
+            uint256 price,
+            uint16[] memory accessiblePools,
+            uint256 stakingTimespan
+        );
 }
