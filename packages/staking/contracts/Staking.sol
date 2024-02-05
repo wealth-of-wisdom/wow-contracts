@@ -56,8 +56,8 @@ contract Staking is
     mapping(bytes32 stakerWithBandLevelAndId => StakerBandData)
         internal s_stakerBand;
 
-    mapping(uint16 poolId => Pool) internal s_poolData; // Pool data
-    mapping(uint16 bandId => Band) internal s_bandData; // Band data
+    mapping(uint16 poolId => Pool) internal s_poolData; // Pool data, poolId - 1-9lvl
+    mapping(uint16 bandLevel => Band) internal s_bandData; // Band data, bandLevel - 1-9lvl
     FundDistribution[] internal s_fundDistributionData; // Any added funds data
 
     uint256[] shares; // in 10**6 integrals, for divident calculation
@@ -95,9 +95,16 @@ contract Staking is
         _;
     }
 
-    modifier mBandExists(uint16 bandId) {
-        if (bandId == 0 || bandId > s_totalBands) {
-            revert Errors.Staking__InvalidBand(bandId);
+    modifier mBandExists(uint16 bandLevel) {
+        if (bandLevel == 0 || bandLevel > s_totalBands) {
+            revert Errors.Staking__InvalidBand(bandLevel);
+        }
+        _;
+    }
+
+    modifier mTokenExists(IERC20 token) {
+        if (token != s_usdtToken && token != s_usdcToken) {
+            revert Errors.Staking__NonExistantToken();
         }
         _;
     }
@@ -172,7 +179,7 @@ contract Staking is
 
     /**
      * @notice  Sets data of the selected band
-     * @param   bandId  band identification number
+     * @param   bandLevel  band level number
      * @param   price  band purchase price
      * @param   accessiblePools  list of pools that become
      *          accessible after band purchase
@@ -180,7 +187,7 @@ contract Staking is
      *          staking will be conducted
      */
     function setBand(
-        uint16 bandId,
+        uint16 bandLevel,
         uint256 price,
         uint16[] memory accessiblePools,
         uint256 stakingTimespan
@@ -188,7 +195,7 @@ contract Staking is
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
         mAmountNotZero(price)
-        mBandExists(bandId)
+        mBandExists(bandLevel)
     {
         // Checks: amount must be in pool bounds
         if (accessiblePools.length > s_totalPools)
@@ -200,14 +207,14 @@ contract Staking is
         }
 
         // Effects: set band storage
-        s_bandData[bandId] = Band({
+        s_bandData[bandLevel] = Band({
             price: price,
             accessiblePools: accessiblePools,
             stakingTimespan: stakingTimespan
         });
 
         // Effects: emit event
-        emit BandSet(bandId);
+        emit BandSet(bandLevel);
     }
 
     /**
@@ -234,6 +241,58 @@ contract Staking is
     ) external onlyRole(DEFAULT_ADMIN_ROLE) mAmountNotZero(newTotalPoolAmount) {
         s_totalPools = newTotalPoolAmount;
         emit TotalPoolAmountSet(newTotalPoolAmount);
+    }
+
+    /**
+     * @notice  Administrator function for transfering funds
+     *          to contract for pool distribution
+     * @param   token  USDT/USDC token
+     * @param   amount  amount to be distributed to pools
+     * @param   distributionPeriodStart  when distribution period started
+     * @param   distributionPeriodEnd  when the distribution period ends
+     */
+    function distributeFunds(
+        IERC20 token,
+        uint256 amount,
+        uint256 distributionPeriodStart,
+        uint256 distributionPeriodEnd
+    )
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        mTokenExists(token)
+        mAmountNotZero(amount)
+        mAmountNotZero(distributionPeriodStart)
+        mAmountNotZero(distributionPeriodEnd)
+    {
+        // Effects: set fund distribution data
+        FundDistribution memory fundDistributionData = FundDistribution({
+            token: token,
+            amount: amount,
+            distributionPeriodStart: distributionPeriodStart,
+            distributionPeriodEnd: distributionPeriodEnd
+        });
+        s_fundDistributionData.push(fundDistributionData);
+
+        // Effects: distribute funds to pools
+        for (uint16 poolId; poolId < s_totalPools; poolId++) {
+            // amount * (100% * 10**6) / (distribution % * 10**6)
+            uint256 poolAmount = (amount * (100 * PERCENTAGE_PRECISION)) /
+                s_poolData[poolId].distributionPercentage;
+
+            s_poolData[poolId].totalUsdtPoolTokenAmount += (token ==
+                s_usdtToken)
+                ? poolAmount
+                : 0;
+            s_poolData[poolId].totalUsdcPoolTokenAmount += (token ==
+                s_usdcToken)
+                ? poolAmount
+                : 0;
+        }
+
+        // Interaction: transfer the tokens to contract
+        token.safeTransferFrom(msg.sender, address(this), amount);
+
+        emit FundsDistributed(token, amount);
     }
 
     /**
@@ -267,6 +326,11 @@ contract Staking is
                             EXTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
+    /**
+     * @notice  Stake and lock tokens to earn rewards
+     * @param   stakingType  enumerable type for flexi or fixed staking
+     * @param   bandLevel  band level number
+     */
     function stake(
         StakingTypes stakingType,
         uint16 bandLevel
@@ -281,7 +345,7 @@ contract Staking is
         );
 
         uint16 bandId = s_nextBandId[hashedStakerBandAndLevel];
-        Band memory bandData = s_bandData[bandId];
+        Band memory bandData = s_bandData[bandLevel];
 
         bytes32 hashedStakerWithBandLevelAndId = _getStakerWithBandLevelAndIdHash(
                 msg.sender,
@@ -309,6 +373,42 @@ contract Staking is
         // Effects: transfer transaction funds to contract
         s_wowToken.safeTransferFrom(msg.sender, address(this), bandData.price);
         s_nextBandId[hashedStakerBandAndLevel]++;
+    }
+
+    /**
+     * @notice  Unstake tokens at any time and claim earned rewards
+     * @param   bandLevel  band level number
+     * @param   bandId  Id of the band (0-max uint)
+     */
+    function unStake(
+        uint16 bandLevel,
+        uint16 bandId
+    ) external mBandExists(bandLevel) {
+        Band memory bandData = s_bandData[bandLevel];
+        bytes32 hashedStakerBandAndLevel = _getStakerBandAndLevelHash(
+            msg.sender,
+            bandLevel
+        );
+
+        if (s_stakerBandState[hashedStakerBandAndLevel].get(bandId) == 0) {
+            revert Errors.Staking__InvalidBandId(bandId);
+        }
+
+        // Effects: set staker and pool data
+        s_stakerBandState[hashedStakerBandAndLevel].set(bandId, 0);
+
+        //@question: do we need to have mapping if user is still in the pool?
+        //maybe we can do the check with stakersBandState?
+        uint16 poolId;
+        for (uint i; i < bandData.accessiblePools.length; i++) {
+            poolId = bandData.accessiblePools[i];
+            s_poolData[poolId].userCheck[msg.sender] = false;
+        }
+
+        // Interaction: transfer transaction funds to user
+        // @todo:
+        // _claimRewards();
+        // s_wowToken.safeTransferFrom(address(this), msg.sender, rewards+band.price);
     }
 
     // NOTE: staking function base

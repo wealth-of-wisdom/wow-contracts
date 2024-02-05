@@ -10,7 +10,9 @@ interface IStakingEvents {
 
     event PoolSet(uint16 indexed poolId);
 
-    event BandSet(uint16 bandId);
+    event BandSet(uint16 bandLevel);
+
+    event FundsDistributed(IERC20 token, uint256 amount);
 
     event TotalBandAmountSet(uint16 newTotalBandsAmount);
 
@@ -82,7 +84,7 @@ interface IStaking is IStakingEvents {
     // ) external;
 
     function setBand(
-        uint16 bandId,
+        uint16 bandLevel,
         uint256 price,
         uint16[] memory accessiblePools,
         uint256 stakingTimespan
