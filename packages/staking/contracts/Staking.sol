@@ -297,7 +297,6 @@ contract Staking is
             usdcRewardsClaimed: 0
         });
 
-        s_nextBandId[hashedStakerBandAndLevel]++;
         s_stakerBandState[hashedStakerBandAndLevel].set(bandId, 1);
 
         uint16 poolId;
@@ -507,16 +506,5 @@ contract Staking is
         address newImplementation
     ) internal override onlyRole(UPGRADER_ROLE) {
         /// @dev This function is empty but uses a modifier to restrict access
-    }
-
-    /*//////////////////////////////////////////////////////////////////////////
-                              INTERNAL VIEW/PURE FUNCTIONS
-    //////////////////////////////////////////////////////////////////////////*/
-
-    function _getStakingHash(
-        address staker,
-        uint16 bandLevel
-    ) internal pure returns (bytes32) {
-        return keccak256(abi.encode(staker, bandLevel));
     }
 }
