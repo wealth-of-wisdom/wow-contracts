@@ -46,9 +46,9 @@ contract Staking is
     //////////////////////////////////////////////////////////////////////////*/
 
     // Enumerable mapping equivalent to:
-    // mapping(uint256 bandId => uint256 bandState)
+    // mapping(uint bandId => uint bandState)
     // With normal mapping it would look like this:
-    // mapping(bytes32 stakerAndBandLevel => mapping(uint256 bandId => uint256 bandState)
+    // mapping(bytes32 stakerAndBandLevel => mapping(uint bandId => uint bandState)
     // Returns 1 or 0 as true or false values to determine whether the band exists
     mapping(bytes32 stakerAndBandLevel => EnumerableMap.UintToUintMap)
         internal s_stakerBandState;
@@ -61,7 +61,7 @@ contract Staking is
     mapping(uint16 bandLevel => Band) internal s_bandData; // Band data, bandLevel - 1-9lvl
     FundDistribution[] internal s_fundDistributionData; // Any added funds data
 
-    uint256[] shares; // in 10**6 integrals, for divident calculation
+    uint[] shares; // in 10**6 integrals, for divident calculation
     uint16 internal s_totalPools;
     uint16 internal s_totalBands;
 
@@ -69,7 +69,7 @@ contract Staking is
                             STORAGE FOR FUTURE UPGRADES
     //////////////////////////////////////////////////////////////////////////*/
 
-    uint256[50] private __gap;
+    uint[50] private __gap;
 
     /*//////////////////////////////////////////////////////////////////////////
                                   MODIFIERS
@@ -82,7 +82,7 @@ contract Staking is
         _;
     }
 
-    modifier mAmountNotZero(uint256 amount) {
+    modifier mAmountNotZero(uint amount) {
         if (amount == 0) {
             revert Errors.Staking__ZeroAmount();
         }
@@ -92,6 +92,21 @@ contract Staking is
     modifier mBandExists(uint16 bandLevel) {
         if (bandLevel == 0 || bandLevel > s_totalBands) {
             revert Errors.Staking__InvalidBand(bandLevel);
+        }
+        _;
+    }
+
+    modifier mBandIdExists(
+        address user,
+        uint16 bandLevel,
+        uint16 bandId
+    ) {
+        bytes32 hashedStakerBandAndLevel = _getStakerBandAndLevelHash(
+            user,
+            bandLevel
+        );
+        if (s_stakerBandState[hashedStakerBandAndLevel].get(bandId) == 0) {
+            revert Errors.Staking__InvalidBandId(bandId);
         }
         _;
     }
@@ -196,9 +211,9 @@ contract Staking is
      */
     function setBand(
         uint16 bandLevel,
-        uint256 price,
+        uint price,
         uint16[] memory accessiblePools,
-        uint256 stakingTimespan
+        uint stakingTimespan
     )
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
@@ -261,9 +276,9 @@ contract Staking is
      */
     function distributeFunds(
         IERC20 token,
-        uint256 amount,
-        uint256 distributionPeriodStart,
-        uint256 distributionPeriodEnd
+        uint amount,
+        uint distributionPeriodStart,
+        uint distributionPeriodEnd
     )
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
@@ -285,7 +300,7 @@ contract Staking is
         uint16 totalPools = s_totalPools;
         for (uint16 poolId; poolId < totalPools; poolId++) {
             // amount * (100% * 10**6) / (distribution % * 10**6)
-            uint256 poolAmount = ((amount *
+            uint poolAmount = ((amount *
                 s_poolData[poolId].distributionPercentage) /
                 PERCENTAGE_PRECISION);
 
@@ -309,14 +324,14 @@ contract Staking is
      */
     function withdrawTokens(
         IERC20 token,
-        uint256 amount
+        uint amount
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         // Checks: the amount must be greater than 0
         if (amount == 0) {
             revert Errors.Staking__ZeroAmount();
         }
 
-        uint256 balance = token.balanceOf(address(this));
+        uint balance = token.balanceOf(address(this));
 
         // Checks: the contract must have enough balance to withdraw
         if (balance < amount) {
@@ -412,38 +427,41 @@ contract Staking is
         uint16 oldBandLevel,
         uint16 newBandLevel,
         uint16 bandId
-    ) external mBandExists(oldBandLevel) mBandExists(newBandLevel) {
-        bytes32 hashedStakerBandAndLevel = _getStakerBandAndLevelHash(
+    )
+        external
+        mBandExists(oldBandLevel)
+        mBandExists(newBandLevel)
+        mBandIdExists(msg.sender, oldBandLevel, bandId)
+    {
+        bytes32 hashedStakerOldBandAndLevel = _getStakerBandAndLevelHash(
             msg.sender,
             oldBandLevel
         );
+        bytes32 hashedStakerNewBandAndLevel = _getStakerBandAndLevelHash(
+            msg.sender,
+            newBandLevel
+        );
 
-        uint16 oldBandId = s_nextBandId[hashedStakerBandAndLevel]++;
+        // Effects: update staker band Ids
+        s_stakerBandState[hashedStakerOldBandAndLevel].set(bandId, 0);
+        s_stakerBandState[hashedStakerNewBandAndLevel].set(bandId, 1);
+
         Band memory oldBandData = s_bandData[oldBandLevel];
+        Band memory newBandData = s_bandData[newBandLevel];
 
-        bytes32 hashedStakerWithBandLevelAndId = _getStakerWithBandLevelAndIdHash(
-                msg.sender,
-                oldBandLevel,
-                oldBandId
-            );
-
-        // Effects: set pool data
-        s_stakerBandState[hashedStakerBandAndLevel].set(bandId, 1);
-
-        // uint16 poolId;
-        // uint256 accessiblePoolLength = oldBandData.accessiblePools.length;
-        // for (uint i; i < accessiblePoolLength; i++) {
-        //     poolId = bandData.accessiblePools[i];
-        //     s_poolData[poolId].userCheck[user] = true;
-        //     s_poolData[poolId].allUsers.push(user);
-        // }
+        // Effects: get/set pools that need to be upgraded
+        uint oldPoolLength = oldBandData.accessiblePools.length;
+        uint newPoolLength = newBandData.accessiblePools.length;
+        uint16 poolId;
+        for (oldPoolLength; oldPoolLength < newPoolLength; oldPoolLength++) {
+            poolId = newBandData.accessiblePools[oldPoolLength];
+            s_poolData[poolId].userCheck[msg.sender] = true;
+            s_poolData[poolId].allUsers.push(msg.sender);
+        }
 
         // Interaction: transfer transaction funds to contract
-        // s_wowToken.safeTransferFrom(
-        //     msg.sender,
-        //     address(this),
-        //     oldBandData.price - newBandData.price
-        // );
+        uint priceDifference = oldBandData.price - newBandData.price;
+        s_wowToken.safeTransferFrom(msg.sender, address(this), priceDifference);
         emit UpgradeSuccess(msg.sender, oldBandLevel, newBandLevel);
     }
 
@@ -499,8 +517,8 @@ contract Staking is
         returns (
             uint48 distributionPercentage,
             uint48[] memory bandAllocationPercentage,
-            uint256 usdtTokenAmount,
-            uint256 usdcTokenAmount,
+            uint usdtTokenAmount,
+            uint usdcTokenAmount,
             address[] memory allUsers
         )
     {
@@ -518,9 +536,9 @@ contract Staking is
         external
         view
         returns (
-            uint256 price,
+            uint price,
             uint16[] memory accessiblePools,
-            uint256 stakingTimespan
+            uint stakingTimespan
         )
     {
         Band storage band = s_bandData[bandId];
@@ -581,7 +599,7 @@ contract Staking is
         s_stakerBandState[hashedStakerBandAndLevel].set(bandId, 1);
 
         uint16 poolId;
-        uint256 accessiblePoolLength = bandData.accessiblePools.length;
+        uint accessiblePoolLength = bandData.accessiblePools.length;
         for (uint i; i < accessiblePoolLength; i++) {
             poolId = bandData.accessiblePools[i];
             s_poolData[poolId].userCheck[user] = true;
@@ -593,22 +611,18 @@ contract Staking is
         uint16 bandLevel,
         uint16 bandId,
         address user
-    ) internal {
+    ) internal mBandIdExists(user, bandLevel, bandId) {
         Band memory bandData = s_bandData[bandLevel];
         bytes32 hashedStakerBandAndLevel = _getStakerBandAndLevelHash(
             user,
             bandLevel
         );
 
-        if (s_stakerBandState[hashedStakerBandAndLevel].get(bandId) == 0) {
-            revert Errors.Staking__InvalidBandId(bandId);
-        }
-
         // Effects: set staker and pool data
         s_stakerBandState[hashedStakerBandAndLevel].set(bandId, 0);
 
         uint16 poolId;
-        uint256 allUsersLength;
+        uint allUsersLength;
         for (uint i; i < bandData.accessiblePools.length; i++) {
             poolId = bandData.accessiblePools[i];
             s_poolData[poolId].userCheck[user] = false;
