@@ -71,6 +71,17 @@ interface IStaking is IStakingEvents {
         uint48[] memory bandAllocationPercentage
     ) external;
 
+    function distributeFunds(
+        IERC20 token,
+        uint256 amount,
+        uint256 distributionPeriodStart,
+        uint256 distributionPeriodEnd
+    ) external;
+
+    function stake(StakingTypes stakingType, uint16 bandLevel) external;
+
+    function unStake(uint16 bandLevel, uint16 bandId) external;
+
     // /**
     //  * @notice Stops staking of vested tokens for a beneficiary in a pool
     //  * @notice Beneficiary needs to claim staking rewards with an external call
