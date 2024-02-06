@@ -46,8 +46,7 @@ interface IVestingEvents {
     event StakedTokensUpdated(
         uint16 indexed poolIndex,
         address indexed beneficiary,
-        uint256 amount,
-        bool stake
+        uint256 amount
     );
 }
 
@@ -139,11 +138,21 @@ interface IVesting is IVestingEvents {
 
     function claimTokens(uint16 pid) external;
 
-    function updateVestedStakedTokens(
+    function stakeVestedTokens(
+        IStaking.StakingTypes stakingType,
+        uint16 bandLevel,
         uint16 pid,
         address beneficiary,
-        uint256 tokenAmount,
-        bool startStaking
+        uint256 tokenAmount
+    ) external;
+
+    function unstakeVestedTokens(
+        IStaking.StakingTypes stakingType,
+        uint16 bandLevel,
+        uint16 bandId,
+        uint16 pid,
+        address beneficiary,
+        uint256 tokenAmount
     ) external;
 
     function getBeneficiary(

@@ -28,6 +28,7 @@ contract Staking is
     //////////////////////////////////////////////////////////////////////////*/
 
     bytes32 private constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+    bytes32 private constant VESTING_ROLE = keccak256("VESTING_ROLE");
     uint128 private constant DECIMALS = 10 ** 6;
     uint128 private constant MONTH = 30 days;
     uint48 private constant PERCENTAGE_PRECISION = 10 ** 8; // 100% = 10**8
@@ -88,6 +89,13 @@ contract Staking is
         _;
     }
 
+    modifier mBandExists(uint16 bandLevel) {
+        if (bandLevel == 0 || bandLevel > s_totalBands) {
+            revert Errors.Staking__InvalidBand(bandLevel);
+        }
+        _;
+    }
+
     modifier mPoolExists(uint16 poolId) {
         if (poolId == 0 || poolId > s_totalPools) {
             revert Errors.Staking__InvalidPoolId(poolId);
@@ -95,10 +103,10 @@ contract Staking is
         _;
     }
 
-    modifier mBandExists(uint16 bandLevel) {
-        if (bandLevel == 0 || bandLevel > s_totalBands) {
-            revert Errors.Staking__InvalidBand(bandLevel);
-        }
+    modifier mStakingTypeExists(StakingTypes stakingType) {
+        if (
+            StakingTypes.FIX != stakingType || StakingTypes.FLEXI != stakingType
+        ) revert Errors.Staking__InvalidStakingType();
         _;
     }
 
@@ -333,44 +341,15 @@ contract Staking is
     function stake(
         StakingTypes stakingType,
         uint16 bandLevel
-    ) external mBandExists(bandLevel) {
-        if (
-            StakingTypes.FIX != stakingType || StakingTypes.FLEXI != stakingType
-        ) revert Errors.Staking__InvalidStakingType();
-
-        bytes32 hashedStakerBandAndLevel = _getStakerBandAndLevelHash(
-            msg.sender,
-            bandLevel
+    ) external mBandExists(bandLevel) mStakingTypeExists(stakingType) {
+        Band memory bandData = _updateStakeData(
+            stakingType,
+            bandLevel,
+            msg.sender
         );
-
-        uint16 bandId = s_nextBandId[hashedStakerBandAndLevel]++;
-        Band memory bandData = s_bandData[bandLevel];
-
-        bytes32 hashedStakerWithBandLevelAndId = _getStakerWithBandLevelAndIdHash(
-                msg.sender,
-                bandLevel,
-                bandId
-            );
-
-        // Effects: set staker and pool data
-        StakerBandData storage stakerBandData = s_stakerBand[
-            hashedStakerWithBandLevelAndId
-        ];
-        stakerBandData.stakingType = stakingType;
-        stakerBandData.stakingStartTimestamp = block.timestamp;
-
-        s_stakerBandState[hashedStakerBandAndLevel].set(bandId, 1);
-
-        uint16 poolId;
-        uint256 accessiblePoolLength = bandData.accessiblePools.length;
-        for (uint i; i < accessiblePoolLength; i++) {
-            poolId = bandData.accessiblePools[i];
-            s_poolData[poolId].userCheck[msg.sender] = true;
-            s_poolData[poolId].allUsers.push(msg.sender);
-        }
-
         // Interaction: transfer transaction funds to contract
         s_wowToken.safeTransferFrom(msg.sender, address(this), bandData.price);
+        emit StakingSuccess(msg.sender, bandLevel);
     }
 
     /**
@@ -382,126 +361,53 @@ contract Staking is
         uint16 bandLevel,
         uint16 bandId
     ) external mBandExists(bandLevel) {
-        Band memory bandData = s_bandData[bandLevel];
-        bytes32 hashedStakerBandAndLevel = _getStakerBandAndLevelHash(
-            msg.sender,
-            bandLevel
-        );
-
-        if (s_stakerBandState[hashedStakerBandAndLevel].get(bandId) == 0) {
-            revert Errors.Staking__InvalidBandId(bandId);
+       
+        _updateUnstakeData(bandLevel, bandId, msg.sender);
         }
-
-        // Effects: set staker and pool data
-        s_stakerBandState[hashedStakerBandAndLevel].set(bandId, 0);
-
-        uint16 poolId;
-        uint256 allUsersLength;
-        for (uint i; i < bandData.accessiblePools.length; i++) {
-            poolId = bandData.accessiblePools[i];
-            s_poolData[poolId].userCheck[msg.sender] = false;
-
-            allUsersLength = s_poolData[poolId].allUsers.length;
-            for (uint j; j < allUsersLength; j++) {
-                if (s_poolData[poolId].allUsers[j] == msg.sender) {
-                    s_poolData[poolId].allUsers[j] = s_poolData[poolId]
-                        .allUsers[allUsersLength - 1];
-                    s_poolData[poolId].allUsers.pop();
-                }
-            }
-        }
-
         // Interaction: transfer transaction funds to user
         // @todo:
         // _claimRewards();
         // s_wowToken.safeTransferFrom(address(this), msg.sender, rewards+band.price);
+        emit UnstakingSuccess(msg.sender, bandLevel);
     }
 
-    // NOTE: staking function base
-    // function addStakerToPoolIfInexistent(
-    //     uint256 _poolId,
-    //     address depositingStaker
-    // ) private {
-    //     Pool storage pool = pools[_poolId];
-    //     for (uint256 i; i < pool.stakers.length; i++) {
-    //         address existingStaker = pool.stakers[i];
-    //         if (existingStaker == depositingStaker) return;
-    //     }
-    //     pool.stakers.push(msg.sender);
-    // }
+    /**
+     * @notice  Stakes vesting contract tokens to ear rewards
+     * @param   stakingType  enumerable type for flexi or fixed staking
+     * @param   bandLevel  band level number
+     * @param   user  address of user staking vested tokens
+     */
+    function stakeVested(
+        StakingTypes stakingType,
+        uint16 bandLevel,
+        address user
+    )
+        external
+        mBandExists(bandLevel)
+        onlyRole(VESTING_ROLE)
+        mStakingTypeExists(stakingType)
+    {
+        _updateStakeData(stakingType, bandLevel, user);
+        emit StakingSuccess(user, bandLevel);
+    }
 
-    // function deposit(uint256 _poolId, uint256 _amount) external {
-    //     require(_amount > 0, "Deposit amount can't be zero");
-    //     Pool storage pool = pools[_poolId];
-    //     PoolStaker storage staker = poolStakers[_poolId][msg.sender];
-    //     // Update pool stakers
-    //     updateStakersRewards(_poolId);
-    //     addStakerToPoolIfInexistent(_poolId, msg.sender);
-    //     // Update current staker
-    //     staker.amount = staker.amount + _amount;
-    //     staker.lastRewardedBlock = block.number;
-    //     // Update pool
-    //     pool.tokensStaked = pool.tokensStaked + _amount;
-    //     // Deposit tokens
-    //     emit Deposit(msg.sender, _poolId, _amount);
-    //     pool.stakeToken.safeTransferFrom(
-    //         address(msg.sender),
-    //         address(this),
-    //         _amount
-    //     );
-    // }
-
-    // function withdraw(uint256 _poolId) external {
-    //     Pool storage pool = pools[_poolId];
-    //     PoolStaker storage staker = poolStakers[_poolId][msg.sender];
-    //     uint256 amount = staker.amount;
-    //     require(amount > 0, "Withdraw amount can't be zero");
-
-    //     // Update pool stakers
-    //     updateStakersRewards(_poolId);
-
-    //     // Pay rewards
-    //     harvestRewards(_poolId);
-
-    //     // Update staker
-    //     staker.amount = 0;
-
-    //     // Update pool
-    //     pool.tokensStaked = pool.tokensStaked - amount;
-
-    //     // Withdraw tokens
-    //     emit Withdraw(msg.sender, _poolId, amount);
-    //     pool.stakeToken.safeTransfer(address(msg.sender), amount);
-    // }
-
-    // function harvestRewards(uint256 _poolId) public {
-    //     updateStakersRewards(_poolId);
-    //     PoolStaker storage staker = poolStakers[_poolId][msg.sender];
-    //     uint256 rewardsToHarvest = staker.rewards;
-    //     staker.rewards = 0;
-    //     emit HarvestRewards(msg.sender, _poolId, rewardsToHarvest);
-    //     //transfer reward token rewards to user
-    //     // rewardToken.mint(msg.sender, rewardsToHarvest);
-    // }
-
-    // function updateStakersRewards(uint256 _poolId) private {
-    //     Pool storage pool = pools[_poolId];
-    //     for (uint256 i; i < pool.stakers.length; i++) {
-    //         address stakerAddress = pool.stakers[i];
-    //         PoolStaker storage staker = poolStakers[_poolId][stakerAddress];
-    //         if (staker.amount == 0) return;
-    //         uint256 stakedAmount = staker.amount;
-    //         uint256 stakerShare = ((stakedAmount * STAKER_SHARE_PRECISION) /
-    //             pool.tokensStaked);
-    //         uint256 blocksSinceLastReward = block.number -
-    //             staker.lastRewardedBlock;
-    //         uint256 rewards = (blocksSinceLastReward *
-    //             rewardTokensPerBlock *
-    //             stakerShare) / STAKER_SHARE_PRECISION;
-    //         staker.lastRewardedBlock = block.number;
-    //         staker.rewards = staker.rewards + rewards;
-    //     }
-    // }
+    /**
+     * @notice  Unstake tokens at any time and claim earned rewards
+     * @param   bandLevel  band level number
+     * @param   bandId  Id of the band (0-max uint)
+     * @param   user  address of user staking vested tokens
+     */
+    function unstakeVested(
+        uint16 bandLevel,
+        uint16 bandId,
+        address user
+    ) external mBandExists(bandLevel) onlyRole(VESTING_ROLE) {
+        _updateUnstakeData(bandLevel, bandId, user);
+        // @todo:
+        // _claimRewards();
+        // s_wowToken.safeTransferFrom(address(this), msg.sender, rewards);
+         emit UnstakingSuccess(msg.sender, bandLevel);
+    }
 
     /*//////////////////////////////////////////////////////////////////////////
                             EXTERNAL VIEW/PURE FUNCTIONS
@@ -602,6 +508,82 @@ contract Staking is
         uint16 bandId
     ) internal pure returns (bytes32) {
         return keccak256(abi.encode(staker, bandLevel, bandId));
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                            INTERNAL  FUNCTIONS
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function _updateStakeData(
+        StakingTypes stakingType,
+        uint16 bandLevel,
+        address user
+    ) internal returns (Band memory bandData) {
+        bytes32 hashedStakerBandAndLevel = _getStakerBandAndLevelHash(
+            user,
+            bandLevel
+        );
+
+        uint16 bandId = s_nextBandId[hashedStakerBandAndLevel]++;
+        bandData = s_bandData[bandLevel];
+
+        bytes32 hashedStakerWithBandLevelAndId = _getStakerWithBandLevelAndIdHash(
+                user,
+                bandLevel,
+                bandId
+            );
+
+        // Effects: set staker and pool data
+        StakerBandData storage stakerBandData = s_stakerBand[
+            hashedStakerWithBandLevelAndId
+        ];
+        stakerBandData.stakingType = stakingType;
+        stakerBandData.stakingStartTimestamp = block.timestamp;
+
+        s_stakerBandState[hashedStakerBandAndLevel].set(bandId, 1);
+
+        uint16 poolId;
+        uint256 accessiblePoolLength = bandData.accessiblePools.length;
+        for (uint i; i < accessiblePoolLength; i++) {
+            poolId = bandData.accessiblePools[i];
+            s_poolData[poolId].userCheck[user] = true;
+            s_poolData[poolId].allUsers.push(user);
+        }
+    }
+
+    function _updateUnstakeData(
+        uint16 bandLevel,
+        uint16 bandId,
+        address user
+    ) internal {
+        Band memory bandData = s_bandData[bandLevel];
+        bytes32 hashedStakerBandAndLevel = _getStakerBandAndLevelHash(
+            user,
+            bandLevel
+        );
+
+        if (s_stakerBandState[hashedStakerBandAndLevel].get(bandId) == 0) {
+            revert Errors.Staking__InvalidBandId(bandId);
+        }
+
+        // Effects: set staker and pool data
+        s_stakerBandState[hashedStakerBandAndLevel].set(bandId, 0);
+
+        uint16 poolId;
+        uint256 allUsersLength;
+        for (uint i; i < bandData.accessiblePools.length; i++) {
+            poolId = bandData.accessiblePools[i];
+            s_poolData[poolId].userCheck[user] = false;
+
+            allUsersLength = s_poolData[poolId].allUsers.length;
+            for (uint j; j < allUsersLength; j++) {
+                if (s_poolData[poolId].allUsers[j] == user) {
+                    s_poolData[poolId].allUsers[j] = s_poolData[poolId]
+                        .allUsers[allUsersLength - 1];
+                    s_poolData[poolId].allUsers.pop();
+                }
+            }
+        }
     }
 
     /*//////////////////////////////////////////////////////////////////////////

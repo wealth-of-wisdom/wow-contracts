@@ -4,6 +4,7 @@ pragma solidity 0.8.20;
 library Errors {
     error Vesting__ArraySizeMismatch();
     error Vesting__CanNotWithdrawVestedTokens();
+    error Vesting__InvalidBand();
     error Vesting__ListingDateNotInFuture();
     error Vesting__ListingAndCliffPercentageOverflow();
     error Vesting__NotEnoughVestedTokensForStaking();
