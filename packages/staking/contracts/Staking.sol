@@ -343,7 +343,7 @@ contract Staking is
             bandLevel
         );
 
-        uint16 bandId = s_nextBandId[hashedStakerBandAndLevel];
+        uint16 bandId = s_nextBandId[hashedStakerBandAndLevel]++;
         Band memory bandData = s_bandData[bandLevel];
 
         bytes32 hashedStakerWithBandLevelAndId = _getStakerWithBandLevelAndIdHash(
@@ -371,7 +371,6 @@ contract Staking is
 
         // Interaction: transfer transaction funds to contract
         s_wowToken.safeTransferFrom(msg.sender, address(this), bandData.price);
-        bandId = s_nextBandId[hashedStakerBandAndLevel]++;
     }
 
     /**
@@ -397,12 +396,18 @@ contract Staking is
         s_stakerBandState[hashedStakerBandAndLevel].set(bandId, 0);
 
         uint16 poolId;
+        uint256 allUsersLength;
         for (uint i; i < bandData.accessiblePools.length; i++) {
             poolId = bandData.accessiblePools[i];
             s_poolData[poolId].userCheck[msg.sender] = false;
-            for (uint j; j < s_poolData[poolId].allUsers.length; j++) {
-                if (s_poolData[poolId].allUsers[j] == msg.sender)
-                    delete s_poolData[poolId].allUsers[j];
+
+            allUsersLength = s_poolData[poolId].allUsers.length;
+            for (uint j; j < allUsersLength; j++) {
+                if (s_poolData[poolId].allUsers[j] == msg.sender) {
+                    s_poolData[poolId].allUsers[j] = s_poolData[poolId]
+                        .allUsers[allUsersLength - 1];
+                    s_poolData[poolId].allUsers.pop();
+                }
             }
         }
 
