@@ -30,7 +30,7 @@ contract Staking is
     bytes32 private constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     uint128 private constant DECIMALS = 10 ** 6;
     uint128 private constant MONTH = 30 days;
-    uint48 private constant PERCENTAGE_PRECISION = 10 ** 6; // 100% = 10**6
+    uint48 private constant PERCENTAGE_PRECISION = 10 ** 8; // 100% = 10**8
 
     /*//////////////////////////////////////////////////////////////////////////
                                 PUBLIC STORAGE
@@ -274,19 +274,18 @@ contract Staking is
         s_fundDistributionData.push(fundDistributionData);
 
         // Effects: distribute funds to pools
-        for (uint16 poolId; poolId < s_totalPools; poolId++) {
+        uint16 totalPools = s_totalPools;
+        for (uint16 poolId; poolId < totalPools; poolId++) {
             // amount * (100% * 10**6) / (distribution % * 10**6)
-            uint256 poolAmount = (amount * (100 * PERCENTAGE_PRECISION)) /
-                s_poolData[poolId].distributionPercentage;
+            uint256 poolAmount = ((amount *
+                s_poolData[poolId].distributionPercentage) /
+                PERCENTAGE_PRECISION);
 
-            s_poolData[poolId].totalUsdtPoolTokenAmount += (token ==
-                s_usdtToken)
-                ? poolAmount
-                : 0;
-            s_poolData[poolId].totalUsdcPoolTokenAmount += (token ==
-                s_usdcToken)
-                ? poolAmount
-                : 0;
+            if (token == s_usdtToken) {
+                s_poolData[poolId].totalUsdtPoolTokenAmount += poolAmount;
+            } else {
+                s_poolData[poolId].totalUsdcPoolTokenAmount += poolAmount;
+            }
         }
 
         // Interaction: transfer the tokens to contract
@@ -354,25 +353,25 @@ contract Staking is
             );
 
         // Effects: set staker and pool data
-        s_stakerBand[hashedStakerWithBandLevelAndId] = StakerBandData({
-            stakingType: stakingType,
-            stakingStartTimestamp: block.timestamp,
-            usdtRewardsClaimed: 0,
-            usdcRewardsClaimed: 0
-        });
+        StakerBandData storage stakerBandData = s_stakerBand[
+            hashedStakerWithBandLevelAndId
+        ];
+        stakerBandData.stakingType = stakingType;
+        stakerBandData.stakingStartTimestamp = block.timestamp;
 
         s_stakerBandState[hashedStakerBandAndLevel].set(bandId, 1);
 
         uint16 poolId;
-        for (uint i; i < bandData.accessiblePools.length; i++) {
+        uint256 accessiblePoolLength = bandData.accessiblePools.length;
+        for (uint i; i < accessiblePoolLength; i++) {
             poolId = bandData.accessiblePools[i];
             s_poolData[poolId].userCheck[msg.sender] = true;
             s_poolData[poolId].allUsers.push(msg.sender);
         }
 
-        // Effects: transfer transaction funds to contract
+        // Interaction: transfer transaction funds to contract
         s_wowToken.safeTransferFrom(msg.sender, address(this), bandData.price);
-        s_nextBandId[hashedStakerBandAndLevel]++;
+        bandId = s_nextBandId[hashedStakerBandAndLevel]++;
     }
 
     /**
@@ -397,12 +396,14 @@ contract Staking is
         // Effects: set staker and pool data
         s_stakerBandState[hashedStakerBandAndLevel].set(bandId, 0);
 
-        //@question: do we need to have mapping if user is still in the pool?
-        //maybe we can do the check with stakersBandState?
         uint16 poolId;
         for (uint i; i < bandData.accessiblePools.length; i++) {
             poolId = bandData.accessiblePools[i];
             s_poolData[poolId].userCheck[msg.sender] = false;
+            for (uint j; j < s_poolData[poolId].allUsers.length; j++) {
+                if (s_poolData[poolId].allUsers[j] == msg.sender)
+                    delete s_poolData[poolId].allUsers[j];
+            }
         }
 
         // Interaction: transfer transaction funds to user
