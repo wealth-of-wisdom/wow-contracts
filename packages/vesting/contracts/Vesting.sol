@@ -502,7 +502,6 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
 
     /**
      * @notice Unstakes vested tokesns via vesting contract in staking contract
-     * @param stakingType  enumerable type for flexi or fixed staking
      * @param bandLevel  band level number
      * @param bandId  Id of the band (0-max uint)
      * @param pid Index that refers to vesting pool object.
@@ -510,7 +509,6 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      * @param tokenAmount Amount used to stake or unstake from vesting pool.
      */
     function unstakeVestedTokens(
-        IStaking.StakingTypes stakingType,
         uint16 bandLevel,
         uint16 bandId,
         uint16 pid,

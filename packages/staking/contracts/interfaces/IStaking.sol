@@ -18,6 +18,12 @@ interface IStakingEvents {
 
     event UnstakingSuccess(address user, uint16 bandLevel);
 
+    event UpgradeSuccess(
+        address user,
+        uint16 oldBandLevel,
+        uint16 newBandLevel
+    );
+
     event TotalBandAmountSet(uint16 newTotalBandsAmount);
 
     event TotalPoolAmountSet(uint16 newTotalPoolAmount);

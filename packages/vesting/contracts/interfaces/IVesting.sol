@@ -147,7 +147,6 @@ interface IVesting is IVestingEvents {
     ) external;
 
     function unstakeVestedTokens(
-        IStaking.StakingTypes stakingType,
         uint16 bandLevel,
         uint16 bandId,
         uint16 pid,

@@ -361,9 +361,8 @@ contract Staking is
         uint16 bandLevel,
         uint16 bandId
     ) external mBandExists(bandLevel) {
-       
         _updateUnstakeData(bandLevel, bandId, msg.sender);
-        }
+
         // Interaction: transfer transaction funds to user
         // @todo:
         // _claimRewards();
@@ -406,7 +405,46 @@ contract Staking is
         // @todo:
         // _claimRewards();
         // s_wowToken.safeTransferFrom(address(this), msg.sender, rewards);
-         emit UnstakingSuccess(msg.sender, bandLevel);
+        emit UnstakingSuccess(msg.sender, bandLevel);
+    }
+
+    function upgradeBand(
+        uint16 oldBandLevel,
+        uint16 newBandLevel,
+        uint16 bandId
+    ) external mBandExists(oldBandLevel) mBandExists(newBandLevel) {
+        bytes32 hashedStakerBandAndLevel = _getStakerBandAndLevelHash(
+            msg.sender,
+            oldBandLevel
+        );
+
+        uint16 oldBandId = s_nextBandId[hashedStakerBandAndLevel]++;
+        Band memory oldBandData = s_bandData[oldBandLevel];
+
+        bytes32 hashedStakerWithBandLevelAndId = _getStakerWithBandLevelAndIdHash(
+                msg.sender,
+                oldBandLevel,
+                oldBandId
+            );
+
+        // Effects: set pool data
+        s_stakerBandState[hashedStakerBandAndLevel].set(bandId, 1);
+
+        // uint16 poolId;
+        // uint256 accessiblePoolLength = oldBandData.accessiblePools.length;
+        // for (uint i; i < accessiblePoolLength; i++) {
+        //     poolId = bandData.accessiblePools[i];
+        //     s_poolData[poolId].userCheck[user] = true;
+        //     s_poolData[poolId].allUsers.push(user);
+        // }
+
+        // Interaction: transfer transaction funds to contract
+        // s_wowToken.safeTransferFrom(
+        //     msg.sender,
+        //     address(this),
+        //     oldBandData.price - newBandData.price
+        // );
+        emit UpgradeSuccess(msg.sender, oldBandLevel, newBandLevel);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
