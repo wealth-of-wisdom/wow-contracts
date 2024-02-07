@@ -325,7 +325,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
 
         if (stakedAmount > 0) {
             // Interactions: delete user data from staking contract
-            s_staking.deleteVestingUserData(msg.sender);
+            // s_staking.deleteVestingUserData(msg.sender);
         }
 
         emit BeneficiaryRemoved(pid, beneficiary, availableAmount);
