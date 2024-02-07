@@ -623,7 +623,8 @@ contract Staking is
 
         uint16 poolId;
         uint allUsersLength;
-        for (uint i; i < bandData.accessiblePools.length; i++) {
+        uint accessiblePoolLength = bandData.accessiblePools.length;
+        for (uint i; i < accessiblePoolLength; i++) {
             poolId = bandData.accessiblePools[i];
             s_poolData[poolId].userCheck[user] = false;
 
