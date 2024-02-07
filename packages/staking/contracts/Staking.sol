@@ -43,11 +43,6 @@ contract Staking is
                                 INTERNAL STORAGE
     //////////////////////////////////////////////////////////////////////////*/
 
-    // Enumerable mapping equivalent to:
-    // mapping(uint bandId => uint bandState)
-    // With normal mapping it would look like this:
-    // mapping(bytes32 stakerAndBandLevel => mapping(uint bandId => uint bandState)
-    // Returns 1 or 0 as true or false values to determine whether the band exists
     mapping(bytes32 stakerAndBandLevel => uint16[] bandId)
         internal s_stakerBands;
     mapping(bytes32 bandLevelAndId => address staker) internal s_bandOwnership;
