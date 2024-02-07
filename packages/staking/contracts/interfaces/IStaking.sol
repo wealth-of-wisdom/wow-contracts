@@ -18,7 +18,7 @@ interface IStakingEvents {
 
     event UnstakingSuccess(address user, uint16 bandLevel);
 
-    event UpgradeSuccess(
+    event BandStateChanged(
         address user,
         uint16 oldBandLevel,
         uint16 newBandLevel

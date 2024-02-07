@@ -423,6 +423,12 @@ contract Staking is
         emit UnstakingSuccess(msg.sender, bandLevel);
     }
 
+    /**
+     * @notice  Upgradea any owned band to a new level
+     * @param   oldBandLevel  Old band level in need of an upgrade
+     * @param   newBandLevel  New band level being upgraded to
+     * @param   bandId  Band Id being upgraded
+     */
     function upgradeBand(
         uint16 oldBandLevel,
         uint16 newBandLevel,
@@ -433,25 +439,13 @@ contract Staking is
         mBandExists(newBandLevel)
         mBandIdExists(msg.sender, oldBandLevel, bandId)
     {
-        bytes32 hashedStakerOldBandAndLevel = _getStakerBandAndLevelHash(
-            msg.sender,
-            oldBandLevel
-        );
-        bytes32 hashedStakerNewBandAndLevel = _getStakerBandAndLevelHash(
-            msg.sender,
-            newBandLevel
-        );
+        (
+            Band memory oldBandData,
+            Band memory newBandData,
+            uint oldPoolLength,
+            uint newPoolLength
+        ) = _getDataForBandLevelChange(oldBandLevel, newBandLevel, bandId);
 
-        // Effects: update staker band Ids
-        s_stakerBandState[hashedStakerOldBandAndLevel].set(bandId, 0);
-        s_stakerBandState[hashedStakerNewBandAndLevel].set(bandId, 1);
-
-        Band memory oldBandData = s_bandData[oldBandLevel];
-        Band memory newBandData = s_bandData[newBandLevel];
-
-        // Effects: get/set pools that need to be upgraded
-        uint oldPoolLength = oldBandData.accessiblePools.length;
-        uint newPoolLength = newBandData.accessiblePools.length;
         uint16 poolId;
         for (oldPoolLength; oldPoolLength < newPoolLength; oldPoolLength++) {
             poolId = newBandData.accessiblePools[oldPoolLength];
@@ -460,9 +454,56 @@ contract Staking is
         }
 
         // Interaction: transfer transaction funds to contract
-        uint priceDifference = oldBandData.price - newBandData.price;
+        uint priceDifference = newBandData.price - oldBandData.price;
         s_wowToken.safeTransferFrom(msg.sender, address(this), priceDifference);
-        emit UpgradeSuccess(msg.sender, oldBandLevel, newBandLevel);
+        emit BandStateChanged(msg.sender, oldBandLevel, newBandLevel);
+    }
+
+    /**
+     * @notice  Downgrade any owned band to a new level
+     * @param   oldBandLevel  Old band level in need of an downgrade
+     * @param   newBandLevel  New band level being downgraded to
+     * @param   bandId  Band Id being downgraded
+     */
+    function downgradeBand(
+        uint16 oldBandLevel,
+        uint16 newBandLevel,
+        uint16 bandId
+    )
+        external
+        mBandExists(oldBandLevel)
+        mBandExists(newBandLevel)
+        mBandIdExists(msg.sender, oldBandLevel, bandId)
+    {
+        (
+            Band memory oldBandData,
+            Band memory newBandData,
+            uint oldPoolLength,
+            uint newPoolLength
+        ) = _getDataForBandLevelChange(oldBandLevel, newBandLevel, bandId);
+
+        uint16 poolId;
+        uint allUsersLength;
+
+        for (newPoolLength; newPoolLength < oldPoolLength; newPoolLength++) {
+            poolId = newBandData.accessiblePools[newPoolLength];
+            s_poolData[poolId].userCheck[msg.sender] = false;
+
+            allUsersLength = s_poolData[poolId].allUsers.length;
+            for (uint j; j < allUsersLength; j++) {
+                if (s_poolData[poolId].allUsers[j] == msg.sender) {
+                    s_poolData[poolId].allUsers[j] = s_poolData[poolId]
+                        .allUsers[allUsersLength - 1];
+                    s_poolData[poolId].allUsers.pop();
+                    break;
+                }
+            }
+        }
+
+        // Interaction: transfer transaction funds to contract
+        uint priceDifference = oldBandData.price - newBandData.price;
+        s_wowToken.safeTransferFrom(address(this), msg.sender, priceDifference);
+        emit BandStateChanged(msg.sender, oldBandLevel, newBandLevel);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -634,9 +675,44 @@ contract Staking is
                     s_poolData[poolId].allUsers[j] = s_poolData[poolId]
                         .allUsers[allUsersLength - 1];
                     s_poolData[poolId].allUsers.pop();
+                    break;
                 }
             }
         }
+    }
+
+    function _getDataForBandLevelChange(
+        uint16 oldBandLevel,
+        uint16 newBandLevel,
+        uint16 bandId
+    )
+        internal
+        returns (
+            Band memory oldBandData,
+            Band memory newBandData,
+            uint oldPoolLength,
+            uint newPoolLength
+        )
+    {
+        bytes32 hashedStakerOldBandAndLevel = _getStakerBandAndLevelHash(
+            msg.sender,
+            oldBandLevel
+        );
+        bytes32 hashedStakerNewBandAndLevel = _getStakerBandAndLevelHash(
+            msg.sender,
+            newBandLevel
+        );
+
+        // Effects: update staker band Ids
+        s_stakerBandState[hashedStakerOldBandAndLevel].set(bandId, 0);
+        s_stakerBandState[hashedStakerNewBandAndLevel].set(bandId, 1);
+
+        oldBandData = s_bandData[oldBandLevel];
+        newBandData = s_bandData[newBandLevel];
+
+        // Effects: get/set pools that need to be upgraded
+        oldPoolLength = oldBandData.accessiblePools.length;
+        newPoolLength = newBandData.accessiblePools.length;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
