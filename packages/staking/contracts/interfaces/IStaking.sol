@@ -109,7 +109,8 @@ interface IStaking is IStakingEvents {
         address user
     ) external;
 
-    function deleteVestingUserData(address user) external;
+    //WIP
+    // function deleteVestingUserData(address user) external;
 
     function upgradeBand(
         uint16 oldBandLevel,
