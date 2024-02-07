@@ -423,6 +423,18 @@ contract Staking is
         emit UnstakingSuccess(msg.sender, bandLevel);
     }
 
+    //WIP
+    // function deleteVestingUserData(
+    //     address user
+    // ) external onlyRole(VESTING_ROLE) {
+    //    bytes32 hashedStakerBandAndLevel = _getStakerBandAndLevelHash(
+    //         user,
+    //         bandLevel
+    //     );
+    //     s_stakerBandState[hashedStakerBandAndLevel].set(bandId, 1);
+
+    // }
+
     /**
      * @notice  Upgradea any owned band to a new level
      * @param   oldBandLevel  Old band level in need of an upgrade
