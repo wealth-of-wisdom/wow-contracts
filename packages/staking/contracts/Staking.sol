@@ -53,7 +53,6 @@ contract Staking is
     mapping(bytes32 stakerAndBandLevel => EnumerableMap.UintToUintMap)
         internal s_stakerBandState;
 
-    mapping(bytes32 stakerAndBandLevel => uint16 bandId) internal s_nextBandId;
     mapping(bytes32 stakerWithBandLevelAndId => StakerBandData)
         internal s_stakerBand;
 
@@ -62,6 +61,7 @@ contract Staking is
     FundDistribution[] internal s_fundDistributionData; // Any added funds data
 
     uint[] shares; // in 10**6 integrals, for divident calculation
+    uint16 internal s_nextBandId;
     uint16 internal s_totalPools;
     uint16 internal s_totalBands;
 
@@ -580,7 +580,7 @@ contract Staking is
             bandLevel
         );
 
-        uint16 bandId = s_nextBandId[hashedStakerBandAndLevel]++;
+        uint16 bandId = s_nextBandId++;
         bandData = s_bandData[bandLevel];
 
         bytes32 hashedStakerWithBandLevelAndId = _getStakerWithBandLevelAndIdHash(

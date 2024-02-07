@@ -327,6 +327,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
             // Interactions: Unstake staked tokens from staking contract
             //todo: discuss beneficiary stake removal when being removed from pool
             //are all stakes from this pool removed?
+            //possible solution: delete data - make public funds
             // s_staking.unstakeVestedTokens(beneficiary, stakedAmount);
         }
 
