@@ -67,8 +67,6 @@ interface IStaking is IStakingEvents {
         uint48[] bandAllocationPercentage; // in 10**6, start from the last level: 0 = 9lvl, 1 = 8lvl...
         uint256 totalUsdtPoolTokenAmount;
         uint256 totalUsdcPoolTokenAmount;
-        address[] allUsers;
-        mapping(address staker => bool isUserInPool) userCheck;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -90,7 +88,7 @@ interface IStaking is IStakingEvents {
 
     function stake(StakingTypes stakingType, uint16 bandLevel) external;
 
-    function unStake(uint16 bandLevel, uint16 bandId) external;
+    function unstake(uint16 bandLevel, uint16 bandId) external;
 
     function stakeVested(
         StakingTypes stakingType,

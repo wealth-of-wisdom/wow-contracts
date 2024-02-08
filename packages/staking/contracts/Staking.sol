@@ -5,6 +5,7 @@ import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/acce
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {EnumerableMap} from "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
 import {Errors} from "./libraries/Errors.sol";
@@ -20,6 +21,7 @@ contract Staking is
     //////////////////////////////////////////////////////////////////////////*/
 
     using SafeERC20 for IERC20; // Wrappers around ERC20 operations that throw on failure
+    using EnumerableMap for EnumerableMap.AddressToUintMap;
 
     /*//////////////////////////////////////////////////////////////////////////
                                 PRIVATE CONSTANTS
@@ -32,16 +34,12 @@ contract Staking is
     uint48 private constant PERCENTAGE_PRECISION = 10 ** 8; // 100% = 10**8
 
     /*//////////////////////////////////////////////////////////////////////////
-                                PUBLIC STORAGE
-    //////////////////////////////////////////////////////////////////////////*/
-
-    IERC20 internal s_usdtToken; // Token to be payed as reward
-    IERC20 internal s_usdcToken; // Token to be payed as reward
-    IERC20 internal s_wowToken; // Token to be staked
-
-    /*//////////////////////////////////////////////////////////////////////////
                                 INTERNAL STORAGE
     //////////////////////////////////////////////////////////////////////////*/
+
+    // Map user => bool (if user is staking)
+    // 0 - false (not staking), 1 - true (is staking)
+    EnumerableMap.AddressToUintMap internal s_users;
 
     mapping(bytes32 stakerAndBandLevel => uint16[] bandId)
         internal s_stakerBands;
@@ -51,7 +49,12 @@ contract Staking is
 
     mapping(uint16 poolId => Pool) internal s_poolData; // Pool data, poolId - 1-9lvl
     mapping(uint16 bandLevel => Band) internal s_bandData; // Band data, bandLevel - 1-9lvl
+
     FundDistribution[] internal s_fundDistributionData; // Any added funds data
+
+    IERC20 internal s_usdtToken; // Token to be payed as reward
+    IERC20 internal s_usdcToken; // Token to be payed as reward
+    IERC20 internal s_wowToken; // Token to be staked
 
     uint[] shares; // in 10**6 integrals, for divident calculation
     uint16 internal s_nextBandId;
@@ -347,11 +350,7 @@ contract Staking is
         StakingTypes stakingType,
         uint16 bandLevel
     ) external mBandExists(bandLevel) mStakingTypeExists(stakingType) {
-        Band memory bandData = _updateStakeData(
-            stakingType,
-            bandLevel,
-            msg.sender
-        );
+        Band memory bandData = _stakeBand(stakingType, bandLevel, msg.sender);
         // Interaction: transfer transaction funds to contract
         s_wowToken.safeTransferFrom(msg.sender, address(this), bandData.price);
         emit StakingSuccess(msg.sender, bandLevel);
@@ -362,11 +361,11 @@ contract Staking is
      * @param   bandLevel  band level number
      * @param   bandId  Id of the band (0-max uint)
      */
-    function unStake(
+    function unstake(
         uint16 bandLevel,
         uint16 bandId
     ) external mBandExists(bandLevel) {
-        _updateUnstakeData(bandLevel, bandId, msg.sender);
+        _unstakeBand(bandLevel, bandId, msg.sender);
 
         // Interaction: transfer transaction funds to user
         // @todo:
@@ -391,7 +390,7 @@ contract Staking is
         onlyRole(VESTING_ROLE)
         mStakingTypeExists(stakingType)
     {
-        _updateStakeData(stakingType, bandLevel, user);
+        _stakeBand(stakingType, bandLevel, user);
         emit StakingSuccess(user, bandLevel);
     }
 
@@ -406,7 +405,7 @@ contract Staking is
         uint16 bandId,
         address user
     ) external mBandExists(bandLevel) onlyRole(VESTING_ROLE) {
-        _updateUnstakeData(bandLevel, bandId, user);
+        _unstakeBand(bandLevel, bandId, user);
         // @todo:
         // _claimRewards();
         // s_wowToken.safeTransferFrom(address(this), msg.sender, rewards);
@@ -449,13 +448,6 @@ contract Staking is
             uint newPoolLength
         ) = _updateDataForBandLevelChange(oldBandLevel, newBandLevel, bandId);
 
-        uint16 poolId;
-        for (oldPoolLength; oldPoolLength < newPoolLength; oldPoolLength++) {
-            poolId = newBandData.accessiblePools[oldPoolLength];
-            s_poolData[poolId].userCheck[msg.sender] = true;
-            s_poolData[poolId].allUsers.push(msg.sender);
-        }
-
         // Interaction: transfer transaction funds to contract
         uint priceDifference = newBandData.price - oldBandData.price;
         s_wowToken.safeTransferFrom(msg.sender, address(this), priceDifference);
@@ -484,24 +476,6 @@ contract Staking is
             uint oldPoolLength,
             uint newPoolLength
         ) = _updateDataForBandLevelChange(oldBandLevel, newBandLevel, bandId);
-
-        uint16 poolId;
-        uint allUsersLength;
-
-        for (newPoolLength; newPoolLength < oldPoolLength; newPoolLength++) {
-            poolId = newBandData.accessiblePools[newPoolLength];
-            s_poolData[poolId].userCheck[msg.sender] = false;
-
-            allUsersLength = s_poolData[poolId].allUsers.length;
-            for (uint j; j < allUsersLength; j++) {
-                if (s_poolData[poolId].allUsers[j] == msg.sender) {
-                    s_poolData[poolId].allUsers[j] = s_poolData[poolId]
-                        .allUsers[allUsersLength - 1];
-                    s_poolData[poolId].allUsers.pop();
-                    break;
-                }
-            }
-        }
 
         // Interaction: transfer transaction funds to contract
         uint priceDifference = oldBandData.price - newBandData.price;
@@ -562,8 +536,7 @@ contract Staking is
             uint48 distributionPercentage,
             uint48[] memory bandAllocationPercentage,
             uint usdtTokenAmount,
-            uint usdcTokenAmount,
-            address[] memory allUsers
+            uint usdcTokenAmount
         )
     {
         Pool storage pool = s_poolData[poolId];
@@ -571,7 +544,6 @@ contract Staking is
         bandAllocationPercentage = pool.bandAllocationPercentage;
         usdtTokenAmount = pool.totalUsdtPoolTokenAmount;
         usdcTokenAmount = pool.totalUsdcPoolTokenAmount;
-        allUsers = pool.allUsers;
     }
 
     function getBand(
@@ -621,7 +593,7 @@ contract Staking is
                             INTERNAL  FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
-    function _updateStakeData(
+    function _stakeBand(
         StakingTypes stakingType,
         uint16 bandLevel,
         address user
@@ -649,16 +621,10 @@ contract Staking is
         stakerBandData.stakingType = stakingType;
         stakerBandData.stakingStartTimestamp = block.timestamp;
 
-        uint16 poolId;
-        uint accessiblePoolLength = bandData.accessiblePools.length;
-        for (uint i; i < accessiblePoolLength; i++) {
-            poolId = bandData.accessiblePools[i];
-            s_poolData[poolId].userCheck[user] = true;
-            s_poolData[poolId].allUsers.push(user);
-        }
+        // @todo add user if needed
     }
 
-    function _updateUnstakeData(
+    function _unstakeBand(
         uint16 bandLevel,
         uint16 bandId,
         address user
@@ -683,24 +649,7 @@ contract Staking is
         s_stakerBands[hashedStakerBandAndLevel].push(bandId);
         delete s_bandOwnership[hashedBandLevelAndId];
 
-        // Effects: set staker and pool data;
-        uint16 poolId;
-        uint allUsersLength;
-        uint accessiblePoolLength = bandData.accessiblePools.length;
-        for (uint i; i < accessiblePoolLength; i++) {
-            poolId = bandData.accessiblePools[i];
-            s_poolData[poolId].userCheck[user] = false;
-
-            allUsersLength = s_poolData[poolId].allUsers.length;
-            for (uint j; j < allUsersLength; j++) {
-                if (s_poolData[poolId].allUsers[j] == user) {
-                    s_poolData[poolId].allUsers[j] = s_poolData[poolId]
-                        .allUsers[allUsersLength - 1];
-                    s_poolData[poolId].allUsers.pop();
-                    break;
-                }
-            }
-        }
+        // @todo remove user if needed
     }
 
     function _updateDataForBandLevelChange(
