@@ -523,6 +523,9 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         Beneficiary storage user = pool.beneficiaries[beneficiary];
 
         // Effects: Unstake tokens
+        if (tokenAmount - user.stakedTokenAmount > 0) {
+            revert Errors.Vesting__UnstakingTooManyTokens();
+        }
         user.stakedTokenAmount -= tokenAmount;
         s_staking.unstakeVested(bandLevel, bandId, msg.sender);
 

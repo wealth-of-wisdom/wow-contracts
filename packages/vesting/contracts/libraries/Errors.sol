@@ -18,6 +18,7 @@ library Errors {
     error Vesting__TokenAmountExeedsTotalPoolAmount();
     error Vesting__TokenAmountZero();
     error Vesting__VestingDurationZero();
+    error Vesting__UnstakingTooManyTokens();
     error Vesting__ZeroAddress();
     error Vesting__EmptyName();
     error Vesting__BeneficiaryDoesNotExist();

@@ -52,6 +52,8 @@ interface IStaking is IStakingEvents {
 
     struct StakerBandData {
         StakingTypes stakingType;
+        address owner;
+        uint16 bandLevel;
         uint256 stakingStartTimestamp;
         uint256 usdtRewardsClaimed;
         uint256 usdcRewardsClaimed;
