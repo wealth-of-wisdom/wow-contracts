@@ -86,8 +86,8 @@ contract Staking is
         _;
     }
 
-    modifier mBandBelongsToUser(address user, uint16 bandId) {
-        if (s_stakerBand[bandId].owner == user) {
+    modifier mBandBelongsToUser(address staker, uint16 bandId) {
+        if (s_stakerBand[bandId].owner == staker) {
             revert Errors.Staking__InvalidBandId(bandId);
         }
         _;
@@ -176,7 +176,6 @@ contract Staking is
         // Effects: set the storage
         Pool storage pool = s_poolData[poolId];
         pool.distributionPercentage = distributionPercentage;
-        pool.bandAllocationPercentage = bandAllocationPercentage;
 
         // Effects: emit event
         emit PoolSet(poolId);
@@ -357,10 +356,10 @@ contract Staking is
     function unStake(
         uint16 bandLevel,
         uint16 bandId
-    ) external mBandExists(bandLevel) {
+    ) external mBandExists(bandLevel) mBandBelongsToUser(msg.sender, bandId) {
         _updateUnstakeData(bandLevel, bandId, msg.sender);
 
-        // Interaction: transfer transaction funds to user
+        // Interaction: transfer transaction funds to staker
         // @todo:
         // _claimRewards();
         // s_wowToken.safeTransferFrom(address(this), msg.sender, rewards+band.price);
@@ -371,34 +370,39 @@ contract Staking is
      * @notice  Stakes vesting contract tokens to ear rewards
      * @param   stakingType  enumerable type for flexi or fixed staking
      * @param   bandLevel  band level number
-     * @param   user  address of user staking vested tokens
+     * @param   staker  address of staker staking vested tokens
      */
     function stakeVested(
         StakingTypes stakingType,
         uint16 bandLevel,
-        address user
+        address staker
     )
         external
         mBandExists(bandLevel)
         onlyRole(VESTING_ROLE)
         mStakingTypeExists(stakingType)
     {
-        _updateStakeData(stakingType, bandLevel, user);
-        emit StakingSuccess(user, bandLevel);
+        _updateStakeData(stakingType, bandLevel, staker);
+        emit StakingSuccess(staker, bandLevel);
     }
 
     /**
      * @notice  Unstake tokens at any time and claim earned rewards
      * @param   bandLevel  band level number
      * @param   bandId  Id of the band (0-max uint)
-     * @param   user  address of user staking vested tokens
+     * @param   staker  address of staker staking vested tokens
      */
     function unstakeVested(
         uint16 bandLevel,
         uint16 bandId,
-        address user
-    ) external mBandExists(bandLevel) onlyRole(VESTING_ROLE) {
-        _updateUnstakeData(bandLevel, bandId, user);
+        address staker
+    )
+        external
+        mBandExists(bandLevel)
+        onlyRole(VESTING_ROLE)
+        mBandBelongsToUser(staker, bandId)
+    {
+        _updateUnstakeData(bandLevel, bandId, staker);
         // @todo:
         // _claimRewards();
         // s_wowToken.safeTransferFrom(address(this), msg.sender, rewards);
@@ -407,11 +411,11 @@ contract Staking is
 
     //WIP
     // function deleteVestingUserData(
-    //     address user
+    //     address staker
     // ) external onlyRole(VESTING_ROLE) {
     //     for (uint256 bandLevel; bandLevel < s_totalBands; bandLevel++) {
     //         bytes32 hashedStakerBandAndLevel = _getStakerBandAndLevelHash(
-    //             user,
+    //             staker,
     //             bandLevel
     //         );
     //         delete s_bandOwnership[bandId];
@@ -500,6 +504,14 @@ contract Staking is
         emit BandStateChanged(msg.sender, oldBandLevel, newBandLevel);
     }
 
+    function claimRewards(
+        uint16 bandId,
+        uint16 poolId
+    ) external mBandBelongsToUser(msg.sender, bandId) {
+        // _claimRewards(bandId, poolId);
+        emit RewardsClaimedSuccessfully();
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                             EXTERNAL VIEW/PURE FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
@@ -559,7 +571,6 @@ contract Staking is
     {
         Pool storage pool = s_poolData[poolId];
         distributionPercentage = pool.distributionPercentage;
-        bandAllocationPercentage = pool.bandAllocationPercentage;
         usdtTokenAmount = pool.totalUsdtPoolTokenAmount;
         usdcTokenAmount = pool.totalUsdcPoolTokenAmount;
         allUsers = pool.allUsers;
@@ -583,6 +594,17 @@ contract Staking is
     }
 
     /*//////////////////////////////////////////////////////////////////////////
+                            PUBLIC VIEW/PURE FUNCTIONS
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function getDistributionTimeInMonths(
+        uint256 periodStart,
+        uint256 periodEnd
+    ) public view returns (uint256 perionInMonths) {
+        perionInMonths = (periodStart - periodEnd) / 30 days;
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
                             INTERNAL VIEW/PURE FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
@@ -600,21 +622,31 @@ contract Staking is
     function _updateStakeData(
         StakingTypes stakingType,
         uint16 bandLevel,
-        address user
+        address staker
     ) internal returns (Band memory bandData) {
         bytes32 hashedStakerBandAndLevel = _getStakerBandAndLevelHash(
-            user,
+            staker,
             bandLevel
         );
         uint16 bandId = s_nextBandId++;
         s_stakerBands[hashedStakerBandAndLevel].push(bandId);
         bandData = s_bandData[bandLevel];
 
+        // Effects: assign shares by share type
+        uint128 sharesEarned;
+        uint256 sharesLength = shares.length;
+        if (StakingTypes.FIX == stakingType) {
+            for (uint128 share; share < sharesLength; share++) {
+                sharesEarned += share;
+            }
+        }
+
         // Effects: set staker and pool data
         s_stakerBand[bandId] = StakerBandData({
             stakingType: stakingType,
-            owner: user,
+            owner: staker,
             bandLevel: bandLevel,
+            sharesEarned: sharesEarned,
             stakingStartTimestamp: block.timestamp,
             usdtRewardsClaimed: 0,
             usdcRewardsClaimed: 0
@@ -624,19 +656,19 @@ contract Staking is
         uint256 accessiblePoolLength = bandData.accessiblePools.length;
         for (uint256 i; i < accessiblePoolLength; i++) {
             poolId = bandData.accessiblePools[i];
-            s_poolData[poolId].userCheck[user] = true;
-            s_poolData[poolId].allUsers.push(user);
+            s_poolData[poolId].userCheck[staker] = true;
+            s_poolData[poolId].allUsers.push(staker);
         }
     }
 
     function _updateUnstakeData(
         uint16 bandLevel,
         uint16 bandId,
-        address user
-    ) internal mBandBelongsToUser(user, bandId) {
+        address staker
+    ) internal mBandBelongsToUser(staker, bandId) {
         Band memory bandData = s_bandData[bandLevel];
         bytes32 hashedStakerBandAndLevel = _getStakerBandAndLevelHash(
-            user,
+            staker,
             bandLevel
         );
 
@@ -660,11 +692,11 @@ contract Staking is
         uint256 accessiblePoolLength = bandData.accessiblePools.length;
         for (uint256 i; i < accessiblePoolLength; i++) {
             poolId = bandData.accessiblePools[i];
-            s_poolData[poolId].userCheck[user] = false;
+            s_poolData[poolId].userCheck[staker] = false;
 
             allUsersLength = s_poolData[poolId].allUsers.length;
             for (uint256 j; j < allUsersLength; j++) {
-                if (s_poolData[poolId].allUsers[j] == user) {
+                if (s_poolData[poolId].allUsers[j] == staker) {
                     s_poolData[poolId].allUsers[j] = s_poolData[poolId]
                         .allUsers[allUsersLength - 1];
                     s_poolData[poolId].allUsers.pop();
@@ -696,6 +728,105 @@ contract Staking is
 
         oldPoolLength = oldBandData.accessiblePools.length;
         newPoolLength = newBandData.accessiblePools.length;
+    }
+
+    //WIP
+    // function _claimRewards(uint16 bandId, uint16 poolId) internal {
+    //     // Effects: get pool data and total staker shares
+    //     Pool storage poolData = s_poolData[poolId];
+    //     uint128 allStakerShares;
+    //     for (uint256 staker; staker < poolData.allUsers.length; staker++) {
+    //         //calculate each staker shares and add them together
+    //     }
+
+    //     //Effects: get staker data and check for staking type
+    //     StakerBandData memory stakerData = s_stakerBand[bandId];
+    //     uint128 stakerShares;
+    //     if (stakerData.stakingType == StakingTypes.FIX) {
+    //         //distribute once in this fund dristribution
+    //     }
+
+    //     // _getFundDistributionForInputPeriod(
+    //     //     token,
+    //     //     stakerData.stakingStartTimestamp,
+    //     //     block.timestamp
+    //     // );
+
+    //     // poolData.totalUsdtPoolTokenAmount /
+    //     //     s_fundDistributionData[1].distributionTimeInMonths;
+    //     // uint256 totalRewardsEarned = rewardDeposit *
+    //     // Effects: get reward deposit for this timeline
+
+    //     // Effects: get reward deposit for pool
+
+    //     // Effects: get staker shares
+    // }
+
+    function _getFundDistributionForInputPeriod(
+        IERC20 token,
+        uint256 periodStart,
+        uint256 periodEnd //current claiming time
+    ) internal returns (uint256 fundsToDistribute) {
+        //@question: should we delete fundDistribution data on period end?
+        //           or should we have a structural change?
+
+        uint256 stakerPeriodTimeInMonths;
+        FundDistribution memory fundData;
+        uint256 distributionPeriodTimeInMonths;
+
+        // Effects: calculate distribution amount for months staker was active
+        uint256 fundDistributionLength = s_fundDistributionData.length;
+        uint256 distributionForMonth;
+
+        for (
+            uint256 distribution;
+            distribution < fundDistributionLength;
+            distribution++
+        ) {
+            // Effects: calculate distribution period of funds per month
+            //          if token does not match - skip
+            fundData = s_fundDistributionData[distribution];
+            if (fundData.token != token) continue;
+            distributionPeriodTimeInMonths = getDistributionTimeInMonths(
+                fundData.distributionPeriodStart,
+                fundData.distributionPeriodEnd
+            );
+
+            distributionForMonth =
+                fundData.amount /
+                distributionPeriodTimeInMonths;
+
+            // Effects: check and recalculate earning period for staker in months
+            if (
+                fundData.distributionPeriodStart > periodStart &&
+                block.timestamp >= fundData.distributionPeriodStart &&
+                fundData.distributionPeriodEnd >= periodEnd
+            ) {
+                periodStart = fundData.distributionPeriodStart;
+            } else if (
+                fundData.distributionPeriodStart > periodStart &&
+                block.timestamp >= fundData.distributionPeriodStart &&
+                fundData.distributionPeriodEnd < periodEnd
+            ) {
+                periodStart = fundData.distributionPeriodStart;
+                periodEnd = fundData.distributionPeriodEnd;
+            } else if (
+                fundData.distributionPeriodStart > periodStart &&
+                fundData.distributionPeriodEnd < periodEnd
+            ) {
+                continue;
+            }
+
+            stakerPeriodTimeInMonths = getDistributionTimeInMonths(
+                periodStart,
+                periodEnd
+            );
+
+            // Effects: calculate user earnings for staking period
+            fundsToDistribute +=
+                stakerPeriodTimeInMonths *
+                distributionForMonth;
+        }
     }
 
     /*//////////////////////////////////////////////////////////////////////////

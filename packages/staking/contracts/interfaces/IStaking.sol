@@ -14,6 +14,8 @@ interface IStakingEvents {
 
     event FundsDistributed(IERC20 token, uint256 amount);
 
+    event RewardsClaimedSuccessfully();
+
     event StakingSuccess(address user, uint16 bandLevel);
 
     event UnstakingSuccess(address user, uint16 bandLevel);
@@ -54,6 +56,7 @@ interface IStaking is IStakingEvents {
         StakingTypes stakingType;
         address owner;
         uint16 bandLevel;
+        uint128 sharesEarned; //10**6 precision
         uint256 stakingStartTimestamp;
         uint256 usdtRewardsClaimed;
         uint256 usdcRewardsClaimed;
@@ -66,7 +69,6 @@ interface IStaking is IStakingEvents {
 
     struct Pool {
         uint48 distributionPercentage; // in 10**6 integrals, for divident calculation
-        uint48[] bandAllocationPercentage; // in 10**6, start from the last level: 0 = 9lvl, 1 = 8lvl...
         uint256 totalUsdtPoolTokenAmount;
         uint256 totalUsdcPoolTokenAmount;
         address[] allUsers;
