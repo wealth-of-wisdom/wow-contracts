@@ -10,11 +10,7 @@ import {Unit_Test} from "../Unit.t.sol";
 contract Staking_SetPool_Unit_Test is Unit_Test {
     modifier setPoolId1() {
         vm.prank(admin);
-        staking.setPool(
-            POOL_ID_1,
-            POOL_1_PERCENTAGE,
-            POOL_1_BAND_ALLOCATION_PERCENTAGE
-        );
+        staking.setPool(POOL_ID_1, POOL_1_PERCENTAGE);
         _;
     }
 
@@ -27,11 +23,7 @@ contract Staking_SetPool_Unit_Test is Unit_Test {
             )
         );
         vm.prank(alice);
-        staking.setPool(
-            POOL_ID_1,
-            POOL_1_PERCENTAGE,
-            POOL_1_BAND_ALLOCATION_PERCENTAGE
-        );
+        staking.setPool(POOL_ID_1, POOL_1_PERCENTAGE);
     }
 
     function test_setPool_RevertIf_PoolIdIsZero() external {
@@ -39,11 +31,7 @@ contract Staking_SetPool_Unit_Test is Unit_Test {
             abi.encodeWithSelector(Errors.Staking__InvalidPoolId.selector, 0)
         );
         vm.prank(admin);
-        staking.setPool(
-            0,
-            POOL_1_PERCENTAGE,
-            POOL_1_BAND_ALLOCATION_PERCENTAGE
-        );
+        staking.setPool(0, POOL_1_PERCENTAGE);
     }
 
     function test_setPool_RevertIf_PoolIdIsGreaterThanMaxPools() external {
@@ -54,11 +42,7 @@ contract Staking_SetPool_Unit_Test is Unit_Test {
             )
         );
         vm.prank(admin);
-        staking.setPool(
-            TOTAL_POOLS + 1,
-            POOL_1_PERCENTAGE,
-            POOL_1_BAND_ALLOCATION_PERCENTAGE
-        );
+        staking.setPool(TOTAL_POOLS + 1, POOL_1_PERCENTAGE);
     }
 
     function test_setPool_RevertIf_PoolPercentageExeeds100Percent() external {
@@ -69,15 +53,11 @@ contract Staking_SetPool_Unit_Test is Unit_Test {
             )
         );
         vm.prank(admin);
-        staking.setPool(
-            POOL_ID_1,
-            PERCENTAGE_PRECISION + 1,
-            POOL_1_BAND_ALLOCATION_PERCENTAGE
-        );
+        staking.setPool(POOL_ID_1, PERCENTAGE_PRECISION + 1);
     }
 
     function test_setPool_SetsPoolDistributionPercentage() external setPoolId1 {
-        (uint48 percentage, , , ) = staking.getPool(POOL_ID_1);
+        (uint48 percentage, , ) = staking.getPool(POOL_ID_1);
         assertEq(
             percentage,
             POOL_1_PERCENTAGE,
@@ -85,31 +65,11 @@ contract Staking_SetPool_Unit_Test is Unit_Test {
         );
     }
 
-    function test_setPool_SetsPoolBandAllocationPercentage()
-        external
-        setPoolId1
-    {
-        (, uint48[] memory bandPercentages, , ) = staking.getPool(POOL_ID_1);
-
-        uint256 bandsAmount = bandPercentages.length;
-        for (uint256 i; i < bandsAmount; i++) {
-            assertEq(
-                bandPercentages[i],
-                POOL_1_BAND_ALLOCATION_PERCENTAGE[i],
-                "Pool band allocation percentage not set"
-            );
-        }
-    }
-
     function test_setPool_EmitsPoolSetEvent() external {
         vm.expectEmit(address(staking));
         emit PoolSet(POOL_ID_1);
 
         vm.prank(admin);
-        staking.setPool(
-            POOL_ID_1,
-            POOL_1_PERCENTAGE,
-            POOL_1_BAND_ALLOCATION_PERCENTAGE
-        );
+        staking.setPool(POOL_ID_1, POOL_1_PERCENTAGE);
     }
 }

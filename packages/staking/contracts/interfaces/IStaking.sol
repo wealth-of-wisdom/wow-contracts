@@ -27,8 +27,16 @@ interface IStakingEvents {
 
     event BandUnstaked(address user, uint16 bandLevel, uint256 bandId);
 
-    event BandStateChanged(
+    event BandUpgaded(
         address user,
+        uint256 bandId,
+        uint16 oldBandLevel,
+        uint16 newBandLevel
+    );
+
+    event BandDowngraded(
+        address user,
+        uint256 bandId,
         uint16 oldBandLevel,
         uint16 newBandLevel
     );
@@ -41,9 +49,10 @@ interface IStakingEvents {
 }
 
 interface IStaking is IStakingEvents {
-    /*////////////////////////////////////////////////////////////////  //////////
+    /*//////////////////////////////////////////////////////////////////////////
                                        ENUMS
     //////////////////////////////////////////////////////////////////////////*/
+
     enum StakingTypes {
         FIX,
         FLEXI
@@ -52,30 +61,46 @@ interface IStaking is IStakingEvents {
                                        STRUCTS
     //////////////////////////////////////////////////////////////////////////*/
 
+    // Distribution of funds
+
     struct FundDistribution {
+        uint256 id;
         IERC20 token;
         uint256 amount;
-        uint256 distributionPeriodStart;
-        uint256 distributionPeriodEnd;
+        uint256 timestamp;
     }
+
+    struct PoolDistribution {
+        IERC20 token;
+        uint256 tokensAmount;
+        uint256 sharesAmount;
+    }
+
+    struct StakerShares {
+        uint256 shares;
+        bool claimed;
+    }
+
+    // Staking
 
     struct StakerBandData {
         StakingTypes stakingType;
+        uint256 startingSharesAmount;
         address owner;
         uint16 bandLevel;
         uint256 stakingStartTimestamp;
         uint256 usdtRewardsClaimed;
         uint256 usdcRewardsClaimed;
     }
+
     struct Band {
         uint256 price;
-        uint16[] accessiblePools; //1-9
+        uint16[] accessiblePools; // 1-9
         uint256 stakingTimespan;
     }
 
     struct Pool {
         uint48 distributionPercentage; // in 10**6 integrals, for divident calculation
-        uint48[] bandAllocationPercentage; // in 10**6, start from the last level: 0 = 9lvl, 1 = 8lvl...
         uint256 totalUsdtPoolTokenAmount;
         uint256 totalUsdcPoolTokenAmount;
     }
@@ -84,18 +109,22 @@ interface IStaking is IStakingEvents {
                                        FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
-    function setPool(
-        uint16 poolId,
-        uint48 distributionPercentage,
-        uint48[] memory bandAllocationPercentage
+    function setPool(uint16 poolId, uint48 distributionPercentage) external;
+
+    function setBand(
+        uint16 bandLevel,
+        uint256 price,
+        uint16[] memory accessiblePools,
+        uint256 stakingTimespan
     ) external;
 
-    function distributeFunds(
-        IERC20 token,
-        uint256 amount,
-        uint256 distributionPeriodStart,
-        uint256 distributionPeriodEnd
-    ) external;
+    function setTotalBandAmount(uint16 newTotalBandsAmount) external;
+
+    function setTotalPoolAmount(uint16 newTotalPoolAmount) external;
+
+    function distributeFunds(IERC20 token, uint256 amount) external;
+
+    function withdrawTokens(IERC20 token, uint256 amount) external;
 
     function stake(StakingTypes stakingType, uint16 bandLevel) external;
 
@@ -114,31 +143,12 @@ interface IStaking is IStakingEvents {
     //  */
     function unstakeVested(uint256 bandId, address user) external;
 
-    //WIP
+    // WIP
     // function deleteVestingUserData(address user) external;
 
-    function upgradeBand(
-        uint16 oldBandLevel,
-        uint16 newBandLevel,
-        uint256 bandId
-    ) external;
+    function upgradeBand(uint256 bandId, uint16 newBandLevel) external;
 
-    function downgradeBand(
-        uint16 oldBandLevel,
-        uint16 newBandLevel,
-        uint256 bandId
-    ) external;
-
-    function setBand(
-        uint16 bandLevel,
-        uint256 price,
-        uint16[] memory accessiblePools,
-        uint256 stakingTimespan
-    ) external;
-
-    function setTotalBandAmount(uint16 newTotalBandsAmount) external;
-
-    function setTotalPoolAmount(uint16 newTotalPoolAmount) external;
+    function downgradeBand(uint256 bandId, uint16 newBandLevel) external;
 
     function getTokenUSDT() external view returns (IERC20);
 
@@ -157,7 +167,6 @@ interface IStaking is IStakingEvents {
         view
         returns (
             uint48 distributionPercentage,
-            uint48[] memory bandAllocationPercentage,
             uint256 usdtTokenAmount,
             uint256 usdcTokenAmount
         );

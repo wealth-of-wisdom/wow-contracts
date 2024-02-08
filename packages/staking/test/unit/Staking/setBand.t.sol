@@ -38,7 +38,7 @@ contract Staking_SetBand_Unit_Test is Unit_Test {
 
     function test_setBand_RevertIf_BandIdIsZero() external {
         vm.expectRevert(
-            abi.encodeWithSelector(Errors.Staking__InvalidBand.selector, 0)
+            abi.encodeWithSelector(Errors.Staking__InvalidBandLevel.selector, 0)
         );
         vm.prank(admin);
         staking.setBand(
@@ -52,7 +52,7 @@ contract Staking_SetBand_Unit_Test is Unit_Test {
     function test_setBand_RevertIf_BandIdIsGreaterThanMaxBands() external {
         vm.expectRevert(
             abi.encodeWithSelector(
-                Errors.Staking__InvalidBand.selector,
+                Errors.Staking__InvalidBandLevel.selector,
                 TOTAL_BANDS + 1
             )
         );
