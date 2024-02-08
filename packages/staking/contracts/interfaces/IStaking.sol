@@ -14,6 +14,16 @@ interface IStakingEvents {
 
     event FundsDistributed(IERC20 token, uint256 amount);
 
+    event StakingSuccess(address user, uint16 bandLevel);
+
+    event UnstakingSuccess(address user, uint16 bandLevel);
+
+    event BandStateChanged(
+        address user,
+        uint16 oldBandLevel,
+        uint16 newBandLevel
+    );
+
     event TotalBandAmountSet(uint16 newTotalBandsAmount);
 
     event TotalPoolAmountSet(uint16 newTotalPoolAmount);
@@ -42,6 +52,8 @@ interface IStaking is IStakingEvents {
 
     struct StakerBandData {
         StakingTypes stakingType;
+        address owner;
+        uint16 bandLevel;
         uint256 stakingStartTimestamp;
         uint256 usdtRewardsClaimed;
         uint256 usdcRewardsClaimed;
@@ -82,17 +94,37 @@ interface IStaking is IStakingEvents {
 
     function unStake(uint16 bandLevel, uint16 bandId) external;
 
+    function stakeVested(
+        StakingTypes stakingType,
+        uint16 bandLevel,
+        address user
+    ) external;
+
     // /**
     //  * @notice Stops staking of vested tokens for a beneficiary in a pool
     //  * @notice Beneficiary needs to claim staking rewards with an external call
     //  * @notice This function can only be called by the vesting contract
-    //  * @param beneficiary Address of the beneficiary
-    //  * @param stakedAmount Amount of tokens to unstake
     //  */
-    // function unstakeVestedTokens(
-    //     address beneficiary,
-    //     uint256 stakedAmount
-    // ) external;
+    function unstakeVested(
+        uint16 bandLevel,
+        uint16 bandId,
+        address user
+    ) external;
+
+    //WIP
+    // function deleteVestingUserData(address user) external;
+
+    function upgradeBand(
+        uint16 oldBandLevel,
+        uint16 newBandLevel,
+        uint16 bandId
+    ) external;
+
+    function downgradeBand(
+        uint16 oldBandLevel,
+        uint16 newBandLevel,
+        uint16 bandId
+    ) external;
 
     function setBand(
         uint16 bandLevel,

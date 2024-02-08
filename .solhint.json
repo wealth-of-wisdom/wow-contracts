@@ -12,7 +12,6 @@
         "imports-on-top": "warn",
         "ordering": "warn",
         "use-forbidden-name": "warn",
-        "var-name-mixedcase": "warn",
         "const-name-snakecase": "warn",
         "func-name-mixedcase": "warn",
         "event-name-camelcase": "warn",

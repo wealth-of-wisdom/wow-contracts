@@ -324,8 +324,8 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         delete pool.beneficiaries[beneficiary];
 
         if (stakedAmount > 0) {
-            // Interactions: Unstake staked tokens from staking contract
-            s_staking.unstakeVestedTokens(beneficiary, stakedAmount);
+            // Interactions: delete user data from staking contract
+            // s_staking.deleteVestingUserData(msg.sender);
         }
 
         emit BeneficiaryRemoved(pid, beneficiary, availableAmount);
@@ -458,17 +458,19 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     }
 
     /**
-     * @notice Updates staked tokens via vesting contract.
+     * @notice Stakes vested tokesns via vesting contract in staking contract
+     * @param stakingType  enumerable type for flexi or fixed staking
+     * @param bandLevel  band level number
      * @param pid Index that refers to vesting pool object.
      * @param beneficiary Address of the staker.
      * @param tokenAmount Amount used to stake or unstake from vesting pool.
-     * @param startStaking Specification whether we are staking or unstaking from pool.
      */
-    function updateVestedStakedTokens(
+    function stakeVestedTokens(
+        IStaking.StakingTypes stakingType,
+        uint16 bandLevel,
         uint16 pid,
         address beneficiary,
-        uint256 tokenAmount,
-        bool startStaking
+        uint256 tokenAmount
     )
         external
         onlyRole(STAKING_ROLE)
@@ -479,30 +481,55 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         Pool storage pool = s_vestingPools[pid];
         Beneficiary storage user = pool.beneficiaries[beneficiary];
 
-        if (startStaking) {
-            // Checks: Enough unstaked tokens in the contract
-            if (
-                tokenAmount >
-                user.totalTokenAmount -
-                    user.stakedTokenAmount -
-                    user.claimedTokenAmount
-            ) {
-                revert Errors.Vesting__NotEnoughVestedTokensForStaking();
-            }
-
-            // Effects: Stake tokens
-            user.stakedTokenAmount += tokenAmount;
-        } else {
-            // Checks: Enough staked tokens in the contract
-            if (tokenAmount > user.stakedTokenAmount) {
-                revert Errors.Vesting__NotEnoughStakedTokens();
-            }
-
-            // Effects: Unstake tokens
-            user.stakedTokenAmount -= tokenAmount;
+        // Checks: Enough unstaked tokens in the contract
+        if (
+            tokenAmount >
+            user.totalTokenAmount -
+                user.stakedTokenAmount -
+                user.claimedTokenAmount
+        ) {
+            revert Errors.Vesting__NotEnoughVestedTokensForStaking();
         }
 
-        emit StakedTokensUpdated(pid, beneficiary, tokenAmount, startStaking);
+        // Effects: Stake tokens
+        user.stakedTokenAmount += tokenAmount;
+        s_staking.stakeVested(stakingType, bandLevel, msg.sender);
+
+        emit StakedTokensUpdated(pid, beneficiary, tokenAmount);
+    }
+
+    /**
+     * @notice Unstakes vested tokesns via vesting contract in staking contract
+     * @param bandLevel  band level number
+     * @param bandId  Id of the band (0-max uint)
+     * @param pid Index that refers to vesting pool object.
+     * @param beneficiary Address of the staker.
+     * @param tokenAmount Amount used to stake or unstake from vesting pool.
+     */
+    function unstakeVestedTokens(
+        uint16 bandLevel,
+        uint16 bandId,
+        uint16 pid,
+        address beneficiary,
+        uint256 tokenAmount
+    )
+        external
+        onlyRole(STAKING_ROLE)
+        mPoolExists(pid)
+        mBeneficiaryExists(pid, beneficiary)
+        mAmountNotZero(tokenAmount)
+    {
+        Pool storage pool = s_vestingPools[pid];
+        Beneficiary storage user = pool.beneficiaries[beneficiary];
+
+        // Effects: Unstake tokens
+        if (tokenAmount - user.stakedTokenAmount > 0) {
+            revert Errors.Vesting__UnstakingTooManyTokens();
+        }
+        user.stakedTokenAmount -= tokenAmount;
+        s_staking.unstakeVested(bandLevel, bandId, msg.sender);
+
+        emit StakedTokensUpdated(pid, beneficiary, tokenAmount);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
