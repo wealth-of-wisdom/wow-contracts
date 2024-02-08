@@ -7,7 +7,7 @@ library Errors {
     //////////////////////////////////////////////////////////////////////////*/
 
     error Staking__InvalidBand(uint16 bandLevel);
-    error Staking__InvalidBandId(uint16 bandId);
+    error Staking__InvalidBandId(uint256 bandId);
     error Staking__InvalidStakingType();
     error Staking__MaximumLevelExceeded();
     error Staking__NonExistantToken();

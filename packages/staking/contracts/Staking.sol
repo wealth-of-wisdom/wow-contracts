@@ -41,9 +41,9 @@ contract Staking is
     // 0 - false (not staking), 1 - true (is staking)
     EnumerableMap.AddressToUintMap internal s_users;
 
-    mapping(bytes32 stakerAndBandLevel => uint16[] bandId)
+    mapping(bytes32 stakerAndBandLevel => uint256[] bandId)
         internal s_stakerBands;
-    mapping(uint16 bandId => StakerBandData) internal s_stakerBand;
+    mapping(uint256 bandId => StakerBandData) internal s_stakerBand;
     mapping(uint16 poolId => Pool) internal s_poolData; // Pool data, poolId - 1-9lvl
     mapping(uint16 bandLevel => Band) internal s_bandData; // Band data, bandLevel - 1-9lvl
 
@@ -55,7 +55,7 @@ contract Staking is
 
     uint256[] shares; // in 10**6 integrals, for divident calculation
 
-    uint16 internal s_nextBandId;
+    uint256 internal s_nextBandId;
     uint16 internal s_totalPools;
     uint16 internal s_totalBands;
 
@@ -90,7 +90,7 @@ contract Staking is
         _;
     }
 
-    modifier mBandBelongsToUser(address user, uint16 bandId) {
+    modifier mBandBelongsToUser(address user, uint256 bandId) {
         if (s_stakerBand[bandId].owner == user) {
             revert Errors.Staking__InvalidBandId(bandId);
         }
@@ -343,28 +343,35 @@ contract Staking is
         StakingTypes stakingType,
         uint16 bandLevel
     ) external mBandExists(bandLevel) mStakingTypeExists(stakingType) {
-        Band memory bandData = _stakeBand(stakingType, bandLevel, msg.sender);
+        uint256 price = s_bandData[bandLevel].price;
+
+        // Effects: Create a new band and add it to the user
+        _stakeBand(stakingType, bandLevel, msg.sender);
+
         // Interaction: transfer transaction funds to contract
-        s_wowToken.safeTransferFrom(msg.sender, address(this), bandData.price);
-        emit StakingSuccess(msg.sender, bandLevel);
+        s_wowToken.safeTransferFrom(msg.sender, address(this), price);
+
+        // Effects: emit event
+        emit Staked(msg.sender, bandLevel, stakingType, false);
     }
 
     /**
      * @notice  Unstake tokens at any time and claim earned rewards
-     * @param   bandLevel  band level number
      * @param   bandId  Id of the band (0-max uint)
      */
     function unstake(
-        uint16 bandLevel,
-        uint16 bandId
-    ) external mBandExists(bandLevel) {
-        _unstakeBand(bandLevel, bandId, msg.sender);
+        uint256 bandId
+    ) external mBandBelongsToUser(msg.sender, bandId) {
+        // Effects: delete band data
+        _unstakeBand(bandId, msg.sender);
 
         // Interaction: transfer transaction funds to user
-        // @todo:
+        // @todo: transfer rewards and initial price
         // _claimRewards();
         // s_wowToken.safeTransferFrom(address(this), msg.sender, rewards+band.price);
-        emit UnstakingSuccess(msg.sender, bandLevel);
+
+        // Effects: emit event
+        emit Unstaked(msg.sender, bandId, false);
     }
 
     /**
@@ -379,30 +386,35 @@ contract Staking is
         address user
     )
         external
-        mBandExists(bandLevel)
         onlyRole(VESTING_ROLE)
+        mBandExists(bandLevel)
         mStakingTypeExists(stakingType)
     {
+        // Effects: Create a new band and add it to the user
         _stakeBand(stakingType, bandLevel, user);
-        emit StakingSuccess(user, bandLevel);
+
+        // Effects: emit event
+        emit Staked(user, bandLevel, stakingType, true);
     }
 
     /**
      * @notice  Unstake tokens at any time and claim earned rewards
-     * @param   bandLevel  band level number
      * @param   bandId  Id of the band (0-max uint)
      * @param   user  address of user staking vested tokens
      */
     function unstakeVested(
-        uint16 bandLevel,
-        uint16 bandId,
+        uint256 bandId,
         address user
-    ) external mBandExists(bandLevel) onlyRole(VESTING_ROLE) {
-        _unstakeBand(bandLevel, bandId, user);
-        // @todo:
+    ) external onlyRole(VESTING_ROLE) mBandBelongsToUser(user, bandId) {
+        // Effects: delete band data
+        _unstakeBand(bandId, user);
+
+        // @todo: transfer rewards
         // _claimRewards();
         // s_wowToken.safeTransferFrom(address(this), msg.sender, rewards);
-        emit UnstakingSuccess(msg.sender, bandLevel);
+
+        // Effects: emit event
+        emit Unstaked(user, bandId, true);
     }
 
     //WIP
@@ -410,7 +422,7 @@ contract Staking is
     //     address user
     // ) external onlyRole(VESTING_ROLE) {
     //     for (uint256 bandLevel; bandLevel < s_totalBands; bandLevel++) {
-    //         bytes32 hashedStakerBandAndLevel = _getStakerBandAndLevelHash(
+    //         bytes32 hashedStakerBandAndLevel = _getStakerAndBandLevelHash(
     //             user,
     //             bandLevel
     //         );
@@ -427,7 +439,7 @@ contract Staking is
     function upgradeBand(
         uint16 oldBandLevel,
         uint16 newBandLevel,
-        uint16 bandId
+        uint256 bandId
     )
         external
         mBandExists(oldBandLevel)
@@ -456,7 +468,7 @@ contract Staking is
     function downgradeBand(
         uint16 oldBandLevel,
         uint16 newBandLevel,
-        uint16 bandId
+        uint256 bandId
     )
         external
         mBandExists(oldBandLevel)
@@ -540,7 +552,7 @@ contract Staking is
     }
 
     function getBand(
-        uint16 bandId
+        uint16 bandLevel
     )
         external
         view
@@ -550,7 +562,7 @@ contract Staking is
             uint256 stakingTimespan
         )
     {
-        Band storage band = s_bandData[bandId];
+        Band storage band = s_bandData[bandLevel];
         price = band.price;
         accessiblePools = band.accessiblePools;
         stakingTimespan = band.stakingTimespan;
@@ -560,7 +572,7 @@ contract Staking is
                             INTERNAL VIEW/PURE FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
-    function _getStakerBandAndLevelHash(
+    function _getStakerAndBandLevelHash(
         address staker,
         uint16 bandLevel
     ) internal pure returns (bytes32) {
@@ -575,60 +587,70 @@ contract Staking is
         StakingTypes stakingType,
         uint16 bandLevel,
         address user
-    ) internal returns (Band memory bandData) {
-        bytes32 hashedStakerBandAndLevel = _getStakerBandAndLevelHash(
-            user,
-            bandLevel
-        );
-        uint16 bandId = s_nextBandId++;
-        s_stakerBands[hashedStakerBandAndLevel].push(bandId);
-        bandData = s_bandData[bandLevel];
+    ) internal {
+        bytes32 configHash = _getStakerAndBandLevelHash(user, bandLevel);
 
-        // Effects: set staker and pool data
-        s_stakerBand[bandId] = StakerBandData({
-            stakingType: stakingType,
-            owner: user,
-            bandLevel: bandLevel,
-            stakingStartTimestamp: block.timestamp,
-            usdtRewardsClaimed: 0,
-            usdcRewardsClaimed: 0
-        });
+        // Effects: increment bandId (variable is set before incrementing to start from 0)
+        uint256 bandId = s_nextBandId++;
 
-        // @todo add user if needed
+        // Effects: set staker band data
+        StakerBandData storage band = s_stakerBand[bandId];
+        band.stakingType = stakingType;
+        band.owner = user;
+        band.bandLevel = bandLevel;
+        band.stakingStartTimestamp = block.timestamp;
+
+        // Effects: add bandId to the user
+        s_stakerBands[configHash].push(bandId);
+
+        // Get total amount of bands user owns
+        // Returns 0 if user does not exist in the map
+        (, uint256 bandsAmount) = s_users.tryGet(user);
+        // Effects: increment bands amount by 1
+        s_users.set(user, bandsAmount + 1);
+
+        // Effects: emit event
+        emit BandStaked(user, bandLevel, bandId);
     }
 
-    function _unstakeBand(
-        uint16 bandLevel,
-        uint16 bandId,
-        address user
-    ) internal mBandBelongsToUser(user, bandId) {
-        Band memory bandData = s_bandData[bandLevel];
-        bytes32 hashedStakerBandAndLevel = _getStakerBandAndLevelHash(
-            user,
-            bandLevel
-        );
+    function _unstakeBand(uint256 bandId, address user) internal {
+        uint16 bandLevel = s_stakerBand[bandId].bandLevel;
+        bytes32 configHash = _getStakerAndBandLevelHash(user, bandLevel);
 
-        //Effects: loop trough bandIds and remove required Id
-        uint16[] storage bandIds = s_stakerBands[hashedStakerBandAndLevel];
-        uint256 allBandIdsLength = s_stakerBands[hashedStakerBandAndLevel]
-            .length;
-        for (uint256 i; i < allBandIdsLength; i++) {
+        // Effects: delete band data
+        delete s_stakerBand[bandId];
+
+        // Effects: loop trough bandIds and remove required Id
+        uint256[] storage bandIds = s_stakerBands[configHash];
+        uint256 bandsIdsAmount = bandIds.length;
+        for (uint256 i; i < bandsIdsAmount; i++) {
             if (bandIds[i] == bandId) {
-                bandIds[i] = bandIds[allBandIdsLength - 1];
+                bandIds[i] = bandIds[bandsIdsAmount - 1];
                 bandIds.pop();
                 break;
             }
         }
-        s_stakerBands[hashedStakerBandAndLevel].push(bandId);
-        delete s_stakerBand[bandId];
 
-        // @todo remove user if needed
+        // Get total amount of bands user owns
+        // Reverts if user does not exist in the map
+        uint256 bandsAmount = s_users.get(user);
+
+        if (bandsAmount > 1) {
+            // Effects: decrement bands amount by 1
+            s_users.set(user, bandsAmount - 1);
+        } else {
+            // Effects: remove user from the map
+            s_users.remove(user);
+        }
+
+        // Effects: emit event
+        emit BandUnstaked(user, bandLevel, bandId);
     }
 
     function _updateDataForBandLevelChange(
         uint16 oldBandLevel,
         uint16 newBandLevel,
-        uint16 bandId
+        uint256 bandId
     )
         internal
         returns (

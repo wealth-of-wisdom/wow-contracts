@@ -77,7 +77,7 @@ contract Staking_SetPool_Unit_Test is Unit_Test {
     }
 
     function test_setPool_SetsPoolDistributionPercentage() external setPoolId1 {
-        (uint48 percentage, , , , ) = staking.getPool(POOL_ID_1);
+        (uint48 percentage, , , ) = staking.getPool(POOL_ID_1);
         assertEq(
             percentage,
             POOL_1_PERCENTAGE,
@@ -89,7 +89,7 @@ contract Staking_SetPool_Unit_Test is Unit_Test {
         external
         setPoolId1
     {
-        (, uint48[] memory bandPercentages, , , ) = staking.getPool(POOL_ID_1);
+        (, uint48[] memory bandPercentages, , ) = staking.getPool(POOL_ID_1);
 
         uint256 bandsAmount = bandPercentages.length;
         for (uint256 i; i < bandsAmount; i++) {

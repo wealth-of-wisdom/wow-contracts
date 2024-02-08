@@ -14,9 +14,18 @@ interface IStakingEvents {
 
     event FundsDistributed(IERC20 token, uint256 amount);
 
-    event StakingSuccess(address user, uint16 bandLevel);
+    event Staked(
+        address user,
+        uint16 bandLevel,
+        IStaking.StakingTypes stakingType,
+        bool isVested
+    );
 
-    event UnstakingSuccess(address user, uint16 bandLevel);
+    event Unstaked(address user, uint256 bandId, bool isVested);
+
+    event BandStaked(address user, uint16 bandLevel, uint256 bandId);
+
+    event BandUnstaked(address user, uint16 bandLevel, uint256 bandId);
 
     event BandStateChanged(
         address user,
@@ -90,7 +99,7 @@ interface IStaking is IStakingEvents {
 
     function stake(StakingTypes stakingType, uint16 bandLevel) external;
 
-    function unstake(uint16 bandLevel, uint16 bandId) external;
+    function unstake(uint256 bandId) external;
 
     function stakeVested(
         StakingTypes stakingType,
@@ -103,11 +112,7 @@ interface IStaking is IStakingEvents {
     //  * @notice Beneficiary needs to claim staking rewards with an external call
     //  * @notice This function can only be called by the vesting contract
     //  */
-    function unstakeVested(
-        uint16 bandLevel,
-        uint16 bandId,
-        address user
-    ) external;
+    function unstakeVested(uint256 bandId, address user) external;
 
     //WIP
     // function deleteVestingUserData(address user) external;
@@ -115,13 +120,13 @@ interface IStaking is IStakingEvents {
     function upgradeBand(
         uint16 oldBandLevel,
         uint16 newBandLevel,
-        uint16 bandId
+        uint256 bandId
     ) external;
 
     function downgradeBand(
         uint16 oldBandLevel,
         uint16 newBandLevel,
-        uint16 bandId
+        uint256 bandId
     ) external;
 
     function setBand(
@@ -154,12 +159,11 @@ interface IStaking is IStakingEvents {
             uint48 distributionPercentage,
             uint48[] memory bandAllocationPercentage,
             uint256 usdtTokenAmount,
-            uint256 usdcTokenAmount,
-            address[] memory allUsers
+            uint256 usdcTokenAmount
         );
 
     function getBand(
-        uint16 bandId
+        uint16 bandLevel
     )
         external
         view
