@@ -400,7 +400,7 @@ contract Staking is
         _unstakeBand(bandId, msg.sender);
 
         // Interaction: transfer earned rewards to staker
-        _claimAllRewardsByBandId(bandId);
+        _claimRewardsByBandId(bandId);
 
         // Effects: emit event
         emit Unstaked(msg.sender, bandId, false);
@@ -442,7 +442,7 @@ contract Staking is
         _unstakeBand(bandId, user);
 
         // Interaction: transfer earned rewards to staker
-        _claimAllRewardsByBandId(bandId);
+        _claimRewardsByBandId(bandId);
 
         // Effects: emit event
         emit Unstaked(user, bandId, true);
@@ -880,7 +880,7 @@ contract Staking is
      * @dev  This function can be called by anyone
      * @param   bandId  Band Id
      */
-    function _claimAllRewardsByBandId(uint256 bandId) internal {
+    function _claimRewardsByBandId(uint256 bandId) internal {
         uint256 accessiblePoolLength = s_bandLevelData[
             s_bands[bandId].bandLevel
         ].accessiblePools.length;
