@@ -41,24 +41,52 @@ contract Staking is
     // 0 - false (not staking), 1 - true (is staking)
     EnumerableMap.AddressToUintMap internal s_users;
 
-    mapping(address staker => uint256[] bandId) internal s_stakerBands;
-    mapping(uint256 bandId => StakerBandData) internal s_bands;
-    mapping(uint16 poolId => Pool) internal s_poolData; // Pool data, poolId - 1-9lvl
-    mapping(uint16 bandLevel => Band) internal s_bandLevelData; // Band data, bandLevel - 1-9lvl
+    // Map user => all the band ids that user owns
+    mapping(address staker => uint256[] bandIds) internal s_stakerBands;
 
-    FundDistribution[] internal s_fundDistributionData; // Any added funds data
+    // Map single band id => band data
+    mapping(uint256 bandId => StakerBandData) internal s_bands;
+
+    // Map pool id (1-9) => pool data
+    mapping(uint16 poolId => Pool) internal s_poolData;
+
+    // Map band level (1-9) => band data
+    mapping(uint16 bandLevel => Band) internal s_bandLevelData;
+
+    // Array of all distributions. Used for storing shares and tokens info
+    FundDistribution[] internal s_fundDistributionData;
+
+    // Map single distribution id => pool id => pool distribution data
     mapping(bytes32 distributionIdAndPoolId => PoolDistribution) s_poolsDistribution;
+
+    // Map single distribution id => pool id => staker address => staker shares data
     mapping(bytes32 distributionIdWithPoolIdAndStaker => StakerShares) s_stakerShares;
 
-    IERC20 internal s_usdtToken; // Token to be payed as reward
-    IERC20 internal s_usdcToken; // Token to be payed as reward
-    IERC20 internal s_wowToken; // Token to be staked
+    // Token to be payed as reward
+    IERC20 internal s_usdtToken;
 
-    uint256[] sharesInMonth; // in 10**6 integrals, for divident calculation
+    // Token to be payed as reward
+    IERC20 internal s_usdcToken;
 
+    // Token to be staked
+    IERC20 internal s_wowToken;
+
+    // Array of 24 integers, each representing the amount of shares
+    // User owns in the pool for each month. Used for flexi staking
+    // 0 index represents shares after 1 month, 1 index represents shares after 2 months, etc.
+    // in 10**6 integrals, for divident calculation
+    uint256[] sharesInMonth;
+
+    // Next unique band id to be used
     uint256 internal s_nextBandId;
+
+    // Next unique distribution id to be used
     uint256 internal s_nextDistributionId;
+
+    // Total amount of pools used for staking (currently, 9)
     uint16 internal s_totalPools;
+
+    // Total amount of bands used for staking (currently, 9)
     uint16 internal s_totalBands;
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -266,100 +294,32 @@ contract Staking is
         mTokenExists(token)
         mAmountNotZero(amount)
     {
-        uint256 distributionId = s_nextDistributionId++;
-
-        // Effects: set fund distribution data
-        FundDistribution memory fundDistribution = FundDistribution({
-            id: distributionId,
-            token: token,
-            amount: amount,
-            timestamp: block.timestamp
-        });
-        s_fundDistributionData.push(fundDistribution);
-
         uint16 totalPools = s_totalPools;
-
-        // Loop through all pools and set the amount of tokens
-        for (uint16 poolId; poolId < totalPools; poolId++) {
-            bytes32 configHash = _getPoolHash(distributionId, poolId);
-
-            // amount * (distribution % * 10**6) / (100% * 10**6)
-            uint256 poolTokens = ((amount *
-                s_poolData[poolId].distributionPercentage) /
-                PERCENTAGE_PRECISION);
-
-            // Effects: set pool distribution data
-            PoolDistribution storage poolDistribution = s_poolsDistribution[
-                configHash
-            ];
-            poolDistribution.token = token;
-            poolDistribution.tokensAmount = poolTokens;
-        }
-
         uint256 usersAmount = s_users.length();
+
+        uint256 distributionId = _createFundDistribution(token, amount);
+
+        // Effects: create all pool distributions for this fund distribution
+        _createAllPoolDistributions(token, amount, distributionId, totalPools);
 
         // Loop through all users and set the amount of shares
         for (uint256 userIndex; userIndex < usersAmount; userIndex++) {
             (address user, ) = s_users.at(userIndex);
-            uint256[] memory bandIds = s_stakerBands[user];
-            uint256 bandsAmount = bandIds.length;
 
-            // Loop through all bands that user owns and set the amount of shares
-            for (uint256 bandIndex; bandIndex < bandsAmount; bandIndex++) {
-                uint256 bandId = bandIds[bandIndex];
-                StakerBandData memory band = s_bands[bandId];
-                uint256 userShares;
+            // Effects: Loop through all bands and add shares to pools
+            uint256[] memory userSharesPerPool = _addAllBandSharesToPools(
+                user,
+                distributionId,
+                totalPools
+            );
 
-                // If staking type is FLEXI calculate shares based months passed
-                if (band.stakingType == StakingTypes.FLEXI) {
-                    // Calculate months that passed since staking start
-                    uint256 monthsPassed = (block.timestamp -
-                        band.stakingStartTimestamp) / MONTH;
-
-                    // If at least 1 month passed, calculate shares based on months
-                    if (monthsPassed > 0) {
-                        userShares = sharesInMonth[monthsPassed - 1];
-                    }
-                }
-                // Else type is FIX
-                else {
-                    // For FIX type, shares are set at the start and do not change over time
-                    userShares = band.startingSharesAmount;
-                }
-
-                // If user has shares, add them to the pool
-                if (userShares > 0) {
-                    uint16[] memory pools = s_bandLevelData[band.bandLevel]
-                        .accessiblePools;
-                    uint256 poolsAmount = pools.length;
-
-                    // Loop through all pools and set the amount of shares
-                    for (
-                        uint16 poolIndex;
-                        poolIndex < poolsAmount;
-                        poolIndex++
-                    ) {
-                        uint16 poolId = pools[poolIndex];
-                        bytes32 poolConfigHash = _getPoolHash(
-                            distributionId,
-                            poolId
-                        );
-
-                        bytes32 stakerConfigHash = _getStakerHash(
-                            distributionId,
-                            poolId,
-                            user
-                        );
-
-                        // Effects: increase pool shares
-                        s_poolsDistribution[poolConfigHash]
-                            .sharesAmount += userShares;
-
-                        // Effects: increase user shares
-                        s_stakerShares[stakerConfigHash].shares += userShares;
-                    }
-                }
-            }
+            // Effects: Loop through all pools and set the amount of shares for the user
+            _addSharesToUser(
+                user,
+                distributionId,
+                totalPools,
+                userSharesPerPool
+            );
         }
 
         // Interaction: transfer the tokens to contract
@@ -691,6 +651,116 @@ contract Staking is
         emit BandUnstaked(user, bandLevel, bandId);
     }
 
+    function _createFundDistribution(
+        IERC20 token,
+        uint256 amount
+    ) internal returns (uint256 distributionId) {
+        distributionId = s_nextDistributionId++;
+
+        // Effects: set fund distribution data
+        FundDistribution memory fundDistribution = FundDistribution({
+            id: distributionId,
+            token: token,
+            amount: amount,
+            timestamp: block.timestamp
+        });
+        s_fundDistributionData.push(fundDistribution);
+    }
+
+    function _createAllPoolDistributions(
+        IERC20 token,
+        uint256 amount,
+        uint256 distributionId,
+        uint16 totalPools
+    ) internal {
+        // Loop through all pools and set the amount of tokens
+        for (uint16 poolId; poolId < totalPools; poolId++) {
+            bytes32 configHash = _getPoolHash(distributionId, poolId);
+            uint256 poolTokens = _calculatePoolAllocation(amount, poolId);
+
+            // Effects: set pool distribution data
+            PoolDistribution storage poolDistribution = s_poolsDistribution[
+                configHash
+            ];
+            poolDistribution.token = token;
+            poolDistribution.tokensAmount = poolTokens;
+        }
+    }
+
+    function _addSharesToAccessiblePools(
+        uint256 bandShares,
+        uint256 distributionId,
+        uint16 bandLevel,
+        uint256[] memory userSharesPerPool
+    ) internal returns (uint256[] memory) {
+        uint16[] memory pools = s_bandLevelData[bandLevel].accessiblePools;
+        uint256 poolsAmount = pools.length;
+
+        // No need to add shares if there is nothing to add
+        if (bandShares == 0) {
+            return userSharesPerPool;
+        }
+
+        // Loop through all pools and set the amount of shares
+        for (uint16 poolIndex; poolIndex < poolsAmount; poolIndex++) {
+            uint16 poolId = pools[poolIndex];
+            bytes32 poolConfigHash = _getPoolHash(distributionId, poolId);
+
+            // Add shares to the user in the pool
+            userSharesPerPool[poolId - 1] = bandShares;
+
+            // Effects: increase pool shares
+            s_poolsDistribution[poolConfigHash].sharesAmount += bandShares;
+        }
+
+        return userSharesPerPool;
+    }
+
+    function _addSharesToUser(
+        address user,
+        uint256 distributionId,
+        uint16 totalPools,
+        uint256[] memory userSharesPerPool
+    ) internal {
+        // Loop through all pools and set the amount of shares
+        for (uint16 poolId = 1; poolId <= totalPools; poolId++) {
+            bytes32 stakerConfigHash = _getStakerHash(
+                distributionId,
+                poolId,
+                user
+            );
+
+            // Effects: increase user shares
+            s_stakerShares[stakerConfigHash].shares += userSharesPerPool[
+                poolId - 1
+            ];
+        }
+    }
+
+    function _addAllBandSharesToPools(
+        address user,
+        uint256 distributionId,
+        uint16 totalPools
+    ) internal returns (uint256[] memory userSharesPerPool) {
+        uint256[] memory bandIds = s_stakerBands[user];
+        uint256 bandsAmount = bandIds.length;
+        userSharesPerPool = new uint256[](totalPools);
+
+        // Loop through all bands that user owns and set the amount of shares
+        for (uint256 bandIndex; bandIndex < bandsAmount; bandIndex++) {
+            uint256 bandId = bandIds[bandIndex];
+            StakerBandData memory band = s_bands[bandId];
+            uint256 bandShares = _calculateBandShares(band, block.timestamp);
+
+            userSharesPerPool = _addSharesToAccessiblePools(
+                bandShares,
+                distributionId,
+                band.bandLevel,
+                userSharesPerPool
+            );
+        }
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                             FUNCTIONS FOR UPGRADER ROLE
     //////////////////////////////////////////////////////////////////////////*/
@@ -704,6 +774,46 @@ contract Staking is
     /*//////////////////////////////////////////////////////////////////////////
                             INTERNAL VIEW/PURE FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
+
+    function _calculateCompletedMonths(
+        uint256 startDate,
+        uint256 endDate
+    ) internal pure returns (uint256 perionInMonths) {
+        perionInMonths = (endDate - startDate) / MONTH;
+    }
+
+    function _calculatePoolAllocation(
+        uint256 amount,
+        uint16 poolId
+    ) internal view returns (uint256 poolTokens) {
+        // amount * (distribution % * 10**6) / (100% * 10**6)
+        poolTokens = ((amount * s_poolData[poolId].distributionPercentage) /
+            PERCENTAGE_PRECISION);
+    }
+
+    function _calculateBandShares(
+        StakerBandData memory band,
+        uint256 endDate
+    ) internal view returns (uint256 bandShares) {
+        // If staking type is FLEXI calculate shares based months passed
+        if (band.stakingType == StakingTypes.FLEXI) {
+            // Calculate months that passed since staking start
+            uint256 monthsPassed = _calculateCompletedMonths(
+                band.stakingStartTimestamp,
+                endDate
+            );
+
+            // If at least 1 month passed, calculate shares based on months
+            if (monthsPassed > 0) {
+                bandShares = sharesInMonth[monthsPassed - 1];
+            }
+        }
+        // Else type is FIX
+        else {
+            // For FIX type, shares are set at the start and do not change over time
+            bandShares = band.startingSharesAmount;
+        }
+    }
 
     function _getPoolHash(
         uint256 distributionId,
