@@ -53,14 +53,17 @@ contract Staking is
     // Map band level (1-9) => band data
     mapping(uint16 bandLevel => Band) internal s_bandLevelData;
 
-    // Array of all distributions. Used for storing shares and tokens info
-    FundDistribution[] internal s_fundDistributionData;
+    // Map token => all fund distributions
+    // Array of all distributions is used for storing shares and tokens info
+    mapping(IERC20 token => FundDistribution[]) internal s_fundDistributions;
 
     // Map single distribution id => pool id => pool distribution data
-    mapping(bytes32 distributionIdAndPoolId => PoolDistribution) s_poolsDistribution;
+    mapping(bytes32 distributionIdAndPoolId => PoolDistribution)
+        internal s_poolsDistribution;
 
     // Map single distribution id => pool id => staker address => staker shares data
-    mapping(bytes32 distributionIdWithPoolIdAndStaker => StakerShares) s_stakerShares;
+    mapping(bytes32 distributionIdWithPoolIdAndStaker => StakerShares)
+        internal s_stakerShares;
 
     // Token to be payed as reward
     IERC20 internal s_usdtToken;
@@ -75,7 +78,7 @@ contract Staking is
     // User owns in the pool for each month. Used for flexi staking
     // 0 index represents shares after 1 month, 1 index represents shares after 2 months, etc.
     // in 10**6 integrals, for divident calculation
-    uint256[] sharesInMonth;
+    uint256[] internal sharesInMonth;
 
     // Next unique band id to be used
     uint256 internal s_nextBandId;
@@ -514,6 +517,21 @@ contract Staking is
         emit BandDowngraded(msg.sender, bandId, oldBandLevel, newBandLevel);
     }
 
+    /**
+     * @notice  Claim rewards for all pools and tokens
+     * @notice  This function can be called by anyone
+     */
+    function claimAllRewards() external {
+        // Loop through all pools and claim rewards for USDT and USDC
+        for (uint16 poolId = 1; poolId <= s_totalPools; poolId++) {
+            claimPoolRewards(s_usdtToken, poolId);
+            claimPoolRewards(s_usdcToken, poolId);
+        }
+
+        // Effects: emit event
+        emit AllRewardsClaimed(msg.sender);
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                             EXTERNAL VIEW/PURE FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
@@ -593,6 +611,59 @@ contract Staking is
     }
 
     /*//////////////////////////////////////////////////////////////////////////
+                                    PUBLIC FUNCTIONS
+    //////////////////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice  Claim rewards for all bands
+     * @param   token  USDT/USDC token
+     * @param   poolId  Id of the pool (1-9)
+     */
+    function claimPoolRewards(IERC20 token, uint16 poolId) public {
+        uint256 distributionsAmount = s_fundDistributions[token].length;
+        uint256 totalRewards;
+
+        // Loop through all fund distributions for a single pool
+        // Iterate from the last distribution to the first one
+        // We know that only distributions with unclaimed rewards are at the end
+        for (uint256 index = distributionsAmount - 1; index >= 0; index--) {
+            uint256 distributionId = s_fundDistributions[token][index].id;
+            bytes32 stakerConfigHash = _getStakerHash(
+                distributionId,
+                poolId,
+                msg.sender
+            );
+            StakerShares memory stakerShares = s_stakerShares[stakerConfigHash];
+
+            // Break the loop if the user has already claimed the rewards
+            if (stakerShares.claimed) {
+                break;
+            }
+
+            bytes32 poolConfigHash = _getPoolHash(distributionId, poolId);
+            PoolDistribution memory distribution = s_poolsDistribution[
+                poolConfigHash
+            ];
+
+            // Calculate rewards for the user and add them to the total
+            totalRewards += _calculateRewards(
+                distribution.tokensAmount,
+                distribution.sharesAmount,
+                stakerShares.shares
+            );
+
+            // Effects: set the user shares to claimed
+            s_stakerShares[stakerConfigHash].claimed = true;
+        }
+
+        // Interaction: transfer the tokens to the sender
+        token.safeTransfer(msg.sender, totalRewards);
+
+        // Effects: emit event
+        emit RewardsClaimed(msg.sender, token, totalRewards);
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
                             INTERNAL  FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
@@ -655,16 +726,19 @@ contract Staking is
         IERC20 token,
         uint256 amount
     ) internal returns (uint256 distributionId) {
+        // Effects: increment distributionId
         distributionId = s_nextDistributionId++;
 
-        // Effects: set fund distribution data
+        // Create fund distribution data
         FundDistribution memory fundDistribution = FundDistribution({
             id: distributionId,
             token: token,
             amount: amount,
             timestamp: block.timestamp
         });
-        s_fundDistributionData.push(fundDistribution);
+
+        // Effects: set fund distribution data
+        s_fundDistributions[token].push(fundDistribution);
     }
 
     function _createAllPoolDistributions(
@@ -674,7 +748,7 @@ contract Staking is
         uint16 totalPools
     ) internal {
         // Loop through all pools and set the amount of tokens
-        for (uint16 poolId; poolId < totalPools; poolId++) {
+        for (uint16 poolId = 1; poolId <= totalPools; poolId++) {
             bytes32 configHash = _getPoolHash(distributionId, poolId);
             uint256 poolTokens = _calculatePoolAllocation(amount, poolId);
 
@@ -813,6 +887,18 @@ contract Staking is
             // For FIX type, shares are set at the start and do not change over time
             bandShares = band.startingSharesAmount;
         }
+    }
+
+    function _calculateRewards(
+        uint256 poolTokens,
+        uint256 poolShares,
+        uint256 userShares
+    ) internal pure returns (uint256 rewards) {
+        if (poolShares == 0) {
+            revert Errors.Staking__ZeroPoolShares();
+        }
+
+        rewards = (poolTokens * userShares) / poolShares;
     }
 
     function _getPoolHash(

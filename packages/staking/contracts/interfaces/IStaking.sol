@@ -46,6 +46,10 @@ interface IStakingEvents {
     event TotalPoolAmountSet(uint16 newTotalPoolAmount);
 
     event TokensWithdrawn(IERC20 token, address receiver, uint256 amount);
+
+    event RewardsClaimed(address user, IERC20 token, uint256 totalRewards);
+
+    event AllRewardsClaimed(address user);
 }
 
 interface IStaking is IStakingEvents {
@@ -149,6 +153,10 @@ interface IStaking is IStakingEvents {
     function upgradeBand(uint256 bandId, uint16 newBandLevel) external;
 
     function downgradeBand(uint256 bandId, uint16 newBandLevel) external;
+
+    function claimAllRewards() external;
+
+    function claimPoolRewards(IERC20 token, uint16 poolId) external;
 
     function getTokenUSDT() external view returns (IERC20);
 
