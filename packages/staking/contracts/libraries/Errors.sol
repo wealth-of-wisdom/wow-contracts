@@ -6,8 +6,9 @@ library Errors {
                                     STAKING
     //////////////////////////////////////////////////////////////////////////*/
 
-    error Staking__InvalidBand(uint16 bandLevel);
-    error Staking__InvalidBandId(uint16 bandId);
+    error Staking__InvalidBandLevel(uint16 bandLevel);
+    error Staking__InvalidBandId(uint256 bandId);
+    error Staking__NotBandOwner(uint256 bandId, address owner);
     error Staking__InvalidStakingType();
     error Staking__MaximumLevelExceeded();
     error Staking__NonExistantToken();
@@ -23,4 +24,5 @@ library Errors {
     error Staking__InvalidBandsAmount();
     error Staking__ZeroAmount();
     error Staking__ZeroAddress();
+    error Staking__ZeroPoolShares();
 }
