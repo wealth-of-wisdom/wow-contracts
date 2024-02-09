@@ -881,9 +881,10 @@ contract Staking is
      * @param   bandId  Band Id
      */
     function _claimRewardsByBandId(uint256 bandId) internal {
-        uint256 accessiblePoolLength = s_bandLevelData[
-            s_bands[bandId].bandLevel
-        ].accessiblePools.length;
+        uint16 bandLevel = s_bands[bandId].bandLevel;
+        uint256 accessiblePoolLength = s_bandLevelData[bandLevel]
+            .accessiblePools
+            .length;
         // Loop through all pools and claim rewards for USDT and USDC
         for (uint16 poolId = 1; poolId <= accessiblePoolLength; poolId++) {
             claimPoolRewards(s_usdtToken, poolId);
