@@ -24,4 +24,5 @@ library Errors {
     error Staking__InvalidBandsAmount();
     error Staking__ZeroAmount();
     error Staking__ZeroAddress();
+    error Staking__ZeroPoolShares();
 }
