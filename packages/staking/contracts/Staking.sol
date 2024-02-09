@@ -29,9 +29,9 @@ contract Staking is
 
     bytes32 private constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     bytes32 private constant VESTING_ROLE = keccak256("VESTING_ROLE");
-    uint128 private constant DECIMALS = 10 ** 6;
-    uint128 private constant MONTH = 30 days;
-    uint48 private constant PERCENTAGE_PRECISION = 10 ** 8; // 100% = 10**8
+    uint48 private constant MONTH = 30 days;
+    uint48 private constant SHARE = 1e6; // 1 share = 10^6
+    uint48 private constant PERCENTAGE_PRECISION = 1e8; // 100% = 10^8
 
     /*//////////////////////////////////////////////////////////////////////////
                                 INTERNAL STORAGE
@@ -75,10 +75,10 @@ contract Staking is
     IERC20 internal s_wowToken;
 
     // Array of 24 integers, each representing the amount of shares
-    // User owns in the pool for each month. Used for flexi staking
+    // User owns in the pool for each month. Used for FLEXI staking
     // 0 index represents shares after 1 month, 1 index represents shares after 2 months, etc.
-    // in 10**6 integrals, for divident calculation
-    uint256[] internal sharesInMonth;
+    // in 10**6 = 1 share
+    uint48[] internal sharesInMonth;
 
     // Next unique band id to be used
     uint256 internal s_nextBandId;
@@ -90,7 +90,7 @@ contract Staking is
     uint16 internal s_totalPools;
 
     // Total amount of bands used for staking (currently, 9)
-    uint16 internal s_totalBands;
+    uint16 internal s_totalBandLevels;
 
     /*//////////////////////////////////////////////////////////////////////////
                             STORAGE FOR FUTURE UPGRADES
@@ -117,7 +117,7 @@ contract Staking is
     }
 
     modifier mBandLevelExists(uint16 bandLevel) {
-        if (bandLevel == 0 || bandLevel > s_totalBands) {
+        if (bandLevel == 0 || bandLevel > s_totalBandLevels) {
             revert Errors.Staking__InvalidBandLevel(bandLevel);
         }
         _;
@@ -160,7 +160,7 @@ contract Staking is
         IERC20 usdcToken,
         IERC20 wowToken,
         uint16 totalPools,
-        uint16 totalBands
+        uint16 totalBandLevels
     )
         external
         initializer
@@ -168,7 +168,7 @@ contract Staking is
         mAddressNotZero(address(usdcToken))
         mAddressNotZero(address(wowToken))
         mAmountNotZero(totalPools)
-        mAmountNotZero(totalBands)
+        mAmountNotZero(totalBandLevels)
     {
         __AccessControl_init();
         __UUPSUpgradeable_init();
@@ -181,9 +181,8 @@ contract Staking is
         s_usdtToken = usdtToken;
         s_usdcToken = usdcToken;
         s_wowToken = wowToken;
-
         s_totalPools = totalPools;
-        s_totalBands = totalBands;
+        s_totalBandLevels = totalBandLevels;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -213,7 +212,7 @@ contract Staking is
         pool.distributionPercentage = distributionPercentage;
 
         // Effects: emit event
-        emit PoolSet(poolId);
+        emit PoolSet(poolId, distributionPercentage);
     }
 
     /**
@@ -222,53 +221,63 @@ contract Staking is
      * @param   price  band purchase price
      * @param   accessiblePools  list of pools that become
      *          accessible after band purchase
-     * @param   stakingTimespan  time in months for how long
-     *          staking will be conducted
      */
-    function setBand(
+    function setBandLevel(
         uint16 bandLevel,
         uint256 price,
-        uint16[] memory accessiblePools,
-        uint256 stakingTimespan
+        uint16[] calldata accessiblePools
     )
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
-        mAmountNotZero(price)
         mBandLevelExists(bandLevel)
+        mAmountNotZero(price)
     {
         // Checks: amount must be in pool bounds
-        if (accessiblePools.length > s_totalPools)
+        if (accessiblePools.length > s_totalPools) {
             revert Errors.Staking__MaximumLevelExceeded();
-
-        // Checks: checks if timespan valid
-        if (stakingTimespan < MONTH) {
-            revert Errors.Staking__InvalidStakingTimespan(stakingTimespan);
         }
 
         // Effects: set band storage
         s_bandLevelData[bandLevel] = Band({
             price: price,
-            accessiblePools: accessiblePools,
-            stakingTimespan: stakingTimespan
+            accessiblePools: accessiblePools
         });
 
         // Effects: emit event
-        emit BandSet(bandLevel);
+        emit BandLevelSet(bandLevel, price, accessiblePools);
+    }
+
+    /**
+     * @notice  Sets the total amount of shares that user is going to have
+     *          at the end of each month of staking. Used for FLEXI staking
+     * @param   totalSharesInMonth  array of shares for each month
+     */
+    function setSharesInMonth(
+        uint48[] calldata totalSharesInMonth
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        // Effects: set the shares array
+        sharesInMonth = totalSharesInMonth;
+
+        // Effects: emit event
+        emit SharesInMonthSet(totalSharesInMonth);
     }
 
     /**
      * @notice  Sets new total amount of bands used for staking
      * @param   newTotalBandsAmount  total amount of bands used for staking
      */
-    function setTotalBandAmount(
+    function setTotalBandLevelsAmount(
         uint16 newTotalBandsAmount
     )
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
         mAmountNotZero(newTotalBandsAmount)
     {
-        s_totalBands = newTotalBandsAmount;
-        emit TotalBandAmountSet(newTotalBandsAmount);
+        // Effects: set the total bands amount
+        s_totalBandLevels = newTotalBandsAmount;
+
+        // Effects: emit event
+        emit TotalBandLevelsAmountSet(newTotalBandsAmount);
     }
 
     /**
@@ -278,7 +287,10 @@ contract Staking is
     function setTotalPoolAmount(
         uint16 newTotalPoolAmount
     ) external onlyRole(DEFAULT_ADMIN_ROLE) mAmountNotZero(newTotalPoolAmount) {
+        // Effects: set the total pools amount
         s_totalPools = newTotalPoolAmount;
+
+        // Effects: emit event
         emit TotalPoolAmountSet(newTotalPoolAmount);
     }
 
@@ -448,7 +460,7 @@ contract Staking is
     // function deleteVestingUserData(
     //     address user
     // ) external onlyRole(VESTING_ROLE) {
-    //     for (uint256 bandLevel; bandLevel < s_totalBands; bandLevel++) {
+    //     for (uint256 bandLevel; bandLevel < s_totalBandLevels; bandLevel++) {
     //         bytes32 hashedStakerBandAndLevel = _getStakerAndBandLevelHash(
     //             user,
     //             bandLevel
@@ -573,7 +585,7 @@ contract Staking is
      * @return uint16 Total amount of bands
      */
     function getTotalBands() external view returns (uint16) {
-        return s_totalBands;
+        return s_totalBandLevels;
     }
 
     function getPool(
@@ -595,19 +607,16 @@ contract Staking is
 
     function getBand(
         uint16 bandLevel
-    )
-        external
-        view
-        returns (
-            uint256 price,
-            uint16[] memory accessiblePools,
-            uint256 stakingTimespan
-        )
-    {
+    ) external view returns (uint256 price, uint16[] memory accessiblePools) {
         Band memory band = s_bandLevelData[bandLevel];
         price = band.price;
         accessiblePools = band.accessiblePools;
-        stakingTimespan = band.stakingTimespan;
+    }
+
+    function getSharesInMonth(
+        uint256 index
+    ) external view returns (uint48 shares) {
+        shares = sharesInMonth[index];
     }
 
     /*//////////////////////////////////////////////////////////////////////////
