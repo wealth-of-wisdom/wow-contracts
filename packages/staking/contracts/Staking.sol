@@ -130,6 +130,13 @@ contract Staking is
         _;
     }
 
+    modifier mNotFixStakingType(uint256 bandId) {
+        if (StakingTypes.FIX == s_bands[bandId].stakingType) {
+            revert Errors.Staking__CantModifyFixTypeBand();
+        }
+        _;
+    }
+
     modifier mPoolExists(uint16 poolId) {
         if (poolId == 0 || poolId > s_totalPools) {
             revert Errors.Staking__InvalidPoolId(poolId);
@@ -392,10 +399,8 @@ contract Staking is
         // Effects: delete band data
         _unstakeBand(bandId, msg.sender);
 
-        // Interaction: transfer transaction funds to user
-        // @todo: transfer rewards and initial price
-        // _claimRewards();
-        // s_wowToken.safeTransferFrom(address(this), msg.sender, rewards+band.price);
+        // Interaction: transfer earned rewards to staker
+        _claimAllRewardsByBandId(bandId);
 
         // Effects: emit event
         emit Unstaked(msg.sender, bandId, false);
@@ -436,26 +441,29 @@ contract Staking is
         // Effects: delete band data
         _unstakeBand(bandId, user);
 
-        // @todo: transfer rewards
-        // _claimRewards();
-        // s_wowToken.safeTransferFrom(address(this), msg.sender, rewards);
+        // Interaction: transfer earned rewards to staker
+        _claimAllRewardsByBandId(bandId);
 
         // Effects: emit event
         emit Unstaked(user, bandId, true);
     }
 
-    // WIP
-    // function deleteVestingUserData(
-    //     address user
-    // ) external onlyRole(VESTING_ROLE) {
-    //     for (uint256 bandLevel; bandLevel < s_totalBands; bandLevel++) {
-    //         bytes32 hashedStakerBandAndLevel = _getStakerAndBandLevelHash(
-    //             user,
-    //             bandLevel
-    //         );
-    //         delete s_bandOwnership[bandId];
-    //     }
-    // }
+    /**
+     * @notice  Delete all user band data if beneficiary removed from vesting
+     * @param   user  staker address
+     */
+    function deleteVestingUserData(
+        address user
+    ) external onlyRole(VESTING_ROLE) {
+        uint256[] memory bandIds = s_stakerBands[user];
+        uint256 bandsAmount = bandIds.length;
+
+        // Loop through all bands that user owns and delete data
+        for (uint256 bandIndex; bandIndex < bandsAmount; bandIndex++) {
+            delete s_bands[bandIds[bandIndex]];
+        }
+        delete s_stakerBands[user];
+    }
 
     /**
      * @notice  Upgradea any owned band to a new level
@@ -465,7 +473,12 @@ contract Staking is
     function upgradeBand(
         uint256 bandId,
         uint16 newBandLevel
-    ) external mBandOwner(msg.sender, bandId) mBandLevelExists(newBandLevel) {
+    )
+        external
+        mBandOwner(msg.sender, bandId)
+        mBandLevelExists(newBandLevel)
+        mNotFixStakingType(bandId)
+    {
         uint16 oldBandLevel = s_bands[bandId].bandLevel;
 
         // Checks: new band level must be higher than the old one
@@ -495,7 +508,12 @@ contract Staking is
     function downgradeBand(
         uint256 bandId,
         uint16 newBandLevel
-    ) external mBandOwner(msg.sender, bandId) mBandLevelExists(newBandLevel) {
+    )
+        external
+        mBandOwner(msg.sender, bandId)
+        mBandLevelExists(newBandLevel)
+        mNotFixStakingType(bandId)
+    {
         uint16 oldBandLevel = s_bands[bandId].bandLevel;
 
         // Checks: new band level must be higher than the old one
@@ -576,6 +594,37 @@ contract Staking is
         return s_totalBands;
     }
 
+    /**
+     * @notice  Returns the next consecutive band Id number to be assigned
+     * @return  uint256  Next band Id
+     */
+    function getNextBandId() external view returns (uint256) {
+        return s_nextBandId;
+    }
+
+    /**
+     * @notice  Returns the next consecutive distribution Id number to be assigned
+     * @return  uint256  Next distribution Id
+     */
+    function getNextDistributionId() external view returns (uint256) {
+        return s_nextDistributionId;
+    }
+
+    /**
+     * @notice  Returns all shares to be accumulated each month
+     * @return  uint256[]  Array of all shares appending each month
+     */
+    function getSharesInMonth() external view returns (uint256[] memory) {
+        return sharesInMonth;
+    }
+
+    /**
+     * @notice  Returns pool data such as distribution percentage and token amounts
+     * @param   poolId  Pool Id
+     * @return  distributionPercentage  Percentage in 10**6 precision
+     * @return  usdtTokenAmount  Total USDT tokens in pool
+     * @return  usdcTokenAmount  Total USDC tokens in pool
+     */
     function getPool(
         uint16 poolId
     )
@@ -593,6 +642,13 @@ contract Staking is
         usdcTokenAmount = pool.totalUsdcPoolTokenAmount;
     }
 
+    /**
+     * @notice  Returns band data such as band price, accessible pools and timespan
+     * @param   bandLevel  Band level
+     * @return  price  Band price in WOW tokens
+     * @return  accessiblePools  List of accessible pools after purchase
+     * @return  stakingTimespan  Band staking validity timespan
+     */
     function getBand(
         uint16 bandLevel
     )
@@ -608,6 +664,103 @@ contract Staking is
         price = band.price;
         accessiblePools = band.accessiblePools;
         stakingTimespan = band.stakingTimespan;
+    }
+
+    /**
+     * @notice  Returns staker data on each band they purchased
+     * @param   bandId  Band Id
+     * @return  stakingType  FIx/FLEXI staking type
+     * @return  startingSharesAmount  Starting assigned share amount
+     * @return  owner  Staker address
+     * @return  bandLevel  Band level
+     * @return  stakingStartTimestamp  Timestamp of staking start
+     * @return  usdtRewardsClaimed  Amount of USDT tokens claimed
+     * @return  usdcRewardsClaimed  Amount of USDC tokens claimed
+     */
+    function getStakerBandData(
+        uint256 bandId
+    )
+        external
+        view
+        returns (
+            StakingTypes stakingType,
+            uint256 startingSharesAmount,
+            address owner,
+            uint16 bandLevel,
+            uint256 stakingStartTimestamp,
+            uint256 usdtRewardsClaimed,
+            uint256 usdcRewardsClaimed
+        )
+    {
+        StakerBandData memory stakerBandData = s_bands[bandId];
+        stakingType = stakerBandData.stakingType;
+        startingSharesAmount = stakerBandData.startingSharesAmount;
+        owner = stakerBandData.owner;
+        bandLevel = stakerBandData.bandLevel;
+        stakingStartTimestamp = stakerBandData.stakingStartTimestamp;
+        usdtRewardsClaimed = stakerBandData.usdtRewardsClaimed;
+        usdcRewardsClaimed = stakerBandData.usdcRewardsClaimed;
+    }
+
+    /**
+     * @notice  Returns all band Ids the staker bought
+     * @param   staker  Staker address
+     * @return  bandIds  Array of all staker owned bands
+     */
+    function getStakerBandIds(
+        address staker
+    ) external view returns (uint256[] memory bandIds) {
+        bandIds = s_stakerBands[staker];
+    }
+
+    /**
+     * @notice  Returns all fund distributions by specified token
+     * @param   token  IERC20 USDT/USDC token
+     * @return  fundDistributionData  Array of funDistribution data
+     */
+    function getFundDistribution(
+        IERC20 token
+    ) external view returns (FundDistribution[] memory fundDistributionData) {
+        fundDistributionData = s_fundDistributions[token];
+    }
+
+    /**
+     * @notice  Returns pool distribution information:
+     *          token, token amount and share amount
+     * @param   distributionIdAndPoolId  Hashed distribution and pool Id
+     * @return  token  ERC20 USDT/USDC
+     * @return  tokensAmount  Amount of tokens distributed to pool
+     * @return  sharesAmount  Amount of shares present in pool
+     */
+    function getPoolDistribution(
+        bytes32 distributionIdAndPoolId
+    )
+        external
+        view
+        returns (IERC20 token, uint256 tokensAmount, uint256 sharesAmount)
+    {
+        PoolDistribution memory poolDistributionData = s_poolsDistribution[
+            distributionIdAndPoolId
+        ];
+        token = poolDistributionData.token;
+        tokensAmount = poolDistributionData.tokensAmount;
+        sharesAmount = poolDistributionData.sharesAmount;
+    }
+
+    /**
+     * @notice  Returns data on staker shares and claimed status
+     * @param   distributionIdWithPoolIdAndStaker  Hashed distribution, pool Id and staker
+     * @return  shares  Total claimable shares
+     * @return  claimed  Claimed share status
+     */
+    function getStakerShares(
+        bytes32 distributionIdWithPoolIdAndStaker
+    ) external view returns (uint256 shares, bool claimed) {
+        StakerShares memory stakerSharesData = s_stakerShares[
+            distributionIdWithPoolIdAndStaker
+        ];
+        shares = stakerSharesData.shares;
+        claimed = stakerSharesData.claimed;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -720,6 +873,21 @@ contract Staking is
 
         // Effects: emit event
         emit BandUnstaked(user, bandLevel, bandId);
+    }
+
+    /**
+     * @notice  Claim rewards for specified band
+     * @dev  This function can be called by anyone
+     * @param   bandId  Band Id
+     */
+    function _claimAllRewardsByBandId(uint256 bandId) internal {
+        uint256 accessiblePoolLength = s_bandLevelData[
+            s_bands[bandId].bandLevel
+        ].accessiblePools.length;
+        // Loop through all pools and claim rewards for USDT and USDC
+        for (uint16 poolId = 1; poolId <= accessiblePoolLength; poolId++) {
+            claimPoolRewards(s_usdtToken, poolId);
+        }
     }
 
     function _createFundDistribution(

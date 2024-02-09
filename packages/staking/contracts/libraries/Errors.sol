@@ -8,6 +8,7 @@ library Errors {
 
     error Staking__InvalidBandLevel(uint16 bandLevel);
     error Staking__InvalidBandId(uint256 bandId);
+    error Staking__CantModifyFixTypeBand();
     error Staking__NotBandOwner(uint256 bandId, address owner);
     error Staking__InvalidStakingType();
     error Staking__MaximumLevelExceeded();

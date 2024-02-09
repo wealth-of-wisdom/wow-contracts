@@ -147,8 +147,7 @@ interface IStaking is IStakingEvents {
     //  */
     function unstakeVested(uint256 bandId, address user) external;
 
-    // WIP
-    // function deleteVestingUserData(address user) external;
+    function deleteVestingUserData(address user) external;
 
     function upgradeBand(uint256 bandId, uint16 newBandLevel) external;
 
