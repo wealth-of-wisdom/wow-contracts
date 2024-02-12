@@ -2,9 +2,7 @@
 pragma solidity 0.8.20;
 
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
-import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {Errors} from "../../../contracts/libraries/Errors.sol";
-import {StakingMock} from "../../mocks/StakingMock.sol";
 import {Unit_Test} from "../Unit.t.sol";
 
 contract Staking_SetPool_Unit_Test is Unit_Test {
@@ -67,7 +65,7 @@ contract Staking_SetPool_Unit_Test is Unit_Test {
 
     function test_setPool_EmitsPoolSetEvent() external {
         vm.expectEmit(address(staking));
-        emit PoolSet(POOL_ID_1);
+        emit PoolSet(POOL_ID_1, POOL_1_PERCENTAGE);
 
         vm.prank(admin);
         staking.setPool(POOL_ID_1, POOL_1_PERCENTAGE);
