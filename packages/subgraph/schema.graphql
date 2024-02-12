@@ -79,9 +79,9 @@ type VestingPool @entity {
     listingPercentageDivisor: BigInt!
 
     """
-    Duration of the cliff period.
+    Duration of the cliff period in days
     Type: BigInt
-    Example: 2592000000 (30 days in milliseconds)
+    Example: 30 (days)
     """
     cliffDuration: BigInt!
 
@@ -107,9 +107,9 @@ type VestingPool @entity {
     cliffPercentageDivisor: BigInt!
 
     """
-    Duration of the vesting period.
+    Duration of the vesting period in days
     Type: BigInt
-    Example: 7776000000 (90 days in milliseconds)
+    Example: 90 (days)
     """
     vestingDuration: BigInt!
 
@@ -209,4 +209,43 @@ type Beneficiary @entity {
     Example: 2000
     """
     claimedTokens: BigInt!
+}
+
+
+# Staking schema
+ 
+type StakingContract @entity {
+    id: ID!
+    stakingContractAddress: Bytes!
+    totalPools: Int!
+    totalBands: Int!
+}
+
+
+type Pool @entity {
+    id: ID!
+    distributionPercentage: Int!
+    usdtTokenAmount: BigInt!
+    usdcTokenAmount: BigInt!
+}
+
+
+type Band @entity {
+    id: ID!
+    stakingType: String!
+    bandLevel: Int!
+    price: BigInt!
+    owner: Bytes!
+    startingSharesAmount: BigInt!
+    stakingStartTimestamp: BigInt!
+    claimableRewardsAmount: BigInt!
+    usdtRewardsClaimed: BigInt!
+    usdcRewardsClaimed: BigInt!
+}
+
+type FundDistribution @entity {
+    id: ID!
+    token: Bytes!
+    amount: BigInt!
+    timestamp: BigInt!
 }
