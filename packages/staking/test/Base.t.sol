@@ -73,7 +73,7 @@ contract Base_Test is Test, Constants, Events {
             usdcToken,
             wowToken,
             TOTAL_POOLS,
-            TOTAL_BANDS
+            TOTAL_BAND_LEVELS
         );
 
         // MINT TOKENS TO TEST ACCOUNTS

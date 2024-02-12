@@ -14,7 +14,7 @@ contract Staking_Initialize_Unit_Test is Unit_Test {
             usdcToken,
             wowToken,
             TOTAL_POOLS,
-            TOTAL_BANDS
+            TOTAL_BAND_LEVELS
         );
         _;
     }
@@ -34,7 +34,7 @@ contract Staking_Initialize_Unit_Test is Unit_Test {
             usdcToken,
             wowToken,
             TOTAL_POOLS,
-            TOTAL_BANDS
+            TOTAL_BAND_LEVELS
         );
     }
 
@@ -45,7 +45,7 @@ contract Staking_Initialize_Unit_Test is Unit_Test {
             IERC20(ZERO_ADDRESS),
             wowToken,
             TOTAL_POOLS,
-            TOTAL_BANDS
+            TOTAL_BAND_LEVELS
         );
     }
 
@@ -56,13 +56,19 @@ contract Staking_Initialize_Unit_Test is Unit_Test {
             usdcToken,
             IERC20(ZERO_ADDRESS),
             TOTAL_POOLS,
-            TOTAL_BANDS
+            TOTAL_BAND_LEVELS
         );
     }
 
     function test_initialize_RevertIf_TotalPoolsIsZero() external {
         vm.expectRevert(Errors.Staking__ZeroAmount.selector);
-        staking.initialize(usdtToken, usdcToken, wowToken, 0, TOTAL_BANDS);
+        staking.initialize(
+            usdtToken,
+            usdcToken,
+            wowToken,
+            0,
+            TOTAL_BAND_LEVELS
+        );
     }
 
     function test_initialize_RevertIf_TotalBandsIsZero() external {
@@ -129,7 +135,7 @@ contract Staking_Initialize_Unit_Test is Unit_Test {
     {
         assertEq(
             staking.getTotalBands(),
-            TOTAL_BANDS,
+            TOTAL_BAND_LEVELS,
             "Total bands should be set correctly"
         );
     }
