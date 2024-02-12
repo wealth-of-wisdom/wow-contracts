@@ -400,7 +400,7 @@ contract Staking is
         _unstakeBand(bandId, msg.sender);
 
         // Interaction: transfer earned rewards to staker
-        _claimRewardsByBandId(bandId);
+        _claimRewardsFromPools(bandId);
 
         // Effects: emit event
         emit Unstaked(msg.sender, bandId, false);
@@ -442,7 +442,7 @@ contract Staking is
         _unstakeBand(bandId, user);
 
         // Interaction: transfer earned rewards to staker
-        _claimRewardsByBandId(bandId);
+        _claimRewardsFromPools(bandId);
 
         // Effects: emit event
         emit Unstaked(user, bandId, true);
@@ -462,6 +462,7 @@ contract Staking is
         for (uint256 bandIndex; bandIndex < bandsAmount; bandIndex++) {
             delete s_bands[bandIds[bandIndex]];
         }
+        s_users.remove(user);
         delete s_stakerBands[user];
     }
 
@@ -880,13 +881,11 @@ contract Staking is
      * @dev  This function can be called by anyone
      * @param   bandId  Band Id
      */
-    function _claimRewardsByBandId(uint256 bandId) internal {
+    function _claimRewardsFromPools(uint256 bandId) internal {
         uint16 bandLevel = s_bands[bandId].bandLevel;
-        uint256 accessiblePoolLength = s_bandLevelData[bandLevel]
-            .accessiblePools
-            .length;
+        uint256 maxPoolId = s_bandLevelData[bandLevel].accessiblePools.length;
         // Loop through all pools and claim rewards for USDT and USDC
-        for (uint16 poolId = 1; poolId <= accessiblePoolLength; poolId++) {
+        for (uint16 poolId = 1; poolId <= maxPoolId; poolId++) {
             claimPoolRewards(s_usdtToken, poolId);
         }
     }
