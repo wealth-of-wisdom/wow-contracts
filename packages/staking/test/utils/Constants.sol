@@ -36,9 +36,36 @@ abstract contract Constants {
     //////////////////////////////////////////////////////////////////////////*/
 
     uint16 internal constant TOTAL_POOLS = 9;
-    uint16 internal constant TOTAL_BANDS = 9;
-    uint48 internal constant PERCENTAGE_PRECISION = 10 ** 6; // 100% = 10**6
-    uint128 internal constant MONTH = 30 days;
+    uint16 internal constant TOTAL_BAND_LEVELS = 9;
+    uint48 internal constant PERCENTAGE_PRECISION = 1e8;
+    uint48 internal constant SHARE = 1e6;
+    uint48 internal constant MONTH = 30 days;
+    uint48[] internal SHARES_IN_MONTH = [
+        SHARE,
+        SHARE * 2,
+        SHARE * 3,
+        SHARE * 4,
+        SHARE * 5,
+        SHARE * 6,
+        SHARE * 7,
+        SHARE * 8,
+        SHARE * 9,
+        SHARE * 10,
+        SHARE * 11,
+        SHARE * 12,
+        SHARE * 13,
+        SHARE * 14,
+        SHARE * 15,
+        SHARE * 16,
+        SHARE * 17,
+        SHARE * 18,
+        SHARE * 19,
+        SHARE * 20,
+        SHARE * 21,
+        SHARE * 22,
+        SHARE * 23,
+        SHARE * 24
+    ];
 
     /*//////////////////////////////////////////////////////////////////////////
                                 STAKING POOL DATA
@@ -73,83 +100,12 @@ abstract contract Constants {
     uint48 internal constant POOL_9_PERCENTAGE =
         (14 * PERCENTAGE_PRECISION) / 100; // 14%
 
-    uint48[] internal POOL_1_BAND_ALLOCATION_PERCENTAGE = [
-        (16 * PERCENTAGE_PRECISION) / 100, // 16%
-        (14 * PERCENTAGE_PRECISION) / 100, // 14%
-        (13 * PERCENTAGE_PRECISION) / 100, // 13%
-        (12 * PERCENTAGE_PRECISION) / 100, // 12%
-        (11 * PERCENTAGE_PRECISION) / 100, // 11%
-        (10 * PERCENTAGE_PRECISION) / 100, // 10%
-        (9 * PERCENTAGE_PRECISION) / 100, // 9%
-        (8 * PERCENTAGE_PRECISION) / 100, // 8%
-        (7 * PERCENTAGE_PRECISION) / 100 // 7%
-    ];
-    uint48[] internal POOL_2_BAND_ALLOCATION_PERCENTAGE = [
-        (23 * PERCENTAGE_PRECISION) / 100, // 23%
-        (14 * PERCENTAGE_PRECISION) / 100, // 14%
-        (13 * PERCENTAGE_PRECISION) / 100, // 13%
-        (12 * PERCENTAGE_PRECISION) / 100, // 12%
-        (11 * PERCENTAGE_PRECISION) / 100, // 11%
-        (10 * PERCENTAGE_PRECISION) / 100, // 10%
-        (9 * PERCENTAGE_PRECISION) / 100, // 9%
-        (8 * PERCENTAGE_PRECISION) / 100 // 8%
-    ];
-
-    uint48[] internal POOL_3_BAND_ALLOCATION_PERCENTAGE = [
-        (31 * PERCENTAGE_PRECISION) / 100, // 31%
-        (14 * PERCENTAGE_PRECISION) / 100, // 14%
-        (13 * PERCENTAGE_PRECISION) / 100, // 13%
-        (12 * PERCENTAGE_PRECISION) / 100, // 12%
-        (11 * PERCENTAGE_PRECISION) / 100, // 11%
-        (10 * PERCENTAGE_PRECISION) / 100, // 10%
-        (9 * PERCENTAGE_PRECISION) / 100 // 9%
-    ];
-
-    uint48[] internal POOL_4_BAND_ALLOCATION_PERCENTAGE = [
-        (40 * PERCENTAGE_PRECISION) / 100, // 40%
-        (14 * PERCENTAGE_PRECISION) / 100, // 14%
-        (13 * PERCENTAGE_PRECISION) / 100, // 13%
-        (12 * PERCENTAGE_PRECISION) / 100, // 12%
-        (11 * PERCENTAGE_PRECISION) / 100, // 11%
-        (10 * PERCENTAGE_PRECISION) / 100 // 10%
-    ];
-
-    uint48[] internal POOL_5_BAND_ALLOCATION_PERCENTAGE = [
-        (50 * PERCENTAGE_PRECISION) / 100, // 50%
-        (14 * PERCENTAGE_PRECISION) / 100, // 14%
-        (13 * PERCENTAGE_PRECISION) / 100, // 13%
-        (12 * PERCENTAGE_PRECISION) / 100, // 12%
-        (11 * PERCENTAGE_PRECISION) / 100 // 11%
-    ];
-
-    uint48[] internal POOL_6_BAND_ALLOCATION_PERCENTAGE = [
-        (61 * PERCENTAGE_PRECISION) / 100, // 61%
-        (14 * PERCENTAGE_PRECISION) / 100, // 14%
-        (13 * PERCENTAGE_PRECISION) / 100, // 13%
-        (12 * PERCENTAGE_PRECISION) / 100 // 12%
-    ];
-
-    uint48[] internal POOL_7_BAND_ALLOCATION_PERCENTAGE = [
-        (73 * PERCENTAGE_PRECISION) / 100, // 73%
-        (14 * PERCENTAGE_PRECISION) / 100, // 14%
-        (13 * PERCENTAGE_PRECISION) / 100 // 13%
-    ];
-
-    uint48[] internal POOL_8_BAND_ALLOCATION_PERCENTAGE = [
-        (86 * PERCENTAGE_PRECISION) / 100, // 86%
-        (14 * PERCENTAGE_PRECISION) / 100 // 14%
-    ];
-
-    uint48[] internal POOL_9_BAND_ALLOCATION_PERCENTAGE = [
-        PERCENTAGE_PRECISION
-    ]; // 100%
-
     /*//////////////////////////////////////////////////////////////////////////
                                 STAKING BAND DATA
     //////////////////////////////////////////////////////////////////////////*/
 
     uint16 internal constant BAND_ID_1 = 1;
-    uint16 internal constant constantBAND_ID_2 = 2;
+    uint16 internal constant BAND_ID_2 = 2;
     uint16 internal constant BAND_ID_3 = 3;
     uint16 internal constant BAND_ID_4 = 4;
     uint16 internal constant BAND_ID_5 = 5;
@@ -177,14 +133,4 @@ abstract contract Constants {
     uint16[] internal BAND_7_ACCESSIBLE_POOLS = [1, 2, 3, 4, 5, 6, 7];
     uint16[] internal BAND_8_ACCESSIBLE_POOLS = [1, 2, 3, 4, 5, 6, 7, 8];
     uint16[] internal BAND_9_ACCESSIBLE_POOLS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-
-    uint256 internal constant BAND_1_STAKING_TIMESPAN = 24 * MONTH;
-    uint256 internal constant BAND_2_STAKING_TIMESPAN = 24 * MONTH;
-    uint256 internal constant BAND_3_STAKING_TIMESPAN = 24 * MONTH;
-    uint256 internal constant BAND_4_STAKING_TIMESPAN = 24 * MONTH;
-    uint256 internal constant BAND_5_STAKING_TIMESPAN = 24 * MONTH;
-    uint256 internal constant BAND_6_STAKING_TIMESPAN = 24 * MONTH;
-    uint256 internal constant BAND_7_STAKING_TIMESPAN = 24 * MONTH;
-    uint256 internal constant BAND_8_STAKING_TIMESPAN = 24 * MONTH;
-    uint256 internal constant BAND_9_STAKING_TIMESPAN = 24 * MONTH;
 }

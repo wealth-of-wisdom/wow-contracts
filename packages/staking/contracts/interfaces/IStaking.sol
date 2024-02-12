@@ -8,9 +8,19 @@ interface IStakingEvents {
                                        EVENTS
     //////////////////////////////////////////////////////////////////////////*/
 
-    event PoolSet(uint16 indexed poolId);
+    event PoolSet(uint16 indexed poolId, uint48 distributionPercentage);
 
-    event BandSet(uint16 bandLevel);
+    event BandLevelSet(
+        uint16 indexed bandLevel,
+        uint256 price,
+        uint16[] accessiblePools
+    );
+
+    event SharesInMonthSet(uint48[] totalSharesInMonth);
+
+    event TotalBandLevelsAmountSet(uint16 newTotalBandsAmount);
+
+    event TotalPoolAmountSet(uint16 newTotalPoolAmount);
 
     event FundsDistributed(IERC20 token, uint256 amount);
 
@@ -40,10 +50,6 @@ interface IStakingEvents {
         uint16 oldBandLevel,
         uint16 newBandLevel
     );
-
-    event TotalBandAmountSet(uint16 newTotalBandsAmount);
-
-    event TotalPoolAmountSet(uint16 newTotalPoolAmount);
 
     event TokensWithdrawn(IERC20 token, address receiver, uint256 amount);
 
@@ -100,7 +106,6 @@ interface IStaking is IStakingEvents {
     struct Band {
         uint256 price;
         uint16[] accessiblePools; // 1-9
-        uint256 stakingTimespan;
     }
 
     struct Pool {
@@ -115,14 +120,15 @@ interface IStaking is IStakingEvents {
 
     function setPool(uint16 poolId, uint48 distributionPercentage) external;
 
-    function setBand(
+    function setBandLevel(
         uint16 bandLevel,
         uint256 price,
-        uint16[] memory accessiblePools,
-        uint256 stakingTimespan
+        uint16[] calldata accessiblePools
     ) external;
 
-    function setTotalBandAmount(uint16 newTotalBandsAmount) external;
+    function setSharesInMonth(uint48[] calldata totalSharesInMonth) external;
+
+    function setTotalBandLevelsAmount(uint16 newTotalBandsAmount) external;
 
     function setTotalPoolAmount(uint16 newTotalPoolAmount) external;
 
@@ -180,12 +186,9 @@ interface IStaking is IStakingEvents {
 
     function getBand(
         uint16 bandLevel
-    )
-        external
-        view
-        returns (
-            uint256 price,
-            uint16[] memory accessiblePools,
-            uint256 stakingTimespan
-        );
+    ) external view returns (uint256 price, uint16[] memory accessiblePools);
+
+    function getSharesInMonth(
+        uint256 index
+    ) external view returns (uint48 shares);
 }
