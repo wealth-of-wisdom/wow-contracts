@@ -146,7 +146,7 @@ contract Staking is
 
     modifier mStakingTypeExists(StakingTypes stakingType) {
         if (
-            StakingTypes.FIX != stakingType || StakingTypes.FLEXI != stakingType
+            StakingTypes.FIX != stakingType && StakingTypes.FLEXI != stakingType
         ) revert Errors.Staking__InvalidStakingType();
         _;
     }
@@ -359,12 +359,7 @@ contract Staking is
     function withdrawTokens(
         IERC20 token,
         uint256 amount
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        // Checks: the amount must be greater than 0
-        if (amount == 0) {
-            revert Errors.Staking__ZeroAmount();
-        }
-
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) mAmountNotZero(amount) {
         uint256 balance = token.balanceOf(address(this));
 
         // Checks: the contract must have enough balance to withdraw
@@ -408,6 +403,11 @@ contract Staking is
      * @param   bandId  Id of the band (0-max uint)
      */
     function unstake(uint256 bandId) external mBandOwner(msg.sender, bandId) {
+        // Interraction: transfer staked tokens
+        uint16 bandLevel = s_bands[bandId].bandLevel;
+        uint256 stakedAmount = s_bandLevelData[bandLevel].price;
+        s_wowToken.safeTransfer(msg.sender, stakedAmount);
+
         // Effects: delete band data
         _unstakeBand(bandId, msg.sender);
 
