@@ -476,6 +476,7 @@ contract Staking is
         }
         s_users.remove(user);
         delete s_stakerBands[user];
+        emit VestingUserRemoved(msg.sender);
     }
 
     /**
@@ -627,7 +628,7 @@ contract Staking is
      * @notice  Returns all shares to be accumulated each month
      * @return  uint256[]  Array of all shares appending each month
      */
-    function getSharesInMonth() external view returns (uint256[] memory) {
+    function getSharesInMonth() external view returns (uint48[] memory) {
         return sharesInMonth;
     }
 
@@ -660,7 +661,6 @@ contract Staking is
      * @param   bandLevel  Band level
      * @return  price  Band price in WOW tokens
      * @return  accessiblePools  List of accessible pools after purchase
-     * @return  stakingTimespan  Band staking validity timespan
      */
     function getBand(
         uint16 bandLevel

@@ -53,6 +53,8 @@ interface IStakingEvents {
 
     event TokensWithdrawn(IERC20 token, address receiver, uint256 amount);
 
+    event VestingUserRemoved(address vestingSaker);
+
     event RewardsClaimed(address user, IERC20 token, uint256 totalRewards);
 
     event AllRewardsClaimed(address user);
