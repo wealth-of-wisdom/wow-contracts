@@ -53,6 +53,8 @@ interface IStakingEvents {
 
     event TokensWithdrawn(IERC20 token, address receiver, uint256 amount);
 
+    event VestingUserRemoved(address vestingSaker);
+
     event RewardsClaimed(address user, IERC20 token, uint256 totalRewards);
 
     event AllRewardsClaimed(address user);
@@ -153,8 +155,7 @@ interface IStaking is IStakingEvents {
     //  */
     function unstakeVested(uint256 bandId, address user) external;
 
-    // WIP
-    // function deleteVestingUserData(address user) external;
+    function deleteVestingUserData(address user) external;
 
     function upgradeBand(uint256 bandId, uint16 newBandLevel) external;
 
