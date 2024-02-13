@@ -22,6 +22,7 @@ import {
     FundDistribution
 } from "../../generated/schema"
 import { getOrInitBand, getOrInitFundDistribution, getOrInitPool, getOrInitStakingContract } from "../helpers/staking.helpers"
+import { BIGINT_ZERO } from "../utils/constants";
 import { stringifyStakingType } from "../utils/utils";
 import { BigInt, store } from "@graphprotocol/graph-ts";
 
@@ -36,4 +37,21 @@ export function handleInitialized(event: InitializedEvent): void {
 
     stakingContract.save();
 
+}
+
+export function handleBandStaked(event: BandStakedEvent): void {
+
+    const band: Band = getOrInitBand(event.params.bandId);
+
+    // band.stakingType = event.params
+    band.bandLevel = event.params.bandLevel;
+    band.owner = event.params.user
+    // band.price = event.params.price;
+    band.startingSharesAmount = BIGINT_ZERO;
+    band.stakingStartTimestamp = event.block.timestamp;
+    band.claimableRewardsAmount = BIGINT_ZERO;
+    band.usdcRewardsClaimed = BIGINT_ZERO;
+    band.usdcRewardsClaimed = BIGINT_ZERO;
+
+    band.save();
 }
