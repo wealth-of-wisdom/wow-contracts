@@ -55,3 +55,12 @@ export function handleBandStaked(event: BandStakedEvent): void {
 
     band.save();
 }
+
+export function handleBandUnstaked(event: BandUnstakedEvent): void {
+
+    const band: Band = getOrInitBand(event.params.bandId);
+
+    store.remove("Band", band.id)
+
+    band.save()
+}
