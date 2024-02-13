@@ -42,6 +42,8 @@ abstract contract Constants {
     //////////////////////////////////////////////////////////////////////////*/
 
     uint256 FIRST_STAKED_BAND_ID = 0;
+    uint256[] STAKER_BAND_IDS = [0];
+    uint256[] EMPTY_STAKER_BAND_IDS;
 
     /*//////////////////////////////////////////////////////////////////////////
                                     ENUMS

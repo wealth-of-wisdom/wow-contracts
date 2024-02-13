@@ -7,14 +7,6 @@ import {Unit_Test} from "../Unit.t.sol";
 import {IStaking} from "../../../contracts/interfaces/IStaking.sol";
 
 contract Staking_DeleteVestingUserData_Unit_Test is Unit_Test {
-    uint256[] stakerBandIds;
-
-    modifier mGrantVestingRole() {
-        vm.prank(admin);
-        staking.grantRole(DEFAULT_VESTING_ROLE, alice);
-        _;
-    }
-
     function test_deleteVestingUserData_RevertIf_NotVestingContract() external {
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -29,7 +21,7 @@ contract Staking_DeleteVestingUserData_Unit_Test is Unit_Test {
 
     function test_deleteVestingUserData_DeletesStakerData()
         external
-        mGrantVestingRole
+        grantVestingRole
         setBandLevelData
         stakeTokens
     {
@@ -40,23 +32,21 @@ contract Staking_DeleteVestingUserData_Unit_Test is Unit_Test {
         staking.deleteVestingUserData(alice);
         (
             ,
-            uint256 startingSharesAmount,
+            ,
             address owner,
             uint16 bandLevel,
             uint256 stakingStartTimestamp,
-            uint256 usdtRewardsClaimed,
-            uint256 usdcRewardsClaimed
+            ,
+
         ) = staking.getStakerBandData(FIRST_STAKED_BAND_ID);
 
         assertEq(owner, address(0), "Owner not removed");
         assertEq(bandLevel, 0, "Band Level not removed");
         assertEq(stakingStartTimestamp, 0, "Timestamp not removed");
-        assertEq(usdtRewardsClaimed, 0, "USDT rewards claimed changed");
-        assertEq(usdcRewardsClaimed, 0, "USDC rewards claimed changed");
 
         assertEq(
             staking.getStakerBandIds(alice),
-            stakerBandIds,
+            EMPTY_STAKER_BAND_IDS,
             "Band Id's not removed"
         );
         vm.stopPrank();
@@ -64,7 +54,7 @@ contract Staking_DeleteVestingUserData_Unit_Test is Unit_Test {
 
     function test_deleteVestingUserData_EmitsStaked()
         external
-        mGrantVestingRole
+        grantVestingRole
         setBandLevelData
         stakeTokens
     {

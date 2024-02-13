@@ -101,8 +101,8 @@ contract Base_Test is Test, Constants, Events {
         _;
     }
 
-    modifier distributeFunds() {
-        _distributeFunds();
+    modifier grantVestingRole() {
+        _grantVestingRole();
         _;
     }
 
@@ -127,12 +127,11 @@ contract Base_Test is Test, Constants, Events {
         vm.stopPrank();
     }
 
-    function _distributeFunds() internal {
-        vm.startPrank(admin);
-        usdcToken.approve(address(staking), DEFAULT_DISTRIBUTION_AMOUNT);
-        staking.distributeFunds(usdcToken, DEFAULT_DISTRIBUTION_AMOUNT);
-        vm.stopPrank();
+    function _grantVestingRole() internal {
+        vm.prank(admin);
+        staking.grantRole(DEFAULT_VESTING_ROLE, alice);
     }
+
     /*//////////////////////////////////////////////////////////////////////////
                                 HELPER FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/

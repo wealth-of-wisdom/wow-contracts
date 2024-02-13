@@ -6,30 +6,47 @@ import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {Unit_Test} from "../Unit.t.sol";
 import {IStaking} from "../../../contracts/interfaces/IStaking.sol";
 
-contract Staking_Unstake_Unit_Test is Unit_Test {
-    function test_unstake_RevertIf_NotBandOwner()
+contract Staking_UnstakeVested_Unit_Test is Unit_Test {
+    function test_unstakeVested_RevertIf_NotVestingContract()
         external
         setBandLevelData
         stakeTokens
     {
         vm.expectRevert(
             abi.encodeWithSelector(
-                Errors.Staking__NotBandOwner.selector,
-                FIRST_STAKED_BAND_ID,
-                bob
+                IAccessControl.AccessControlUnauthorizedAccount.selector,
+                alice,
+                DEFAULT_VESTING_ROLE
             )
         );
-        vm.prank(bob);
-        staking.unstake(FIRST_STAKED_BAND_ID);
+        vm.prank(alice);
+        staking.unstakeVested(FIRST_STAKED_BAND_ID, alice);
     }
 
-    function test_unstake_UnstakesTokensAndSetsData()
+    function test_unstakeVested_RevertIf_NotBandOwner()
+        external
+        setBandLevelData
+        grantVestingRole
+    {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.Staking__NotBandOwner.selector,
+                FIRST_STAKED_BAND_ID,
+                alice
+            )
+        );
+        vm.prank(alice);
+        staking.unstakeVested(FIRST_STAKED_BAND_ID, alice);
+    }
+
+    function test_unstakeVested_UnstakesTokensAndSetsData()
         external
         setBandLevelData
         stakeTokens
+        grantVestingRole
     {
         vm.startPrank(alice);
-        staking.unstake(FIRST_STAKED_BAND_ID);
+        staking.unstakeVested(FIRST_STAKED_BAND_ID, alice);
 
         (
             ,
@@ -54,42 +71,48 @@ contract Staking_Unstake_Unit_Test is Unit_Test {
         vm.stopPrank();
     }
 
-    function test_unstake_UnstakesAndTransfersTokens()
+    function test_unstakeVested_UnstakesAndTransfersTokens()
         external
         setBandLevelData
         stakeTokens
+        grantVestingRole
     {
         vm.startPrank(alice);
         uint256 alicePreUnstakingBalance = wowToken.balanceOf(alice);
+        uint256 stakingPreUnstakingBalance = wowToken.balanceOf(
+            address(staking)
+        );
 
-        staking.unstake(FIRST_STAKED_BAND_ID);
+        staking.unstakeVested(FIRST_STAKED_BAND_ID, alice);
 
         uint256 alicePostUnstakingBalance = wowToken.balanceOf(alice);
         uint256 stakingPostUnstakingBalance = wowToken.balanceOf(
             address(staking)
         );
+
         assertEq(
             stakingPostUnstakingBalance,
-            0,
-            "Tokens not transfered from contract"
+            stakingPreUnstakingBalance,
+            "Tokens should not have been transfered to contract"
         );
         assertEq(
             alicePostUnstakingBalance,
-            alicePreUnstakingBalance + BAND_4_PRICE,
-            "Tokens and rewards not transfered to staker"
+            alicePreUnstakingBalance,
+            "Tokens should not have been transfered from user"
         );
         vm.stopPrank();
     }
 
-    function test_unstake_EmitsUnstaked()
+    function test_unstakeVested_EmitsUnstaked()
         external
         setBandLevelData
         stakeTokens
+        grantVestingRole
     {
         vm.startPrank(alice);
         vm.expectEmit(true, true, true, true);
-        emit Unstaked(alice, FIRST_STAKED_BAND_ID, false);
-        staking.unstake(FIRST_STAKED_BAND_ID);
+        emit Unstaked(alice, FIRST_STAKED_BAND_ID, true);
+        staking.unstakeVested(FIRST_STAKED_BAND_ID, alice);
         vm.stopPrank();
     }
 }

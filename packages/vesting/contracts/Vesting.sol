@@ -500,14 +500,12 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
 
     /**
      * @notice Unstakes vested tokesns via vesting contract in staking contract
-     * @param bandLevel  band level number
      * @param bandId  Id of the band (0-max uint)
      * @param pid Index that refers to vesting pool object.
      * @param beneficiary Address of the staker.
      * @param tokenAmount Amount used to stake or unstake from vesting pool.
      */
     function unstakeVestedTokens(
-        uint16 bandLevel,
         uint16 bandId,
         uint16 pid,
         address beneficiary,
@@ -527,7 +525,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
             revert Errors.Vesting__UnstakingTooManyTokens();
         }
         user.stakedTokenAmount -= tokenAmount;
-        s_staking.unstakeVested(bandLevel, bandId, msg.sender);
+        s_staking.unstakeVested(bandId, msg.sender);
 
         emit StakedTokensUpdated(pid, beneficiary, tokenAmount);
     }

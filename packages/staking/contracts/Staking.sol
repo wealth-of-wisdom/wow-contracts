@@ -302,56 +302,6 @@ contract Staking is
     }
 
     /**
-     * @notice  Administrator function for transfering funds
-     *          to contract for pool distribution
-     * @param   token  USDT/USDC token
-     * @param   amount  amount to be distributed to pools
-     */
-    function distributeFunds(
-        IERC20 token,
-        uint256 amount
-    )
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-        mTokenExists(token)
-        mAmountNotZero(amount)
-    {
-        uint16 totalPools = s_totalPools;
-        uint256 usersAmount = s_users.length();
-
-        uint256 distributionId = _createFundDistribution(token, amount);
-
-        // Effects: create all pool distributions for this fund distribution
-        _createAllPoolDistributions(token, amount, distributionId, totalPools);
-
-        // Loop through all users and set the amount of shares
-        for (uint256 userIndex; userIndex < usersAmount; userIndex++) {
-            (address user, ) = s_users.at(userIndex);
-
-            // Effects: Loop through all bands and add shares to pools
-            uint256[] memory userSharesPerPool = _addAllBandSharesToPools(
-                user,
-                distributionId,
-                totalPools
-            );
-
-            // Effects: Loop through all pools and set the amount of shares for the user
-            _addSharesToUser(
-                user,
-                distributionId,
-                totalPools,
-                userSharesPerPool
-            );
-        }
-
-        // Interaction: transfer the tokens to contract
-        token.safeTransferFrom(msg.sender, address(this), amount);
-
-        // Effects: emit event
-        emit FundsDistributed(token, amount);
-    }
-
-    /**
      * @notice Withdraw the given amount of tokens from the contract
      * @param token Token to withdraw
      * @param amount Amount to withdraw

@@ -1,148 +1,134 @@
-// // SPDX-License-Identifier: UNLICENSED
-// pragma solidity 0.8.20;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity 0.8.20;
 
-// import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
-// import {Errors} from "../../../contracts/libraries/Errors.sol";
-// import {Unit_Test} from "../Unit.t.sol";
-// import {IStaking} from "../../../contracts/interfaces/IStaking.sol";
+import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
+import {Errors} from "../../../contracts/libraries/Errors.sol";
+import {Unit_Test} from "../Unit.t.sol";
+import {IStaking} from "../../../contracts/interfaces/IStaking.sol";
 
-// contract Staking_Stake_Unit_Test is Unit_Test {
-//     uint256[] stakerBandIds = [0];
+contract Staking_Stake_Unit_Test is Unit_Test {
+    function test_stake_RevertIf_InvalidBandLevel() external setBandLevelData {
+        uint16 fauxLevel = 100;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.Staking__InvalidBandLevel.selector,
+                fauxLevel
+            )
+        );
+        vm.prank(alice);
+        staking.stake(STAKING_TYPE_FLEXI, fauxLevel);
+    }
 
-//     // enum TestStakingTypes {
-//     //     FIX,
-//     //     FLEXI,
-//     //     FAUX
-//     // }
+    //NOTE: won't pass due to enum restrictions
+    // function test_stake_RevertIf_InvalidStakingType()
+    //     external
+    //     setBandLevelData
+    // {
+    //     vm.expectRevert(Errors.Staking__InvalidStakingType.selector);
+    //     vm.prank(alice);
+    //     staking.stake(3, BAND_ID_1);
+    // }
 
-//     function test_stake_RevertIf_InvalidBandLevel() external setBandLevelData {
-//         uint16 fauxLevel = 100;
-//         vm.expectRevert(
-//             abi.encodeWithSelector(
-//                 Errors.Staking__InvalidBandLevel.selector,
-//                 fauxLevel
-//             )
-//         );
-//         vm.prank(alice);
-//         staking.stake(STAKING_TYPE_FLEXI, fauxLevel);
-//     }
+    function test_stake_StakesTokensSetsData() external setBandLevelData {
+        uint256 currentTimestamp = 100;
+        vm.warp(currentTimestamp);
 
-//     //NOTE: won't pass due to enum restrictions
-//     // function test_stake_RevertIf_InvalidStakingType()
-//     //     external
-//     //     setBandLevelData
-//     // {
-//     //     vm.expectRevert(Errors.Staking__InvalidStakingType.selector);
-//     //     vm.prank(alice);
-//     //     staking.stake(TestStakingTypes.FAUX, BAND_ID_1);
-//     // }
+        vm.startPrank(alice);
+        wowToken.approve(address(staking), BAND_2_PRICE);
+        staking.stake(STAKING_TYPE_FLEXI, BAND_ID_2);
 
-//     function test_stake_StakesTokensSetsData() external setBandLevelData {
-//         uint256 currentTimestamp = 100;
-//         vm.warp(currentTimestamp);
+        (
+            ,
+            ,
+            address owner,
+            uint16 bandLevel,
+            uint256 stakingStartTimestamp,
+            ,
 
-//         vm.startPrank(alice);
-//         wowToken.approve(address(staking), BAND_2_PRICE);
-//         staking.stake(STAKING_TYPE_FLEXI, BAND_ID_2);
+        ) = staking.getStakerBandData(FIRST_STAKED_BAND_ID);
 
-//         (
-//             ,
-//             uint256 startingSharesAmount,
-//             address owner,
-//             uint16 bandLevel,
-//             uint256 stakingStartTimestamp,
-//             uint256 usdtRewardsClaimed,
-//             uint256 usdcRewardsClaimed
-//         ) = staking.getStakerBandData(FIRST_STAKED_BAND_ID);
+        assertEq(owner, alice, "Owner not set");
+        assertEq(bandLevel, BAND_ID_2, "Band Level not set");
+        assertEq(stakingStartTimestamp, currentTimestamp, "Timestamp not set");
 
-//         assertEq(owner, alice, "Owner not set");
-//         assertEq(bandLevel, BAND_ID_2, "Band Level not set");
-//         assertEq(stakingStartTimestamp, currentTimestamp, "Timestamp not set");
-//         assertEq(usdtRewardsClaimed, 0, "USDT rewards claimed changed");
-//         assertEq(usdcRewardsClaimed, 0, "USDC rewards claimed changed");
+        assertEq(
+            staking.getStakerBandIds(alice),
+            STAKER_BAND_IDS,
+            "Incorrect band Id's set"
+        );
 
-//         assertEq(
-//             staking.getStakerBandIds(alice),
-//             stakerBandIds,
-//             "Incorrect band Id's set"
-//         );
+        vm.stopPrank();
+    }
 
-//         vm.stopPrank();
-//     }
+    function test_stake_StakesTokensTransfersTokens()
+        external
+        setBandLevelData
+    {
+        vm.startPrank(alice);
+        uint256 alicePreStakingBalance = wowToken.balanceOf(alice);
 
-//     function test_stake_StakesTokensTransfersTokens()
-//         external
-//         setBandLevelData
-//     {
-//         vm.startPrank(alice);
-//         uint256 preStakingBalance = wowToken.balanceOf(alice);
-//         wowToken.approve(address(staking), BAND_2_PRICE);
-//         staking.stake(STAKING_TYPE_FLEXI, BAND_ID_2);
-//         assertEq(
-//             wowToken.balanceOf(address(staking)),
-//             BAND_2_PRICE,
-//             "Tokens not transfered to contract"
-//         );
-//         assertEq(
-//             wowToken.balanceOf(address(alice)),
-//             preStakingBalance - BAND_2_PRICE,
-//             "Tokens not transfered from staker"
-//         );
-//         vm.stopPrank();
-//     }
+        wowToken.approve(address(staking), BAND_2_PRICE);
+        staking.stake(STAKING_TYPE_FLEXI, BAND_ID_2);
 
-//     function test_stake_MultipleTokenStake() external setBandLevelData {
-//         uint256 currentTimestamp = 100;
-//         vm.warp(currentTimestamp);
+        uint256 alicePostStakingBalance = wowToken.balanceOf(alice);
+        uint256 stakingPostStakingBalance = wowToken.balanceOf(
+            address(staking)
+        );
 
-//         vm.startPrank(alice);
-//         wowToken.approve(address(staking), BAND_2_PRICE);
-//         staking.stake(STAKING_TYPE_FLEXI, BAND_ID_2);
+        assertEq(
+            stakingPostStakingBalance,
+            BAND_2_PRICE,
+            "Tokens not transfered to contract"
+        );
+        assertEq(
+            alicePostStakingBalance,
+            alicePreStakingBalance - BAND_2_PRICE,
+            "Tokens not transfered from staker"
+        );
+        vm.stopPrank();
+    }
 
-//         uint256 secondStakeBandId = staking.getNextBandId();
-//         wowToken.approve(address(staking), BAND_5_PRICE);
-//         staking.stake(STAKING_TYPE_FIX, BAND_ID_5);
+    function test_stake_MultipleTokenStake() external setBandLevelData {
+        uint256 currentTimestamp = 100;
+        vm.warp(currentTimestamp);
 
-//         (
-//             ,
-//             uint256 startingSharesAmount,
-//             address owner,
-//             uint16 bandLevel,
-//             uint256 stakingStartTimestamp,
-//             uint256 usdtRewardsClaimed,
-//             uint256 usdcRewardsClaimed
-//         ) = staking.getStakerBandData(FIRST_STAKED_BAND_ID);
+        vm.startPrank(alice);
+        wowToken.approve(address(staking), BAND_2_PRICE);
+        staking.stake(STAKING_TYPE_FLEXI, BAND_ID_2);
 
-//         assertEq(owner, alice, "Owner not set");
-//         assertEq(bandLevel, BAND_ID_2, "Band Level not set");
-//         assertEq(stakingStartTimestamp, currentTimestamp, "Timestamp not set");
-//         assertEq(usdtRewardsClaimed, 0, "USDT rewards claimed changed");
-//         assertEq(usdcRewardsClaimed, 0, "USDC rewards claimed changed");
+        uint256 secondStakeBandId = staking.getNextBandId();
+        wowToken.approve(address(staking), BAND_5_PRICE);
+        staking.stake(STAKING_TYPE_FIX, BAND_ID_5);
 
-//         (
-//             ,
-//             startingSharesAmount,
-//             owner,
-//             bandLevel,
-//             stakingStartTimestamp,
-//             usdtRewardsClaimed,
-//             usdcRewardsClaimed
-//         ) = staking.getStakerBandData(secondStakeBandId);
+        (
+            ,
+            ,
+            address owner,
+            uint16 bandLevel,
+            uint256 stakingStartTimestamp,
+            ,
 
-//         assertEq(owner, alice, "Owner not set");
-//         assertEq(bandLevel, BAND_ID_5, "Band Level not set");
-//         assertEq(stakingStartTimestamp, currentTimestamp, "Timestamp not set");
-//         assertEq(usdtRewardsClaimed, 0, "USDT rewards claimed changed");
-//         assertEq(usdcRewardsClaimed, 0, "USDC rewards claimed changed");
-//         vm.stopPrank();
-//     }
+        ) = staking.getStakerBandData(FIRST_STAKED_BAND_ID);
 
-//     function test_stake_EmitsStaked() external setBandLevelData {
-//         vm.startPrank(alice);
-//         wowToken.approve(address(staking), BAND_2_PRICE);
-//         vm.expectEmit(true, true, true, true);
-//         emit Staked(alice, BAND_ID_2, STAKING_TYPE_FLEXI, false);
-//         staking.stake(STAKING_TYPE_FLEXI, BAND_ID_2);
-//         vm.stopPrank();
-//     }
-// }
+        assertEq(owner, alice, "Owner not set");
+        assertEq(bandLevel, BAND_ID_2, "Band Level not set");
+        assertEq(stakingStartTimestamp, currentTimestamp, "Timestamp not set");
+
+        (, , owner, bandLevel, stakingStartTimestamp, , ) = staking
+            .getStakerBandData(secondStakeBandId);
+
+        assertEq(owner, alice, "Owner not set");
+        assertEq(bandLevel, BAND_ID_5, "Band Level not set");
+        assertEq(stakingStartTimestamp, currentTimestamp, "Timestamp not set");
+        vm.stopPrank();
+    }
+
+    function test_stake_EmitsStaked() external setBandLevelData {
+        vm.startPrank(alice);
+        wowToken.approve(address(staking), BAND_2_PRICE);
+        vm.expectEmit(true, true, true, true);
+        emit Staked(alice, BAND_ID_2, STAKING_TYPE_FLEXI, false);
+        staking.stake(STAKING_TYPE_FLEXI, BAND_ID_2);
+        vm.stopPrank();
+    }
+}
