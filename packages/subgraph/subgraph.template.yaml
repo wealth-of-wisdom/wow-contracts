@@ -41,3 +41,59 @@ dataSources:
               handler: handleStakingContractSet
             - event: TokensClaimed(indexed uint16,indexed address,uint256)
               handler: handleTokensClaimed
+    - kind: ethereum/contract
+      name: Staking
+      network: {{network}}
+      source:
+          address: "{{stakingAddress}}"
+          abi: Staking
+          startBlock: {{startBlock}}
+      mapping:
+          kind: ethereum/events
+          apiVersion: 0.0.7
+          language: wasm/assemblyscript
+          file: ./src/mappings/staking.ts
+          entities:
+              - Pool
+              - Band
+              - FundDistribution
+          abis:
+            - name: Staking
+              file: ./abis/Staking.json
+          eventHandlers:
+            - event: Initialized(uint64)
+              handler: handleInitialized
+            - event: AllRewardsClaimed(address)
+              handler: handleAllRewardsClaimed
+            - event: BandDowngraded(address,uint256,uint16,uint16)
+              handler: handleBandDowngraded
+            # - event: BandLevelSet(uint16,uint256,uint16[])
+            #   handler: handleBandLevelSet
+            - event: BandStaked(address,uint16,uint256)
+              handler: handleBandStaked
+            - event: BandUnstaked(address,uint16,uint256)
+              handler: handleBandUnstaked
+            - event: BandUpgaded(address,uint256,uint16,uint16)
+              handler: handleBandUpgaded
+            - event: FundsDistributed(address,uint256)
+              handler: handleFundsDistributed
+            # - event: PoolSet(uint16,uint48)
+            #   handler: handlePoolSet
+            - event: RewardsClaimed(address,address,uint256)
+              handler: handleRewardsClaimed
+            - event: SharesInMonthSet(uint48[])
+              handler: handleSharesInMonthSet
+            - event: Staked(address,uint16,uint8,bool)
+              handler: handleStaked
+            - event: TokensWithdrawn(address,address,uint256)
+              handler: handleTokensWithdrawn
+            - event: TotalBandLevelsAmountSet(uint16)
+              handler: handleTotalBandLevelsAmountSet
+            - event: TotalPoolAmountSet(uint16)
+              handler: handleTotalPoolAmountSet
+            - event: Unstaked(address,uint256,bool)
+              handler: handleUnstaked
+            # - event: Upgraded(address)
+            #   handler: handleUpgraded
+            - event: VestingUserRemoved(address)
+              handler: handleVestingUserRemoved

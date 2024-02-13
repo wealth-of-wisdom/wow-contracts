@@ -1,5 +1,5 @@
 import { Address, BigInt, log, Bytes } from "@graphprotocol/graph-ts";
-import { BIGINT_ZERO, StakingTypes } from "../utils/constants";
+import { BIGINT_ZERO, StakingType } from "../utils/constants";
 import {
     StakingContract,
     Pool,
@@ -68,7 +68,7 @@ export function getOrInitBand(bandId: BigInt): Band {
         stakingBand = new Band(stakingBandId);
 
         stakingBand.id = stakingBandId;
-        stakingBand.stakingType = stringifyStakingType(StakingTypes.FIX);
+        stakingBand.stakingType = stringifyStakingType(StakingType.FIX);
         stakingBand.bandLevel = BIGINT_ZERO;
         stakingBand.price = BIGINT_ZERO;
         stakingBand.owner = Address.empty();
