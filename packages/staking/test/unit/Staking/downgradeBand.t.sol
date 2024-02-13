@@ -4,6 +4,7 @@ pragma solidity 0.8.20;
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {Unit_Test} from "../Unit.t.sol";
+import {IStaking} from "../../../contracts/interfaces/IStaking.sol";
 
 contract Staking_DowngradeBand_Unit_Test is Unit_Test {
     function test_downgradeBand_RevertIf_NotBandOwner()
@@ -14,12 +15,12 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
         vm.expectRevert(
             abi.encodeWithSelector(
                 Errors.Staking__NotBandOwner.selector,
-                FIRST_STAKED_BAND_ID,
+                BAND_LEVEL_0,
                 bob
             )
         );
         vm.prank(bob);
-        staking.downgradeBand(FIRST_STAKED_BAND_ID, BAND_ID_1);
+        staking.downgradeBand(BAND_LEVEL_0, BAND_LEVEL_1);
     }
 
     function test_downgradeBand_RevertIf_InvalidBandLevel()
@@ -35,7 +36,7 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
             )
         );
         vm.prank(alice);
-        staking.downgradeBand(FIRST_STAKED_BAND_ID, fauxBand);
+        staking.downgradeBand(BAND_LEVEL_0, fauxBand);
     }
 
     function test_downgradeBand_RevertIf_CantModifyFixTypeBand()
@@ -44,9 +45,9 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
     {
         vm.startPrank(alice);
         wowToken.approve(address(staking), BAND_4_PRICE);
-        staking.stake(STAKING_TYPE_FIX, BAND_ID_4);
+        staking.stake(STAKING_TYPE_FIX, BAND_LEVEL_4);
         vm.expectRevert(Errors.Staking__CantModifyFixTypeBand.selector);
-        staking.downgradeBand(FIRST_STAKED_BAND_ID, BAND_ID_1);
+        staking.downgradeBand(BAND_LEVEL_0, BAND_LEVEL_1);
         vm.stopPrank();
     }
 
@@ -56,46 +57,41 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
         stakeTokens
     {
         (
-            ,
+            IStaking.StakingTypes previousStakingType,
             ,
             address previousOwner,
             uint16 previousBandLevel,
             uint256 previousStakingStartTimestamp,
-            uint256 previousUsdtRewardsClaimed,
-            uint256 previousUsdcRewardsClaimed
-        ) = staking.getStakerBandData(FIRST_STAKED_BAND_ID);
+            ,
+
+        ) = staking.getStakerBandData(BAND_LEVEL_0);
 
         vm.startPrank(alice);
         wowToken.approve(address(staking), BAND_7_PRICE - BAND_4_PRICE);
-        staking.downgradeBand(FIRST_STAKED_BAND_ID, BAND_ID_1);
+        staking.downgradeBand(BAND_LEVEL_0, BAND_LEVEL_1);
         vm.stopPrank();
 
         (
-            ,
+            IStaking.StakingTypes stakingType,
             ,
             address owner,
             uint16 bandLevel,
             uint256 stakingStartTimestamp,
-            uint256 usdtRewardsClaimed,
-            uint256 usdcRewardsClaimed
-        ) = staking.getStakerBandData(FIRST_STAKED_BAND_ID);
+            ,
 
+        ) = staking.getStakerBandData(BAND_LEVEL_0);
+
+        assertEq(
+            uint8(previousStakingType),
+            uint8(stakingType),
+            "Staking type reset"
+        );
         assertEq(owner, previousOwner, "Owner reset");
-        assertEq(bandLevel, BAND_ID_1, "Band Level not set");
+        assertEq(bandLevel, BAND_LEVEL_1, "Band Level not set");
         assertEq(
             stakingStartTimestamp,
             previousStakingStartTimestamp,
             "Timestamp reset"
-        );
-        assertEq(
-            usdtRewardsClaimed,
-            previousUsdtRewardsClaimed,
-            "USDT rewards claimed reset"
-        );
-        assertEq(
-            usdcRewardsClaimed,
-            previousUsdcRewardsClaimed,
-            "USDC rewards claimed reset"
         );
 
         assertEq(
@@ -117,7 +113,7 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
         uint256 bandPriceDifference = BAND_4_PRICE - BAND_1_PRICE;
         vm.startPrank(alice);
         wowToken.approve(address(staking), bandPriceDifference);
-        staking.downgradeBand(FIRST_STAKED_BAND_ID, BAND_ID_1);
+        staking.downgradeBand(BAND_LEVEL_0, BAND_LEVEL_1);
         vm.stopPrank();
 
         uint256 aliceBalanceAfterUpgrade = wowToken.balanceOf(alice);
@@ -147,8 +143,8 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
         wowToken.approve(address(staking), bandPriceDifference);
 
         vm.expectEmit(address(staking));
-        emit BandDowngraded(alice, FIRST_STAKED_BAND_ID, BAND_ID_4, BAND_ID_1);
-        staking.downgradeBand(FIRST_STAKED_BAND_ID, BAND_ID_1);
+        emit BandDowngraded(alice, BAND_LEVEL_0, BAND_LEVEL_4, BAND_LEVEL_1);
+        staking.downgradeBand(BAND_LEVEL_0, BAND_LEVEL_1);
         vm.stopPrank();
     }
 }

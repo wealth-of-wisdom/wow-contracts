@@ -15,12 +15,12 @@ contract Staking_Unstake_Unit_Test is Unit_Test {
         vm.expectRevert(
             abi.encodeWithSelector(
                 Errors.Staking__NotBandOwner.selector,
-                FIRST_STAKED_BAND_ID,
+                BAND_LEVEL_0,
                 bob
             )
         );
         vm.prank(bob);
-        staking.unstake(FIRST_STAKED_BAND_ID);
+        staking.unstake(BAND_LEVEL_0);
     }
 
     function test_unstake_UnstakesTokensAndSetsData()
@@ -29,18 +29,19 @@ contract Staking_Unstake_Unit_Test is Unit_Test {
         stakeTokens
     {
         vm.startPrank(alice);
-        staking.unstake(FIRST_STAKED_BAND_ID);
+        staking.unstake(BAND_LEVEL_0);
 
         (
-            ,
+            IStaking.StakingTypes stakingType,
             ,
             address owner,
             uint16 bandLevel,
             uint256 stakingStartTimestamp,
             ,
 
-        ) = staking.getStakerBandData(FIRST_STAKED_BAND_ID);
+        ) = staking.getStakerBandData(BAND_LEVEL_0);
 
+        assertEq(uint8(stakingType), 0, "Staking type not removed");
         assertEq(owner, address(0), "Owner not removed");
         assertEq(bandLevel, 0, "Band Level not removed");
         assertEq(stakingStartTimestamp, 0, "Timestamp not removed");
@@ -62,7 +63,7 @@ contract Staking_Unstake_Unit_Test is Unit_Test {
         vm.startPrank(alice);
         uint256 alicePreUnstakingBalance = wowToken.balanceOf(alice);
 
-        staking.unstake(FIRST_STAKED_BAND_ID);
+        staking.unstake(BAND_LEVEL_0);
 
         uint256 alicePostUnstakingBalance = wowToken.balanceOf(alice);
         uint256 stakingPostUnstakingBalance = wowToken.balanceOf(
@@ -88,8 +89,8 @@ contract Staking_Unstake_Unit_Test is Unit_Test {
     {
         vm.startPrank(alice);
         vm.expectEmit(true, true, true, true);
-        emit Unstaked(alice, FIRST_STAKED_BAND_ID, false);
-        staking.unstake(FIRST_STAKED_BAND_ID);
+        emit Unstaked(alice, BAND_LEVEL_0, false);
+        staking.unstake(BAND_LEVEL_0);
         vm.stopPrank();
     }
 }

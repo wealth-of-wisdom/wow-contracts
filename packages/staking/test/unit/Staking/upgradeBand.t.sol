@@ -4,6 +4,7 @@ pragma solidity 0.8.20;
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {Unit_Test} from "../Unit.t.sol";
+import {IStaking} from "../../../contracts/interfaces/IStaking.sol";
 
 contract Staking_UpgradeBand_Unit_Test is Unit_Test {
     function test_upgradeBand_RevertIf_NotBandOwner()
@@ -14,12 +15,12 @@ contract Staking_UpgradeBand_Unit_Test is Unit_Test {
         vm.expectRevert(
             abi.encodeWithSelector(
                 Errors.Staking__NotBandOwner.selector,
-                FIRST_STAKED_BAND_ID,
+                BAND_LEVEL_0,
                 bob
             )
         );
         vm.prank(bob);
-        staking.upgradeBand(FIRST_STAKED_BAND_ID, BAND_ID_7);
+        staking.upgradeBand(BAND_LEVEL_0, BAND_LEVEL_7);
     }
 
     function test_upgradeBand_RevertIf_InvalidBandLevel()
@@ -35,7 +36,7 @@ contract Staking_UpgradeBand_Unit_Test is Unit_Test {
             )
         );
         vm.prank(alice);
-        staking.upgradeBand(FIRST_STAKED_BAND_ID, fauxBand);
+        staking.upgradeBand(BAND_LEVEL_0, fauxBand);
     }
 
     function test_upgradeBand_RevertIf_CantModifyFixTypeBand()
@@ -44,10 +45,10 @@ contract Staking_UpgradeBand_Unit_Test is Unit_Test {
     {
         vm.startPrank(alice);
         wowToken.approve(address(staking), BAND_4_PRICE);
-        staking.stake(STAKING_TYPE_FIX, BAND_ID_4);
+        staking.stake(STAKING_TYPE_FIX, BAND_LEVEL_4);
 
         vm.expectRevert(Errors.Staking__CantModifyFixTypeBand.selector);
-        staking.upgradeBand(FIRST_STAKED_BAND_ID, BAND_ID_7);
+        staking.upgradeBand(BAND_LEVEL_0, BAND_LEVEL_7);
         vm.stopPrank();
     }
 
@@ -57,32 +58,37 @@ contract Staking_UpgradeBand_Unit_Test is Unit_Test {
         stakeTokens
     {
         (
-            ,
+            IStaking.StakingTypes previousStakingType,
             ,
             address previousOwner,
             uint16 previousBandLevel,
             uint256 previousStakingStartTimestamp,
             ,
 
-        ) = staking.getStakerBandData(FIRST_STAKED_BAND_ID);
+        ) = staking.getStakerBandData(BAND_LEVEL_0);
 
         vm.startPrank(alice);
         wowToken.approve(address(staking), BAND_7_PRICE - BAND_4_PRICE);
-        staking.upgradeBand(FIRST_STAKED_BAND_ID, BAND_ID_7);
+        staking.upgradeBand(BAND_LEVEL_0, BAND_LEVEL_7);
         vm.stopPrank();
 
         (
-            ,
+            IStaking.StakingTypes stakingType,
             ,
             address owner,
             uint16 bandLevel,
             uint256 stakingStartTimestamp,
             ,
 
-        ) = staking.getStakerBandData(FIRST_STAKED_BAND_ID);
+        ) = staking.getStakerBandData(BAND_LEVEL_0);
 
+        assertEq(
+            uint8(stakingType),
+            uint8(previousStakingType),
+            "StakingType reset"
+        );
         assertEq(owner, previousOwner, "Owner reset");
-        assertEq(bandLevel, BAND_ID_7, "Band Level not set");
+        assertEq(bandLevel, BAND_LEVEL_7, "Band Level not set");
         assertEq(
             stakingStartTimestamp,
             previousStakingStartTimestamp,
@@ -109,7 +115,7 @@ contract Staking_UpgradeBand_Unit_Test is Unit_Test {
 
         vm.startPrank(alice);
         wowToken.approve(address(staking), bandPriceDifference);
-        staking.upgradeBand(FIRST_STAKED_BAND_ID, BAND_ID_7);
+        staking.upgradeBand(BAND_LEVEL_0, BAND_LEVEL_7);
         vm.stopPrank();
 
         uint256 aliceBalanceAfterUpgrade = wowToken.balanceOf(alice);
@@ -139,8 +145,8 @@ contract Staking_UpgradeBand_Unit_Test is Unit_Test {
         wowToken.approve(address(staking), bandPriceDifference);
 
         vm.expectEmit(address(staking));
-        emit BandUpgaded(alice, FIRST_STAKED_BAND_ID, BAND_ID_4, BAND_ID_7);
-        staking.upgradeBand(FIRST_STAKED_BAND_ID, BAND_ID_7);
+        emit BandUpgaded(alice, BAND_LEVEL_0, BAND_LEVEL_4, BAND_LEVEL_7);
+        staking.upgradeBand(BAND_LEVEL_0, BAND_LEVEL_7);
         vm.stopPrank();
     }
 }

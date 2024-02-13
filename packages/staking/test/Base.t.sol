@@ -109,21 +109,57 @@ contract Base_Test is Test, Constants, Events {
     function _stakeTokens() internal {
         vm.startPrank(alice);
         wowToken.approve(address(staking), BAND_4_PRICE);
-        staking.stake(STAKING_TYPE_FLEXI, BAND_ID_4);
+        staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_4);
         vm.stopPrank();
     }
 
     function _setBandLevelData() internal {
         vm.startPrank(admin);
-        staking.setBandLevel(BAND_ID_1, BAND_1_PRICE, BAND_1_ACCESSIBLE_POOLS);
-        staking.setBandLevel(BAND_ID_2, BAND_2_PRICE, BAND_2_ACCESSIBLE_POOLS);
-        staking.setBandLevel(BAND_ID_3, BAND_3_PRICE, BAND_3_ACCESSIBLE_POOLS);
-        staking.setBandLevel(BAND_ID_4, BAND_4_PRICE, BAND_4_ACCESSIBLE_POOLS);
-        staking.setBandLevel(BAND_ID_5, BAND_5_PRICE, BAND_5_ACCESSIBLE_POOLS);
-        staking.setBandLevel(BAND_ID_6, BAND_6_PRICE, BAND_6_ACCESSIBLE_POOLS);
-        staking.setBandLevel(BAND_ID_7, BAND_7_PRICE, BAND_7_ACCESSIBLE_POOLS);
-        staking.setBandLevel(BAND_ID_8, BAND_8_PRICE, BAND_8_ACCESSIBLE_POOLS);
-        staking.setBandLevel(BAND_ID_9, BAND_9_PRICE, BAND_9_ACCESSIBLE_POOLS);
+        staking.setBandLevel(
+            BAND_LEVEL_1,
+            BAND_1_PRICE,
+            BAND_1_ACCESSIBLE_POOLS
+        );
+        staking.setBandLevel(
+            BAND_LEVEL_2,
+            BAND_2_PRICE,
+            BAND_2_ACCESSIBLE_POOLS
+        );
+        staking.setBandLevel(
+            BAND_LEVEL_3,
+            BAND_3_PRICE,
+            BAND_3_ACCESSIBLE_POOLS
+        );
+        staking.setBandLevel(
+            BAND_LEVEL_4,
+            BAND_4_PRICE,
+            BAND_4_ACCESSIBLE_POOLS
+        );
+        staking.setBandLevel(
+            BAND_LEVEL_5,
+            BAND_5_PRICE,
+            BAND_5_ACCESSIBLE_POOLS
+        );
+        staking.setBandLevel(
+            BAND_LEVEL_6,
+            BAND_6_PRICE,
+            BAND_6_ACCESSIBLE_POOLS
+        );
+        staking.setBandLevel(
+            BAND_LEVEL_7,
+            BAND_7_PRICE,
+            BAND_7_ACCESSIBLE_POOLS
+        );
+        staking.setBandLevel(
+            BAND_LEVEL_8,
+            BAND_8_PRICE,
+            BAND_8_ACCESSIBLE_POOLS
+        );
+        staking.setBandLevel(
+            BAND_LEVEL_9,
+            BAND_9_PRICE,
+            BAND_9_ACCESSIBLE_POOLS
+        );
         vm.stopPrank();
     }
 

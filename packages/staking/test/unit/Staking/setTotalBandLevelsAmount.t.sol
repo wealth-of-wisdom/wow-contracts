@@ -15,7 +15,7 @@ contract Staking_SetTotalBandLevelsAmount_Unit_Test is Unit_Test {
             )
         );
         vm.prank(alice);
-        staking.setTotalBandLevelsAmount(NEW_TOTAL_BAND_LEVELS);
+        staking.setTotalBandLevelsAmount(TOTAL_4_BAND_LEVELS);
     }
 
     function test_setTotalBandLevelsAmount_RevertIf_LevelAmountZero() external {
@@ -28,10 +28,10 @@ contract Staking_SetTotalBandLevelsAmount_Unit_Test is Unit_Test {
 
     function test_setTotalBandLevelsAmount_SetsTotalBandLevelAmount() external {
         vm.prank(admin);
-        staking.setTotalBandLevelsAmount(NEW_TOTAL_BAND_LEVELS);
+        staking.setTotalBandLevelsAmount(TOTAL_4_BAND_LEVELS);
         assertEq(
             staking.getTotalBands(),
-            NEW_TOTAL_BAND_LEVELS,
+            TOTAL_4_BAND_LEVELS,
             "New total band level not set"
         );
     }
@@ -40,9 +40,9 @@ contract Staking_SetTotalBandLevelsAmount_Unit_Test is Unit_Test {
         external
     {
         vm.expectEmit(address(staking));
-        emit TotalBandLevelsAmountSet(NEW_TOTAL_BAND_LEVELS);
+        emit TotalBandLevelsAmountSet(TOTAL_4_BAND_LEVELS);
 
         vm.prank(admin);
-        staking.setTotalBandLevelsAmount(NEW_TOTAL_BAND_LEVELS);
+        staking.setTotalBandLevelsAmount(TOTAL_4_BAND_LEVELS);
     }
 }

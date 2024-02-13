@@ -20,7 +20,7 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
             )
         );
         vm.prank(alice);
-        staking.unstakeVested(FIRST_STAKED_BAND_ID, alice);
+        staking.unstakeVested(BAND_LEVEL_0, alice);
     }
 
     function test_unstakeVested_RevertIf_NotBandOwner()
@@ -31,12 +31,12 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
         vm.expectRevert(
             abi.encodeWithSelector(
                 Errors.Staking__NotBandOwner.selector,
-                FIRST_STAKED_BAND_ID,
+                BAND_LEVEL_0,
                 alice
             )
         );
         vm.prank(alice);
-        staking.unstakeVested(FIRST_STAKED_BAND_ID, alice);
+        staking.unstakeVested(BAND_LEVEL_0, alice);
     }
 
     function test_unstakeVested_UnstakesTokensAndSetsData()
@@ -46,18 +46,19 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
         grantVestingRole
     {
         vm.startPrank(alice);
-        staking.unstakeVested(FIRST_STAKED_BAND_ID, alice);
+        staking.unstakeVested(BAND_LEVEL_0, alice);
 
         (
-            ,
+            IStaking.StakingTypes stakingType,
             ,
             address owner,
             uint16 bandLevel,
             uint256 stakingStartTimestamp,
             ,
 
-        ) = staking.getStakerBandData(FIRST_STAKED_BAND_ID);
+        ) = staking.getStakerBandData(BAND_LEVEL_0);
 
+        assertEq(uint8(stakingType), 0, "Staking type not removed");
         assertEq(owner, address(0), "Owner not removed");
         assertEq(bandLevel, 0, "Band Level not removed");
         assertEq(stakingStartTimestamp, 0, "Timestamp not removed");
@@ -83,7 +84,7 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
             address(staking)
         );
 
-        staking.unstakeVested(FIRST_STAKED_BAND_ID, alice);
+        staking.unstakeVested(BAND_LEVEL_0, alice);
 
         uint256 alicePostUnstakingBalance = wowToken.balanceOf(alice);
         uint256 stakingPostUnstakingBalance = wowToken.balanceOf(
@@ -111,8 +112,8 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
     {
         vm.startPrank(alice);
         vm.expectEmit(true, true, true, true);
-        emit Unstaked(alice, FIRST_STAKED_BAND_ID, true);
-        staking.unstakeVested(FIRST_STAKED_BAND_ID, alice);
+        emit Unstaked(alice, BAND_LEVEL_0, true);
+        staking.unstakeVested(BAND_LEVEL_0, alice);
         vm.stopPrank();
     }
 }

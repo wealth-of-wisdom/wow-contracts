@@ -20,7 +20,7 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
             )
         );
         vm.prank(alice);
-        staking.stakeVested(STAKING_TYPE_FLEXI, BAND_ID_2, alice);
+        staking.stakeVested(STAKING_TYPE_FLEXI, BAND_LEVEL_2, alice);
     }
 
     function test_stakeVested_RevertIf_InvalidBandLevel()
@@ -48,20 +48,25 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
         vm.warp(currentTimestamp);
         vm.startPrank(alice);
         wowToken.approve(address(staking), BAND_2_PRICE);
-        staking.stakeVested(STAKING_TYPE_FLEXI, BAND_ID_2, alice);
+        staking.stakeVested(STAKING_TYPE_FLEXI, BAND_LEVEL_2, alice);
 
         (
-            ,
+            IStaking.StakingTypes stakingType,
             ,
             address owner,
             uint16 bandLevel,
             uint256 stakingStartTimestamp,
             ,
 
-        ) = staking.getStakerBandData(FIRST_STAKED_BAND_ID);
+        ) = staking.getStakerBandData(BAND_LEVEL_0);
 
+        assertEq(
+            uint8(stakingType),
+            uint8(STAKING_TYPE_FLEXI),
+            "Staking type set"
+        );
         assertEq(owner, alice, "Owner not set");
-        assertEq(bandLevel, BAND_ID_2, "Band Level not set");
+        assertEq(bandLevel, BAND_LEVEL_2, "Band Level not set");
         assertEq(stakingStartTimestamp, currentTimestamp, "Timestamp not set");
 
         assertEq(
@@ -82,7 +87,7 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
         uint256 alicePreStakingBalance = wowToken.balanceOf(alice);
 
         wowToken.approve(address(staking), BAND_2_PRICE);
-        staking.stakeVested(STAKING_TYPE_FLEXI, BAND_ID_2, alice);
+        staking.stakeVested(STAKING_TYPE_FLEXI, BAND_LEVEL_2, alice);
 
         uint256 alicePostStakingBalance = wowToken.balanceOf(alice);
         uint256 stakingPostStakingBalance = wowToken.balanceOf(
@@ -110,8 +115,8 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
         vm.startPrank(alice);
         wowToken.approve(address(staking), BAND_2_PRICE);
         vm.expectEmit(true, true, true, true);
-        emit Staked(alice, BAND_ID_2, STAKING_TYPE_FLEXI, true);
-        staking.stakeVested(STAKING_TYPE_FLEXI, BAND_ID_2, alice);
+        emit Staked(alice, BAND_LEVEL_2, STAKING_TYPE_FLEXI, true);
+        staking.stakeVested(STAKING_TYPE_FLEXI, BAND_LEVEL_2, alice);
         vm.stopPrank();
     }
 }

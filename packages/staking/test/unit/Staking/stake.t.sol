@@ -26,7 +26,7 @@ contract Staking_Stake_Unit_Test is Unit_Test {
     // {
     //     vm.expectRevert(Errors.Staking__InvalidStakingType.selector);
     //     vm.prank(alice);
-    //     staking.stake(3, BAND_ID_1);
+    //     staking.stake(3, BAND_LEVEL_1);
     // }
 
     function test_stake_StakesTokensSetsData() external setBandLevelData {
@@ -35,20 +35,25 @@ contract Staking_Stake_Unit_Test is Unit_Test {
 
         vm.startPrank(alice);
         wowToken.approve(address(staking), BAND_2_PRICE);
-        staking.stake(STAKING_TYPE_FLEXI, BAND_ID_2);
+        staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_2);
 
         (
-            ,
+            IStaking.StakingTypes stakingType,
             ,
             address owner,
             uint16 bandLevel,
             uint256 stakingStartTimestamp,
             ,
 
-        ) = staking.getStakerBandData(FIRST_STAKED_BAND_ID);
+        ) = staking.getStakerBandData(BAND_LEVEL_0);
 
+        assertEq(
+            uint8(stakingType),
+            uint8(STAKING_TYPE_FLEXI),
+            "Staking type not set"
+        );
         assertEq(owner, alice, "Owner not set");
-        assertEq(bandLevel, BAND_ID_2, "Band Level not set");
+        assertEq(bandLevel, BAND_LEVEL_2, "Band Level not set");
         assertEq(stakingStartTimestamp, currentTimestamp, "Timestamp not set");
 
         assertEq(
@@ -68,7 +73,7 @@ contract Staking_Stake_Unit_Test is Unit_Test {
         uint256 alicePreStakingBalance = wowToken.balanceOf(alice);
 
         wowToken.approve(address(staking), BAND_2_PRICE);
-        staking.stake(STAKING_TYPE_FLEXI, BAND_ID_2);
+        staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_2);
 
         uint256 alicePostStakingBalance = wowToken.balanceOf(alice);
         uint256 stakingPostStakingBalance = wowToken.balanceOf(
@@ -94,31 +99,41 @@ contract Staking_Stake_Unit_Test is Unit_Test {
 
         vm.startPrank(alice);
         wowToken.approve(address(staking), BAND_2_PRICE);
-        staking.stake(STAKING_TYPE_FLEXI, BAND_ID_2);
+        staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_2);
 
         uint256 secondStakeBandId = staking.getNextBandId();
         wowToken.approve(address(staking), BAND_5_PRICE);
-        staking.stake(STAKING_TYPE_FIX, BAND_ID_5);
+        staking.stake(STAKING_TYPE_FIX, BAND_LEVEL_5);
 
         (
-            ,
+            IStaking.StakingTypes stakingType,
             ,
             address owner,
             uint16 bandLevel,
             uint256 stakingStartTimestamp,
             ,
 
-        ) = staking.getStakerBandData(FIRST_STAKED_BAND_ID);
+        ) = staking.getStakerBandData(BAND_LEVEL_0);
 
+        assertEq(
+            uint8(stakingType),
+            uint8(STAKING_TYPE_FLEXI),
+            "Staking type not set"
+        );
         assertEq(owner, alice, "Owner not set");
-        assertEq(bandLevel, BAND_ID_2, "Band Level not set");
+        assertEq(bandLevel, BAND_LEVEL_2, "Band Level not set");
         assertEq(stakingStartTimestamp, currentTimestamp, "Timestamp not set");
 
-        (, , owner, bandLevel, stakingStartTimestamp, , ) = staking
+        (stakingType, , owner, bandLevel, stakingStartTimestamp, , ) = staking
             .getStakerBandData(secondStakeBandId);
 
+        assertEq(
+            uint8(stakingType),
+            uint8(STAKING_TYPE_FIX),
+            "Staking type not set"
+        );
         assertEq(owner, alice, "Owner not set");
-        assertEq(bandLevel, BAND_ID_5, "Band Level not set");
+        assertEq(bandLevel, BAND_LEVEL_5, "Band Level not set");
         assertEq(stakingStartTimestamp, currentTimestamp, "Timestamp not set");
         vm.stopPrank();
     }
@@ -127,8 +142,8 @@ contract Staking_Stake_Unit_Test is Unit_Test {
         vm.startPrank(alice);
         wowToken.approve(address(staking), BAND_2_PRICE);
         vm.expectEmit(true, true, true, true);
-        emit Staked(alice, BAND_ID_2, STAKING_TYPE_FLEXI, false);
-        staking.stake(STAKING_TYPE_FLEXI, BAND_ID_2);
+        emit Staked(alice, BAND_LEVEL_2, STAKING_TYPE_FLEXI, false);
+        staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_2);
         vm.stopPrank();
     }
 }

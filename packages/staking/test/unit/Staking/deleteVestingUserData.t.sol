@@ -31,15 +31,16 @@ contract Staking_DeleteVestingUserData_Unit_Test is Unit_Test {
         vm.startPrank(alice);
         staking.deleteVestingUserData(alice);
         (
-            ,
+            IStaking.StakingTypes stakingType,
             ,
             address owner,
             uint16 bandLevel,
             uint256 stakingStartTimestamp,
             ,
 
-        ) = staking.getStakerBandData(FIRST_STAKED_BAND_ID);
+        ) = staking.getStakerBandData(BAND_LEVEL_0);
 
+        assertEq(uint8(stakingType), 0, "Staking type not removed");
         assertEq(owner, address(0), "Owner not removed");
         assertEq(bandLevel, 0, "Band Level not removed");
         assertEq(stakingStartTimestamp, 0, "Timestamp not removed");
