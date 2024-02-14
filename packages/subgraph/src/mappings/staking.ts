@@ -5,7 +5,7 @@ import {
     BandStaked as BandStakedEvent,
     BandUnstaked as BandUnstakedEvent,
     BandUpgaded as BandUpgadedEvent,
-    FundsDistributed as FundDistributionEvent,
+    FundsDistributed as FundsDistributedEvent,
     RewardsClaimed as RewardsClaimedEvent,
     SharesInMonthSet as SharesInMonthSetEvent,
     Staked as StakedEvent,
@@ -38,7 +38,7 @@ export function handleInitialized(event: InitializedEvent): void {
     stakingContract.save();
 
 }
-
+// Band add
 export function handleBandStaked(event: BandStakedEvent): void {
 
     const band: Band = getOrInitBand(event.params.bandId);
@@ -55,7 +55,7 @@ export function handleBandStaked(event: BandStakedEvent): void {
 
     band.save();
 }
-
+// Band remove
 export function handleBandUnstaked(event: BandUnstakedEvent): void {
 
     const band: Band = getOrInitBand(event.params.bandId);
@@ -63,4 +63,26 @@ export function handleBandUnstaked(event: BandUnstakedEvent): void {
     store.remove("Band", band.id)
 
     band.save()
+}
+
+// Band upgrade
+export function handleBandUpgaded(event: BandUpgadedEvent): void {
+
+    const band: Band = getOrInitBand(event.params.bandId)
+
+    band.bandLevel = event.params.newBandLevel;
+    band.owner = event.params.user;
+
+    band.save();
+}
+
+export function handleFundsDistributed(event: FundsDistributedEvent): void {
+
+    const fundsDistribution = getOrInitFundDistribution(event.transaction.hash)
+
+    fundsDistribution.amount = event.params.amount;
+    fundsDistribution.timestamp = event.block.timestamp;
+    fundsDistribution.token = event.params.token;
+
+    fundsDistribution.save();
 }

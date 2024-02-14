@@ -84,9 +84,9 @@ export function getOrInitBand(bandId: BigInt): Band {
     return stakingBand;
 }
 
-export function getOrInitFundDistribution(fundDistributionID: BigInt): FundDistribution {
+export function getOrInitFundDistribution(fundDistributionID: Bytes): FundDistribution {
     
-    let fundDistributionId = fundDistributionID.toString();
+    let fundDistributionId = fundDistributionID.toHex();
     let fundDistribution = FundDistribution.load(fundDistributionId);
 
     if (!fundDistribution) {
