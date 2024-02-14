@@ -147,7 +147,6 @@ interface IVesting is IVestingEvents {
     ) external;
 
     function unstakeVestedTokens(
-        uint16 bandLevel,
         uint16 bandId,
         uint16 pid,
         address beneficiary,

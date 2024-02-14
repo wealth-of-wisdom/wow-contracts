@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
+import {IStaking} from "../../contracts/interfaces/IStaking.sol";
+
 abstract contract Constants {
     /*//////////////////////////////////////////////////////////////////////////
                                     ADDRESSES
@@ -13,6 +15,7 @@ abstract contract Constants {
     //////////////////////////////////////////////////////////////////////////*/
 
     bytes32 internal constant DEFAULT_ADMIN_ROLE = 0x00;
+    bytes32 internal constant DEFAULT_VESTING_ROLE = keccak256("VESTING_ROLE");
     bytes32 internal constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 internal constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
@@ -22,6 +25,8 @@ abstract contract Constants {
 
     uint8 internal constant USD_DECIMALS = 6;
     uint8 internal constant WOW_DECIMALS = 18;
+    uint128 internal constant USD_DECIMALS_FOR_MULTIPLICATION = 1e6;
+    uint128 internal constant WOW_DECIMALS_FOR_MULTIPLICATION = 1e18;
 
     /*//////////////////////////////////////////////////////////////////////////
                                     AMOUNTS
@@ -30,6 +35,25 @@ abstract contract Constants {
     uint256 internal constant INIT_ETH_BALANCE = type(uint128).max;
     uint256 internal constant INIT_TOKEN_BALANCE = type(uint128).max;
     uint256 internal constant INIT_TOKEN_SUPPLY = 100_000 ether;
+    uint256 internal constant DEFAULT_DISTRIBUTION_AMOUNT =
+        1_000_000 * USD_DECIMALS_FOR_MULTIPLICATION;
+    uint16 internal constant TOTAL_4_BAND_LEVELS = 4;
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                    TESTING VARS
+    //////////////////////////////////////////////////////////////////////////*/
+
+    uint256[] STAKER_BAND_IDS = [0];
+    uint256[] EMPTY_STAKER_BAND_IDS;
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                    ENUMS
+    //////////////////////////////////////////////////////////////////////////*/
+
+    IStaking.StakingTypes internal constant STAKING_TYPE_FIX =
+        IStaking.StakingTypes.FIX;
+    IStaking.StakingTypes internal constant STAKING_TYPE_FLEXI =
+        IStaking.StakingTypes.FLEXI;
 
     /*//////////////////////////////////////////////////////////////////////////
                                 STAKING DATA
@@ -104,25 +128,35 @@ abstract contract Constants {
                                 STAKING BAND DATA
     //////////////////////////////////////////////////////////////////////////*/
 
-    uint16 internal constant BAND_ID_1 = 1;
-    uint16 internal constant BAND_ID_2 = 2;
-    uint16 internal constant BAND_ID_3 = 3;
-    uint16 internal constant BAND_ID_4 = 4;
-    uint16 internal constant BAND_ID_5 = 5;
-    uint16 internal constant BAND_ID_6 = 6;
-    uint16 internal constant BAND_ID_7 = 7;
-    uint16 internal constant BAND_ID_8 = 8;
-    uint16 internal constant BAND_ID_9 = 9;
+    uint16 internal constant BAND_LEVEL_0 = 0;
+    uint16 internal constant BAND_LEVEL_1 = 1;
+    uint16 internal constant BAND_LEVEL_2 = 2;
+    uint16 internal constant BAND_LEVEL_3 = 3;
+    uint16 internal constant BAND_LEVEL_4 = 4;
+    uint16 internal constant BAND_LEVEL_5 = 5;
+    uint16 internal constant BAND_LEVEL_6 = 6;
+    uint16 internal constant BAND_LEVEL_7 = 7;
+    uint16 internal constant BAND_LEVEL_8 = 8;
+    uint16 internal constant BAND_LEVEL_9 = 9;
 
-    uint256 internal constant BAND_1_PRICE = 1_000 * WOW_DECIMALS;
-    uint256 internal constant BAND_2_PRICE = 3_000 * WOW_DECIMALS;
-    uint256 internal constant BAND_3_PRICE = 10_000 * WOW_DECIMALS;
-    uint256 internal constant BAND_4_PRICE = 30_000 * WOW_DECIMALS;
-    uint256 internal constant BAND_5_PRICE = 100_000 * WOW_DECIMALS;
-    uint256 internal constant BAND_6_PRICE = 200_000 * WOW_DECIMALS;
-    uint256 internal constant BAND_7_PRICE = 500_000 * WOW_DECIMALS;
-    uint256 internal constant BAND_8_PRICE = 1_000_000 * WOW_DECIMALS;
-    uint256 internal constant BAND_9_PRICE = 2_000_000 * WOW_DECIMALS;
+    uint256 internal constant BAND_1_PRICE =
+        1_000 * WOW_DECIMALS_FOR_MULTIPLICATION;
+    uint256 internal constant BAND_2_PRICE =
+        3_000 * WOW_DECIMALS_FOR_MULTIPLICATION;
+    uint256 internal constant BAND_3_PRICE =
+        10_000 * WOW_DECIMALS_FOR_MULTIPLICATION;
+    uint256 internal constant BAND_4_PRICE =
+        30_000 * WOW_DECIMALS_FOR_MULTIPLICATION;
+    uint256 internal constant BAND_5_PRICE =
+        100_000 * WOW_DECIMALS_FOR_MULTIPLICATION;
+    uint256 internal constant BAND_6_PRICE =
+        200_000 * WOW_DECIMALS_FOR_MULTIPLICATION;
+    uint256 internal constant BAND_7_PRICE =
+        500_000 * WOW_DECIMALS_FOR_MULTIPLICATION;
+    uint256 internal constant BAND_8_PRICE =
+        1_000_000 * WOW_DECIMALS_FOR_MULTIPLICATION;
+    uint256 internal constant BAND_9_PRICE =
+        2_000_000 * WOW_DECIMALS_FOR_MULTIPLICATION;
 
     uint16[] internal BAND_1_ACCESSIBLE_POOLS = [1];
     uint16[] internal BAND_2_ACCESSIBLE_POOLS = [1, 2];

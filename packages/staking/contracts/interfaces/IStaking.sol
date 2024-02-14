@@ -22,8 +22,6 @@ interface IStakingEvents {
 
     event TotalPoolAmountSet(uint16 newTotalPoolAmount);
 
-    event FundsDistributed(IERC20 token, uint256 amount);
-
     event Staked(
         address user,
         uint16 bandLevel,
@@ -133,8 +131,6 @@ interface IStaking is IStakingEvents {
     function setTotalBandLevelsAmount(uint16 newTotalBandsAmount) external;
 
     function setTotalPoolAmount(uint16 newTotalPoolAmount) external;
-
-    function distributeFunds(IERC20 token, uint256 amount) external;
 
     function withdrawTokens(IERC20 token, uint256 amount) external;
 

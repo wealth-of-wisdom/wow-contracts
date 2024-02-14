@@ -6,12 +6,6 @@ import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {Unit_Test} from "../Unit.t.sol";
 
 contract Staking_SetBand_Unit_Test is Unit_Test {
-    modifier setBandId1() {
-        vm.prank(admin);
-        staking.setBandLevel(BAND_ID_1, BAND_1_PRICE, BAND_1_ACCESSIBLE_POOLS);
-        _;
-    }
-
     function test_setBand_RevertIf_NotDefaultAdmin() external {
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -21,7 +15,11 @@ contract Staking_SetBand_Unit_Test is Unit_Test {
             )
         );
         vm.prank(alice);
-        staking.setBandLevel(BAND_ID_1, BAND_1_PRICE, BAND_1_ACCESSIBLE_POOLS);
+        staking.setBandLevel(
+            BAND_LEVEL_1,
+            BAND_1_PRICE,
+            BAND_1_ACCESSIBLE_POOLS
+        );
     }
 
     function test_setBand_RevertIf_BandLevelIsZero() external {
@@ -50,18 +48,25 @@ contract Staking_SetBand_Unit_Test is Unit_Test {
     function test_setBand_RevertIf_BandPriceIsZero() external {
         vm.expectRevert(Errors.Staking__ZeroAmount.selector);
         vm.prank(admin);
-        staking.setBandLevel(BAND_ID_1, 0, BAND_1_ACCESSIBLE_POOLS);
+        staking.setBandLevel(BAND_LEVEL_1, 0, BAND_1_ACCESSIBLE_POOLS);
     }
 
     function test_setBand_RevertIf_AccessiblePoolsArrayIsTooLarge() external {
         vm.expectRevert(Errors.Staking__MaximumLevelExceeded.selector);
         vm.prank(admin);
-        staking.setBandLevel(BAND_ID_1, BAND_1_PRICE, new uint16[](10));
+        staking.setBandLevel(BAND_LEVEL_1, BAND_1_PRICE, new uint16[](10));
     }
 
-    function test_setBand_SetsBandData() external setBandId1 {
+    function test_setBand_SetsBandData() external {
+        vm.prank(admin);
+        staking.setBandLevel(
+            BAND_LEVEL_1,
+            BAND_1_PRICE,
+            BAND_1_ACCESSIBLE_POOLS
+        );
+
         (uint256 price, uint16[] memory accessiblePools) = staking.getBand(
-            BAND_ID_1
+            BAND_LEVEL_1
         );
         uint256 poolsAmount = accessiblePools.length;
 
@@ -74,9 +79,13 @@ contract Staking_SetBand_Unit_Test is Unit_Test {
 
     function test_setBand_EmitsBandLevelSetEvent() external {
         vm.expectEmit(address(staking));
-        emit BandLevelSet(BAND_ID_1, BAND_1_PRICE, BAND_1_ACCESSIBLE_POOLS);
+        emit BandLevelSet(BAND_LEVEL_1, BAND_1_PRICE, BAND_1_ACCESSIBLE_POOLS);
 
         vm.prank(admin);
-        staking.setBandLevel(BAND_ID_1, BAND_1_PRICE, BAND_1_ACCESSIBLE_POOLS);
+        staking.setBandLevel(
+            BAND_LEVEL_1,
+            BAND_1_PRICE,
+            BAND_1_ACCESSIBLE_POOLS
+        );
     }
 }

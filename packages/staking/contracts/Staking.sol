@@ -146,7 +146,7 @@ contract Staking is
 
     modifier mStakingTypeExists(StakingTypes stakingType) {
         if (
-            StakingTypes.FIX != stakingType || StakingTypes.FLEXI != stakingType
+            StakingTypes.FIX != stakingType && StakingTypes.FLEXI != stakingType
         ) revert Errors.Staking__InvalidStakingType();
         _;
     }
@@ -302,56 +302,6 @@ contract Staking is
     }
 
     /**
-     * @notice  Administrator function for transfering funds
-     *          to contract for pool distribution
-     * @param   token  USDT/USDC token
-     * @param   amount  amount to be distributed to pools
-     */
-    function distributeFunds(
-        IERC20 token,
-        uint256 amount
-    )
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-        mTokenExists(token)
-        mAmountNotZero(amount)
-    {
-        uint16 totalPools = s_totalPools;
-        uint256 usersAmount = s_users.length();
-
-        uint256 distributionId = _createFundDistribution(token, amount);
-
-        // Effects: create all pool distributions for this fund distribution
-        _createAllPoolDistributions(token, amount, distributionId, totalPools);
-
-        // Loop through all users and set the amount of shares
-        for (uint256 userIndex; userIndex < usersAmount; userIndex++) {
-            (address user, ) = s_users.at(userIndex);
-
-            // Effects: Loop through all bands and add shares to pools
-            uint256[] memory userSharesPerPool = _addAllBandSharesToPools(
-                user,
-                distributionId,
-                totalPools
-            );
-
-            // Effects: Loop through all pools and set the amount of shares for the user
-            _addSharesToUser(
-                user,
-                distributionId,
-                totalPools,
-                userSharesPerPool
-            );
-        }
-
-        // Interaction: transfer the tokens to contract
-        token.safeTransferFrom(msg.sender, address(this), amount);
-
-        // Effects: emit event
-        emit FundsDistributed(token, amount);
-    }
-
-    /**
      * @notice Withdraw the given amount of tokens from the contract
      * @param token Token to withdraw
      * @param amount Amount to withdraw
@@ -359,12 +309,7 @@ contract Staking is
     function withdrawTokens(
         IERC20 token,
         uint256 amount
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        // Checks: the amount must be greater than 0
-        if (amount == 0) {
-            revert Errors.Staking__ZeroAmount();
-        }
-
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) mAmountNotZero(amount) {
         uint256 balance = token.balanceOf(address(this));
 
         // Checks: the contract must have enough balance to withdraw
@@ -408,6 +353,11 @@ contract Staking is
      * @param   bandId  Id of the band (0-max uint)
      */
     function unstake(uint256 bandId) external mBandOwner(msg.sender, bandId) {
+        // Interraction: transfer staked tokens
+        uint16 bandLevel = s_bands[bandId].bandLevel;
+        uint256 stakedAmount = s_bandLevelData[bandLevel].price;
+        s_wowToken.safeTransfer(msg.sender, stakedAmount);
+
         // Effects: delete band data
         _unstakeBand(bandId, msg.sender);
 

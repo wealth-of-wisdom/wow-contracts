@@ -6,12 +6,6 @@ import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {Unit_Test} from "../Unit.t.sol";
 
 contract Staking_SetPool_Unit_Test is Unit_Test {
-    modifier setPoolId1() {
-        vm.prank(admin);
-        staking.setPool(POOL_ID_1, POOL_1_PERCENTAGE);
-        _;
-    }
-
     function test_setPool_RevertIf_NotDefaultAdmin() external {
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -54,7 +48,10 @@ contract Staking_SetPool_Unit_Test is Unit_Test {
         staking.setPool(POOL_ID_1, PERCENTAGE_PRECISION + 1);
     }
 
-    function test_setPool_SetsPoolDistributionPercentage() external setPoolId1 {
+    function test_setPool_SetsPoolDistributionPercentage() external {
+        vm.prank(admin);
+        staking.setPool(POOL_ID_1, POOL_1_PERCENTAGE);
+
         (uint48 percentage, , ) = staking.getPool(POOL_ID_1);
         assertEq(
             percentage,
