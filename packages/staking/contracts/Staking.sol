@@ -350,6 +350,17 @@ contract Staking is
         emit TokensWithdrawn(token, msg.sender, amount);
     }
 
+    /**
+     * @notice  Creates a new distribution of the given amount of tokens
+     * @notice  Gelato backend will will monitor this function and call web3 function
+     * @notice  to calculate the amount of rewards for each staker and distribute them
+     * @notice  by calling distributeRewards function at the end
+     * @notice  It might look like this function is missing the actual distribution logic
+     * @notice  but this function is only indication for Gelato backend to calculate the rewards
+     * @notice  All logic is done on the server side
+     * @param   token  USDT/USDC token
+     * @param   amount  amount of tokens to distribute
+     */
     function createDistribution(
         IERC20 token,
         uint256 amount
@@ -359,13 +370,20 @@ contract Staking is
         mTokenExists(token)
         mAmountNotZero(amount)
     {
-        // @todo add implementation
+        // Only indication for Gelato backend to calculate the rewards
+        // We only need to transfer funds and emit an event here
 
         // Interaction: transfer the tokens to the sender
         token.safeTransferFrom(msg.sender, address(this), amount);
 
         // Effects: emit event
-        emit DistributionCreated(token, amount);
+        emit DistributionCreated(
+            token,
+            amount,
+            s_totalPools,
+            s_totalBandLevels,
+            s_users.length()
+        );
     }
 
     /*//////////////////////////////////////////////////////////////////////////

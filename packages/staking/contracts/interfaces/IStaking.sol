@@ -30,7 +30,13 @@ interface IStakingEvents {
 
     event TokensWithdrawn(IERC20 token, address receiver, uint256 amount);
 
-    event DistributionCreated(IERC20 token, uint256 amount);
+    event DistributionCreated(
+        IERC20 token,
+        uint256 amount,
+        uint256 totalPools,
+        uint256 totalBandLevels,
+        uint256 totalStakers
+    );
 
     event RewardsDistributed(IERC20 token);
 
