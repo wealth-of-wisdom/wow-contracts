@@ -17,18 +17,16 @@ contract Staking_E2E_Test is Base_Test {
     function assertStaked(
         address staker,
         uint256 bandId,
-        uint16 bandLevel,
+        uint16 bandLvl,
         uint256 timestamp
     ) internal {
         (
-            IStaking.StakingTypes stakingType,
+            uint256 stakingStartDate,
             ,
             address owner,
             uint16 bandLevel,
-            uint256 stakingStartTimestamp,
-            ,
-
-        ) = staking.getStakerBandData(bandId);
+            IStaking.StakingTypes stakingType
+        ) = staking.getStakerBand(bandId);
 
         assertEq(
             uint8(stakingType),
@@ -36,25 +34,23 @@ contract Staking_E2E_Test is Base_Test {
             "Staking type not set"
         );
         assertEq(owner, staker, "Owner not set");
-        assertEq(bandLevel, bandLevel, "Band Level not set");
-        assertEq(stakingStartTimestamp, timestamp, "Timestamp not set");
+        assertEq(bandLevel, bandLvl, "BandLevel Level not set");
+        assertEq(stakingStartDate, timestamp, "Timestamp not set");
     }
 
     function assertUnstaked(uint256 bandId) internal {
         (
-            IStaking.StakingTypes stakingType,
+            uint256 stakingStartDate,
             ,
             address owner,
             uint16 bandLevel,
-            uint256 stakingStartTimestamp,
-            ,
-
-        ) = staking.getStakerBandData(bandId);
+            IStaking.StakingTypes stakingType
+        ) = staking.getStakerBand(bandId);
 
         assertEq(uint8(stakingType), 0, "Staking type not removed");
         assertEq(owner, address(0), "Owner not removed");
-        assertEq(bandLevel, 0, "Band Level not removed");
-        assertEq(stakingStartTimestamp, 0, "Timestamp not removed");
+        assertEq(bandLevel, 0, "BandLevel Level not removed");
+        assertEq(stakingStartDate, 0, "Timestamp not removed");
     }
 
     function assertBalances(

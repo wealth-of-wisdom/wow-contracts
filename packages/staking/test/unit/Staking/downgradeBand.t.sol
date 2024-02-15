@@ -57,14 +57,12 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
         stakeTokens
     {
         (
-            IStaking.StakingTypes previousStakingType,
+            uint256 previousStakingStartTimestamp,
             ,
             address previousOwner,
             uint16 previousBandLevel,
-            uint256 previousStakingStartTimestamp,
-            ,
-
-        ) = staking.getStakerBandData(BAND_LEVEL_0);
+            IStaking.StakingTypes previousStakingType
+        ) = staking.getStakerBand(BAND_LEVEL_0);
 
         vm.startPrank(alice);
         wowToken.approve(address(staking), BAND_7_PRICE - BAND_4_PRICE);
@@ -72,14 +70,12 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
         vm.stopPrank();
 
         (
-            IStaking.StakingTypes stakingType,
+            uint256 stakingStartDate,
             ,
             address owner,
             uint16 bandLevel,
-            uint256 stakingStartTimestamp,
-            ,
-
-        ) = staking.getStakerBandData(BAND_LEVEL_0);
+            IStaking.StakingTypes stakingType
+        ) = staking.getStakerBand(BAND_LEVEL_0);
 
         assertEq(
             uint8(previousStakingType),
@@ -87,9 +83,9 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
             "Staking type reset"
         );
         assertEq(owner, previousOwner, "Owner reset");
-        assertEq(bandLevel, BAND_LEVEL_1, "Band Level not set");
+        assertEq(bandLevel, BAND_LEVEL_1, "BandLevel Level not set");
         assertEq(
-            stakingStartTimestamp,
+            stakingStartDate,
             previousStakingStartTimestamp,
             "Timestamp reset"
         );

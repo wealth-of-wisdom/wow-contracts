@@ -52,7 +52,7 @@ contract Staking_SetPool_Unit_Test is Unit_Test {
         vm.prank(admin);
         staking.setPool(POOL_ID_1, POOL_1_PERCENTAGE);
 
-        (uint48 percentage, , ) = staking.getPool(POOL_ID_1);
+        uint48 percentage = staking.getPool(POOL_ID_1);
         assertEq(
             percentage,
             POOL_1_PERCENTAGE,

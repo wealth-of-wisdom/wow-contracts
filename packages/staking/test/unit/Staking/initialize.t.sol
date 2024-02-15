@@ -134,7 +134,7 @@ contract Staking_Initialize_Unit_Test is Unit_Test {
         initializeStaking
     {
         assertEq(
-            staking.getTotalBands(),
+            staking.getTotalBandLevels(),
             TOTAL_BAND_LEVELS,
             "Total bands should be set correctly"
         );
