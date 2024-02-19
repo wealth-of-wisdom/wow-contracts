@@ -38,14 +38,12 @@ contract Staking_Stake_Unit_Test is Unit_Test {
         staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_2);
 
         (
-            IStaking.StakingTypes stakingType,
+            uint256 stakingStartDate,
             ,
             address owner,
             uint16 bandLevel,
-            uint256 stakingStartTimestamp,
-            ,
-
-        ) = staking.getStakerBandData(BAND_LEVEL_0);
+            IStaking.StakingTypes stakingType
+        ) = staking.getStakerBand(BAND_LEVEL_0);
 
         assertEq(
             uint8(stakingType),
@@ -53,8 +51,8 @@ contract Staking_Stake_Unit_Test is Unit_Test {
             "Staking type not set"
         );
         assertEq(owner, alice, "Owner not set");
-        assertEq(bandLevel, BAND_LEVEL_2, "Band Level not set");
-        assertEq(stakingStartTimestamp, currentTimestamp, "Timestamp not set");
+        assertEq(bandLevel, BAND_LEVEL_2, "BandLevel Level not set");
+        assertEq(stakingStartDate, currentTimestamp, "Timestamp not set");
 
         assertEq(
             staking.getStakerBandIds(alice),
@@ -106,14 +104,12 @@ contract Staking_Stake_Unit_Test is Unit_Test {
         staking.stake(STAKING_TYPE_FIX, BAND_LEVEL_5);
 
         (
-            IStaking.StakingTypes stakingType,
+            uint256 stakingStartDate,
             ,
             address owner,
             uint16 bandLevel,
-            uint256 stakingStartTimestamp,
-            ,
-
-        ) = staking.getStakerBandData(BAND_LEVEL_0);
+            IStaking.StakingTypes stakingType
+        ) = staking.getStakerBand(BAND_LEVEL_0);
 
         assertEq(
             uint8(stakingType),
@@ -121,11 +117,11 @@ contract Staking_Stake_Unit_Test is Unit_Test {
             "Staking type not set"
         );
         assertEq(owner, alice, "Owner not set");
-        assertEq(bandLevel, BAND_LEVEL_2, "Band Level not set");
-        assertEq(stakingStartTimestamp, currentTimestamp, "Timestamp not set");
+        assertEq(bandLevel, BAND_LEVEL_2, "BandLevel Level not set");
+        assertEq(stakingStartDate, currentTimestamp, "Timestamp not set");
 
-        (stakingType, , owner, bandLevel, stakingStartTimestamp, , ) = staking
-            .getStakerBandData(secondStakeBandId);
+        (stakingStartDate, , owner, bandLevel, stakingType) = staking
+            .getStakerBand(secondStakeBandId);
 
         assertEq(
             uint8(stakingType),
@@ -133,8 +129,8 @@ contract Staking_Stake_Unit_Test is Unit_Test {
             "Staking type not set"
         );
         assertEq(owner, alice, "Owner not set");
-        assertEq(bandLevel, BAND_LEVEL_5, "Band Level not set");
-        assertEq(stakingStartTimestamp, currentTimestamp, "Timestamp not set");
+        assertEq(bandLevel, BAND_LEVEL_5, "BandLevel Level not set");
+        assertEq(stakingStartDate, currentTimestamp, "Timestamp not set");
         vm.stopPrank();
     }
 

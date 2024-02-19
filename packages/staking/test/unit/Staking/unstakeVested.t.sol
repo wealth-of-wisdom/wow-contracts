@@ -49,24 +49,22 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
         staking.unstakeVested(BAND_LEVEL_0, alice);
 
         (
-            IStaking.StakingTypes stakingType,
+            uint256 stakingStartDate,
             ,
             address owner,
             uint16 bandLevel,
-            uint256 stakingStartTimestamp,
-            ,
-
-        ) = staking.getStakerBandData(BAND_LEVEL_0);
+            IStaking.StakingTypes stakingType
+        ) = staking.getStakerBand(BAND_LEVEL_0);
 
         assertEq(uint8(stakingType), 0, "Staking type not removed");
         assertEq(owner, address(0), "Owner not removed");
-        assertEq(bandLevel, 0, "Band Level not removed");
-        assertEq(stakingStartTimestamp, 0, "Timestamp not removed");
+        assertEq(bandLevel, 0, "BandLevel Level not removed");
+        assertEq(stakingStartDate, 0, "Timestamp not removed");
 
         assertEq(
             staking.getStakerBandIds(alice),
             EMPTY_STAKER_BAND_IDS,
-            "Band Id's not removed"
+            "BandLevel Id's not removed"
         );
 
         vm.stopPrank();

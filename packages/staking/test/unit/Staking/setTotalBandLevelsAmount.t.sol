@@ -30,7 +30,7 @@ contract Staking_SetTotalBandLevelsAmount_Unit_Test is Unit_Test {
         vm.prank(admin);
         staking.setTotalBandLevelsAmount(TOTAL_4_BAND_LEVELS);
         assertEq(
-            staking.getTotalBands(),
+            staking.getTotalBandLevels(),
             TOTAL_4_BAND_LEVELS,
             "New total band level not set"
         );

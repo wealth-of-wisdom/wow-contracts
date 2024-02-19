@@ -26,4 +26,9 @@ library Errors {
     error Staking__ZeroAmount();
     error Staking__ZeroAddress();
     error Staking__ZeroPoolShares();
+    error Staking__InvalidArrayLengths(
+        uint256 stakersLength,
+        uint256 rewardsLength
+    );
+    error Staking__NoRewardsToClaim();
 }

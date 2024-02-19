@@ -65,7 +65,7 @@ contract Staking_SetBand_Unit_Test is Unit_Test {
             BAND_1_ACCESSIBLE_POOLS
         );
 
-        (uint256 price, uint16[] memory accessiblePools) = staking.getBand(
+        (uint256 price, uint16[] memory accessiblePools) = staking.getBandLevel(
             BAND_LEVEL_1
         );
         uint256 poolsAmount = accessiblePools.length;
