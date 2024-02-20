@@ -32,14 +32,7 @@ const config: HardhatUserConfig = {
   w3f: {
     rootDir: "./web3-functions",
     debug: false,
-    networks: [
-      "ethereum",
-      "sepolia",
-      "baseGoerli",
-      "polygon",
-      "hardhat",
-      "mumbai",
-    ], //(multiChainProvider) injects provider for these networks
+    networks: ["ethereum", "sepolia"], //(multiChainProvider) injects provider for these networks
   },
 
   namedAccounts: {
@@ -60,134 +53,16 @@ const config: HardhatUserConfig = {
     },
 
     // Prod
-    avalanche: {
-      url: "https://api.avax.network/ext/bc/C/rpc",
-      chainId: 43114,
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
-    },
-    arbitrum: {
-      chainId: 42161,
-      url: "https://arb1.arbitrum.io/rpc",
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
-    },
-    base: {
-      url: `https://mainnet.base.org`,
-      chainId: 8453,
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
-    },
-    bsc: {
-      chainId: 56,
-      url: "https://bsc-dataseed.binance.org/",
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
-    },
     ethereum: {
       chainId: 1,
       url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_ID}`,
       accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
     },
-    fantom: {
-      chainId: 250,
-      url: `https://rpcapi.fantom.network/`,
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
-    },
-    gnosis: {
-      chainId: 100,
-      url: `https://gnosis-mainnet.public.blastapi.io`,
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
-    },
-    linea: {
-      url: `https://linea-mainnet.infura.io/v3/${INFURA_ID}`,
-      chainId: 59144,
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
-    },
-    metis: {
-      chainId: 1088,
-      url: "https://metis-mainnet.public.blastapi.io",
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
-    },
-    optimism: {
-      chainId: 10,
-      url: "https://mainnet.optimism.io",
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
-    },
-    polygon: {
-      chainId: 137,
-      url: `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_ID}`,
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
-    },
-    polygonzk: {
-      url: "https://zkevm-rpc.com",
-      chainId: 1101,
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
-    },
-    zksync: {
-      zksync: true,
-      url: "https://mainnet.era.zksync.io",
-      chainId: 324,
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
-      verifyURL:
-        "https://zksync2-mainnet-explorer.zksync.io/contract_verification",
-    },
 
     // Staging
-    arbsepolia: {
-      chainId: 421614,
-      url: `https://sepolia-rollup.arbitrum.io/rpc`,
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
-    },
-    baseGoerli: {
-      chainId: 84531,
-      url: "https://goerli.base.org",
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
-    },
-    basesepolia: {
-      url: `https://sepolia.base.org`,
-      chainId: 84532,
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
-    },
-    blastsepolia: {
-      chainId: 168587773,
-      url: `https://sepolia.blast.io`,
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
-    },
-    gelopcelestiatestnet: {
-      chainId: 123420111,
-      url: `https://rpc.op-celestia-testnet.gelato.digital`,
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
-    },
-    goerli: {
-      chainId: 5,
-      url: `https://eth-goerli.g.alchemy.com/v2/${ALCHEMY_ID}`,
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
-    },
-    lisksepolia: {
-      chainId: 4202,
-      url: `https://rpc.lisk-sepolia-testnet.gelato.digital`,
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
-    },
-    mumbai: {
-      chainId: 80001,
-      url: `https://polygon-mumbai.g.alchemy.com/v2/${ALCHEMY_ID}`,
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
-    },
-    osepolia: {
-      chainId: 11155420,
-      url: `https://sly-light-scion.optimism-sepolia.quiknode.pro/30140607e2dbcaf7d581b1e706ce2f33579f5f8e/`,
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
-    },
     sepolia: {
       chainId: 11155111,
       url: `https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_ID}`,
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
-    },
-    unreal: {
-      chainId: 18231,
-      url: `https://rpc.unreal.gelato.digital`,
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
-    },
-    zkatana: {
-      chainId: 1261120,
-      url: "https://rpc.zkatana.gelato.digital",
       accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
     },
   },
