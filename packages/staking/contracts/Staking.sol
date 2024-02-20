@@ -439,13 +439,13 @@ contract Staking is
         uint256 price = s_bandLevelData[bandLevel].price;
 
         // Effects: Create a new band and add it to the user
-        _stakeBand(stakingType, bandLevel, msg.sender);
+        uint256 bandId = _stakeBand(stakingType, bandLevel, msg.sender);
 
         // Interaction: transfer transaction funds to contract
         s_wowToken.safeTransferFrom(msg.sender, address(this), price);
 
         // Effects: emit event
-        emit Staked(msg.sender, bandLevel, stakingType, false);
+        emit Staked(msg.sender, bandLevel, bandId, stakingType, false);
     }
 
     /**
@@ -485,10 +485,10 @@ contract Staking is
         mStakingTypeExists(stakingType)
     {
         // Effects: Create a new band and add it to the user
-        _stakeBand(stakingType, bandLevel, user);
+        uint256 bandId = _stakeBand(stakingType, bandLevel, user);
 
         // Effects: emit event
-        emit Staked(user, bandLevel, stakingType, true);
+        emit Staked(user, bandLevel, bandId, stakingType, true);
     }
 
     /**
@@ -818,9 +818,9 @@ contract Staking is
         StakingTypes stakingType,
         uint16 bandLevel,
         address user
-    ) internal {
+    ) internal returns (uint256 bandId) {
         // Effects: increment bandId (variable is set before incrementing to start from 0)
-        uint256 bandId = s_nextBandId++;
+        bandId = s_nextBandId++;
 
         // Effects: set staker band data
         StakerBand storage band = s_bands[bandId];
@@ -837,9 +837,6 @@ contract Staking is
             // Effects: add user to the map
             s_users.set(user, 1);
         }
-
-        // Effects: emit event
-        emit BandStaked(user, bandLevel, bandId);
     }
 
     function _unstakeBand(uint256 bandId, address user) internal {

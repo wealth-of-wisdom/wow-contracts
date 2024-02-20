@@ -43,13 +43,12 @@ interface IStakingEvents {
     event Staked(
         address user,
         uint16 bandLevel,
+        uint256 bandId,
         IStaking.StakingTypes stakingType,
         bool isVested
     );
 
     event Unstaked(address user, uint256 bandId, bool isVested);
-
-    event BandStaked(address user, uint16 bandLevel, uint256 bandId);
 
     event BandUnstaked(address user, uint16 bandLevel, uint256 bandId);
 
