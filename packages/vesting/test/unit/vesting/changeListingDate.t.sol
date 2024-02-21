@@ -2,9 +2,9 @@
 pragma solidity 0.8.20;
 
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
-import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
-import {Errors} from "@wealth-of-wisdom/vesting/contracts/libraries/Errors.sol";
-import {Vesting_Unit_Test} from "@wealth-of-wisdom/vesting/test/unit/VestingUnit.t.sol";
+import {IVesting} from "../../../contracts/interfaces/IVesting.sol";
+import {Errors} from "../../../contracts/libraries/Errors.sol";
+import {Vesting_Unit_Test} from "../VestingUnit.t.sol";
 
 contract Vesting_ChangeListingDate_Unit_Test is Vesting_Unit_Test {
     uint32 internal immutable NEW_LISTING_DATE;
@@ -13,7 +13,7 @@ contract Vesting_ChangeListingDate_Unit_Test is Vesting_Unit_Test {
         NEW_LISTING_DATE = LISTING_DATE + 1 days;
     }
 
-    function test_changeListingDate_RevertIf_NotAdmin() external {
+    function test_changeListingDate_RevertIf_CallerNotAdmin() external {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
@@ -47,7 +47,7 @@ contract Vesting_ChangeListingDate_Unit_Test is Vesting_Unit_Test {
         vesting.changeListingDate(NEW_LISTING_DATE);
 
         (uint32 cliffEndDate, , , ) = vesting.getPoolCliffData(PRIMARY_POOL);
-        assertEq(cliffEndDate, NEW_LISTING_DATE + CLIFF_IN_DAYS * 1 days);
+        assertEq(cliffEndDate, NEW_LISTING_DATE + CLIFF_IN_SECONDS);
     }
 
     function test_changeListingDate_UpdatesCliffEndDateForMultiplePools()
@@ -60,10 +60,10 @@ contract Vesting_ChangeListingDate_Unit_Test is Vesting_Unit_Test {
         vesting.changeListingDate(NEW_LISTING_DATE);
 
         (uint32 cliffEndDate, , , ) = vesting.getPoolCliffData(PRIMARY_POOL);
-        assertEq(cliffEndDate, NEW_LISTING_DATE + CLIFF_IN_DAYS * 1 days);
+        assertEq(cliffEndDate, NEW_LISTING_DATE + CLIFF_IN_SECONDS);
 
         (cliffEndDate, , , ) = vesting.getPoolCliffData(SECONDARY_POOL);
-        assertEq(cliffEndDate, NEW_LISTING_DATE + CLIFF_IN_DAYS * 1 days);
+        assertEq(cliffEndDate, NEW_LISTING_DATE + CLIFF_IN_SECONDS);
     }
 
     function test_changeListingDate_UpdatesVestingEndDateForSinglePool()
@@ -76,11 +76,7 @@ contract Vesting_ChangeListingDate_Unit_Test is Vesting_Unit_Test {
         (uint32 vestingEndDate, , ) = vesting.getPoolVestingData(PRIMARY_POOL);
         assertEq(
             vestingEndDate,
-            NEW_LISTING_DATE +
-                CLIFF_IN_DAYS *
-                1 days +
-                VESTING_DURATION_IN_MONTHS *
-                30 days
+            NEW_LISTING_DATE + CLIFF_IN_SECONDS + VESTING_DURATION_IN_SECONDS
         );
     }
 
@@ -96,21 +92,13 @@ contract Vesting_ChangeListingDate_Unit_Test is Vesting_Unit_Test {
         (uint32 vestingEndDate, , ) = vesting.getPoolVestingData(PRIMARY_POOL);
         assertEq(
             vestingEndDate,
-            NEW_LISTING_DATE +
-                CLIFF_IN_DAYS *
-                1 days +
-                VESTING_DURATION_IN_MONTHS *
-                30 days
+            NEW_LISTING_DATE + CLIFF_IN_SECONDS + VESTING_DURATION_IN_SECONDS
         );
 
         (vestingEndDate, , ) = vesting.getPoolVestingData(SECONDARY_POOL);
         assertEq(
             vestingEndDate,
-            NEW_LISTING_DATE +
-                CLIFF_IN_DAYS *
-                1 days +
-                VESTING_DURATION_IN_MONTHS *
-                30 days
+            NEW_LISTING_DATE + CLIFF_IN_SECONDS + VESTING_DURATION_IN_SECONDS
         );
     }
 
@@ -118,7 +106,7 @@ contract Vesting_ChangeListingDate_Unit_Test is Vesting_Unit_Test {
         external
         approveAndAddPool
     {
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit(address(vesting));
         emit ListingDateChanged(LISTING_DATE, NEW_LISTING_DATE);
 
         vm.prank(admin);

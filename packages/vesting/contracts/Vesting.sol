@@ -325,6 +325,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
 
         if (stakedAmount > 0) {
             // Interactions: delete user data from staking contract
+            // @todo update this part
             // s_staking.deleteVestingUserData(msg.sender);
         }
 
@@ -709,17 +710,15 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         Pool storage pool = s_vestingPools[pid];
 
         // Default value for duration is vesting duration in months
-        duration = pool.vestingDurationInMonths;
+        duration = pool.unlockType == UnlockTypes.DAILY
+            ? pool.vestingDurationInDays
+            : pool.vestingDurationInMonths;
 
         if (block.timestamp >= pool.cliffEndDate) {
             periodsPassed = uint16(
                 (block.timestamp - pool.cliffEndDate) /
                     (pool.unlockType == UnlockTypes.DAILY ? DAY : MONTH)
             );
-
-            if (pool.unlockType == UnlockTypes.DAILY) {
-                duration = pool.vestingDurationInDays;
-            }
         }
 
         // periodsPassed by default is 0 if cliff has not ended yet

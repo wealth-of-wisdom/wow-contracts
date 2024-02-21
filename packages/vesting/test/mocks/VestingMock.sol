@@ -31,6 +31,16 @@ contract VestingMock is Vesting {
             .claimedTokenAmount = claimedAmount;
     }
 
+    function mock_setStakedAmount(
+        uint16 pid,
+        address beneficiary,
+        uint256 stakedAmount
+    ) external {
+        s_vestingPools[pid]
+            .beneficiaries[beneficiary]
+            .stakedTokenAmount = stakedAmount;
+    }
+
     function mock_setPoolUnlockType(
         uint16 pid,
         IVesting.UnlockTypes unlockType

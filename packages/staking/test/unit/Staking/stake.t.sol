@@ -138,7 +138,7 @@ contract Staking_Stake_Unit_Test is Unit_Test {
         vm.startPrank(alice);
         wowToken.approve(address(staking), BAND_2_PRICE);
         vm.expectEmit(true, true, true, true);
-        emit Staked(alice, BAND_LEVEL_2, STAKING_TYPE_FLEXI, false);
+        emit Staked(alice, BAND_LEVEL_2, 0, STAKING_TYPE_FLEXI, false);
         staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_2);
         vm.stopPrank();
     }

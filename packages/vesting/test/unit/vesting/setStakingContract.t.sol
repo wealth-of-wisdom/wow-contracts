@@ -3,10 +3,10 @@ pragma solidity 0.8.20;
 
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {IStaking} from "@wealth-of-wisdom/staking/contracts/interfaces/IStaking.sol";
-import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
-import {Errors} from "@wealth-of-wisdom/vesting/contracts/libraries/Errors.sol";
 import {StakingMock} from "@wealth-of-wisdom/vesting/test/mocks/StakingMock.sol";
-import {Vesting_Unit_Test} from "@wealth-of-wisdom/vesting/test/unit/VestingUnit.t.sol";
+import {IVesting} from "../../../contracts/interfaces/IVesting.sol";
+import {Errors} from "../../../contracts/libraries/Errors.sol";
+import {Vesting_Unit_Test} from "../VestingUnit.t.sol";
 
 contract Vesting_SetStakingContract_Unit_Test is Vesting_Unit_Test {
     StakingMock internal newStakingContract;
@@ -17,7 +17,7 @@ contract Vesting_SetStakingContract_Unit_Test is Vesting_Unit_Test {
         newStakingContract = new StakingMock();
     }
 
-    function test_setStakingContract_RevertIf_NotAdmin() external {
+    function test_setStakingContract_RevertIf_CallerNotAdmin() external {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
@@ -27,6 +27,14 @@ contract Vesting_SetStakingContract_Unit_Test is Vesting_Unit_Test {
         );
         vm.prank(alice);
         vesting.setStakingContract(newStakingContract);
+    }
+
+    function test_setStakingContract_RevertIf_NewStakingContractIsZero()
+        external
+    {
+        vm.expectRevert(Errors.Vesting__ZeroAddress.selector);
+        vm.prank(admin);
+        vesting.setStakingContract(IStaking(ZERO_ADDRESS));
     }
 
     function test_setStakingContract_RevokeStakingRoleFromOldContract()
@@ -61,14 +69,6 @@ contract Vesting_SetStakingContract_Unit_Test is Vesting_Unit_Test {
         );
     }
 
-    function test_setStakingContract_RevertIf_NewStakingContractIsZero()
-        external
-    {
-        vm.expectRevert(Errors.Vesting__ZeroAddress.selector);
-        vm.prank(admin);
-        vesting.setStakingContract(IStaking(ZERO_ADDRESS));
-    }
-
     function test_setStakingContract_SetsStakingContractCorrectly() external {
         vm.prank(admin);
         vesting.setStakingContract(newStakingContract);
@@ -81,7 +81,7 @@ contract Vesting_SetStakingContract_Unit_Test is Vesting_Unit_Test {
     }
 
     function test_setStakingContract_EmitsStakingContractSetEvent() external {
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit(address(vesting));
         emit StakingContractSet(newStakingContract);
 
         vm.prank(admin);
