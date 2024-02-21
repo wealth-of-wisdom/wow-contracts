@@ -35,11 +35,12 @@ export async function main(
   totalPools: number,
   totalBandLevels: number,
   usersAmount: number,
-  distributionDate: number
+  distributionDate: number,
+  stakingAddress: string,
+  privateKey: string,
 ) {
   const provider = getDefaultProvider(process.env.SEPOLIA_RPC_URL);
-  const wallet = new Wallet(process.env.PRIVATE_KEY_1!, provider);
-  const stakingAddress = "";
+  const wallet = new Wallet(privateKey, provider);
   const staking = new Contract(stakingAddress, stakingABI, wallet);
 
   const sharesInMonth = await staking.getSharesInMonth();
@@ -48,7 +49,7 @@ export async function main(
   const poolAllocations = await calculateAllPoolAllocations(
     staking,
     totalPools,
-    totalAmount
+    totalAmount,
   );
   // Loop through all band levels once to store all accessible pools
   const bandLevelPoolIds = await getBandLevelPoolIds(staking, totalBandLevels);
@@ -60,14 +61,14 @@ export async function main(
     usersAmount,
     distributionDate,
     bandLevelPoolIds,
-    sharesInMonth
+    sharesInMonth,
   );
 
   // Add token rewards for each user
   const userRewards = await addUserRewards(
     poolAllocations,
     sharesForPools,
-    sharesForUsers
+    sharesForUsers,
   );
 
   // Call staking contract to distribute tokens to each user
@@ -75,7 +76,7 @@ export async function main(
     const tx = await staking.distributeRewards(
       token,
       userRewards.keys(),
-      userRewards.values()
+      userRewards.values(),
     );
     await tx.wait();
   } catch (err) {
@@ -87,7 +88,7 @@ export async function main(
 async function addUserRewards(
   poolAllocations: BigNumber[],
   sharesForPools: number[],
-  sharesForUsers: Map<string, number[]>
+  sharesForUsers: Map<string, number[]>,
 ): Promise<Map<string, number>> {
   const userRewards: Map<string, number> = new Map();
   // Loop through each user and distribute funds
@@ -101,7 +102,7 @@ async function addUserRewards(
       const totalAmount: BigNumber = poolAllocations[i];
 
       allocation = allocation.add(
-        totalAmount.mul(userPoolShares).div(totalPoolShares)
+        totalAmount.mul(userPoolShares).div(totalPoolShares),
       );
     }
     userRewards.set(user, Number(allocation));
@@ -115,7 +116,7 @@ async function addPoolsAndUsersShares(
   usersAmount: number,
   distributionDate: number,
   bandLevelPoolIds: number[][],
-  sharesInMonth: number[]
+  sharesInMonth: number[],
 ): Promise<[number[], Map<string, number[]>]> {
   // Initialize array with 0 shares for each pool
   const sharesForPools: number[] = new Array(totalPools).fill(0);
@@ -133,7 +134,7 @@ async function addPoolsAndUsersShares(
       totalPools,
       distributionDate,
       bandLevelPoolIds,
-      sharesInMonth
+      sharesInMonth,
     );
 
     // Add shares to the users map
@@ -155,7 +156,7 @@ async function addMultipleBandSharesToPools(
   totalPools: number,
   distributionDate: number,
   bandLevelPoolIds: number[][],
-  sharesInMonth: number[]
+  sharesInMonth: number[],
 ): Promise<number[]> {
   const bandIds = await staking.getStakerBands(user);
   const bandsAmount = bandIds.length;
@@ -170,7 +171,7 @@ async function addMultipleBandSharesToPools(
     const bandShares = await calculateBandShares(
       band,
       distributionDate,
-      sharesInMonth
+      sharesInMonth,
     );
 
     // No need to add shares if there is nothing to add
@@ -193,7 +194,7 @@ async function addMultipleBandSharesToPools(
 
 async function getBandLevelPoolIds(
   staking: Contract,
-  totalBandLevels: number
+  totalBandLevels: number,
 ): Promise<number[][]> {
   const poolIds: number[][] = [];
 
@@ -208,7 +209,7 @@ async function getBandLevelPoolIds(
 
 function calculateCompletedMonths(
   startDateInSeconds: number,
-  endDateInSeconds: number
+  endDateInSeconds: number,
 ): number {
   // 60 seconds * 60 minutes * 24 hours * 30 days
   // This is hardcoded because it's a constant value
@@ -219,7 +220,7 @@ function calculateCompletedMonths(
 async function calculateAllPoolAllocations(
   staking: Contract,
   totalPools: number,
-  totalAmount: BigNumber
+  totalAmount: BigNumber,
 ): Promise<BigNumber[]> {
   // This value is hardcoded because it's a constant value
   const percentagePrecision: number = 10 ** 8;
@@ -232,7 +233,7 @@ async function calculateAllPoolAllocations(
       staking,
       totalAmount,
       percentagePrecision,
-      poolId
+      poolId,
     );
 
     allocations.push(poolTokens);
@@ -245,7 +246,7 @@ async function calculatePoolAllocation(
   staking: Contract,
   totalAmount: BigNumber,
   percentagePrecision: number,
-  poolId: number
+  poolId: number,
 ): Promise<BigNumber> {
   const poolData = await staking.getPool(poolId);
 
@@ -260,7 +261,7 @@ async function calculatePoolAllocation(
 async function calculateBandShares(
   band: StakerBand,
   endDateInSeconds: number,
-  sharesInMonth: number[]
+  sharesInMonth: number[],
 ): Promise<number> {
   let bandShares: number = 0;
 
@@ -269,7 +270,7 @@ async function calculateBandShares(
     // Calculate months that passed since staking started
     const monthsPassed = calculateCompletedMonths(
       band.stakingStartDate,
-      endDateInSeconds
+      endDateInSeconds,
     );
 
     // If at least 1 month passed, calculate shares based on months

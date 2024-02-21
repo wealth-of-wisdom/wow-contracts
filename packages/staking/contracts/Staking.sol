@@ -382,8 +382,7 @@ contract Staking is
             amount,
             s_totalPools,
             s_totalBandLevels,
-            s_users.length(),
-            block.timestamp
+            s_users.length()
         );
     }
 
