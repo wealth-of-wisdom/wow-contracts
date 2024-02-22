@@ -31,4 +31,7 @@ library Errors {
         uint256 rewardsLength
     );
     error Staking__NoRewardsToClaim();
+    error Staking__InvalidMonth(uint8 month);
+    error Staking__DifferentVestingStatus();
+    error Staking__FixedStakingNotUnlocked();
 }

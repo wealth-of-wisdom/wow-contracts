@@ -59,7 +59,7 @@ contract Staking_DeleteVestingUserData_Unit_Test is Unit_Test {
     {
         vm.startPrank(alice);
         vm.expectEmit(true, true, true, true);
-        emit VestingUserRemoved(alice);
+        emit VestingUserDeleted(alice);
         staking.deleteVestingUserData(alice);
         vm.stopPrank();
     }

@@ -46,17 +46,6 @@ contract Vesting_Initialize_Unit_Test is Vesting_Unit_Test {
         );
     }
 
-    function test_initialize_GrantsStakingRoleToStaking() external {
-        vm.warp(LISTING_DATE - 1 seconds);
-        vm.prank(admin);
-        vesting.initialize(wowToken, staking, LISTING_DATE);
-
-        assertTrue(
-            vesting.hasRole(STAKING_ROLE, address(staking)),
-            "Admin should have staking role"
-        );
-    }
-
     function test_initialize_SetsVestingTokenCorrectly() external {
         vm.warp(LISTING_DATE - 1 seconds);
         vesting.initialize(wowToken, staking, LISTING_DATE);

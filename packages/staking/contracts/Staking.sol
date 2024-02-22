@@ -32,9 +32,9 @@ contract Staking is
     bytes32 private constant GELATO_EXECUTOR_ROLE =
         keccak256("GELATO_EXECUTOR_ROLE");
 
-    uint48 private constant MONTH = 30 days;
     uint48 private constant SHARE = 1e6; // 1 share = 10^6
     uint48 private constant PERCENTAGE_PRECISION = 1e8; // 100% = 10^8
+    uint32 private constant MONTH = 30 days;
 
     /*//////////////////////////////////////////////////////////////////////////
                                 INTERNAL STORAGE
@@ -121,9 +121,33 @@ contract Staking is
         _;
     }
 
-    modifier mNotFixStakingType(uint256 bandId) {
+    modifier mOnlyFlexiType(uint256 bandId) {
         if (StakingTypes.FIX == s_bands[bandId].stakingType) {
             revert Errors.Staking__CantModifyFixTypeBand();
+        }
+        _;
+    }
+
+    modifier mValidMonth(StakingTypes stakingType, uint8 month) {
+        // Checks: month must be undefined (0) for flexible staking
+        if (StakingTypes.FLEXI == stakingType && month != 0) {
+            revert Errors.Staking__InvalidMonth(month);
+        }
+
+        // Checks: month must be defined (1-24) for fixed staking
+        if (
+            StakingTypes.FIX == stakingType &&
+            (month == 0 || month > sharesInMonth.length)
+        ) {
+            revert Errors.Staking__InvalidMonth(month);
+        }
+
+        _;
+    }
+
+    modifier mOnlyBandFromVestedTokens(uint256 bandId, bool shouldBeVested) {
+        if (s_bands[bandId].areTokensVested != shouldBeVested) {
+            revert Errors.Staking__DifferentVestingStatus();
         }
         _;
     }
@@ -392,6 +416,9 @@ contract Staking is
 
     /**
      * @notice  Distribute rewards to all stakers
+     * @notice  This function is called by the Gelato backend
+     * @notice  after the rewards are calculated from the server side
+     * @notice  We trust the server side to calculate the rewards correctly
      * @param   token  USDT/USDC token
      * @param   stakers  array of stakers
      * @param   rewards  array of rewards for each staker in the same order
@@ -431,15 +458,28 @@ contract Staking is
      * @notice  Stake and lock tokens to earn rewards
      * @param   stakingType  enumerable type for flexi or fixed staking
      * @param   bandLevel  band level number
+     * @param   month  fixed staking period in months (if not fixed, set to 0)
      */
     function stake(
         StakingTypes stakingType,
-        uint16 bandLevel
-    ) external mBandLevelExists(bandLevel) mStakingTypeExists(stakingType) {
-        uint256 price = s_bandLevelData[bandLevel].price;
-
+        uint16 bandLevel,
+        uint8 month
+    )
+        external
+        mStakingTypeExists(stakingType)
+        mBandLevelExists(bandLevel)
+        mValidMonth(stakingType, month)
+    {
         // Effects: Create a new band and add it to the user
-        uint256 bandId = _stakeBand(stakingType, bandLevel, msg.sender);
+        uint256 bandId = _stakeBand(
+            msg.sender,
+            stakingType,
+            bandLevel,
+            month,
+            false
+        );
+
+        uint256 price = s_bandLevelData[bandLevel].price;
 
         // Interaction: transfer transaction funds to contract
         s_wowToken.safeTransferFrom(msg.sender, address(this), price);
@@ -452,17 +492,29 @@ contract Staking is
      * @notice  Unstake tokens at any time and claim earned rewards
      * @param   bandId  Id of the band (0-max uint)
      */
-    function unstake(uint256 bandId) external mBandOwner(msg.sender, bandId) {
-        // Interraction: transfer staked tokens
-        uint16 bandLevel = s_bands[bandId].bandLevel;
-        uint256 stakedAmount = s_bandLevelData[bandLevel].price;
-        s_wowToken.safeTransfer(msg.sender, stakedAmount);
+    function unstake(
+        uint256 bandId
+    )
+        external
+        mBandOwner(msg.sender, bandId)
+        mOnlyBandFromVestedTokens(bandId, false)
+    {
+        StakerBand storage band = s_bands[bandId];
+
+        // Checks: if band is FIX, the fixed months period should be passed
+        _validateFixedPeriodPassed(band);
+
+        // Get amount before deleting band data
+        uint256 stakedAmount = s_bandLevelData[band.bandLevel].price;
 
         // Effects: delete band data
-        _unstakeBand(bandId, msg.sender);
+        _unstakeBand(msg.sender, bandId);
 
         // Interaction: transfer earned rewards to staker for both tokens
         _claimAllRewards(msg.sender);
+
+        // Interraction: transfer staked tokens
+        s_wowToken.safeTransfer(msg.sender, stakedAmount);
 
         // Effects: emit event
         emit Unstaked(msg.sender, bandId, false);
@@ -470,22 +522,26 @@ contract Staking is
 
     /**
      * @notice  Stakes vesting contract tokens to ear rewards
+     * @param   user  address of user staking vested tokens
      * @param   stakingType  enumerable type for flexi or fixed staking
      * @param   bandLevel  band level number
-     * @param   user  address of user staking vested tokens
+     * @param   month  fixed staking period in months (if not fixed, set to 0)
      */
     function stakeVested(
+        address user,
         StakingTypes stakingType,
         uint16 bandLevel,
-        address user
+        uint8 month
     )
         external
         onlyRole(VESTING_ROLE)
-        mBandLevelExists(bandLevel)
+        mAddressNotZero(user)
         mStakingTypeExists(stakingType)
+        mBandLevelExists(bandLevel)
+        mValidMonth(stakingType, month)
     {
         // Effects: Create a new band and add it to the user
-        uint256 bandId = _stakeBand(stakingType, bandLevel, user);
+        uint256 bandId = _stakeBand(user, stakingType, bandLevel, month, true);
 
         // Effects: emit event
         emit Staked(user, bandLevel, bandId, stakingType, true);
@@ -494,15 +550,25 @@ contract Staking is
     /**
      * @notice  Unstake tokens at any time and claim earned rewards
      * @notice  This function can only be called by the vesting contract
-     * @param   bandId  Id of the band (0-max uint)
      * @param   user  address of user staking vested tokens
+     * @param   bandId  Id of the band (0-max uint)
      */
     function unstakeVested(
-        uint256 bandId,
-        address user
-    ) external onlyRole(VESTING_ROLE) mBandOwner(user, bandId) {
+        address user,
+        uint256 bandId
+    )
+        external
+        onlyRole(VESTING_ROLE)
+        mBandOwner(user, bandId)
+        mOnlyBandFromVestedTokens(bandId, true)
+    {
+        StakerBand storage band = s_bands[bandId];
+
+        // Checks: if band is FIX, the fixed months period should be passed
+        _validateFixedPeriodPassed(band);
+
         // Effects: delete band data
-        _unstakeBand(bandId, user);
+        _unstakeBand(user, bandId);
 
         // Interaction: transfer earned rewards to staker for both tokens
         _claimAllRewards(user);
@@ -515,7 +581,7 @@ contract Staking is
      * @notice  Delete all user band data if beneficiary removed from vesting
      * @param   user  staker address
      */
-    function deleteVestingUserData(
+    function deleteVestingUser(
         address user
     ) external onlyRole(VESTING_ROLE) mAddressNotZero(user) {
         uint256[] memory bandIds = s_stakerBands[user];
@@ -534,7 +600,7 @@ contract Staking is
         s_users.remove(user);
 
         // Effects: emit event
-        emit VestingUserRemoved(msg.sender);
+        emit VestingUserDeleted(msg.sender);
     }
 
     /**
@@ -549,7 +615,8 @@ contract Staking is
         external
         mBandOwner(msg.sender, bandId)
         mBandLevelExists(newBandLevel)
-        mNotFixStakingType(bandId)
+        mOnlyFlexiType(bandId)
+        mOnlyBandFromVestedTokens(bandId, false) // @todo decide if this is needed
     {
         uint16 oldBandLevel = s_bands[bandId].bandLevel;
 
@@ -584,7 +651,8 @@ contract Staking is
         external
         mBandOwner(msg.sender, bandId)
         mBandLevelExists(newBandLevel)
-        mNotFixStakingType(bandId)
+        mOnlyFlexiType(bandId)
+        mOnlyBandFromVestedTokens(bandId, false) // @todo decide if this is needed
     {
         uint16 oldBandLevel = s_bands[bandId].bandLevel;
 
@@ -716,11 +784,12 @@ contract Staking is
     /**
      * @notice  Returns staker data on each band they purchased
      * @param   bandId  BandLevel Id
-     * @return  stakingStartDate  Timestamp of staking start
-     * @return  fixedShares  Starting assigned share amount
      * @return  owner  Staker address
+     * @return  stakingStartDate  Timestamp of staking start
      * @return  bandLevel  BandLevel level
+     * @return  fixedMonths  Fixed staking period in months (if not fixed, set to 0)
      * @return  stakingType  FIx/FLEXI staking type
+     * @return  areTokensVested  If band was bought from vested tokens
      */
     function getStakerBand(
         uint256 bandId
@@ -728,19 +797,21 @@ contract Staking is
         external
         view
         returns (
-            uint256 stakingStartDate,
-            uint256 fixedShares,
             address owner,
+            uint32 stakingStartDate,
             uint16 bandLevel,
-            StakingTypes stakingType
+            uint8 fixedMonths,
+            StakingTypes stakingType,
+            bool areTokensVested
         )
     {
         StakerBand memory band = s_bands[bandId];
-        stakingStartDate = band.stakingStartDate;
-        fixedShares = band.fixedShares;
         owner = band.owner;
+        stakingStartDate = band.stakingStartDate;
         bandLevel = band.bandLevel;
+        fixedMonths = band.fixedMonths;
         stakingType = band.stakingType;
+        areTokensVested = band.areTokensVested;
     }
 
     /**
@@ -781,6 +852,7 @@ contract Staking is
     //////////////////////////////////////////////////////////////////////////*/
 
     function _claimAllRewards(address staker) internal {
+        // If claiming in unstake function, we don't want to revert if there are no rewards
         _claimRewards(staker, s_usdtToken, false);
         _claimRewards(staker, s_usdcToken, false);
     }
@@ -815,19 +887,31 @@ contract Staking is
     }
 
     function _stakeBand(
+        address user,
         StakingTypes stakingType,
         uint16 bandLevel,
-        address user
+        uint8 month,
+        bool areTokensVested
     ) internal returns (uint256 bandId) {
         // Effects: increment bandId (variable is set before incrementing to start from 0)
         bandId = s_nextBandId++;
 
         // Effects: set staker band data
         StakerBand storage band = s_bands[bandId];
-        band.stakingType = stakingType;
         band.owner = user;
+        band.stakingStartDate = uint32(block.timestamp);
         band.bandLevel = bandLevel;
-        band.stakingStartDate = block.timestamp;
+        band.stakingType = stakingType;
+
+        if (month > 0) {
+            // Effects: set fixed months for the band
+            band.fixedMonths = month;
+        }
+
+        if (areTokensVested) {
+            // Effects: set that band is bought from vested tokens
+            band.areTokensVested = true;
+        }
 
         // Effects: add bandId to the user
         s_stakerBands[user].push(bandId);
@@ -839,9 +923,7 @@ contract Staking is
         }
     }
 
-    function _unstakeBand(uint256 bandId, address user) internal {
-        uint16 bandLevel = s_bands[bandId].bandLevel;
-
+    function _unstakeBand(address user, uint256 bandId) internal {
         // Effects: delete band data
         delete s_bands[bandId];
 
@@ -861,9 +943,6 @@ contract Staking is
             // Effects: remove user from the map
             s_users.remove(user);
         }
-
-        // Effects: emit event
-        emit BandUnstaked(user, bandLevel, bandId);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -879,6 +958,18 @@ contract Staking is
     /*//////////////////////////////////////////////////////////////////////////
                             INTERNAL VIEW/PURE FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
+
+    function _validateFixedPeriodPassed(StakerBand storage band) internal view {
+        if (band.stakingType == StakingTypes.FIX) {
+            uint32 monthsPassed = (uint32(block.timestamp) -
+                band.stakingStartDate) / MONTH;
+
+            // Checks: fixed staking can only be unstaked after the fixed period
+            if (monthsPassed < band.fixedMonths) {
+                revert Errors.Staking__FixedStakingNotUnlocked();
+            }
+        }
+    }
 
     function _getStakerAndTokenHash(
         address staker,

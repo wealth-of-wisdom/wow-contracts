@@ -20,7 +20,6 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
                                 PUBLIC CONSTANTS
     //////////////////////////////////////////////////////////////////////////*/
 
-    bytes32 public constant STAKING_ROLE = keccak256("STAKING_ROLE");
     bytes32 public constant BENEFICIARIES_MANAGER_ROLE =
         keccak256("BENEFICIARIES_MANAGER_ROLE");
 
@@ -127,7 +126,6 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         __AccessControl_init();
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(BENEFICIARIES_MANAGER_ROLE, msg.sender);
-        _grantRole(STAKING_ROLE, address(stakingContract));
 
         // Effects: Initialize storage variables
         s_token = token;
@@ -207,6 +205,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
             totalPoolTokenAmount
         );
 
+        // Effects: Emit event
         emit VestingPoolAdded(pid, totalPoolTokenAmount);
     }
 
@@ -259,6 +258,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
             user.listingTokenAmount -
             user.cliffTokenAmount;
 
+        // Effects: Emit event
         emit BeneficiaryAdded(pid, beneficiary, tokenAmount);
     }
 
@@ -325,10 +325,10 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
 
         if (stakedAmount > 0) {
             // Interactions: delete user data from staking contract
-            // @todo update this part
-            // s_staking.deleteVestingUserData(msg.sender);
+            s_staking.deleteVestingUser(msg.sender);
         }
 
+        // Effects: Emit event
         emit BeneficiaryRemoved(pid, beneficiary, availableAmount);
     }
 
@@ -354,6 +354,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
                 (pool.vestingDurationInDays * DAY);
         }
 
+        // Effects: Emit event
         emit ListingDateChanged(oldListingDate, newListingDate);
     }
 
@@ -387,6 +388,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         // Interactions: Transfer tokens to the recipient
         customToken.safeTransfer(recipient, tokenAmount);
 
+        // Effects: Emit event
         emit ContractTokensWithdrawn(customToken, recipient, tokenAmount);
     }
 
@@ -401,18 +403,15 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         onlyRole(DEFAULT_ADMIN_ROLE)
         mAddressNotZero(address(newStaking))
     {
-        // Effects: Revoke and grant roles
-        revokeRole(STAKING_ROLE, address(s_staking));
-        grantRole(STAKING_ROLE, address(newStaking));
-
         // Effects: Set new staking contract address
         s_staking = newStaking;
 
+        // Effects: Emit event
         emit StakingContractSet(newStaking);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
-                        USER-FACING STATE CHANGING FUNCTIONS
+                        EXTERNAL FUNCTIONS FOR BENEFICIARIES
     //////////////////////////////////////////////////////////////////////////*/
 
     /**
@@ -449,38 +448,38 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
             revert Errors.Vesting__StakedTokensCanNotBeClaimed();
         }
 
-        // Effects
+        // Effects: Update user claimed token amount
         user.claimedTokenAmount += unlockedTokens;
 
-        // Interactions
+        // Interactions: Transfer tokens to the user
         s_token.safeTransfer(msg.sender, unlockedTokens);
 
+        // Effects: Emit event
         emit TokensClaimed(pid, msg.sender, unlockedTokens);
     }
 
     /**
      * @notice Stakes vested tokesns via vesting contract in staking contract
      * @param stakingType  enumerable type for flexi or fixed staking
-     * @param bandLevel  band level number
+     * @param bandLevel  band level number (1-9)
      * @param pid Index that refers to vesting pool object.
-     * @param beneficiary Address of the staker.
      * @param tokenAmount Amount used to stake or unstake from vesting pool.
      */
     function stakeVestedTokens(
         IStaking.StakingTypes stakingType,
         uint16 bandLevel,
+        uint8 month,
         uint16 pid,
-        address beneficiary,
         uint256 tokenAmount
     )
         external
-        onlyRole(STAKING_ROLE)
         mPoolExists(pid)
-        mBeneficiaryExists(pid, beneficiary)
+        mOnlyBeneficiary(pid)
         mAmountNotZero(tokenAmount)
     {
-        Pool storage pool = s_vestingPools[pid];
-        Beneficiary storage user = pool.beneficiaries[beneficiary];
+        Beneficiary storage user = s_vestingPools[pid].beneficiaries[
+            msg.sender
+        ];
 
         // Checks: Enough unstaked tokens in the contract
         if (
@@ -494,9 +493,12 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
 
         // Effects: Stake tokens
         user.stakedTokenAmount += tokenAmount;
-        s_staking.stakeVested(stakingType, bandLevel, msg.sender);
 
-        emit StakedTokensUpdated(pid, beneficiary, tokenAmount);
+        // Interactions: Stake tokens in staking contract
+        s_staking.stakeVested(msg.sender, stakingType, bandLevel, month);
+
+        // Effects: Emit event
+        emit StakedTokensUpdated(pid, msg.sender, tokenAmount);
     }
 
     /**
@@ -513,7 +515,6 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         uint256 tokenAmount
     )
         external
-        onlyRole(STAKING_ROLE)
         mPoolExists(pid)
         mBeneficiaryExists(pid, beneficiary)
         mAmountNotZero(tokenAmount)
@@ -526,8 +527,9 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
             revert Errors.Vesting__UnstakingTooManyTokens();
         }
         user.stakedTokenAmount -= tokenAmount;
-        s_staking.unstakeVested(bandId, msg.sender);
+        s_staking.unstakeVested(msg.sender, bandId);
 
+        // Effects: Emit event
         emit StakedTokensUpdated(pid, beneficiary, tokenAmount);
     }
 

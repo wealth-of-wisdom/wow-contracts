@@ -37,38 +37,6 @@ contract Vesting_SetStakingContract_Unit_Test is Vesting_Unit_Test {
         vesting.setStakingContract(IStaking(ZERO_ADDRESS));
     }
 
-    function test_setStakingContract_RevokeStakingRoleFromOldContract()
-        external
-    {
-        assertTrue(
-            vesting.hasRole(STAKING_ROLE, address(staking)),
-            "Old staking contract should have staking role"
-        );
-
-        vm.prank(admin);
-        vesting.setStakingContract(newStakingContract);
-
-        assertTrue(
-            !vesting.hasRole(STAKING_ROLE, address(staking)),
-            "Old staking contract shouldn't have staking role"
-        );
-    }
-
-    function test_setStakingContract_GrantStakingRoleToNewContract() external {
-        assertTrue(
-            !vesting.hasRole(STAKING_ROLE, address(newStakingContract)),
-            "New staking contract shouldn't have staking role"
-        );
-
-        vm.prank(admin);
-        vesting.setStakingContract(newStakingContract);
-
-        assertTrue(
-            vesting.hasRole(STAKING_ROLE, address(newStakingContract)),
-            "New staking contract should have staking role"
-        );
-    }
-
     function test_setStakingContract_SetsStakingContractCorrectly() external {
         vm.prank(admin);
         vesting.setStakingContract(newStakingContract);

@@ -51,7 +51,7 @@ interface IVestingEvents {
 }
 
 interface IVesting is IVestingEvents {
-    /*////////////////////////////////////////////////////////////////  //////////
+    /*//////////////////////////////////////////////////////////////////////////
                                        ENUMS
     //////////////////////////////////////////////////////////////////////////*/
 
@@ -141,8 +141,8 @@ interface IVesting is IVestingEvents {
     function stakeVestedTokens(
         IStaking.StakingTypes stakingType,
         uint16 bandLevel,
+        uint8 month,
         uint16 pid,
-        address beneficiary,
         uint256 tokenAmount
     ) external;
 

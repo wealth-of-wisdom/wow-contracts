@@ -19,16 +19,6 @@ contract Staking_Stake_Unit_Test is Unit_Test {
         staking.stake(STAKING_TYPE_FLEXI, fauxLevel);
     }
 
-    //NOTE: won't pass due to enum restrictions
-    // function test_stake_RevertIf_InvalidStakingType()
-    //     external
-    //     setBandLevelData
-    // {
-    //     vm.expectRevert(Errors.Staking__InvalidStakingType.selector);
-    //     vm.prank(alice);
-    //     staking.stake(3, BAND_LEVEL_1);
-    // }
-
     function test_stake_StakesTokensSetsData() external setBandLevelData {
         uint256 currentTimestamp = 100;
         vm.warp(currentTimestamp);

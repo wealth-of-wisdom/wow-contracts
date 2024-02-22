@@ -109,7 +109,7 @@ contract Base_Test is Test, Constants, Events {
     function _stakeTokens() internal {
         vm.startPrank(alice);
         wowToken.approve(address(staking), BAND_4_PRICE);
-        staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_4);
+        staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0);
         vm.stopPrank();
     }
 

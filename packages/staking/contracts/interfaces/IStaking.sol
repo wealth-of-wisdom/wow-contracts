@@ -45,14 +45,12 @@ interface IStakingEvents {
         uint16 bandLevel,
         uint256 bandId,
         IStaking.StakingTypes stakingType,
-        bool isVested
+        bool areTokensVested
     );
 
-    event Unstaked(address user, uint256 bandId, bool isVested);
+    event Unstaked(address user, uint256 bandId, bool areTokensVested);
 
-    event BandUnstaked(address user, uint16 bandLevel, uint256 bandId);
-
-    event VestingUserRemoved(address vestingSaker);
+    event VestingUserDeleted(address user);
 
     event BandUpgaded(
         address user,
@@ -85,25 +83,26 @@ interface IStaking is IStakingEvents {
     //////////////////////////////////////////////////////////////////////////*/
 
     struct StakerBand {
-        uint256 stakingStartDate;
-        uint256 fixedShares;
-        address owner;
-        uint16 bandLevel;
-        StakingTypes stakingType;
+        address owner; // staker who owns the band
+        uint32 stakingStartDate; // timestamp for initial band creation
+        uint16 bandLevel; // band levels (1-9)
+        uint8 fixedMonths; // 0 for flexi, 1-24 for fix
+        StakingTypes stakingType; // FLEXI or FIX
+        bool areTokensVested; // true if tokens from which the band was created are vested
     }
 
     struct StakerReward {
-        uint256 unclaimedAmount;
-        uint256 claimedAmount;
+        uint256 unclaimedAmount; // amount of tokens that can be claimed
+        uint256 claimedAmount; // amount of tokens that have been claimed
     }
 
     struct BandLevel {
-        uint256 price;
-        uint16[] accessiblePools; // 1-9
+        uint256 price; // price in WOW tokens
+        uint16[] accessiblePools; // pool ids (1-9)
     }
 
     struct Pool {
-        uint48 distributionPercentage; // in 10**6 integrals, for divident calculation
+        uint48 distributionPercentage; // in 10^6 integrals, for divident calculation
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -148,19 +147,24 @@ interface IStaking is IStakingEvents {
         uint256[] memory rewards
     ) external;
 
-    function stake(StakingTypes stakingType, uint16 bandLevel) external;
+    function stake(
+        StakingTypes stakingType,
+        uint16 bandLevel,
+        uint8 month
+    ) external;
 
     function unstake(uint256 bandId) external;
 
     function stakeVested(
+        address user,
         StakingTypes stakingType,
         uint16 bandLevel,
-        address user
+        uint8 month
     ) external;
 
-    function unstakeVested(uint256 bandId, address user) external;
+    function unstakeVested(address user, uint256 bandId) external;
 
-    function deleteVestingUserData(address user) external;
+    function deleteVestingUser(address user) external;
 
     function upgradeBand(uint256 bandId, uint16 newBandLevel) external;
 
@@ -200,11 +204,12 @@ interface IStaking is IStakingEvents {
         external
         view
         returns (
-            uint256 stakingStartDate,
-            uint256 fixedShares,
             address owner,
+            uint32 stakingStartDate,
             uint16 bandLevel,
-            StakingTypes stakingType
+            uint8 fixedMonths,
+            StakingTypes stakingType,
+            bool areTokensVested
         );
 
     function getStakerReward(
