@@ -22,6 +22,7 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
   const { userArgs, multiChainProvider, storage, log } = context;
 
   const privateKey = await context.secrets.get("PRIVATE_KEY");
+  const sepoliaRpcUrl = await context.secrets.get("SEPOLIA_RPC_URL");
   const provider = multiChainProvider.default();
   const stakingAddress = userArgs.staking as string;
   const wallet = new Wallet(privateKey!, provider);
@@ -46,6 +47,7 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
     distributionTimestamp,
     stakingAddress,
     privateKey!,
+    sepoliaRpcUrl!,
   );
   return { canExec: false, message: `Event processed ${log.transactionHash}` };
 });

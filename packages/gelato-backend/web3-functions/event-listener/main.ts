@@ -38,8 +38,9 @@ export async function main(
   distributionDate: number,
   stakingAddress: string,
   privateKey: string,
+  sepoliaRpcUrl: string,
 ) {
-  const provider = getDefaultProvider(process.env.SEPOLIA_RPC_URL);
+  const provider = getDefaultProvider(sepoliaRpcUrl);
   const wallet = new Wallet(privateKey, provider);
   const staking = new Contract(stakingAddress, stakingABI, wallet);
 
