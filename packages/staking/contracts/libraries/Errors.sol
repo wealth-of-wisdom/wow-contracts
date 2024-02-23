@@ -32,6 +32,6 @@ library Errors {
     );
     error Staking__NoRewardsToClaim();
     error Staking__InvalidMonth(uint8 month);
-    error Staking__DifferentVestingStatus();
+    error Staking__BandFromVestedTokens(bool areTokensVested);
     error Staking__UnlockDateNotReached();
 }

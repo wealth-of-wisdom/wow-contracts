@@ -146,8 +146,9 @@ contract Staking is
     }
 
     modifier mOnlyBandFromVestedTokens(uint256 bandId, bool shouldBeVested) {
-        if (s_bands[bandId].areTokensVested != shouldBeVested) {
-            revert Errors.Staking__DifferentVestingStatus();
+        bool areTokensVested = s_bands[bandId].areTokensVested;
+        if (areTokensVested != shouldBeVested) {
+            revert Errors.Staking__BandFromVestedTokens(areTokensVested);
         }
         _;
     }

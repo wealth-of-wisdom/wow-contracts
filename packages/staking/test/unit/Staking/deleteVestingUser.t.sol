@@ -6,8 +6,8 @@ import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {Unit_Test} from "../Unit.t.sol";
 import {IStaking} from "../../../contracts/interfaces/IStaking.sol";
 
-contract Staking_DeleteVestingUserData_Unit_Test is Unit_Test {
-    function test_deleteVestingUserData_RevertIf_NotVestingContract() external {
+contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
+    function test_deleteVestingUser_RevertIf_NotVestingContract() external {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
@@ -16,10 +16,10 @@ contract Staking_DeleteVestingUserData_Unit_Test is Unit_Test {
             )
         );
         vm.prank(alice);
-        staking.deleteVestingUserData(alice);
+        staking.deleteVestingUser(alice);
     }
 
-    function test_deleteVestingUserData_DeletesStakerData()
+    function test_deleteVestingUser_DeletesStakerData()
         external
         grantVestingRole
         setBandLevelData
@@ -29,7 +29,7 @@ contract Staking_DeleteVestingUserData_Unit_Test is Unit_Test {
         vm.warp(currentTimestamp);
 
         vm.startPrank(alice);
-        staking.deleteVestingUserData(alice);
+        staking.deleteVestingUser(alice);
         (
             uint256 stakingStartDate,
             ,
@@ -51,7 +51,7 @@ contract Staking_DeleteVestingUserData_Unit_Test is Unit_Test {
         vm.stopPrank();
     }
 
-    function test_deleteVestingUserData_EmitsStaked()
+    function test_deleteVestingUser_EmitsStaked()
         external
         grantVestingRole
         setBandLevelData
@@ -60,7 +60,7 @@ contract Staking_DeleteVestingUserData_Unit_Test is Unit_Test {
         vm.startPrank(alice);
         vm.expectEmit(true, true, true, true);
         emit VestingUserDeleted(alice);
-        staking.deleteVestingUserData(alice);
+        staking.deleteVestingUser(alice);
         vm.stopPrank();
     }
 }

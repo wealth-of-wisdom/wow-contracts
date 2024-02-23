@@ -107,7 +107,16 @@ contract Base_Test is Test, Constants, Events {
         uint16 _bandLevel,
         uint8 _month
     ) {
-        _stakeTokens(alice, _stakingType, _bandLevel, _month);
+        _stakeTokens(alice, _stakingType, _bandLevel, _month, false);
+        _;
+    }
+
+    modifier stakeVestedTokens(
+        IStaking.StakingTypes _stakingType,
+        uint16 _bandLevel,
+        uint8 _month
+    ) {
+        _stakeTokens(alice, _stakingType, _bandLevel, _month, true);
         _;
     }
 
@@ -118,11 +127,6 @@ contract Base_Test is Test, Constants, Events {
 
     modifier setSharesInMonth() {
         _setSharesInMonth(SHARES_IN_MONTH);
-        _;
-    }
-
-    modifier grantVestingRole() {
-        _grantVestingRole();
         _;
     }
 
@@ -163,19 +167,20 @@ contract Base_Test is Test, Constants, Events {
         address _user,
         IStaking.StakingTypes _stakingType,
         uint16 _bandLevel,
-        uint8 _month
+        uint8 _month,
+        bool areTokensVested
     ) internal {
-        (uint256 price, ) = staking.getBandLevel(_bandLevel);
+        if (areTokensVested) {
+            vm.prank(address(vesting));
+            staking.stakeVested(_user, _stakingType, _bandLevel, _month);
+        } else {
+            (uint256 price, ) = staking.getBandLevel(_bandLevel);
 
-        vm.startPrank(_user);
-        wowToken.approve(address(staking), price);
-        staking.stake(_stakingType, _bandLevel, _month);
-        vm.stopPrank();
-    }
-
-    function _grantVestingRole() internal {
-        vm.prank(admin);
-        staking.grantRole(VESTING_ROLE, alice);
+            vm.startPrank(_user);
+            wowToken.approve(address(staking), price);
+            staking.stake(_stakingType, _bandLevel, _month);
+            vm.stopPrank();
+        }
     }
 
     function _createDistribution() internal {
