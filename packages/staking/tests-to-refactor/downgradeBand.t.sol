@@ -10,23 +10,23 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
     function test_downgradeBand_RevertIf_NotBandOwner()
         external
         setBandLevelData
-        stakeTokens
+        stakeTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         vm.expectRevert(
             abi.encodeWithSelector(
                 Errors.Staking__NotBandOwner.selector,
-                BAND_LEVEL_0,
+                BAND_ID_0,
                 bob
             )
         );
         vm.prank(bob);
-        staking.downgradeBand(BAND_LEVEL_0, BAND_LEVEL_1);
+        staking.downgradeBand(BAND_ID_0, BAND_LEVEL_1);
     }
 
     function test_downgradeBand_RevertIf_InvalidBandLevel()
         external
         setBandLevelData
-        stakeTokens
+        stakeTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         uint16 fauxBand = 100;
         vm.expectRevert(
@@ -36,7 +36,7 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
             )
         );
         vm.prank(alice);
-        staking.downgradeBand(BAND_LEVEL_0, fauxBand);
+        staking.downgradeBand(BAND_ID_0, fauxBand);
     }
 
     function test_downgradeBand_RevertIf_CantModifyFixTypeBand()
@@ -47,14 +47,14 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
         wowToken.approve(address(staking), BAND_4_PRICE);
         staking.stake(STAKING_TYPE_FIX, BAND_LEVEL_4);
         vm.expectRevert(Errors.Staking__CantModifyFixTypeBand.selector);
-        staking.downgradeBand(BAND_LEVEL_0, BAND_LEVEL_1);
+        staking.downgradeBand(BAND_ID_0, BAND_LEVEL_1);
         vm.stopPrank();
     }
 
     function test_downgradeBand_SetsBandData()
         external
         setBandLevelData
-        stakeTokens
+        stakeTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         (
             uint256 previousStakingStartTimestamp,
@@ -62,11 +62,11 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
             address previousOwner,
             uint16 previousBandLevel,
             IStaking.StakingTypes previousStakingType
-        ) = staking.getStakerBand(BAND_LEVEL_0);
+        ) = staking.getStakerBand(BAND_ID_0);
 
         vm.startPrank(alice);
         wowToken.approve(address(staking), BAND_7_PRICE - BAND_4_PRICE);
-        staking.downgradeBand(BAND_LEVEL_0, BAND_LEVEL_1);
+        staking.downgradeBand(BAND_ID_0, BAND_LEVEL_1);
         vm.stopPrank();
 
         (
@@ -75,7 +75,7 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
             address owner,
             uint16 bandLevel,
             IStaking.StakingTypes stakingType
-        ) = staking.getStakerBand(BAND_LEVEL_0);
+        ) = staking.getStakerBand(BAND_ID_0);
 
         assertEq(
             uint8(previousStakingType),
@@ -100,7 +100,7 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
     function test_downgradeBand_TransferTokens()
         external
         setBandLevelData
-        stakeTokens
+        stakeTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         uint256 aliceBalanceBeforeUpgrade = wowToken.balanceOf(alice);
         uint256 contractBalanceBeforeUpgrade = wowToken.balanceOf(
@@ -109,7 +109,7 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
         uint256 bandPriceDifference = BAND_4_PRICE - BAND_1_PRICE;
         vm.startPrank(alice);
         wowToken.approve(address(staking), bandPriceDifference);
-        staking.downgradeBand(BAND_LEVEL_0, BAND_LEVEL_1);
+        staking.downgradeBand(BAND_ID_0, BAND_LEVEL_1);
         vm.stopPrank();
 
         uint256 aliceBalanceAfterUpgrade = wowToken.balanceOf(alice);
@@ -132,15 +132,15 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
     function test_downgradeBand_EmitsBandUpgaded()
         external
         setBandLevelData
-        stakeTokens
+        stakeTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         uint256 bandPriceDifference = BAND_4_PRICE - BAND_1_PRICE;
         vm.startPrank(alice);
         wowToken.approve(address(staking), bandPriceDifference);
 
         vm.expectEmit(address(staking));
-        emit BandDowngraded(alice, BAND_LEVEL_0, BAND_LEVEL_4, BAND_LEVEL_1);
-        staking.downgradeBand(BAND_LEVEL_0, BAND_LEVEL_1);
+        emit BandDowngraded(alice, BAND_ID_0, BAND_LEVEL_4, BAND_LEVEL_1);
+        staking.downgradeBand(BAND_ID_0, BAND_LEVEL_1);
         vm.stopPrank();
     }
 }

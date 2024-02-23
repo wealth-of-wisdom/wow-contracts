@@ -21,6 +21,7 @@ contract Base_Test is Test, Constants, Events {
     address internal constant eve = address(0x6);
 
     address[] internal TEST_ACCOUNTS = [admin, alice, bob, carol, dan, eve];
+    address[] internal STAKERS = [alice, bob, carol, dan, eve];
 
     TokenMock internal usdtToken;
     TokenMock internal usdcToken;
@@ -93,8 +94,12 @@ contract Base_Test is Test, Constants, Events {
                                     HELPER MODIFIERS
     //////////////////////////////////////////////////////////////////////////*/
 
-    modifier stakeTokens() {
-        _stakeTokens();
+    modifier stakeTokens(
+        IStaking.StakingTypes _stakingType,
+        uint16 _bandLevel,
+        uint8 _month
+    ) {
+        _stakeTokens(alice, _stakingType, _bandLevel, _month);
         _;
     }
 
@@ -118,70 +123,46 @@ contract Base_Test is Test, Constants, Events {
         _;
     }
 
+    modifier distributeRewards() {
+        _distributeRewards();
+        _;
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                 HELPER FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
-    function _stakeTokens() internal {
-        vm.startPrank(alice);
-        wowToken.approve(address(staking), BAND_4_PRICE);
-        staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0);
-        vm.stopPrank();
-    }
-
     function _setBandLevelData() internal {
         vm.startPrank(admin);
-        staking.setBandLevel(
-            BAND_LEVEL_1,
-            BAND_1_PRICE,
-            BAND_1_ACCESSIBLE_POOLS
-        );
-        staking.setBandLevel(
-            BAND_LEVEL_2,
-            BAND_2_PRICE,
-            BAND_2_ACCESSIBLE_POOLS
-        );
-        staking.setBandLevel(
-            BAND_LEVEL_3,
-            BAND_3_PRICE,
-            BAND_3_ACCESSIBLE_POOLS
-        );
-        staking.setBandLevel(
-            BAND_LEVEL_4,
-            BAND_4_PRICE,
-            BAND_4_ACCESSIBLE_POOLS
-        );
-        staking.setBandLevel(
-            BAND_LEVEL_5,
-            BAND_5_PRICE,
-            BAND_5_ACCESSIBLE_POOLS
-        );
-        staking.setBandLevel(
-            BAND_LEVEL_6,
-            BAND_6_PRICE,
-            BAND_6_ACCESSIBLE_POOLS
-        );
-        staking.setBandLevel(
-            BAND_LEVEL_7,
-            BAND_7_PRICE,
-            BAND_7_ACCESSIBLE_POOLS
-        );
-        staking.setBandLevel(
-            BAND_LEVEL_8,
-            BAND_8_PRICE,
-            BAND_8_ACCESSIBLE_POOLS
-        );
-        staking.setBandLevel(
-            BAND_LEVEL_9,
-            BAND_9_PRICE,
-            BAND_9_ACCESSIBLE_POOLS
-        );
+
+        for (uint16 i; i < TOTAL_BAND_LEVELS; i++) {
+            staking.setBandLevel(
+                BAND_LEVELS[i],
+                BAND_PRICES[i],
+                BAND_ACCESSIBLE_POOLS[i]
+            );
+        }
+
         vm.stopPrank();
     }
 
     function _setSharesInMonth(uint48[] memory _sharesInMonth) internal {
         vm.prank(admin);
         staking.setSharesInMonth(_sharesInMonth);
+    }
+
+    function _stakeTokens(
+        address _user,
+        IStaking.StakingTypes _stakingType,
+        uint16 _bandLevel,
+        uint8 _month
+    ) internal {
+        (uint256 price, ) = staking.getBandLevel(_bandLevel);
+
+        vm.startPrank(_user);
+        wowToken.approve(address(staking), price);
+        staking.stake(_stakingType, _bandLevel, _month);
+        vm.stopPrank();
     }
 
     function _grantVestingRole() internal {
@@ -194,6 +175,11 @@ contract Base_Test is Test, Constants, Events {
         usdtToken.approve(address(staking), DISTRIBUTION_AMOUNT);
         staking.createDistribution(usdtToken, DISTRIBUTION_AMOUNT);
         vm.stopPrank();
+    }
+
+    function _distributeRewards() internal {
+        vm.prank(admin);
+        staking.distributeRewards(usdtToken, STAKERS, DISTRIBUTION_REWARDS);
     }
 
     /*//////////////////////////////////////////////////////////////////////////

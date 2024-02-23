@@ -10,7 +10,7 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
     function test_stakeVested_RevertIf_NotVestingContract()
         external
         setBandLevelData
-        stakeTokens
+        stakeTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -56,7 +56,7 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
             address owner,
             uint16 bandLevel,
             IStaking.StakingTypes stakingType
-        ) = staking.getStakerBand(BAND_LEVEL_0);
+        ) = staking.getStakerBand(BAND_ID_0);
 
         assertEq(
             uint8(stakingType),

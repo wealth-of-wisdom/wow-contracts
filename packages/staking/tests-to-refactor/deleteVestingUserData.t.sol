@@ -23,7 +23,7 @@ contract Staking_DeleteVestingUserData_Unit_Test is Unit_Test {
         external
         grantVestingRole
         setBandLevelData
-        stakeTokens
+        stakeTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         uint256 currentTimestamp = 100;
         vm.warp(currentTimestamp);
@@ -36,7 +36,7 @@ contract Staking_DeleteVestingUserData_Unit_Test is Unit_Test {
             address owner,
             uint16 bandLevel,
             IStaking.StakingTypes stakingType
-        ) = staking.getStakerBand(BAND_LEVEL_0);
+        ) = staking.getStakerBand(BAND_ID_0);
 
         assertEq(uint8(stakingType), 0, "Staking type not removed");
         assertEq(owner, address(0), "Owner not removed");
@@ -55,7 +55,7 @@ contract Staking_DeleteVestingUserData_Unit_Test is Unit_Test {
         external
         grantVestingRole
         setBandLevelData
-        stakeTokens
+        stakeTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         vm.startPrank(alice);
         vm.expectEmit(true, true, true, true);

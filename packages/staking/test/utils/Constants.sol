@@ -38,9 +38,16 @@ abstract contract Constants {
     uint256 internal constant INIT_ETH_BALANCE = type(uint128).max;
     uint256 internal constant INIT_TOKEN_BALANCE = type(uint128).max;
     uint256 internal constant INIT_TOKEN_SUPPLY = 100_000 ether;
+
     uint256 internal constant DISTRIBUTION_AMOUNT =
         1_000_000 * USD_DECIMALS_FOR_MULTIPLICATION;
-    uint16 internal constant TOTAL_4_BAND_LEVELS = 4;
+    uint256[] internal DISTRIBUTION_REWARDS = [
+        DISTRIBUTION_AMOUNT / 10, // 10%
+        (DISTRIBUTION_AMOUNT * 15) / 100, // 15%
+        DISTRIBUTION_AMOUNT / 5, // 20%
+        DISTRIBUTION_AMOUNT / 4, // 25%
+        (DISTRIBUTION_AMOUNT * 3) / 10 // 30%
+    ];
 
     /*//////////////////////////////////////////////////////////////////////////
                                     TESTING VARS
@@ -115,6 +122,18 @@ abstract contract Constants {
     uint16 internal constant POOL_ID_8 = 8;
     uint16 internal constant POOL_ID_9 = 9;
 
+    uint16[] internal POOL_IDS = [
+        POOL_ID_1,
+        POOL_ID_2,
+        POOL_ID_3,
+        POOL_ID_4,
+        POOL_ID_5,
+        POOL_ID_6,
+        POOL_ID_7,
+        POOL_ID_8,
+        POOL_ID_9
+    ];
+
     uint48 internal constant POOL_1_PERCENTAGE =
         (13 * PERCENTAGE_PRECISION) / 1000; // 1.3%
     uint48 internal constant POOL_2_PERCENTAGE =
@@ -134,11 +153,24 @@ abstract contract Constants {
     uint48 internal constant POOL_9_PERCENTAGE =
         (14 * PERCENTAGE_PRECISION) / 100; // 14%
 
+    uint48[] internal POOL_PERCENTAGES = [
+        POOL_1_PERCENTAGE,
+        POOL_2_PERCENTAGE,
+        POOL_3_PERCENTAGE,
+        POOL_4_PERCENTAGE,
+        POOL_5_PERCENTAGE,
+        POOL_6_PERCENTAGE,
+        POOL_7_PERCENTAGE,
+        POOL_8_PERCENTAGE,
+        POOL_9_PERCENTAGE
+    ];
+
     /*//////////////////////////////////////////////////////////////////////////
                               STAKING BAND LEVEL DATA
     //////////////////////////////////////////////////////////////////////////*/
 
-    uint16 internal constant BAND_LEVEL_0 = 0;
+    uint16 internal constant TOTAL_4_BAND_LEVELS = 4;
+
     uint16 internal constant BAND_LEVEL_1 = 1;
     uint16 internal constant BAND_LEVEL_2 = 2;
     uint16 internal constant BAND_LEVEL_3 = 3;
@@ -148,6 +180,18 @@ abstract contract Constants {
     uint16 internal constant BAND_LEVEL_7 = 7;
     uint16 internal constant BAND_LEVEL_8 = 8;
     uint16 internal constant BAND_LEVEL_9 = 9;
+
+    uint16[] internal BAND_LEVELS = [
+        BAND_LEVEL_1,
+        BAND_LEVEL_2,
+        BAND_LEVEL_3,
+        BAND_LEVEL_4,
+        BAND_LEVEL_5,
+        BAND_LEVEL_6,
+        BAND_LEVEL_7,
+        BAND_LEVEL_8,
+        BAND_LEVEL_9
+    ];
 
     uint256 internal constant BAND_1_PRICE =
         1_000 * WOW_DECIMALS_FOR_MULTIPLICATION;
@@ -168,6 +212,18 @@ abstract contract Constants {
     uint256 internal constant BAND_9_PRICE =
         2_000_000 * WOW_DECIMALS_FOR_MULTIPLICATION;
 
+    uint256[] internal BAND_PRICES = [
+        BAND_1_PRICE,
+        BAND_2_PRICE,
+        BAND_3_PRICE,
+        BAND_4_PRICE,
+        BAND_5_PRICE,
+        BAND_6_PRICE,
+        BAND_7_PRICE,
+        BAND_8_PRICE,
+        BAND_9_PRICE
+    ];
+
     uint16[] internal BAND_1_ACCESSIBLE_POOLS = [1];
     uint16[] internal BAND_2_ACCESSIBLE_POOLS = [1, 2];
     uint16[] internal BAND_3_ACCESSIBLE_POOLS = [1, 2, 3];
@@ -177,6 +233,18 @@ abstract contract Constants {
     uint16[] internal BAND_7_ACCESSIBLE_POOLS = [1, 2, 3, 4, 5, 6, 7];
     uint16[] internal BAND_8_ACCESSIBLE_POOLS = [1, 2, 3, 4, 5, 6, 7, 8];
     uint16[] internal BAND_9_ACCESSIBLE_POOLS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+    uint16[][] internal BAND_ACCESSIBLE_POOLS = [
+        BAND_1_ACCESSIBLE_POOLS,
+        BAND_2_ACCESSIBLE_POOLS,
+        BAND_3_ACCESSIBLE_POOLS,
+        BAND_4_ACCESSIBLE_POOLS,
+        BAND_5_ACCESSIBLE_POOLS,
+        BAND_6_ACCESSIBLE_POOLS,
+        BAND_7_ACCESSIBLE_POOLS,
+        BAND_8_ACCESSIBLE_POOLS,
+        BAND_9_ACCESSIBLE_POOLS
+    ];
 
     /*//////////////////////////////////////////////////////////////////////////
                               STAKING BAND DATA

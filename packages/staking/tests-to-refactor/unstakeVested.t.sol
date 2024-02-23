@@ -10,7 +10,7 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
     function test_unstakeVested_RevertIf_NotVestingContract()
         external
         setBandLevelData
-        stakeTokens
+        stakeTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -20,7 +20,7 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
             )
         );
         vm.prank(alice);
-        staking.unstakeVested(BAND_LEVEL_0, alice);
+        staking.unstakeVested(BAND_ID_0, alice);
     }
 
     function test_unstakeVested_RevertIf_NotBandOwner()
@@ -31,22 +31,22 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
         vm.expectRevert(
             abi.encodeWithSelector(
                 Errors.Staking__NotBandOwner.selector,
-                BAND_LEVEL_0,
+                BAND_ID_0,
                 alice
             )
         );
         vm.prank(alice);
-        staking.unstakeVested(BAND_LEVEL_0, alice);
+        staking.unstakeVested(BAND_ID_0, alice);
     }
 
     function test_unstakeVested_UnstakesTokensAndSetsData()
         external
         setBandLevelData
-        stakeTokens
+        stakeTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
         grantVestingRole
     {
         vm.startPrank(alice);
-        staking.unstakeVested(BAND_LEVEL_0, alice);
+        staking.unstakeVested(BAND_ID_0, alice);
 
         (
             uint256 stakingStartDate,
@@ -54,7 +54,7 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
             address owner,
             uint16 bandLevel,
             IStaking.StakingTypes stakingType
-        ) = staking.getStakerBand(BAND_LEVEL_0);
+        ) = staking.getStakerBand(BAND_ID_0);
 
         assertEq(uint8(stakingType), 0, "Staking type not removed");
         assertEq(owner, address(0), "Owner not removed");
@@ -73,7 +73,7 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
     function test_unstakeVested_UnstakesAndTransfersTokens()
         external
         setBandLevelData
-        stakeTokens
+        stakeTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
         grantVestingRole
     {
         vm.startPrank(alice);
@@ -82,7 +82,7 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
             address(staking)
         );
 
-        staking.unstakeVested(BAND_LEVEL_0, alice);
+        staking.unstakeVested(BAND_ID_0, alice);
 
         uint256 alicePostUnstakingBalance = wowToken.balanceOf(alice);
         uint256 stakingPostUnstakingBalance = wowToken.balanceOf(
@@ -105,13 +105,13 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
     function test_unstakeVested_EmitsUnstaked()
         external
         setBandLevelData
-        stakeTokens
+        stakeTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
         grantVestingRole
     {
         vm.startPrank(alice);
         vm.expectEmit(true, true, true, true);
-        emit Unstaked(alice, BAND_LEVEL_0, true);
-        staking.unstakeVested(BAND_LEVEL_0, alice);
+        emit Unstaked(alice, BAND_ID_0, true);
+        staking.unstakeVested(BAND_ID_0, alice);
         vm.stopPrank();
     }
 }

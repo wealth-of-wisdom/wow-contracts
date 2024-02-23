@@ -954,7 +954,7 @@ contract Staking is
 
             // Checks: fixed staking can only be unstaked after the fixed period
             if (monthsPassed < band.fixedMonths) {
-                revert Errors.Staking__FixedStakingNotUnlocked();
+                revert Errors.Staking__UnlockDateNotReached();
             }
         }
     }

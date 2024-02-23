@@ -6,15 +6,6 @@ import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {Unit_Test} from "../Unit.t.sol";
 
 contract Staking_DistributeRewards_Unit_Test is Unit_Test {
-    address[] internal stakers = [alice, bob, carol, dan, eve];
-    uint256[] internal rewards = [
-        DISTRIBUTION_AMOUNT / 10, // 10%
-        (DISTRIBUTION_AMOUNT * 15) / 100, // 15%
-        DISTRIBUTION_AMOUNT / 5, // 20%
-        DISTRIBUTION_AMOUNT / 4, // 25%
-        (DISTRIBUTION_AMOUNT * 3) / 10 // 30%
-    ];
-
     function test_distributeRewards_RevertIf_CallerNotDefaultAdmin() external {
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -24,7 +15,7 @@ contract Staking_DistributeRewards_Unit_Test is Unit_Test {
             )
         );
         vm.prank(alice);
-        staking.distributeRewards(usdtToken, stakers, rewards);
+        staking.distributeRewards(usdtToken, STAKERS, DISTRIBUTION_REWARDS);
     }
 
     function test_distributeRewards_RevertIf_TokenForDistributionNotSupported()
@@ -32,14 +23,14 @@ contract Staking_DistributeRewards_Unit_Test is Unit_Test {
     {
         vm.expectRevert(Errors.Staking__NonExistantToken.selector);
         vm.prank(admin);
-        staking.distributeRewards(wowToken, stakers, rewards);
+        staking.distributeRewards(wowToken, STAKERS, DISTRIBUTION_REWARDS);
     }
 
     function test_distributeRewards_RevertIf_StakersAndRewardsLengthsMismatch()
         external
     {
         // Remove one reward amount
-        rewards.pop();
+        DISTRIBUTION_REWARDS.pop();
 
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -49,7 +40,7 @@ contract Staking_DistributeRewards_Unit_Test is Unit_Test {
             )
         );
         vm.prank(admin);
-        staking.distributeRewards(usdtToken, stakers, rewards);
+        staking.distributeRewards(usdtToken, STAKERS, DISTRIBUTION_REWARDS);
     }
 
     function test_distributeRewards_IncreasesUnclaimedRewardsForFirstTime()
@@ -69,7 +60,7 @@ contract Staking_DistributeRewards_Unit_Test is Unit_Test {
         (uint256 eveRewardsBefore, ) = staking.getStakerReward(eve, usdtToken);
 
         vm.prank(admin);
-        staking.distributeRewards(usdtToken, stakers, rewards);
+        staking.distributeRewards(usdtToken, STAKERS, DISTRIBUTION_REWARDS);
 
         (uint256 aliceRewardsAfter, ) = staking.getStakerReward(
             alice,
@@ -84,29 +75,29 @@ contract Staking_DistributeRewards_Unit_Test is Unit_Test {
         (uint256 eveRewardsAfter, ) = staking.getStakerReward(eve, usdtToken);
 
         assertEq(
-            aliceRewardsBefore + rewards[0],
+            aliceRewardsBefore + DISTRIBUTION_REWARDS[0],
             aliceRewardsAfter,
-            "Alice rewards not increased"
+            "Alice DISTRIBUTION_REWARDS not increased"
         );
         assertEq(
-            bobRewardsBefore + rewards[1],
+            bobRewardsBefore + DISTRIBUTION_REWARDS[1],
             bobRewardsAfter,
-            "Bob rewards not increased"
+            "Bob DISTRIBUTION_REWARDS not increased"
         );
         assertEq(
-            carolRewardsBefore + rewards[2],
+            carolRewardsBefore + DISTRIBUTION_REWARDS[2],
             carolRewardsAfter,
-            "Carol rewards not increased"
+            "Carol DISTRIBUTION_REWARDS not increased"
         );
         assertEq(
-            danRewardsBefore + rewards[3],
+            danRewardsBefore + DISTRIBUTION_REWARDS[3],
             danRewardsAfter,
-            "Dan rewards not increased"
+            "Dan DISTRIBUTION_REWARDS not increased"
         );
         assertEq(
-            eveRewardsBefore + rewards[4],
+            eveRewardsBefore + DISTRIBUTION_REWARDS[4],
             eveRewardsAfter,
-            "Eve rewards not increased"
+            "Eve DISTRIBUTION_REWARDS not increased"
         );
     }
 
@@ -128,8 +119,8 @@ contract Staking_DistributeRewards_Unit_Test is Unit_Test {
         (uint256 eveRewardsBefore, ) = staking.getStakerReward(eve, usdtToken);
 
         vm.startPrank(admin);
-        staking.distributeRewards(usdtToken, stakers, rewards);
-        staking.distributeRewards(usdtToken, stakers, rewards);
+        staking.distributeRewards(usdtToken, STAKERS, DISTRIBUTION_REWARDS);
+        staking.distributeRewards(usdtToken, STAKERS, DISTRIBUTION_REWARDS);
         vm.stopPrank();
 
         (uint256 aliceRewardsAfter, ) = staking.getStakerReward(
@@ -145,29 +136,29 @@ contract Staking_DistributeRewards_Unit_Test is Unit_Test {
         (uint256 eveRewardsAfter, ) = staking.getStakerReward(eve, usdtToken);
 
         assertEq(
-            aliceRewardsBefore + rewards[0] * 2,
+            aliceRewardsBefore + DISTRIBUTION_REWARDS[0] * 2,
             aliceRewardsAfter,
-            "Alice rewards not increased"
+            "Alice DISTRIBUTION_REWARDS not increased"
         );
         assertEq(
-            bobRewardsBefore + rewards[1] * 2,
+            bobRewardsBefore + DISTRIBUTION_REWARDS[1] * 2,
             bobRewardsAfter,
-            "Bob rewards not increased"
+            "Bob DISTRIBUTION_REWARDS not increased"
         );
         assertEq(
-            carolRewardsBefore + rewards[2] * 2,
+            carolRewardsBefore + DISTRIBUTION_REWARDS[2] * 2,
             carolRewardsAfter,
-            "Carol rewards not increased"
+            "Carol DISTRIBUTION_REWARDS not increased"
         );
         assertEq(
-            danRewardsBefore + rewards[3] * 2,
+            danRewardsBefore + DISTRIBUTION_REWARDS[3] * 2,
             danRewardsAfter,
-            "Dan rewards not increased"
+            "Dan DISTRIBUTION_REWARDS not increased"
         );
         assertEq(
-            eveRewardsBefore + rewards[4] * 2,
+            eveRewardsBefore + DISTRIBUTION_REWARDS[4] * 2,
             eveRewardsAfter,
-            "Eve rewards not increased"
+            "Eve DISTRIBUTION_REWARDS not increased"
         );
     }
 
@@ -179,6 +170,6 @@ contract Staking_DistributeRewards_Unit_Test is Unit_Test {
         emit RewardsDistributed(usdtToken);
 
         vm.prank(admin);
-        staking.distributeRewards(usdtToken, stakers, rewards);
+        staking.distributeRewards(usdtToken, STAKERS, DISTRIBUTION_REWARDS);
     }
 }
