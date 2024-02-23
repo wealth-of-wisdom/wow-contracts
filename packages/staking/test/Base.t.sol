@@ -4,6 +4,7 @@ pragma solidity 0.8.20;
 import {Test} from "forge-std/Test.sol";
 import {IStaking} from "../contracts/interfaces/IStaking.sol";
 import {StakingMock} from "./mocks/StakingMock.sol";
+import {VestingMock} from "./mocks/VestingMock.sol";
 import {TokenMock} from "./mocks/TokenMock.sol";
 import {Constants} from "./utils/Constants.sol";
 import {Events} from "./utils/Events.sol";
@@ -26,6 +27,7 @@ contract Base_Test is Test, Constants, Events {
     TokenMock internal usdtToken;
     TokenMock internal usdcToken;
     TokenMock internal wowToken;
+    VestingMock internal vesting;
     StakingMock internal staking;
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -68,12 +70,18 @@ contract Base_Test is Test, Constants, Events {
             INIT_TOKEN_SUPPLY
         );
 
+        // VESTING CONTRACT
+        vesting = new VestingMock();
+        deal(address(vesting), INIT_ETH_BALANCE);
+        wowToken.mint(address(vesting), INIT_TOKEN_BALANCE);
+
         // STAKING CONTRACT
         staking = new StakingMock();
         staking.initialize(
             usdtToken,
             usdcToken,
             wowToken,
+            address(vesting),
             TOTAL_POOLS,
             TOTAL_BAND_LEVELS
         );

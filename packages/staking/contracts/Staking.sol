@@ -170,21 +170,37 @@ contract Staking is
                                   INITIALIZER
     //////////////////////////////////////////////////////////////////////////*/
 
+    /**
+     * @notice  Initializes the contract with the required data
+     * @param   usdtToken  USDT token
+     * @param   usdcToken  USDC token
+     * @param   wowToken  WOW token
+     * @param   vesting  address of the vesting contract (not contract as we don't call any functions from it)
+     * @param   totalPools  total amount of pools used for staking
+     */
     function initialize(
         IERC20 usdtToken,
         IERC20 usdcToken,
         IERC20 wowToken,
+        address vesting,
         uint16 totalPools,
         uint16 totalBandLevels
     )
         external
         initializer
-        mAddressNotZero(address(usdtToken))
-        mAddressNotZero(address(usdcToken))
-        mAddressNotZero(address(wowToken))
         mAmountNotZero(totalPools)
         mAmountNotZero(totalBandLevels)
     {
+        // Checks: Address cannot be zero (not using modifers to avoid stack too deep error)
+        if (
+            address(usdtToken) == address(0) ||
+            address(usdcToken) == address(0) ||
+            address(wowToken) == address(0) ||
+            vesting == address(0)
+        ) {
+            revert Errors.Staking__ZeroAddress();
+        }
+
         __AccessControl_init();
         __UUPSUpgradeable_init();
 
@@ -192,6 +208,7 @@ contract Staking is
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(GELATO_EXECUTOR_ROLE, msg.sender);
         _grantRole(UPGRADER_ROLE, msg.sender);
+        _grantRole(VESTING_ROLE, vesting);
         // @todo grant GELATO_EXECUTOR_ROLE for gelato
 
         // Effects: set the storage

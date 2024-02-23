@@ -113,6 +113,7 @@ interface IStaking is IStakingEvents {
         IERC20 usdtToken,
         IERC20 usdcToken,
         IERC20 wowToken,
+        address vesting,
         uint16 totalPools,
         uint16 totalBandLevels
     ) external;

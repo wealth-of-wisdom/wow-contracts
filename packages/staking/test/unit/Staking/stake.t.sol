@@ -100,7 +100,7 @@ contract Staking_Stake_Unit_Test is Unit_Test {
         assertEq(bandLevel, BAND_LEVEL_2, "BandLevel Level not set");
         assertEqStakingType(stakingType, STAKING_TYPE_FLEXI);
         assertEq(fixedMonths, MONTH_0, "Fixed months not set");
-        assertEq(areTokensVested, false, "Tokens not vested");
+        assertFalse(areTokensVested, "Tokens not vested");
     }
 
     function test_stake_FlexiType_Adds1BandToAllStakerBands()
@@ -360,7 +360,7 @@ contract Staking_Stake_Unit_Test is Unit_Test {
         assertEq(bandLevel, BAND_LEVEL_2, "BandLevel Level not set");
         assertEqStakingType(stakingType, STAKING_TYPE_FIX);
         assertEq(fixedMonths, MONTH_12, "Fixed months not set");
-        assertEq(areTokensVested, false, "Tokens not vested");
+        assertFalse(areTokensVested, "Tokens not vested");
     }
 
     function test_stake_FixType_Adds1BandToAllStakerBands()
