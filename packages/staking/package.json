@@ -8,8 +8,8 @@
         "build": "forge build",
         "coverage": "forge coverage",
         "coverage:lcov": "forge coverage --report lcov && genhtml -o report --branch-coverage lcov.info",
-        "deploy:staking:ethereum": "npx hardhat run scripts/deploystaking.js --network mainnet",
-        "deploy:staking:sepolia": "npx hardhat run scripts/deploystaking.js --network sepolia",
+        "deploy:staking:ethereum": "npx hardhat run scripts/deployStaking.js --network mainnet",
+        "deploy:staking:sepolia": "npx hardhat run scripts/deployStaking.js --network sepolia",
         "verify:ethereum": "npx hardhat verify --network mainnet",
         "verify:sepolia": "npx hardhat verify --network sepolia"
     },
