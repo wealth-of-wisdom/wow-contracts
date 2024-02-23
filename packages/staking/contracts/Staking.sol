@@ -74,6 +74,10 @@ contract Staking is
     // Token to be staked
     IERC20 internal s_wowToken;
 
+    // Deleted users will lose all unclaimed rewards,
+    // so we need a collector for tokens to make sure they are not lost
+    address internal s_rewardsCollector;
+
     // Next unique band id to be used
     uint256 internal s_nextBandId;
 
@@ -216,6 +220,7 @@ contract Staking is
         s_usdtToken = usdtToken;
         s_usdcToken = usdcToken;
         s_wowToken = wowToken;
+        s_rewardsCollector = msg.sender;
         s_totalPools = totalPools;
         s_totalBandLevels = totalBandLevels;
     }
@@ -330,6 +335,18 @@ contract Staking is
         s_wowToken = token;
 
         emit WowTokenSet(token);
+    }
+
+    /**
+     * @notice  Sets the address of the rewards collector who will receive all deleted users tokens
+     * @param   rewardsCollector  address of the rewards collector
+     */
+    function setRewardsCollector(
+        address rewardsCollector
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) mAddressNotZero(rewardsCollector) {
+        s_rewardsCollector = rewardsCollector;
+
+        emit RewardsCollectorSet(rewardsCollector);
     }
 
     /**
@@ -585,11 +602,37 @@ contract Staking is
 
     /**
      * @notice  Delete all user band data if beneficiary removed from vesting
+     * @notice  All unlclaimed USDT/USDC rewards will be transferred to the rewards collector
      * @param   user  staker address
      */
     function deleteVestingUser(
         address user
     ) external onlyRole(VESTING_ROLE) mAddressNotZero(user) {
+        // Cache to minimize storage reads
+        IERC20 usdtToken = s_usdtToken;
+        IERC20 usdcToken = s_usdcToken;
+        address rewardsCollector = s_rewardsCollector;
+
+        bytes32 usdtUserHash = _getStakerAndTokenHash(user, usdtToken);
+        bytes32 usdcUserHash = _getStakerAndTokenHash(user, usdcToken);
+
+        uint256 usdtUnclaimedRewards = s_stakerRewards[usdtUserHash]
+            .unclaimedAmount;
+        uint256 usdcUnclaimedRewards = s_stakerRewards[usdcUserHash]
+            .unclaimedAmount;
+
+        if (usdtUnclaimedRewards > 0) {
+            // Effects: transfer all unclaimed rewards to the receiver
+            s_stakerRewards[_getStakerAndTokenHash(rewardsCollector, usdtToken)]
+                .unclaimedAmount = usdtUnclaimedRewards;
+        }
+
+        if (usdcUnclaimedRewards > 0) {
+            // Effects: transfer all unclaimed rewards to the receiver
+            s_stakerRewards[_getStakerAndTokenHash(rewardsCollector, usdcToken)]
+                .unclaimedAmount = usdcUnclaimedRewards;
+        }
+
         uint256[] memory bandIds = s_stakerBands[user];
         uint256 bandsAmount = bandIds.length;
 
@@ -602,11 +645,17 @@ contract Staking is
         // Effects: delete user from the staker bands map
         delete s_stakerBands[user];
 
+        // Effects: delete users all claimed and unclaimed rewards for USDT
+        delete s_stakerRewards[usdtUserHash];
+
+        // Effects: delete users all claimed and unclaimed rewards for USDC
+        delete s_stakerRewards[usdcUserHash];
+
         // Effects: delete user from the map
         s_users.remove(user);
 
         // Effects: emit event
-        emit VestingUserDeleted(msg.sender);
+        emit VestingUserDeleted(user);
     }
 
     /**
@@ -716,6 +765,14 @@ contract Staking is
      */
     function getTokenWOW() external view returns (IERC20) {
         return s_wowToken;
+    }
+
+    /**
+     * @notice Returns the address of the rewards collector
+     * @return address Rewards collector address
+     */
+    function getRewardsCollector() external view returns (address) {
+        return s_rewardsCollector;
     }
 
     /**

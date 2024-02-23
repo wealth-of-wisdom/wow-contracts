@@ -7,7 +7,9 @@ import {Unit_Test} from "../Unit.t.sol";
 import {IStaking} from "../../../contracts/interfaces/IStaking.sol";
 
 contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
-    function test_deleteVestingUser_RevertIf_NotVestingContract() external {
+    function test_deleteVestingUser_RevertIf_CallerNotVestingContract()
+        external
+    {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
@@ -19,48 +21,113 @@ contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
         staking.deleteVestingUser(alice);
     }
 
-    function test_deleteVestingUser_DeletesStakerData()
-        external
-        grantVestingRole
-        setBandLevelData
-        stakeTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
-    {
-        uint256 currentTimestamp = 100;
-        vm.warp(currentTimestamp);
-
-        vm.startPrank(alice);
-        staking.deleteVestingUser(alice);
-        (
-            uint256 stakingStartDate,
-            ,
-            address owner,
-            uint16 bandLevel,
-            IStaking.StakingTypes stakingType
-        ) = staking.getStakerBand(BAND_ID_0);
-
-        assertEq(uint8(stakingType), 0, "Staking type not removed");
-        assertEq(owner, address(0), "Owner not removed");
-        assertEq(bandLevel, 0, "BandLevel Level not removed");
-        assertEq(stakingStartDate, 0, "Timestamp not removed");
-
-        assertEq(
-            staking.getStakerBandIds(alice),
-            EMPTY_STAKER_BAND_IDS,
-            "BandLevel Id's not removed"
-        );
-        vm.stopPrank();
+    function test_deleteVestingUser_RevertIf_UserIsZeroAddress() external {
+        vm.expectRevert(Errors.Staking__ZeroAddress.selector);
+        vm.prank(address(vesting));
+        staking.deleteVestingUser(ZERO_ADDRESS);
     }
 
-    function test_deleteVestingUser_EmitsStaked()
+    /*//////////////////////////////////////////////////////////////////////////
+                                    FLEXI STAKING
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function test_deleteVestingUser_FlexiType_Deletes1StakerBandData()
         external
-        grantVestingRole
         setBandLevelData
-        stakeTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+        setSharesInMonth
+        stakeVestedTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
-        vm.startPrank(alice);
-        vm.expectEmit(true, true, true, true);
-        emit VestingUserDeleted(alice);
+        vm.prank(address(vesting));
         staking.deleteVestingUser(alice);
-        vm.stopPrank();
+
+        (
+            address owner,
+            uint32 stakingStartDate,
+            uint16 bandLevel,
+            uint8 fixedMonths,
+            IStaking.StakingTypes stakingType,
+            bool areTokensVested
+        ) = staking.getStakerBand(BAND_ID_0);
+
+        assertEq(owner, ZERO_ADDRESS, "Owner not removed");
+        assertEq(stakingStartDate, 0, "Timestamp not removed");
+        assertEq(uint8(stakingType), 0, "Staking type not removed");
+        assertEq(bandLevel, 0, "BandLevel Level not removed");
+        assertEq(fixedMonths, 0, "Fixed months not removed");
+        assertEq(areTokensVested, false, "Vesting status not removed");
+    }
+
+    function test_deleteVestingUser_FlexiType_Deletes3StakerBandsData()
+        external
+        setBandLevelData
+        setSharesInMonth
+        stakeVestedTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0)
+        stakeVestedTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_5, MONTH_0)
+        stakeVestedTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_9, MONTH_0)
+    {
+        vm.prank(address(vesting));
+        staking.deleteVestingUser(alice);
+
+        (
+            address owner,
+            uint32 stakingStartDate,
+            uint16 bandLevel,
+            uint8 fixedMonths,
+            IStaking.StakingTypes stakingType,
+            bool areTokensVested
+        ) = staking.getStakerBand(BAND_ID_0);
+
+        assertEq(owner, ZERO_ADDRESS, "Owner not removed");
+        assertEq(stakingStartDate, 0, "Timestamp not removed");
+        assertEq(uint8(stakingType), 0, "Staking type not removed");
+        assertEq(bandLevel, 0, "BandLevel Level not removed");
+        assertEq(fixedMonths, 0, "Fixed months not removed");
+        assertEq(areTokensVested, false, "Vesting status not removed");
+
+        (
+            owner,
+            stakingStartDate,
+            bandLevel,
+            fixedMonths,
+            stakingType,
+            areTokensVested
+        ) = staking.getStakerBand(BAND_ID_1);
+
+        assertEq(owner, ZERO_ADDRESS, "Owner not removed");
+        assertEq(stakingStartDate, 0, "Timestamp not removed");
+        assertEq(uint8(stakingType), 0, "Staking type not removed");
+        assertEq(bandLevel, 0, "BandLevel Level not removed");
+        assertEq(fixedMonths, 0, "Fixed months not removed");
+        assertEq(areTokensVested, false, "Vesting status not removed");
+
+        (
+            owner,
+            stakingStartDate,
+            bandLevel,
+            fixedMonths,
+            stakingType,
+            areTokensVested
+        ) = staking.getStakerBand(BAND_ID_2);
+
+        assertEq(owner, ZERO_ADDRESS, "Owner not removed");
+        assertEq(stakingStartDate, 0, "Timestamp not removed");
+        assertEq(uint8(stakingType), 0, "Staking type not removed");
+        assertEq(bandLevel, 0, "BandLevel Level not removed");
+        assertEq(fixedMonths, 0, "Fixed months not removed");
+        assertEq(areTokensVested, false, "Vesting status not removed");
+    }
+
+    // @todo continue from here
+
+    function test_deleteVestingUser_FlexiType_EmitsVestingUserDeletedEvent()
+        external
+        setBandLevelData
+        stakeVestedTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+    {
+        vm.expectEmit(address(staking));
+        emit VestingUserDeleted(alice);
+
+        vm.prank(address(vesting));
+        staking.deleteVestingUser(alice);
     }
 }
