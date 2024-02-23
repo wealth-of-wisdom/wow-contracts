@@ -26,7 +26,7 @@ library Errors {
     error Staking__ZeroAmount();
     error Staking__ZeroAddress();
     error Staking__ZeroPoolShares();
-    error Staking__InvalidArrayLengths(
+    error Staking__MismatchedArrayLengths(
         uint256 stakersLength,
         uint256 rewardsLength
     );

@@ -2,6 +2,7 @@
 pragma solidity 0.8.20;
 
 import {Test} from "forge-std/Test.sol";
+import {IStaking} from "../contracts/interfaces/IStaking.sol";
 import {StakingMock} from "./mocks/StakingMock.sol";
 import {TokenMock} from "./mocks/TokenMock.sol";
 import {Constants} from "./utils/Constants.sol";
@@ -91,6 +92,7 @@ contract Base_Test is Test, Constants, Events {
     /*//////////////////////////////////////////////////////////////////////////
                                     HELPER MODIFIERS
     //////////////////////////////////////////////////////////////////////////*/
+
     modifier stakeTokens() {
         _stakeTokens();
         _;
@@ -101,10 +103,24 @@ contract Base_Test is Test, Constants, Events {
         _;
     }
 
+    modifier setSharesInMonth() {
+        _setSharesInMonth(SHARES_IN_MONTH);
+        _;
+    }
+
     modifier grantVestingRole() {
         _grantVestingRole();
         _;
     }
+
+    modifier createDistribution() {
+        _createDistribution();
+        _;
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                HELPER FUNCTIONS
+    //////////////////////////////////////////////////////////////////////////*/
 
     function _stakeTokens() internal {
         vm.startPrank(alice);
@@ -163,12 +179,35 @@ contract Base_Test is Test, Constants, Events {
         vm.stopPrank();
     }
 
+    function _setSharesInMonth(uint48[] memory _sharesInMonth) internal {
+        vm.prank(admin);
+        staking.setSharesInMonth(_sharesInMonth);
+    }
+
     function _grantVestingRole() internal {
         vm.prank(admin);
-        staking.grantRole(DEFAULT_VESTING_ROLE, alice);
+        staking.grantRole(VESTING_ROLE, alice);
+    }
+
+    function _createDistribution() internal {
+        vm.startPrank(admin);
+        usdtToken.approve(address(staking), DISTRIBUTION_AMOUNT);
+        staking.createDistribution(usdtToken, DISTRIBUTION_AMOUNT);
+        vm.stopPrank();
     }
 
     /*//////////////////////////////////////////////////////////////////////////
-                                HELPER FUNCTIONS
+                                    ASSERTIONS
     //////////////////////////////////////////////////////////////////////////*/
+
+    function assertEqStakingType(
+        IStaking.StakingTypes stakingType,
+        IStaking.StakingTypes expectedStakingType
+    ) internal {
+        assertEq(
+            uint8(stakingType),
+            uint8(expectedStakingType),
+            "Invalid staking type"
+        );
+    }
 }

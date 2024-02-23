@@ -16,7 +16,7 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
                 alice,
-                DEFAULT_VESTING_ROLE
+                VESTING_ROLE
             )
         );
         vm.prank(alice);

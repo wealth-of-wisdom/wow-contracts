@@ -159,13 +159,6 @@ contract Staking is
         _;
     }
 
-    modifier mStakingTypeExists(StakingTypes stakingType) {
-        if (
-            StakingTypes.FIX != stakingType && StakingTypes.FLEXI != stakingType
-        ) revert Errors.Staking__InvalidStakingType();
-        _;
-    }
-
     modifier mTokenExists(IERC20 token) {
         if (token != s_usdtToken && token != s_usdcToken) {
             revert Errors.Staking__NonExistantToken();
@@ -199,6 +192,7 @@ contract Staking is
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(GELATO_EXECUTOR_ROLE, msg.sender);
         _grantRole(UPGRADER_ROLE, msg.sender);
+        // @todo grant GELATO_EXECUTOR_ROLE for gelato
 
         // Effects: set the storage
         s_usdtToken = usdtToken;
@@ -433,7 +427,7 @@ contract Staking is
 
         // Checks: stakers and rewards arrays must be the same length
         if (stakersLength != rewardsLength) {
-            revert Errors.Staking__InvalidArrayLengths(
+            revert Errors.Staking__MismatchedArrayLengths(
                 stakersLength,
                 rewardsLength
             );
@@ -464,12 +458,7 @@ contract Staking is
         StakingTypes stakingType,
         uint16 bandLevel,
         uint8 month
-    )
-        external
-        mStakingTypeExists(stakingType)
-        mBandLevelExists(bandLevel)
-        mValidMonth(stakingType, month)
-    {
+    ) external mBandLevelExists(bandLevel) mValidMonth(stakingType, month) {
         // Effects: Create a new band and add it to the user
         uint256 bandId = _stakeBand(
             msg.sender,
@@ -536,7 +525,6 @@ contract Staking is
         external
         onlyRole(VESTING_ROLE)
         mAddressNotZero(user)
-        mStakingTypeExists(stakingType)
         mBandLevelExists(bandLevel)
         mValidMonth(stakingType, month)
     {

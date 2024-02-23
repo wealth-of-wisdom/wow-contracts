@@ -15,9 +15,10 @@ abstract contract Constants {
     //////////////////////////////////////////////////////////////////////////*/
 
     bytes32 internal constant DEFAULT_ADMIN_ROLE = 0x00;
-    bytes32 internal constant DEFAULT_VESTING_ROLE = keccak256("VESTING_ROLE");
-    bytes32 internal constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 internal constant VESTING_ROLE = keccak256("VESTING_ROLE");
     bytes32 internal constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+    bytes32 internal constant GELATO_EXECUTOR_ROLE =
+        keccak256("GELATO_EXECUTOR_ROLE");
 
     /*//////////////////////////////////////////////////////////////////////////
                                     DECIMALS
@@ -25,8 +26,10 @@ abstract contract Constants {
 
     uint8 internal constant USD_DECIMALS = 6;
     uint8 internal constant WOW_DECIMALS = 18;
-    uint128 internal constant USD_DECIMALS_FOR_MULTIPLICATION = 1e6;
-    uint128 internal constant WOW_DECIMALS_FOR_MULTIPLICATION = 1e18;
+    uint128 internal constant USD_DECIMALS_FOR_MULTIPLICATION =
+        uint128(10 ** USD_DECIMALS);
+    uint128 internal constant WOW_DECIMALS_FOR_MULTIPLICATION =
+        uint128(10 ** WOW_DECIMALS);
 
     /*//////////////////////////////////////////////////////////////////////////
                                     AMOUNTS
@@ -35,7 +38,7 @@ abstract contract Constants {
     uint256 internal constant INIT_ETH_BALANCE = type(uint128).max;
     uint256 internal constant INIT_TOKEN_BALANCE = type(uint128).max;
     uint256 internal constant INIT_TOKEN_SUPPLY = 100_000 ether;
-    uint256 internal constant DEFAULT_DISTRIBUTION_AMOUNT =
+    uint256 internal constant DISTRIBUTION_AMOUNT =
         1_000_000 * USD_DECIMALS_FOR_MULTIPLICATION;
     uint16 internal constant TOTAL_4_BAND_LEVELS = 4;
 
@@ -62,8 +65,15 @@ abstract contract Constants {
     uint16 internal constant TOTAL_POOLS = 9;
     uint16 internal constant TOTAL_BAND_LEVELS = 9;
     uint48 internal constant PERCENTAGE_PRECISION = 1e8;
-    uint48 internal constant SHARE = 1e6;
+
     uint48 internal constant MONTH = 30 days;
+    uint8 internal constant MONTH_0 = 0;
+    uint8 internal constant MONTH_1 = 1;
+    uint8 internal constant MONTH_12 = 12;
+    uint8 internal constant MONTH_24 = 24;
+    uint8 internal constant MONTH_25 = 25;
+
+    uint48 internal constant SHARE = 1e6;
     uint48[] internal SHARES_IN_MONTH = [
         SHARE,
         SHARE * 2,
@@ -106,13 +116,13 @@ abstract contract Constants {
     uint16 internal constant POOL_ID_9 = 9;
 
     uint48 internal constant POOL_1_PERCENTAGE =
-        (13 * PERCENTAGE_PRECISION) / 100; // 1.3%
+        (13 * PERCENTAGE_PRECISION) / 1000; // 1.3%
     uint48 internal constant POOL_2_PERCENTAGE =
-        (17 * PERCENTAGE_PRECISION) / 100; // 1.7%
+        (17 * PERCENTAGE_PRECISION) / 1000; // 1.7%
     uint48 internal constant POOL_3_PERCENTAGE =
-        (34 * PERCENTAGE_PRECISION) / 100; // 3.4%
+        (34 * PERCENTAGE_PRECISION) / 1000; // 3.4%
     uint48 internal constant POOL_4_PERCENTAGE =
-        (64 * PERCENTAGE_PRECISION) / 100; // 6.4%
+        (64 * PERCENTAGE_PRECISION) / 1000; // 6.4%
     uint48 internal constant POOL_5_PERCENTAGE =
         (156 * PERCENTAGE_PRECISION) / 1000; // 15.6%
     uint48 internal constant POOL_6_PERCENTAGE =
@@ -125,7 +135,7 @@ abstract contract Constants {
         (14 * PERCENTAGE_PRECISION) / 100; // 14%
 
     /*//////////////////////////////////////////////////////////////////////////
-                                STAKING BAND DATA
+                              STAKING BAND LEVEL DATA
     //////////////////////////////////////////////////////////////////////////*/
 
     uint16 internal constant BAND_LEVEL_0 = 0;
@@ -167,4 +177,14 @@ abstract contract Constants {
     uint16[] internal BAND_7_ACCESSIBLE_POOLS = [1, 2, 3, 4, 5, 6, 7];
     uint16[] internal BAND_8_ACCESSIBLE_POOLS = [1, 2, 3, 4, 5, 6, 7, 8];
     uint16[] internal BAND_9_ACCESSIBLE_POOLS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+    /*//////////////////////////////////////////////////////////////////////////
+                              STAKING BAND DATA
+    //////////////////////////////////////////////////////////////////////////*/
+
+    uint256 internal constant BAND_ID_0 = 0;
+    uint256 internal constant BAND_ID_1 = 1;
+    uint256 internal constant BAND_ID_2 = 2;
+    uint256 internal constant BAND_ID_3 = 3;
+    uint256 internal constant BAND_ID_4 = 4;
 }

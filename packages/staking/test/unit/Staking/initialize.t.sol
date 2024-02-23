@@ -7,6 +7,22 @@ import {StakingMock} from "../../mocks/StakingMock.sol";
 import {Unit_Test} from "../Unit.t.sol";
 
 contract Staking_Initialize_Unit_Test is Unit_Test {
+    /*//////////////////////////////////////////////////////////////////////////
+                                  SET UP
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function setUp() public virtual override {
+        Unit_Test.setUp();
+
+        vm.startPrank(admin);
+        staking = new StakingMock();
+        vm.stopPrank();
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                  MODIFIERS
+    //////////////////////////////////////////////////////////////////////////*/
+
     modifier initializeStaking() {
         vm.prank(admin);
         staking.initialize(
@@ -19,13 +35,9 @@ contract Staking_Initialize_Unit_Test is Unit_Test {
         _;
     }
 
-    function setUp() public virtual override {
-        Unit_Test.setUp();
-
-        vm.startPrank(admin);
-        staking = new StakingMock();
-        vm.stopPrank();
-    }
+    /*//////////////////////////////////////////////////////////////////////////
+                                  TESTS
+    //////////////////////////////////////////////////////////////////////////*/
 
     function test_initialize_RevertIf_USDTTokenIsZeroAddress() external {
         vm.expectRevert(Errors.Staking__ZeroAddress.selector);
