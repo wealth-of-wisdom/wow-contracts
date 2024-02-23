@@ -27,14 +27,14 @@ contract Staking is
                                 PRIVATE CONSTANTS
     //////////////////////////////////////////////////////////////////////////*/
 
-    bytes32 private constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
-    bytes32 private constant VESTING_ROLE = keccak256("VESTING_ROLE");
-    bytes32 private constant GELATO_EXECUTOR_ROLE =
+    bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+    bytes32 public constant VESTING_ROLE = keccak256("VESTING_ROLE");
+    bytes32 public constant GELATO_EXECUTOR_ROLE =
         keccak256("GELATO_EXECUTOR_ROLE");
 
-    uint48 private constant MONTH = 30 days;
-    uint48 private constant SHARE = 1e6; // 1 share = 10^6
-    uint48 private constant PERCENTAGE_PRECISION = 1e8; // 100% = 10^8
+    uint48 public constant MONTH = 30 days;
+    uint48 public constant SHARE = 1e6; // 1 share = 10^6
+    uint48 public constant PERCENTAGE_PRECISION = 1e8; // 100% = 10^8
 
     /*//////////////////////////////////////////////////////////////////////////
                                 INTERNAL STORAGE
