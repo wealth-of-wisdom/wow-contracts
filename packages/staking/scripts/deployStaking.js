@@ -10,7 +10,7 @@ async function main() {
         process.env.TOTAL_POOLS,
         process.env.TOTAL_BAND_LEVELS,
     ])
-    await sale.waitForDeployment()
+    await staking.waitForDeployment()
     console.log("Staking deployed to:", await staking.getAddress())
 }
 
