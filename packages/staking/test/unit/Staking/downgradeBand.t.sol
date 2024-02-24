@@ -2,13 +2,12 @@
 pragma solidity 0.8.20;
 
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
-import {IStaking} from "../../../contracts/interfaces/IStaking.sol";
 import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {Unit_Test} from "../Unit.t.sol";
 import {IStaking} from "../../../contracts/interfaces/IStaking.sol";
 
-contract Staking_UpgradeBand_Unit_Test is Unit_Test {
-    function test_upgradeBand_RevertIf_CallerNotBandOwner()
+contract Staking_DowngradeBand_Unit_Test is Unit_Test {
+    function test_downgradeBand_RevertIf_CallerNotBandOwner()
         external
         setBandLevelData
         stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
@@ -21,10 +20,10 @@ contract Staking_UpgradeBand_Unit_Test is Unit_Test {
             )
         );
         vm.prank(bob);
-        staking.upgradeBand(BAND_ID_0, BAND_LEVEL_7);
+        staking.downgradeBand(BAND_ID_0, BAND_LEVEL_1);
     }
 
-    function test_upgradeBand_RevertIf_InvalidBandLevel()
+    function test_downgradeBand_RevertIf_InvalidBandLevel()
         external
         setBandLevelData
         stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
@@ -37,10 +36,10 @@ contract Staking_UpgradeBand_Unit_Test is Unit_Test {
             )
         );
         vm.prank(alice);
-        staking.upgradeBand(BAND_ID_0, invalidLevel);
+        staking.downgradeBand(BAND_ID_0, invalidLevel);
     }
 
-    function test_upgradeBand_RevertIf_FixTypeBand()
+    function test_downgradeBand_RevertIf_FixTypeBand()
         external
         setBandLevelData
         setSharesInMonth
@@ -48,10 +47,10 @@ contract Staking_UpgradeBand_Unit_Test is Unit_Test {
     {
         vm.expectRevert(Errors.Staking__NotFlexiTypeBand.selector);
         vm.prank(alice);
-        staking.upgradeBand(BAND_ID_0, BAND_LEVEL_7);
+        staking.downgradeBand(BAND_ID_0, BAND_LEVEL_1);
     }
 
-    function test_upgradeBand_RevertIf_TokensAreVested()
+    function test_downgradeBand_RevertIf_TokensAreVested()
         external
         setBandLevelData
         stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
@@ -63,10 +62,10 @@ contract Staking_UpgradeBand_Unit_Test is Unit_Test {
             )
         );
         vm.prank(alice);
-        staking.upgradeBand(BAND_ID_0, BAND_LEVEL_7);
+        staking.downgradeBand(BAND_ID_0, BAND_LEVEL_1);
     }
 
-    function test_upgradeBand_RevertIf_NewBandLevelIsSameAsPrevious()
+    function test_downgradeBand_RevertIf_NewBandLevelIsSameAsPrevious()
         external
         setBandLevelData
         stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
@@ -78,10 +77,10 @@ contract Staking_UpgradeBand_Unit_Test is Unit_Test {
             )
         );
         vm.prank(alice);
-        staking.upgradeBand(BAND_ID_0, BAND_LEVEL_4);
+        staking.downgradeBand(BAND_ID_0, BAND_LEVEL_4);
     }
 
-    function test_upgradeBand_RevertIf_NewBandLevelIsLowerPrevious()
+    function test_downgradeBand_RevertIf_NewBandLevelIsHigherThanPrevious()
         external
         setBandLevelData
         stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
@@ -89,14 +88,14 @@ contract Staking_UpgradeBand_Unit_Test is Unit_Test {
         vm.expectRevert(
             abi.encodeWithSelector(
                 Errors.Staking__InvalidBandLevel.selector,
-                BAND_LEVEL_2
+                BAND_LEVEL_7
             )
         );
         vm.prank(alice);
-        staking.upgradeBand(BAND_ID_0, BAND_LEVEL_2);
+        staking.downgradeBand(BAND_ID_0, BAND_LEVEL_7);
     }
 
-    function test_upgradeBand_UpdatesBandLevel()
+    function test_downgradeBand_UpdatesBandLevel()
         external
         setBandLevelData
         stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
@@ -104,10 +103,8 @@ contract Staking_UpgradeBand_Unit_Test is Unit_Test {
         uint32 startDate = uint32(block.timestamp);
         skip(1 hours);
 
-        vm.startPrank(alice);
-        wowToken.approve(address(staking), BAND_7_PRICE - BAND_4_PRICE);
-        staking.upgradeBand(BAND_ID_0, BAND_LEVEL_7);
-        vm.stopPrank();
+        vm.prank(alice);
+        staking.downgradeBand(BAND_ID_0, BAND_LEVEL_2);
 
         (
             address owner,
@@ -120,84 +117,74 @@ contract Staking_UpgradeBand_Unit_Test is Unit_Test {
 
         assertEq(owner, alice, "Owner incorrect");
         assertEq(stakingStartDate, startDate, "Timestamp incorrect");
-        assertEq(bandLevel, BAND_LEVEL_7, "BandLevel Level not set");
+        assertEq(bandLevel, BAND_LEVEL_2, "BandLevel Level not set");
         assertEq(fixedMonths, 0, "Fixed months incorrect");
         assertEqStakingType(stakingType, STAKING_TYPE_FLEXI);
         assertFalse(areTokensVested, "Tokens vested incorrect");
     }
 
-    function test_upgradeBand_DoesNotUpdateStakerBandIdsArray()
+    function test_downgradeBand_DoesNotUpdateStakerBandIdsArray()
         external
         setBandLevelData
         stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
-        vm.startPrank(alice);
-        wowToken.approve(address(staking), BAND_7_PRICE - BAND_4_PRICE);
-        staking.upgradeBand(BAND_ID_0, BAND_LEVEL_7);
-        vm.stopPrank();
+        vm.prank(alice);
+        staking.downgradeBand(BAND_ID_0, BAND_LEVEL_2);
 
         uint256[] memory bandIds = staking.getStakerBandIds(alice);
         assertEq(bandIds.length, 1, "BandIds array length incorrect");
         assertEq(bandIds[0], BAND_ID_0, "BandId not in array");
     }
 
-    function test_upgradeBand_TransferTokensFromStaker()
+    function test_downgradeBand_TransferTokensFromStaking()
         external
         setBandLevelData
         stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
-        uint256 bandPriceDifference = BAND_7_PRICE - BAND_4_PRICE;
-        uint256 aliceBalanceBefore = wowToken.balanceOf(alice);
-
-        vm.startPrank(alice);
-        wowToken.approve(address(staking), bandPriceDifference);
-        staking.upgradeBand(BAND_ID_0, BAND_LEVEL_7);
-        vm.stopPrank();
-
-        uint256 aliceBalanceAfter = wowToken.balanceOf(alice);
-
-        assertEq(
-            aliceBalanceBefore - bandPriceDifference,
-            aliceBalanceAfter,
-            "Tokens not transfered from staker"
-        );
-    }
-
-    function test_upgradeBand_TransferTokensToStaking()
-        external
-        setBandLevelData
-        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
-    {
-        uint256 bandPriceDifference = BAND_7_PRICE - BAND_4_PRICE;
+        uint256 bandPriceDifference = BAND_4_PRICE - BAND_2_PRICE;
         uint256 contractBalanceBefore = wowToken.balanceOf(address(staking));
 
-        vm.startPrank(alice);
-        wowToken.approve(address(staking), bandPriceDifference);
-        staking.upgradeBand(BAND_ID_0, BAND_LEVEL_7);
-        vm.stopPrank();
+        vm.prank(alice);
+        staking.downgradeBand(BAND_ID_0, BAND_LEVEL_2);
 
         uint256 contractBalanceAfter = wowToken.balanceOf(address(staking));
 
         assertEq(
-            contractBalanceBefore + bandPriceDifference,
+            contractBalanceBefore - bandPriceDifference,
             contractBalanceAfter,
-            "Tokens not transfered to staking"
+            "Tokens not transfered from staking"
         );
     }
 
-    function test_upgradeBand_EmitsBandUpgadedEvent()
+    function test_downgradeBand_TransferTokensToStaker()
         external
         setBandLevelData
         stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
-        uint256 bandPriceDifference = BAND_7_PRICE - BAND_4_PRICE;
-        vm.startPrank(alice);
-        wowToken.approve(address(staking), bandPriceDifference);
+        uint256 bandPriceDifference = BAND_4_PRICE - BAND_2_PRICE;
+        uint256 aliceBalanceBefore = wowToken.balanceOf(alice);
 
+        vm.prank(alice);
+        staking.downgradeBand(BAND_ID_0, BAND_LEVEL_2);
+
+        uint256 aliceBalanceAfter = wowToken.balanceOf(alice);
+
+        assertEq(
+            aliceBalanceBefore + bandPriceDifference,
+            aliceBalanceAfter,
+            "Tokens not transfered to staker"
+        );
+    }
+
+    function test_downgradeBand_EmitsBandUpgaded()
+        external
+        setBandLevelData
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+    {
         vm.expectEmit(address(staking));
-        emit BandUpgaded(alice, BAND_ID_0, BAND_LEVEL_4, BAND_LEVEL_7);
+        emit BandDowngraded(alice, BAND_ID_0, BAND_LEVEL_4, BAND_LEVEL_2);
 
-        staking.upgradeBand(BAND_ID_0, BAND_LEVEL_7);
-        vm.stopPrank();
+        vm.prank(alice);
+        staking.downgradeBand(BAND_ID_0, BAND_LEVEL_2);
     }
 }
