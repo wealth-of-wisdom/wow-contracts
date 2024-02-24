@@ -45,7 +45,7 @@ contract Staking_DistributeRewards_Unit_Test is Unit_Test {
 
     function test_distributeRewards_IncreasesUnclaimedRewardsForFirstTime()
         external
-        createDistribution
+        createDistribution(usdtToken)
     {
         (uint256 aliceRewardsBefore, ) = staking.getStakerReward(
             alice,
@@ -75,27 +75,27 @@ contract Staking_DistributeRewards_Unit_Test is Unit_Test {
         (uint256 eveRewardsAfter, ) = staking.getStakerReward(eve, usdtToken);
 
         assertEq(
-            aliceRewardsBefore + DISTRIBUTION_REWARDS[0],
+            aliceRewardsBefore + ALICE_REWARDS,
             aliceRewardsAfter,
             "Alice DISTRIBUTION_REWARDS not increased"
         );
         assertEq(
-            bobRewardsBefore + DISTRIBUTION_REWARDS[1],
+            bobRewardsBefore + BOB_REWARDS,
             bobRewardsAfter,
             "Bob DISTRIBUTION_REWARDS not increased"
         );
         assertEq(
-            carolRewardsBefore + DISTRIBUTION_REWARDS[2],
+            carolRewardsBefore + CAROL_REWARDS,
             carolRewardsAfter,
             "Carol DISTRIBUTION_REWARDS not increased"
         );
         assertEq(
-            danRewardsBefore + DISTRIBUTION_REWARDS[3],
+            danRewardsBefore + DAN_REWARDS,
             danRewardsAfter,
             "Dan DISTRIBUTION_REWARDS not increased"
         );
         assertEq(
-            eveRewardsBefore + DISTRIBUTION_REWARDS[4],
+            eveRewardsBefore + EVE_REWARDS,
             eveRewardsAfter,
             "Eve DISTRIBUTION_REWARDS not increased"
         );
@@ -103,8 +103,8 @@ contract Staking_DistributeRewards_Unit_Test is Unit_Test {
 
     function test_distributeRewards_IncreasesUnclaimedRewardsForSecondTime()
         external
-        createDistribution
-        createDistribution
+        createDistribution(usdtToken)
+        createDistribution(usdtToken)
     {
         (uint256 aliceRewardsBefore, ) = staking.getStakerReward(
             alice,
@@ -136,27 +136,27 @@ contract Staking_DistributeRewards_Unit_Test is Unit_Test {
         (uint256 eveRewardsAfter, ) = staking.getStakerReward(eve, usdtToken);
 
         assertEq(
-            aliceRewardsBefore + DISTRIBUTION_REWARDS[0] * 2,
+            aliceRewardsBefore + ALICE_REWARDS * 2,
             aliceRewardsAfter,
             "Alice DISTRIBUTION_REWARDS not increased"
         );
         assertEq(
-            bobRewardsBefore + DISTRIBUTION_REWARDS[1] * 2,
+            bobRewardsBefore + BOB_REWARDS * 2,
             bobRewardsAfter,
             "Bob DISTRIBUTION_REWARDS not increased"
         );
         assertEq(
-            carolRewardsBefore + DISTRIBUTION_REWARDS[2] * 2,
+            carolRewardsBefore + CAROL_REWARDS * 2,
             carolRewardsAfter,
             "Carol DISTRIBUTION_REWARDS not increased"
         );
         assertEq(
-            danRewardsBefore + DISTRIBUTION_REWARDS[3] * 2,
+            danRewardsBefore + DAN_REWARDS * 2,
             danRewardsAfter,
             "Dan DISTRIBUTION_REWARDS not increased"
         );
         assertEq(
-            eveRewardsBefore + DISTRIBUTION_REWARDS[4] * 2,
+            eveRewardsBefore + EVE_REWARDS * 2,
             eveRewardsAfter,
             "Eve DISTRIBUTION_REWARDS not increased"
         );
@@ -164,7 +164,7 @@ contract Staking_DistributeRewards_Unit_Test is Unit_Test {
 
     function test_distributionRewards_EmitsRewardsDistributedEvent()
         external
-        createDistribution
+        createDistribution(usdtToken)
     {
         vm.expectEmit(address(staking));
         emit RewardsDistributed(usdtToken);

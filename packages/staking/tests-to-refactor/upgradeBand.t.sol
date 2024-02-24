@@ -10,7 +10,7 @@ contract Staking_UpgradeBand_Unit_Test is Unit_Test {
     function test_upgradeBand_RevertIf_NotBandOwner()
         external
         setBandLevelData
-        stakeTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -26,7 +26,7 @@ contract Staking_UpgradeBand_Unit_Test is Unit_Test {
     function test_upgradeBand_RevertIf_InvalidBandLevel()
         external
         setBandLevelData
-        stakeTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         uint16 fauxBand = 100;
         vm.expectRevert(
@@ -55,7 +55,7 @@ contract Staking_UpgradeBand_Unit_Test is Unit_Test {
     function test_upgradeBand_SetsBandData()
         external
         setBandLevelData
-        stakeTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         (
             uint256 previousStakingStartTimestamp,
@@ -101,7 +101,7 @@ contract Staking_UpgradeBand_Unit_Test is Unit_Test {
     function test_upgradeBand_TransferTokens()
         external
         setBandLevelData
-        stakeTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         uint256 aliceBalanceBeforeUpgrade = wowToken.balanceOf(alice);
         uint256 contractBalanceBeforeUpgrade = wowToken.balanceOf(
@@ -134,7 +134,7 @@ contract Staking_UpgradeBand_Unit_Test is Unit_Test {
     function test_upgradeBand_EmitsBandUpgaded()
         external
         setBandLevelData
-        stakeTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         uint256 bandPriceDifference = BAND_7_PRICE - BAND_4_PRICE;
         vm.startPrank(alice);

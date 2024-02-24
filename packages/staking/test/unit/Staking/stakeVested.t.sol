@@ -210,11 +210,8 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
         vm.prank(address(vesting));
         staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
 
-        address staker1 = staking.getUser(0);
-        assertEq(staker1, alice, "Staker not added to enumerable map");
-
-        vm.expectRevert();
-        staking.getUser(1);
+        assertEq(staking.getTotalUsers(), 1, "User count not incremented");
+        assertEq(staking.getUser(0), alice, "Staker not added");
     }
 
     function test_stakeVested_FlexiType_Adds3UsersToEnumerableMap()
@@ -228,16 +225,10 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
         staking.stakeVested(carol, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
         vm.stopPrank();
 
-        address staker1 = staking.getUser(0);
-        address staker2 = staking.getUser(1);
-        address staker3 = staking.getUser(2);
-
-        assertEq(staker1, alice, "Staker not added to enumerable map");
-        assertEq(staker2, bob, "Staker not added to enumerable map");
-        assertEq(staker3, carol, "Staker not added to enumerable map");
-
-        vm.expectRevert();
-        staking.getUser(3);
+        assertEq(staking.getTotalUsers(), 3, "User count not incremented");
+        assertEq(staking.getUser(0), alice, "Staker not added");
+        assertEq(staking.getUser(1), bob, "Staker not added");
+        assertEq(staking.getUser(2), carol, "Staker not added");
     }
 
     function test_stakeVested_FlexiType_Adds2UsersWithMultipleBandsToEnumerableMap()
@@ -252,14 +243,9 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
         staking.stakeVested(bob, STAKING_TYPE_FLEXI, BAND_LEVEL_9, MONTH_0);
         vm.stopPrank();
 
-        address staker1 = staking.getUser(0);
-        address staker2 = staking.getUser(1);
-
-        assertEq(staker1, alice, "Staker not added to enumerable map");
-        assertEq(staker2, bob, "Staker not added to enumerable map");
-
-        vm.expectRevert();
-        staking.getUser(2);
+        assertEq(staking.getTotalUsers(), 2, "User count not incremented");
+        assertEq(staking.getUser(0), alice, "Staker not added");
+        assertEq(staking.getUser(1), bob, "Staker not added");
     }
 
     function test_stakeVested_FlexiType_EmitsStakedEvent()
@@ -388,11 +374,8 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
         vm.prank(address(vesting));
         staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_12);
 
-        address staker1 = staking.getUser(0);
-        assertEq(staker1, alice, "Staker not added to enumerable map");
-
-        vm.expectRevert();
-        staking.getUser(1);
+        assertEq(staking.getTotalUsers(), 1, "User count not incremented");
+        assertEq(staking.getUser(0), alice, "Staker not added");
     }
 
     function test_stakeVested_FixType_Adds3UsersToEnumerableMap()
@@ -406,16 +389,10 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
         staking.stakeVested(carol, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_12);
         vm.stopPrank();
 
-        address staker1 = staking.getUser(0);
-        address staker2 = staking.getUser(1);
-        address staker3 = staking.getUser(2);
-
-        assertEq(staker1, alice, "Staker not added to enumerable map");
-        assertEq(staker2, bob, "Staker not added to enumerable map");
-        assertEq(staker3, carol, "Staker not added to enumerable map");
-
-        vm.expectRevert();
-        staking.getUser(3);
+        assertEq(staking.getTotalUsers(), 3, "User count not incremented");
+        assertEq(staking.getUser(0), alice, "Staker not added");
+        assertEq(staking.getUser(1), bob, "Staker not added");
+        assertEq(staking.getUser(2), carol, "Staker not added");
     }
 
     function test_stakeVested_FixType_Adds2UsersWithMultipleBandsToEnumerableMap()
@@ -430,14 +407,9 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
         staking.stakeVested(bob, STAKING_TYPE_FIX, BAND_LEVEL_9, MONTH_12);
         vm.stopPrank();
 
-        address staker1 = staking.getUser(0);
-        address staker2 = staking.getUser(1);
-
-        assertEq(staker1, alice, "Staker not added to enumerable map");
-        assertEq(staker2, bob, "Staker not added to enumerable map");
-
-        vm.expectRevert();
-        staking.getUser(2);
+        assertEq(staking.getTotalUsers(), 2, "User count not incremented");
+        assertEq(staking.getUser(0), alice, "Staker not added");
+        assertEq(staking.getUser(1), bob, "Staker not added");
     }
 
     function test_stakeVested_FixType_EmitsStakedEvent()

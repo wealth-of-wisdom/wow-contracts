@@ -397,6 +397,9 @@ contract Staking is
             revert Errors.Staking__InsufficientContractBalance(balance, amount);
         }
 
+        // @question should we allow to withdraw USDT/USDC tokens?
+        // @question should we allow to withdraw WOW tokens?
+
         // Interaction: transfer the tokens to the sender
         token.safeTransfer(msg.sender, amount);
 
@@ -624,13 +627,13 @@ contract Staking is
         if (usdtUnclaimedRewards > 0) {
             // Effects: transfer all unclaimed rewards to the receiver
             s_stakerRewards[_getStakerAndTokenHash(rewardsCollector, usdtToken)]
-                .unclaimedAmount = usdtUnclaimedRewards;
+                .unclaimedAmount += usdtUnclaimedRewards;
         }
 
         if (usdcUnclaimedRewards > 0) {
             // Effects: transfer all unclaimed rewards to the receiver
             s_stakerRewards[_getStakerAndTokenHash(rewardsCollector, usdcToken)]
-                .unclaimedAmount = usdcUnclaimedRewards;
+                .unclaimedAmount += usdcUnclaimedRewards;
         }
 
         uint256[] memory bandIds = s_stakerBands[user];
@@ -906,8 +909,21 @@ contract Staking is
         bandIds = s_stakerBands[staker];
     }
 
+    /**
+     * @notice  Get user address in the users map from index in array
+     * @param   index  Index in the users array
+     * @return  user  User address
+     */
     function getUser(uint256 index) external view returns (address user) {
         (user, ) = s_users.at(index);
+    }
+
+    /**
+     * @notice  Returns the amount of users in the staking contract
+     * @return  usersAmount  Amount of users
+     */
+    function getTotalUsers() external view returns (uint256 usersAmount) {
+        usersAmount = s_users.length();
     }
 
     /*//////////////////////////////////////////////////////////////////////////

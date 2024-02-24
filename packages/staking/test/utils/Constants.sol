@@ -41,12 +41,18 @@ abstract contract Constants {
 
     uint256 internal constant DISTRIBUTION_AMOUNT =
         1_000_000 * USD_DECIMALS_FOR_MULTIPLICATION;
+
+    uint256 internal constant ALICE_REWARDS = DISTRIBUTION_AMOUNT / 10; // 10%
+    uint256 internal constant BOB_REWARDS = (DISTRIBUTION_AMOUNT * 15) / 100; // 15%
+    uint256 internal constant CAROL_REWARDS = DISTRIBUTION_AMOUNT / 5; // 20%
+    uint256 internal constant DAN_REWARDS = DISTRIBUTION_AMOUNT / 4; // 25%
+    uint256 internal constant EVE_REWARDS = (DISTRIBUTION_AMOUNT * 3) / 10; // 30%
     uint256[] internal DISTRIBUTION_REWARDS = [
-        DISTRIBUTION_AMOUNT / 10, // 10%
-        (DISTRIBUTION_AMOUNT * 15) / 100, // 15%
-        DISTRIBUTION_AMOUNT / 5, // 20%
-        DISTRIBUTION_AMOUNT / 4, // 25%
-        (DISTRIBUTION_AMOUNT * 3) / 10 // 30%
+        ALICE_REWARDS,
+        BOB_REWARDS,
+        CAROL_REWARDS,
+        DAN_REWARDS,
+        EVE_REWARDS
     ];
 
     /*//////////////////////////////////////////////////////////////////////////

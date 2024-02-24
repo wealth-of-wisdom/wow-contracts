@@ -10,7 +10,7 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
     function test_downgradeBand_RevertIf_NotBandOwner()
         external
         setBandLevelData
-        stakeTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -26,7 +26,7 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
     function test_downgradeBand_RevertIf_InvalidBandLevel()
         external
         setBandLevelData
-        stakeTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         uint16 fauxBand = 100;
         vm.expectRevert(
@@ -54,7 +54,7 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
     function test_downgradeBand_SetsBandData()
         external
         setBandLevelData
-        stakeTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         (
             uint256 previousStakingStartTimestamp,
@@ -100,7 +100,7 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
     function test_downgradeBand_TransferTokens()
         external
         setBandLevelData
-        stakeTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         uint256 aliceBalanceBeforeUpgrade = wowToken.balanceOf(alice);
         uint256 contractBalanceBeforeUpgrade = wowToken.balanceOf(
@@ -132,7 +132,7 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
     function test_downgradeBand_EmitsBandUpgaded()
         external
         setBandLevelData
-        stakeTokens(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         uint256 bandPriceDifference = BAND_4_PRICE - BAND_1_PRICE;
         vm.startPrank(alice);

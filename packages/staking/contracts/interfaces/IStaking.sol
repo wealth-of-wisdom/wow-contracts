@@ -229,4 +229,6 @@ interface IStaking is IStakingEvents {
     ) external view returns (uint256[] memory bandIds);
 
     function getUser(uint256 index) external view returns (address user);
+
+    function getTotalUsers() external view returns (uint256 usersAmount);
 }

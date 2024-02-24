@@ -103,20 +103,22 @@ contract Base_Test is Test, Constants, Events {
     //////////////////////////////////////////////////////////////////////////*/
 
     modifier stakeTokens(
+        address _user,
         IStaking.StakingTypes _stakingType,
         uint16 _bandLevel,
         uint8 _month
     ) {
-        _stakeTokens(alice, _stakingType, _bandLevel, _month, false);
+        _stakeTokens(_user, _stakingType, _bandLevel, _month, false);
         _;
     }
 
     modifier stakeVestedTokens(
+        address _user,
         IStaking.StakingTypes _stakingType,
         uint16 _bandLevel,
         uint8 _month
     ) {
-        _stakeTokens(alice, _stakingType, _bandLevel, _month, true);
+        _stakeTokens(_user, _stakingType, _bandLevel, _month, true);
         _;
     }
 
@@ -130,13 +132,13 @@ contract Base_Test is Test, Constants, Events {
         _;
     }
 
-    modifier createDistribution() {
-        _createDistribution();
+    modifier createDistribution(TokenMock _token) {
+        _createDistribution(_token);
         _;
     }
 
-    modifier distributeRewards() {
-        _distributeRewards();
+    modifier distributeRewards(TokenMock _token) {
+        _distributeRewards(_token);
         _;
     }
 
@@ -183,16 +185,16 @@ contract Base_Test is Test, Constants, Events {
         }
     }
 
-    function _createDistribution() internal {
+    function _createDistribution(TokenMock _token) internal {
         vm.startPrank(admin);
-        usdtToken.approve(address(staking), DISTRIBUTION_AMOUNT);
-        staking.createDistribution(usdtToken, DISTRIBUTION_AMOUNT);
+        _token.approve(address(staking), DISTRIBUTION_AMOUNT);
+        staking.createDistribution(_token, DISTRIBUTION_AMOUNT);
         vm.stopPrank();
     }
 
-    function _distributeRewards() internal {
+    function _distributeRewards(TokenMock _token) internal {
         vm.prank(admin);
-        staking.distributeRewards(usdtToken, STAKERS, DISTRIBUTION_REWARDS);
+        staking.distributeRewards(_token, STAKERS, DISTRIBUTION_REWARDS);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
