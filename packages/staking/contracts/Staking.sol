@@ -127,7 +127,7 @@ contract Staking is
 
     modifier mOnlyFlexiType(uint256 bandId) {
         if (StakingTypes.FIX == s_bands[bandId].stakingType) {
-            revert Errors.Staking__CantModifyFixTypeBand();
+            revert Errors.Staking__NotFlexiTypeBand();
         }
         _;
     }
