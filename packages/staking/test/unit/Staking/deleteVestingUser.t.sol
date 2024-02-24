@@ -2,9 +2,9 @@
 pragma solidity 0.8.20;
 
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
+import {IStaking} from "../../../contracts/interfaces/IStaking.sol";
 import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {Unit_Test} from "../Unit.t.sol";
-import {IStaking} from "../../../contracts/interfaces/IStaking.sol";
 
 contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
     function test_deleteVestingUser_RevertIf_CallerNotVestingContract()
