@@ -27,12 +27,17 @@ contract Staking is
                                 PRIVATE CONSTANTS
     //////////////////////////////////////////////////////////////////////////*/
 
+    uint48 private constant MONTH = 30 days;
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                PUBLIC CONSTANTS
+    //////////////////////////////////////////////////////////////////////////*/
+
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     bytes32 public constant VESTING_ROLE = keccak256("VESTING_ROLE");
     bytes32 public constant GELATO_EXECUTOR_ROLE =
         keccak256("GELATO_EXECUTOR_ROLE");
 
-    uint48 public constant MONTH = 30 days;
     uint48 public constant SHARE = 1e6; // 1 share = 10^6
     uint48 public constant PERCENTAGE_PRECISION = 1e8; // 100% = 10^8
 
@@ -157,6 +162,8 @@ contract Staking is
         IERC20 usdtToken,
         IERC20 usdcToken,
         IERC20 wowToken,
+        address vesting,
+        address gelato,
         uint16 totalPools,
         uint16 totalBandLevels
     )
@@ -175,6 +182,8 @@ contract Staking is
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(GELATO_EXECUTOR_ROLE, msg.sender);
         _grantRole(UPGRADER_ROLE, msg.sender);
+        _grantRole(VESTING_ROLE, vesting);
+        _grantRole(GELATO_EXECUTOR_ROLE, gelato);
 
         // Effects: set the storage
         s_usdtToken = usdtToken;
