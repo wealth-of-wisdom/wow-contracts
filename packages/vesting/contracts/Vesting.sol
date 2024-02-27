@@ -415,50 +415,6 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     //////////////////////////////////////////////////////////////////////////*/
 
     /**
-     * @notice Function lets caller claim all unlocked tokens from all vested pools.
-     * @notice if the vesting period has ended - user is transferred all unclaimed tokens.
-     */
-    function claimAllTokens() external {
-        uint16 poolCount = s_poolCount;
-        uint256 claimTokenAmount;
-        for (uint16 i; i < poolCount; i++) {
-            uint256 unlockedTokens = getUnlockedTokenAmount(i, msg.sender);
-
-            // Checks: At least some tokens are unlocked
-            if (unlockedTokens == 0) {
-                continue;
-            }
-            // Checks: Enough tokens in the contract for current pool transfer
-            if (unlockedTokens > s_token.balanceOf(address(this))) {
-                revert Errors.Vesting__NotEnoughTokens();
-            }
-
-            Pool storage pool = s_vestingPools[i];
-            Beneficiary storage user = pool.beneficiaries[msg.sender];
-
-            // Available tokens are the maximum amount that user should be able claim
-            // if all tokens are unlocked for the user,
-            uint256 availableTokens = user.totalTokenAmount -
-                user.claimedTokenAmount -
-                user.stakedTokenAmount;
-
-            // Checks: Unlocked tokens are not withdrawing from staked token pool
-            if (unlockedTokens > availableTokens) {
-                continue;
-            }
-
-            // Effects
-            user.claimedTokenAmount += unlockedTokens;
-            claimTokenAmount += unlockedTokens;
-
-            // Interactions
-            s_token.safeTransfer(msg.sender, unlockedTokens);
-
-            emit TokensClaimed(i, msg.sender, unlockedTokens);
-        }
-    }
-
-    /**
      * @notice Function lets caller claim unlocked tokens from specified vesting pool.
      * @notice if the vesting period has ended - user is transferred all unclaimed tokens.
      * @param pid Index that refers to vesting pool object.
@@ -499,6 +455,50 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         s_token.safeTransfer(msg.sender, unlockedTokens);
 
         emit TokensClaimed(pid, msg.sender, unlockedTokens);
+    }
+
+    /**
+     * @notice Function lets caller claim all unlocked tokens from all vested pools.
+     * @notice if the vesting period has ended - user is transferred all unclaimed tokens.
+     */
+    function claimAllTokens() external {
+        uint16 poolCount = s_poolCount;
+        for (uint16 i; i < poolCount; i++) {
+            uint256 unlockedTokens = getUnlockedTokenAmount(i, msg.sender);
+
+            // Checks: At least some tokens are unlocked
+            // if none - continue to other pool
+            if (unlockedTokens == 0) {
+                continue;
+            }
+            // Checks: Enough tokens in the contract for current pool transfer
+            if (unlockedTokens > s_token.balanceOf(address(this))) {
+                revert Errors.Vesting__NotEnoughTokens();
+            }
+
+            Pool storage pool = s_vestingPools[i];
+            Beneficiary storage user = pool.beneficiaries[msg.sender];
+
+            // Available tokens are the maximum amount that user should be able claim
+            // if all tokens are unlocked for the user,
+            uint256 availableTokens = user.totalTokenAmount -
+                user.claimedTokenAmount -
+                user.stakedTokenAmount;
+
+            // Checks: Unlocked tokens are not withdrawing from staked token pool
+            // if withdrawn - continue to other pool
+            if (unlockedTokens > availableTokens) {
+                continue;
+            }
+
+            // Effects
+            user.claimedTokenAmount += unlockedTokens;
+
+            // Interactions
+            s_token.safeTransfer(msg.sender, unlockedTokens);
+
+            emit TokensClaimed(i, msg.sender, unlockedTokens);
+        }
     }
 
     /**
