@@ -34,8 +34,9 @@ interface IStakingEvents {
         IERC20 token,
         uint256 amount,
         uint256 totalPools,
-        uint256 totalBandLevels,
-        uint256 totalStakers
+        uint16 totalBandLevels,
+        uint256 totalStakers,
+        uint256 distributionTimestamp
     );
 
     event RewardsDistributed(IERC20 token);
