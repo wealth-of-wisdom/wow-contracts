@@ -38,8 +38,9 @@ async function main() {
     const WOW_DECIMALS = 1e18
     for (let i = 0; i < bandLevelData.length; i++) {
         const data = bandLevelData[i]
-        const bandLevelPriceInWoWTokens =
-            BigInt(bandLevelData[i].price) * BigInt(WOW_DECIMALS)
+        const bandLevelPriceInWoWTokens = BigNumber.from(
+            bandLevelData[i].price.mul(WOW_DECIMALS),
+        )
         const tx2 = await staking.setBandLevel(
             data.level,
             bandLevelPriceInWoWTokens,
