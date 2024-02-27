@@ -1,6 +1,3 @@
-import dotenv from "dotenv";
-import path from "path";
-import { fileURLToPath } from "url";
 import {
   getDefaultProvider,
   Wallet,
@@ -25,9 +22,6 @@ interface StakerBand {
 //@todo add abi
 const stakingABI: any = [];
 // __dirname is not available in ES modules, so we need to derive it
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-// Configure dotenv to load the .env file from the root directory
-dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 export async function main(
   token: string,

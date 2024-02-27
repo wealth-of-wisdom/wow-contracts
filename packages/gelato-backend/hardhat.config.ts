@@ -31,7 +31,7 @@ const config: HardhatUserConfig = {
     },
   },
 
-  defaultNetwork: "hardhat",
+  defaultNetwork: "sepolia",
 
   networks: {
     hardhat: {

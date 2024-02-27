@@ -4,6 +4,8 @@
   "memory": 128,
   "timeout": 30,
   "userArgs": {
-    "staking": "string"
+    "staking": "string",
+    "event": "string",
+    "eventTopic": "string"
   }
 }
