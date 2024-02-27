@@ -27,7 +27,7 @@ contract Staking is
                                 PRIVATE CONSTANTS
     //////////////////////////////////////////////////////////////////////////*/
 
-    uint48 private constant MONTH = 30 days;
+    uint32 private constant MONTH = 30 days;
 
     /*//////////////////////////////////////////////////////////////////////////
                                 PUBLIC CONSTANTS

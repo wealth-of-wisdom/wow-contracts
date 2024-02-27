@@ -94,9 +94,19 @@ contract Base_Test is
             usdcToken,
             wowToken,
             address(vesting),
+            ZERO_ADDRESS, // @todo: future gelato service address
             TOTAL_STAKING_POOLS,
             TOTAL_BAND_LEVELS
         );
+
+        // SET POOLS
+        _setPools();
+        // SET BAND LEVEL DATA
+        _setBandLevelData();
+        // // SET SHARES IN MONTH
+        _setSharesInMonth(SHARES_IN_MONTH);
+
+        vm.startPrank(admin);
 
         uint8 accountsNum = uint8(TEST_ACCOUNTS.length);
         for (uint8 i = 0; i < accountsNum; ++i) {
@@ -162,5 +172,34 @@ contract Base_Test is
             beneficiary,
             BENEFICIARY_TOKEN_AMOUNT
         );
+    }
+
+    function _setBandLevelData() internal {
+        vm.startPrank(admin);
+
+        for (uint16 i; i < TOTAL_BAND_LEVELS; i++) {
+            staking.setBandLevel(
+                BAND_LEVELS[i],
+                BAND_PRICES[i],
+                BAND_ACCESSIBLE_POOLS[i]
+            );
+        }
+
+        vm.stopPrank();
+    }
+
+    function _setPools() internal {
+        vm.startPrank(admin);
+
+        for (uint16 i; i < TOTAL_STAKING_POOLS; i++) {
+            staking.setPool(POOL_IDS[i], POOL_PERCENTAGES[i]);
+        }
+
+        vm.stopPrank();
+    }
+
+    function _setSharesInMonth(uint48[] memory _sharesInMonth) internal {
+        vm.prank(admin);
+        staking.setSharesInMonth(_sharesInMonth);
     }
 }
