@@ -66,7 +66,7 @@ contract Staking_WithdrawTokens_Unit_Test is Unit_Test {
     function test_withdrawTokens_TransfersTokensToAdmin()
         external
         setBandLevelData
-        stakeTokens
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         vm.startPrank(admin);
         uint256 contractBalance = wowToken.balanceOf(address(staking));
@@ -86,7 +86,7 @@ contract Staking_WithdrawTokens_Unit_Test is Unit_Test {
     function test_withdrawTokens_TransfersTokensFromContract()
         external
         setBandLevelData
-        stakeTokens
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         vm.startPrank(admin);
 
@@ -102,7 +102,7 @@ contract Staking_WithdrawTokens_Unit_Test is Unit_Test {
     function test_withdrawTokens_EmitsTokensWithdrawnEvent()
         external
         setBandLevelData
-        stakeTokens
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         vm.startPrank(admin);
         uint256 contractBalance = wowToken.balanceOf(address(staking));

@@ -123,7 +123,7 @@ contract Staking is
 
     modifier mOnlyFlexiType(uint256 bandId) {
         if (StakingTypes.FIX == s_bands[bandId].stakingType) {
-            revert Errors.Staking__CantModifyFixTypeBand();
+            revert Errors.Staking__NotFlexiTypeBand();
         }
         _;
     }
@@ -146,8 +146,9 @@ contract Staking is
     }
 
     modifier mOnlyBandFromVestedTokens(uint256 bandId, bool shouldBeVested) {
-        if (s_bands[bandId].areTokensVested != shouldBeVested) {
-            revert Errors.Staking__DifferentVestingStatus();
+        bool areTokensVested = s_bands[bandId].areTokensVested;
+        if (areTokensVested != shouldBeVested) {
+            revert Errors.Staking__BandFromVestedTokens(areTokensVested);
         }
         _;
     }
@@ -156,13 +157,6 @@ contract Staking is
         if (poolId == 0 || poolId > s_totalPools) {
             revert Errors.Staking__InvalidPoolId(poolId);
         }
-        _;
-    }
-
-    modifier mStakingTypeExists(StakingTypes stakingType) {
-        if (
-            StakingTypes.FIX != stakingType && StakingTypes.FLEXI != stakingType
-        ) revert Errors.Staking__InvalidStakingType();
         _;
     }
 
@@ -177,21 +171,37 @@ contract Staking is
                                   INITIALIZER
     //////////////////////////////////////////////////////////////////////////*/
 
+    /**
+     * @notice  Initializes the contract with the required data
+     * @param   usdtToken  USDT token
+     * @param   usdcToken  USDC token
+     * @param   wowToken  WOW token
+     * @param   vesting  address of the vesting contract (not contract as we don't call any functions from it)
+     * @param   totalPools  total amount of pools used for staking
+     */
     function initialize(
         IERC20 usdtToken,
         IERC20 usdcToken,
         IERC20 wowToken,
+        address vesting,
         uint16 totalPools,
         uint16 totalBandLevels
     )
         external
         initializer
-        mAddressNotZero(address(usdtToken))
-        mAddressNotZero(address(usdcToken))
-        mAddressNotZero(address(wowToken))
         mAmountNotZero(totalPools)
         mAmountNotZero(totalBandLevels)
     {
+        // Checks: Address cannot be zero (not using modifers to avoid stack too deep error)
+        if (
+            address(usdtToken) == address(0) ||
+            address(usdcToken) == address(0) ||
+            address(wowToken) == address(0) ||
+            vesting == address(0)
+        ) {
+            revert Errors.Staking__ZeroAddress();
+        }
+
         __AccessControl_init();
         __UUPSUpgradeable_init();
 
@@ -199,6 +209,8 @@ contract Staking is
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(GELATO_EXECUTOR_ROLE, msg.sender);
         _grantRole(UPGRADER_ROLE, msg.sender);
+        _grantRole(VESTING_ROLE, vesting);
+        // @todo grant GELATO_EXECUTOR_ROLE for gelato
 
         // Effects: set the storage
         s_usdtToken = usdtToken;
@@ -368,6 +380,9 @@ contract Staking is
             revert Errors.Staking__InsufficientContractBalance(balance, amount);
         }
 
+        // @question should we allow to withdraw USDT/USDC tokens?
+        // @question should we allow to withdraw WOW tokens?
+
         // Interaction: transfer the tokens to the sender
         token.safeTransfer(msg.sender, amount);
 
@@ -433,7 +448,7 @@ contract Staking is
 
         // Checks: stakers and rewards arrays must be the same length
         if (stakersLength != rewardsLength) {
-            revert Errors.Staking__InvalidArrayLengths(
+            revert Errors.Staking__MismatchedArrayLengths(
                 stakersLength,
                 rewardsLength
             );
@@ -464,12 +479,7 @@ contract Staking is
         StakingTypes stakingType,
         uint16 bandLevel,
         uint8 month
-    )
-        external
-        mStakingTypeExists(stakingType)
-        mBandLevelExists(bandLevel)
-        mValidMonth(stakingType, month)
-    {
+    ) external mBandLevelExists(bandLevel) mValidMonth(stakingType, month) {
         // Effects: Create a new band and add it to the user
         uint256 bandId = _stakeBand(
             msg.sender,
@@ -536,7 +546,6 @@ contract Staking is
         external
         onlyRole(VESTING_ROLE)
         mAddressNotZero(user)
-        mStakingTypeExists(stakingType)
         mBandLevelExists(bandLevel)
         mValidMonth(stakingType, month)
     {
@@ -579,6 +588,7 @@ contract Staking is
 
     /**
      * @notice  Delete all user band data if beneficiary removed from vesting
+     * @notice  All unlclaimed USDT/USDC rewards will be transferred to the rewards collector
      * @param   user  staker address
      */
     function deleteVestingUser(
@@ -596,11 +606,17 @@ contract Staking is
         // Effects: delete user from the staker bands map
         delete s_stakerBands[user];
 
+        // Effects: delete users all claimed and unclaimed rewards for USDT
+        delete s_stakerRewards[_getStakerAndTokenHash(user, s_usdtToken)];
+
+        // Effects: delete users all claimed and unclaimed rewards for USDC
+        delete s_stakerRewards[_getStakerAndTokenHash(user, s_usdcToken)];
+
         // Effects: delete user from the map
         s_users.remove(user);
 
         // Effects: emit event
-        emit VestingUserDeleted(msg.sender);
+        emit VestingUserDeleted(user);
     }
 
     /**
@@ -843,8 +859,21 @@ contract Staking is
         bandIds = s_stakerBands[staker];
     }
 
+    /**
+     * @notice  Get user address in the users map from index in array
+     * @param   index  Index in the users array
+     * @return  user  User address
+     */
     function getUser(uint256 index) external view returns (address user) {
         (user, ) = s_users.at(index);
+    }
+
+    /**
+     * @notice  Returns the amount of users in the staking contract
+     * @return  usersAmount  Amount of users
+     */
+    function getTotalUsers() external view returns (uint256 usersAmount) {
+        usersAmount = s_users.length();
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -966,7 +995,7 @@ contract Staking is
 
             // Checks: fixed staking can only be unstaked after the fixed period
             if (monthsPassed < band.fixedMonths) {
-                revert Errors.Staking__FixedStakingNotUnlocked();
+                revert Errors.Staking__UnlockDateNotReached();
             }
         }
     }

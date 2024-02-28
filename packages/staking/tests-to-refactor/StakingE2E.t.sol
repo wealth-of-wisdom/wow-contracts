@@ -325,8 +325,8 @@ contract Staking_E2E_Test is Base_Test {
 
         // ARRANGE + ACT
         vm.startPrank(admin);
-        staking.grantRole(DEFAULT_VESTING_ROLE, alice);
-        staking.grantRole(DEFAULT_VESTING_ROLE, bob);
+        staking.grantRole(VESTING_ROLE, alice);
+        staking.grantRole(VESTING_ROLE, bob);
         vm.stopPrank();
 
         uint256 alicePreUnstakingBalance = wowToken.balanceOf(alice);
@@ -384,8 +384,8 @@ contract Staking_E2E_Test is Base_Test {
 
         // ARRANGE + ACT
         vm.startPrank(admin);
-        staking.grantRole(DEFAULT_VESTING_ROLE, alice);
-        staking.grantRole(DEFAULT_VESTING_ROLE, bob);
+        staking.grantRole(VESTING_ROLE, alice);
+        staking.grantRole(VESTING_ROLE, bob);
         vm.stopPrank();
         uint256 alicePreStakingBalance = wowToken.balanceOf(alice);
         uint256 bobPreUnstakingBalance = wowToken.balanceOf(bob);

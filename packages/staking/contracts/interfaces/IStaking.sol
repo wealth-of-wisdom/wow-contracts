@@ -24,6 +24,8 @@ interface IStakingEvents {
 
     event WowTokenSet(IERC20 token);
 
+    event RewardsCollectorSet(address collector);
+
     event TotalBandLevelsAmountSet(uint16 newTotalBandsAmount);
 
     event TotalPoolAmountSet(uint16 newTotalPoolAmount);
@@ -113,6 +115,7 @@ interface IStaking is IStakingEvents {
         IERC20 usdtToken,
         IERC20 usdcToken,
         IERC20 wowToken,
+        address vesting,
         uint16 totalPools,
         uint16 totalBandLevels
     ) external;
@@ -222,4 +225,6 @@ interface IStaking is IStakingEvents {
     ) external view returns (uint256[] memory bandIds);
 
     function getUser(uint256 index) external view returns (address user);
+
+    function getTotalUsers() external view returns (uint256 usersAmount);
 }

@@ -84,11 +84,16 @@ contract Base_Test is
             INIT_TOKEN_SUPPLY
         );
 
+        // VESTING
+        vesting = new VestingMock();
+
+        // STAKING
         staking = new StakingMock();
         staking.initialize(
             usdtToken,
             usdcToken,
             wowToken,
+            address(vesting),
             TOTAL_STAKING_POOLS,
             TOTAL_BAND_LEVELS
         );
