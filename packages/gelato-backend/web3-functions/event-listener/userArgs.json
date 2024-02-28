@@ -1,0 +1,5 @@
+{
+  "staking": "0x8F143A5D62de01EAdAF9ef16d4d3694380066D9F",
+  "event": "event DistributionCreated(IERC20 token, uint256 amount, uint256 totalPools, uint256 totalBandLevels, uint256 totalStakers)",
+  "eventTopic": "DistributionCreated"
+}
