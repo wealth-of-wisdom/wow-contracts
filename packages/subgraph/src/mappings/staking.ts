@@ -42,6 +42,7 @@ export function handleBandStaked(event: BandStakedEvent): void {
     // band.stakingType = event.params
     band.bandLevel = event.params.bandLevel;
     band.owner = event.params.user;
+    // @todo get from getter function
     // band.price = event.params.price;
     band.startingSharesAmount = BIGINT_ZERO;
     band.stakingStartTimestamp = event.block.timestamp;
