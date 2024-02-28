@@ -2,12 +2,12 @@
 pragma solidity 0.8.20;
 
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
-import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
-import {Errors} from "@wealth-of-wisdom/vesting/contracts/libraries/Errors.sol";
-import {Vesting_Unit_Test} from "@wealth-of-wisdom/vesting/test/unit/VestingUnit.t.sol";
+import {IVesting} from "../../../contracts/interfaces/IVesting.sol";
+import {Errors} from "../../../contracts/libraries/Errors.sol";
+import {Vesting_Unit_Test} from "../VestingUnit.t.sol";
 
 contract Vesting_AddVestingPool_Unit_Test is Vesting_Unit_Test {
-    function test_addVestingPool_RevertIf_NotAdmin() external {
+    function test_addVestingPool_RevertIf_CallerNotAdmin() external {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
@@ -136,32 +136,6 @@ contract Vesting_AddVestingPool_Unit_Test is Vesting_Unit_Test {
         assertEq(name, POOL_NAME, "Pool name incorrect");
     }
 
-    function test_addVestingPool_SetsPoolUnlockTypeCorrectly()
-        external
-        approveAndAddPool
-    {
-        (, IVesting.UnlockTypes unlockType, , ) = vesting.getGeneralPoolData(
-            PRIMARY_POOL
-        );
-        assertEq(
-            uint8(unlockType),
-            uint8(VESTING_UNLOCK_TYPE),
-            "Unlock type incorrect"
-        );
-    }
-
-    function test_addVestingPool_SetsPoolTotalAmountCorrectly()
-        external
-        approveAndAddPool
-    {
-        (, , uint256 totalAmount, ) = vesting.getGeneralPoolData(PRIMARY_POOL);
-        assertEq(
-            totalAmount,
-            TOTAL_POOL_TOKEN_AMOUNT,
-            "Total pool token amount incorrect"
-        );
-    }
-
     function test_addVestingPool_DoesNotChangePoolLockedAmount()
         external
         approveAndAddPool
@@ -194,21 +168,21 @@ contract Vesting_AddVestingPool_Unit_Test is Vesting_Unit_Test {
         );
     }
 
-    function test_addVestingPool_SetsCliffEndDateCorrectly()
-        external
-        approveAndAddPool
-    {
-        (uint32 endDate, , , ) = vesting.getPoolCliffData(PRIMARY_POOL);
-        uint32 actualEndDate = uint32(LISTING_DATE + CLIFF_IN_DAYS * 1 days);
-        assertEq(endDate, actualEndDate, "Cliff in days incorrect");
-    }
-
     function test_addVestingPool_SetsCliffInDaysCorrectly()
         external
         approveAndAddPool
     {
         (, uint16 inDays, , ) = vesting.getPoolCliffData(PRIMARY_POOL);
         assertEq(inDays, CLIFF_IN_DAYS, "Cliff in days incorrect");
+    }
+
+    function test_addVestingPool_SetsCliffEndDateCorrectly()
+        external
+        approveAndAddPool
+    {
+        (uint32 endDate, , , ) = vesting.getPoolCliffData(PRIMARY_POOL);
+        uint32 actualEndDate = uint32(LISTING_DATE + CLIFF_IN_SECONDS);
+        assertEq(endDate, actualEndDate, "Cliff in days incorrect");
     }
 
     function test_addVestingPool_SetsCliffPercentageDividendCorrectly()
@@ -233,19 +207,6 @@ contract Vesting_AddVestingPool_Unit_Test is Vesting_Unit_Test {
             CLIFF_PERCENTAGE_DIVISOR,
             "Cliff percentage divisor incorrect"
         );
-    }
-
-    function test_addVestingPool_SetsVestingEndDateCorrectly()
-        external
-        approveAndAddPool
-    {
-        (uint32 endDate, , ) = vesting.getPoolVestingData(PRIMARY_POOL);
-        uint32 actualEndDate = uint32(
-            LISTING_DATE +
-                ((CLIFF_IN_DAYS + (VESTING_DURATION_IN_MONTHS * 30)) * 1 days)
-        );
-
-        assertEq(endDate, actualEndDate, "Vesting end date incorrect");
     }
 
     function test_addVestingPool_SetsVestingDurationInDaysCorrectly()
@@ -276,6 +237,44 @@ contract Vesting_AddVestingPool_Unit_Test is Vesting_Unit_Test {
         );
     }
 
+    function test_addVestingPool_SetsVestingEndDateCorrectly()
+        external
+        approveAndAddPool
+    {
+        (uint32 endDate, , ) = vesting.getPoolVestingData(PRIMARY_POOL);
+        uint32 actualEndDate = uint32(
+            LISTING_DATE + CLIFF_IN_SECONDS + VESTING_DURATION_IN_SECONDS
+        );
+
+        assertEq(endDate, actualEndDate, "Vesting end date incorrect");
+    }
+
+    function test_addVestingPool_SetsPoolUnlockTypeCorrectly()
+        external
+        approveAndAddPool
+    {
+        (, IVesting.UnlockTypes unlockType, , ) = vesting.getGeneralPoolData(
+            PRIMARY_POOL
+        );
+        assertEq(
+            uint8(unlockType),
+            uint8(MONTHLY_UNLOCK_TYPE),
+            "Unlock type incorrect"
+        );
+    }
+
+    function test_addVestingPool_SetsPoolTotalAmountCorrectly()
+        external
+        approveAndAddPool
+    {
+        (, , uint256 totalAmount, ) = vesting.getGeneralPoolData(PRIMARY_POOL);
+        assertEq(
+            totalAmount,
+            TOTAL_POOL_TOKEN_AMOUNT,
+            "Total pool token amount incorrect"
+        );
+    }
+
     function test_addVestingPool_IncreasesPoolCountByOne()
         external
         approveAndAddPool
@@ -284,9 +283,9 @@ contract Vesting_AddVestingPool_Unit_Test is Vesting_Unit_Test {
     }
 
     function test_addVestingPool_TransfersTokensFromAdmin() external {
-        uint256 adminBalanceBefore = token.balanceOf(admin);
+        uint256 adminBalanceBefore = wowToken.balanceOf(admin);
         _approveAndAddPool();
-        uint256 adminBalanceAfter = token.balanceOf(admin);
+        uint256 adminBalanceAfter = wowToken.balanceOf(admin);
 
         assertEq(
             adminBalanceBefore - TOTAL_POOL_TOKEN_AMOUNT,
@@ -296,9 +295,9 @@ contract Vesting_AddVestingPool_Unit_Test is Vesting_Unit_Test {
     }
 
     function test_addVestingPool_TransfersTokensToVestingContract() external {
-        uint256 vestingBalanceBefore = token.balanceOf(address(vesting));
+        uint256 vestingBalanceBefore = wowToken.balanceOf(address(vesting));
         _approveAndAddPool();
-        uint256 vestingBalanceAfter = token.balanceOf(address(vesting));
+        uint256 vestingBalanceAfter = wowToken.balanceOf(address(vesting));
 
         assertEq(
             vestingBalanceBefore + TOTAL_POOL_TOKEN_AMOUNT,
@@ -309,9 +308,9 @@ contract Vesting_AddVestingPool_Unit_Test is Vesting_Unit_Test {
 
     function test_addVestingPool_EmitsVestingPoolAddedEvent() external {
         vm.prank(admin);
-        token.approve(address(vesting), TOTAL_POOL_TOKEN_AMOUNT);
+        wowToken.approve(address(vesting), TOTAL_POOL_TOKEN_AMOUNT);
 
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit(address(vesting));
         emit VestingPoolAdded(PRIMARY_POOL, TOTAL_POOL_TOKEN_AMOUNT);
 
         vm.prank(admin);

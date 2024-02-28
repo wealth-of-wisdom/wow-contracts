@@ -3,10 +3,10 @@ pragma solidity 0.8.20;
 
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
-import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
-import {TokenMock} from "@wealth-of-wisdom/vesting/test/mocks/TokenMock.sol";
-import {Errors} from "@wealth-of-wisdom/vesting/contracts/libraries/Errors.sol";
-import {Vesting_Unit_Test} from "@wealth-of-wisdom/vesting/test/unit/VestingUnit.t.sol";
+import {IVesting} from "../../../contracts/interfaces/IVesting.sol";
+import {Errors} from "../../../contracts/libraries/Errors.sol";
+import {TokenMock} from "../../mocks/TokenMock.sol";
+import {Vesting_Unit_Test} from "../VestingUnit.t.sol";
 
 contract Vesting_WithdrawContractTokens_Unit_Test is Vesting_Unit_Test {
     uint256 internal withdrawAmount = 1 ether;
@@ -17,7 +17,7 @@ contract Vesting_WithdrawContractTokens_Unit_Test is Vesting_Unit_Test {
 
         vm.startPrank(admin);
         customToken = new TokenMock();
-        customToken.initialize("TEST", "TST", TOTAL_POOL_TOKEN_AMOUNT * 10);
+        customToken.initialize("TEST Token", "TEST", 18, INIT_TOKEN_SUPPLY);
         vm.stopPrank();
     }
 
@@ -25,7 +25,7 @@ contract Vesting_WithdrawContractTokens_Unit_Test is Vesting_Unit_Test {
                                         TESTS
     //////////////////////////////////////////////////////////////////////////////*/
 
-    function test_withdrawContractTokens_RevertIf_NotAdmin() external {
+    function test_withdrawContractTokens_RevertIf_CallerNotAdmin() external {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
@@ -72,7 +72,7 @@ contract Vesting_WithdrawContractTokens_Unit_Test is Vesting_Unit_Test {
     {
         vm.expectRevert(Errors.Vesting__CanNotWithdrawVestedTokens.selector);
         vm.prank(admin);
-        vesting.withdrawContractTokens(token, alice, withdrawAmount);
+        vesting.withdrawContractTokens(wowToken, alice, withdrawAmount);
     }
 
     function test_withdrawContractTokens_RevertIf_TokenAmountIsGreaterThanBalance()
@@ -123,7 +123,7 @@ contract Vesting_WithdrawContractTokens_Unit_Test is Vesting_Unit_Test {
         vm.prank(admin);
         customToken.mint(address(vesting), withdrawAmount);
 
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit(address(vesting));
         emit ContractTokensWithdrawn(customToken, bob, withdrawAmount);
 
         vm.prank(admin);

@@ -13,7 +13,7 @@ contract Vesting_Unit_Test is Base_Test, IVestingEvents {
 
         vm.startPrank(admin);
         vesting = new VestingMock();
-        vesting.initialize(token, staking, LISTING_DATE);
+        vesting.initialize(wowToken, staking, LISTING_DATE);
         vm.stopPrank();
     }
 }
