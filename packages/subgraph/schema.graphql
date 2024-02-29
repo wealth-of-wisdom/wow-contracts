@@ -79,9 +79,9 @@ type VestingPool @entity {
     listingPercentageDivisor: BigInt!
 
     """
-    Duration of the cliff period in days
+    Duration of the cliff period.
     Type: BigInt
-    Example: 30 (days)
+    Example: 2592000000 (30 days in milliseconds)
     """
     cliffDuration: BigInt!
 
@@ -107,9 +107,9 @@ type VestingPool @entity {
     cliffPercentageDivisor: BigInt!
 
     """
-    Duration of the vesting period in days
+    Duration of the vesting period.
     Type: BigInt
-    Example: 90 (days)
+    Example: 7776000000 (90 days in milliseconds)
     """
     vestingDuration: BigInt!
 
@@ -211,6 +211,28 @@ type Beneficiary @entity {
     claimedTokens: BigInt!
 }
 
+type NftContract @entity {
+    id: ID!
+    nftContractAddress: Bytes!
+}
+
+# NFT details
+type Nft @entity {
+    id: ID!
+    idInLevel: BigInt!
+    level: BigInt!
+    isGenesis: Boolean!
+    activityEndTimestamp: BigInt!
+    extendedActivityEndTimestamp: BigInt!
+    owner: User!
+
+}
+
+# NFT holder info
+type User @entity {
+    id: ID!
+    nfts: [Nft!]! @derivedFrom(field: "owner")
+}
 
 # Staking schema
  

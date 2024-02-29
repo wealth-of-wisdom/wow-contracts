@@ -4,6 +4,7 @@ repository: https://github.com/wealth-of-wisdom/wow-contracts
 schema:
     file: ./schema.graphql
 dataSources:
+{{#includeVesting}}
     - kind: ethereum/contract
       name: Vesting
       network: {{network}}
@@ -41,7 +42,33 @@ dataSources:
               handler: handleStakingContractSet
             - event: TokensClaimed(indexed uint16,indexed address,uint256)
               handler: handleTokensClaimed
+{{/includeVesting}}
     - kind: ethereum/contract
+      name: Nft
+      network: {{network}}
+      source:
+        address: "{{nftAddress}}"
+        abi: Nft
+        startBlock: {{startBlock}}
+      mapping:
+        kind: ethereum/events
+        apiVersion: 0.0.7
+        language: wasm/assemblyscript
+        file: ./src/mappings/nft.ts
+        entities:
+            - NftContract
+            - Nft
+            - User
+        abis:
+          - name: Nft
+            file: ./abis/Nft.json
+        eventHandlers:
+        - event: Initialized(uint64)
+          handler: handleInitialized
+        - event: NftMinted(indexed address,indexed uint256,uint16,bool,uint256)
+          handler: handleNftMinted
+        - event: NftDataActivated(indexed address,indexed uint256,uint16,bool,uint256,uint256)
+          handler: handleNftActivation
       name: Staking
       network: {{network}}
       source:
