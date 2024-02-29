@@ -43,6 +43,8 @@ interface IVestingEvents {
         uint256 tokenAmount
     );
 
+    event AllTokensClaimed(address indexed user, uint256 tokenAmount);
+
     event StakedTokensUpdated(
         uint16 indexed poolIndex,
         address indexed beneficiary,

@@ -88,6 +88,9 @@ contract Staking is
     // Total amount of bands used for staking (currently, 9)
     uint16 internal s_totalBandLevels;
 
+    // Trigger for upgrade/downgrades
+    bool internal s_upgradesTrigger;
+
     /*//////////////////////////////////////////////////////////////////////////
                             STORAGE FOR FUTURE UPGRADES
     //////////////////////////////////////////////////////////////////////////*/
@@ -150,6 +153,13 @@ contract Staking is
     modifier mTokenExists(IERC20 token) {
         if (token != s_usdtToken && token != s_usdcToken) {
             revert Errors.Staking__NonExistantToken();
+        }
+        _;
+    }
+
+    modifier mUpgradesEnabled() {
+        if (!s_upgradesTrigger) {
+            revert Errors.Staking__UpgradesDisabled();
         }
         _;
     }
@@ -338,6 +348,20 @@ contract Staking is
     }
 
     /**
+     * @notice  Sets new trigger status for upgrades/downgrades
+     * @param   triggerStatus  true or false value for upgrades enabling
+     */
+    function setUpgradesTrigger(
+        bool triggerStatus
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        // Effects: set upgrades trigger
+        s_upgradesTrigger = triggerStatus;
+
+        // Effects: emit event
+        emit UpgradesTriggerSet(triggerStatus);
+    }
+
+    /**
      * @notice Withdraw the given amount of tokens from the contract
      * @param token Token to withdraw
      * @param amount Amount to withdraw
@@ -494,6 +518,9 @@ contract Staking is
         mBandLevelExists(bandLevel)
         mStakingTypeExists(stakingType)
     {
+        if (StakingTypes.FLEXI != stakingType) {
+            revert Errors.Staking__OnlyFlexiTypeAllowed();
+        }
         // Effects: Create a new band and add it to the user
         uint256 bandId = _stakeBand(stakingType, bandLevel, user);
 
@@ -557,6 +584,7 @@ contract Staking is
         uint16 newBandLevel
     )
         external
+        mUpgradesEnabled
         mBandOwner(msg.sender, bandId)
         mBandLevelExists(newBandLevel)
         mNotFixStakingType(bandId)
@@ -592,6 +620,7 @@ contract Staking is
         uint16 newBandLevel
     )
         external
+        mUpgradesEnabled
         mBandOwner(msg.sender, bandId)
         mBandLevelExists(newBandLevel)
         mNotFixStakingType(bandId)
@@ -684,6 +713,14 @@ contract Staking is
      */
     function getSharesInMonthArray() external view returns (uint48[] memory) {
         return sharesInMonth;
+    }
+
+    /**
+     * @notice  Returns current upgrades/downgrades trigger status
+     * @return  bool  enabled/disabled trigger
+     */
+    function getUpgradesTrigger() external view returns (bool) {
+        return s_upgradesTrigger;
     }
 
     /**

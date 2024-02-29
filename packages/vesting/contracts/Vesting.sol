@@ -429,11 +429,6 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
             revert Errors.Vesting__NoTokensUnlocked();
         }
 
-        // Checks: Enough tokens in the contract
-        if (unlockedTokens > s_token.balanceOf(address(this))) {
-            revert Errors.Vesting__NotEnoughTokens();
-        }
-
         Pool storage pool = s_vestingPools[pid];
         Beneficiary storage user = pool.beneficiaries[msg.sender];
 
@@ -463,6 +458,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      */
     function claimAllTokens() external {
         uint16 poolCount = s_poolCount;
+        uint256 allTokensToClaim;
         for (uint16 i; i < poolCount; i++) {
             uint256 unlockedTokens = getUnlockedTokenAmount(i, msg.sender);
 
@@ -470,10 +466,6 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
             // if none - continue to other pool
             if (unlockedTokens == 0) {
                 continue;
-            }
-            // Checks: Enough tokens in the contract for current pool transfer
-            if (unlockedTokens > s_token.balanceOf(address(this))) {
-                revert Errors.Vesting__NotEnoughTokens();
             }
 
             Pool storage pool = s_vestingPools[i];
@@ -493,12 +485,12 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
 
             // Effects
             user.claimedTokenAmount += unlockedTokens;
-
-            // Interactions
-            s_token.safeTransfer(msg.sender, unlockedTokens);
-
-            emit TokensClaimed(i, msg.sender, unlockedTokens);
+            allTokensToClaim += unlockedTokens;
         }
+        // Interactions
+        s_token.safeTransfer(msg.sender, allTokensToClaim);
+
+        emit AllTokensClaimed(msg.sender, allTokensToClaim);
     }
 
     /**
