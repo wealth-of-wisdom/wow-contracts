@@ -1,293 +1,283 @@
-import dotenv from "dotenv";
-import path from "path";
-import { fileURLToPath } from "url";
-import {
-  getDefaultProvider,
-  Wallet,
-  Contract,
-  ethers,
-  BigNumber,
-} from "ethers";
+import { BigNumber } from "ethers"
+import { Contract } from "@ethersproject/contracts"
+import { StaticJsonRpcProvider } from "@ethersproject/providers"
+import { stakingABI } from "./stakingABI"
 
-export enum StakingTypes {
-  FLEXI = 0,
-  FIX = 1,
+enum StakingTypes {
+    FIX,
+    FLEXI,
 }
 
 interface StakerBand {
-  stakingStartDate: number;
-  fixedShares: number;
-  owner: string;
-  bandLevel: number;
-  stakingType: StakingTypes;
+    owner: string
+    stakingStartDate: number
+    bandLevel: number
+    fixedMonths: number
+    stakingType: StakingTypes
+    areTokensVested: boolean
 }
 
-//@todo add abi
-const stakingABI: any = [];
-// __dirname is not available in ES modules, so we need to derive it
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-// Configure dotenv to load the .env file from the root directory
-dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+interface BandLevel {
+    price: BigNumber
+    accessiblePools: number[]
+}
 
 export async function main(
-  token: string,
-  totalAmount: BigNumber,
-  totalPools: number,
-  totalBandLevels: number,
-  usersAmount: number,
-  distributionDate: number,
-  stakingAddress: string,
-  privateKey: string,
-  sepoliaRpcUrl: string,
-) {
-  const provider = getDefaultProvider(sepoliaRpcUrl);
-  const wallet = new Wallet(privateKey, provider);
-  const staking = new Contract(stakingAddress, stakingABI, wallet);
+    totalAmount: BigNumber,
+    totalPools: number,
+    totalBandLevels: number,
+    usersAmount: number,
+    distributionDate: number,
+    stakingAddress: string,
+    provider: StaticJsonRpcProvider,
+): Promise<Map<string, BigNumber>> {
+    const staking: Contract = new Contract(stakingAddress, stakingABI, provider)
 
-  const sharesInMonth = await staking.getSharesInMonth();
+    const sharesInMonth: number[] = await staking.getSharesInMonthArray()
 
-  // Calculate how many tokens each pool will receive
-  const poolAllocations = await calculateAllPoolAllocations(
-    staking,
-    totalPools,
-    totalAmount,
-  );
-  // Loop through all band levels once to store all accessible pools
-  const bandLevelPoolIds = await getBandLevelPoolIds(staking, totalBandLevels);
+    // Calculate how many tokens each pool will receive
+    const poolAllocations: BigNumber[] = await calculateAllPoolAllocations(
+        staking,
+        totalPools,
+        totalAmount,
+    )
 
-  // Add shares for each user and pool
-  const [sharesForPools, sharesForUsers] = await addPoolsAndUsersShares(
-    staking,
-    totalPools,
-    usersAmount,
-    distributionDate,
-    bandLevelPoolIds,
-    sharesInMonth,
-  );
+    // Loop through all band levels once to store all accessible pools
+    const bandLevelPoolIds: number[][] = await getBandLevelPoolIds(
+        staking,
+        totalBandLevels,
+    )
 
-  // Add token rewards for each user
-  const userRewards = await addUserRewards(
-    poolAllocations,
-    sharesForPools,
-    sharesForUsers,
-  );
+    // Add shares for each user and pool
+    const [sharesForPools, sharesForUsers]: [number[], Map<string, number[]>] =
+        await addPoolsAndUsersShares(
+            staking,
+            totalPools,
+            usersAmount,
+            distributionDate,
+            bandLevelPoolIds,
+            sharesInMonth,
+        )
 
-  // Call staking contract to distribute tokens to each user
-  try {
-    const tx = await staking.distributeRewards(
-      token,
-      userRewards.keys(),
-      userRewards.values(),
-    );
-    await tx.wait();
-  } catch (err) {
-    console.error("Failed to distribute rewards:", err);
-    throw err; // Propagate the error
-  }
+    // Add rewards for each user
+    const userRewards: Map<string, BigNumber> = await addUserRewards(
+        poolAllocations,
+        sharesForPools,
+        sharesForUsers,
+    )
+
+    return userRewards
 }
 
 async function addUserRewards(
-  poolAllocations: BigNumber[],
-  sharesForPools: number[],
-  sharesForUsers: Map<string, number[]>,
-): Promise<Map<string, number>> {
-  const userRewards: Map<string, number> = new Map();
-  // Loop through each user and distribute funds
-  for (const [user, userShares] of sharesForUsers) {
-    let allocation: BigNumber = new BigNumber(0, "");
+    poolAllocations: BigNumber[],
+    sharesForPools: number[],
+    sharesForUsers: Map<string, number[]>,
+): Promise<Map<string, BigNumber>> {
+    const userRewards: Map<string, BigNumber> = new Map()
 
-    // Loop through all pools and distribute funds to the user
-    for (let i = 0; i < poolAllocations.length; i++) {
-      const userPoolShares: number = userShares[i];
-      const totalPoolShares: number = sharesForPools[i];
-      const totalAmount: BigNumber = poolAllocations[i];
+    // Loop through each user and distribute funds
+    for (const [user, userShares] of sharesForUsers) {
 
-      allocation = allocation.add(
-        totalAmount.mul(userPoolShares).div(totalPoolShares),
-      );
+        let allocation: BigNumber = BigNumber.from(0)
+
+        // Loop through all pools and distribute funds to the user
+        for (let i = 0; i < poolAllocations.length; i++) {
+            const userPoolShares: number = userShares[i]
+            const totalPoolShares: number = sharesForPools[i]
+
+            if (userPoolShares > 0 && totalPoolShares > 0) {
+                const totalAmount: BigNumber = poolAllocations[i]
+
+                allocation = allocation.add(
+                    totalAmount.mul(userPoolShares).div(totalPoolShares),
+                )
+            }
+        }
+
+        userRewards.set(user, allocation)
     }
-    userRewards.set(user, Number(allocation));
-  }
-  return userRewards;
+
+    return userRewards
 }
 
 async function addPoolsAndUsersShares(
-  staking: Contract,
-  totalPools: number,
-  usersAmount: number,
-  distributionDate: number,
-  bandLevelPoolIds: number[][],
-  sharesInMonth: number[],
+    staking: Contract,
+    totalPools: number,
+    usersAmount: number,
+    distributionDate: number,
+    bandLevelPoolIds: number[][],
+    sharesInMonth: number[],
 ): Promise<[number[], Map<string, number[]>]> {
-  // Initialize array with 0 shares for each pool
-  const sharesForPools: number[] = new Array(totalPools).fill(0);
+    // Initialize array with 0 shares for each pool
+    const sharesForPools: number[] = new Array(totalPools).fill(0)
 
-  // Map from user address to array of pools shares amount
-  const sharesForUsers: Map<string, number[]> = new Map();
+    // Map from user address to array of pools shares amount
+    const sharesForUsers: Map<string, number[]> = new Map()
 
-  // Loop through all users and set the amount of shares
-  for (let i = 0; i < usersAmount; i++) {
-    const user = await staking.getUser(i);
-    // Loop through all bands and add shares to pools
-    const userSharesPerPool: number[] = await addMultipleBandSharesToPools(
-      staking,
-      user,
-      totalPools,
-      distributionDate,
-      bandLevelPoolIds,
-      sharesInMonth,
-    );
+    // Loop through all users and set the amount of shares
+    for (let i = 0; i < usersAmount; i++) {
+        const user: string = await staking.getUser(i)
 
-    // Add shares to the users map
-    sharesForUsers.set(user, userSharesPerPool);
+        // Loop through all bands and add shares to pools
+        const userSharesPerPool: number[] = await addMultipleBandSharesToPools(
+            staking,
+            user,
+            totalPools,
+            distributionDate,
+            bandLevelPoolIds,
+            sharesInMonth,
+        )
 
-    // Loop through all pools and add user shares to the pool
-    for (let j = 0; j < totalPools; j++) {
-      const poolShare: number = userSharesPerPool[j];
-      // Add user shares to the pool
-      sharesForPools[j] += poolShare;
+        // Add shares to the users map
+        sharesForUsers.set(user, userSharesPerPool)
+
+        // Loop through all pools and add user shares to the pool
+        for (let j = 0; j < totalPools; j++) {
+            const poolShare: number = userSharesPerPool[j]
+
+            // Add user shares to the pool
+            sharesForPools[j] += poolShare
+        }
     }
-  }
-  return [sharesForPools, sharesForUsers];
+
+    return [sharesForPools, sharesForUsers]
 }
 
 async function addMultipleBandSharesToPools(
-  staking: Contract,
-  user: string,
-  totalPools: number,
-  distributionDate: number,
-  bandLevelPoolIds: number[][],
-  sharesInMonth: number[],
+    staking: Contract,
+    user: string,
+    totalPools: number,
+    distributionDate: number,
+    bandLevelPoolIds: number[][],
+    sharesInMonth: number[],
 ): Promise<number[]> {
-  const bandIds = await staking.getStakerBands(user);
-  const bandsAmount = bandIds.length;
+    const bandIds: number[] = await staking.getStakerBandIds(user)
+    const bandsAmount: number = bandIds.length
 
-  // Initialize array with 0 shares for each pool
-  const userSharesPerPool: number[] = new Array(totalPools).fill(0);
+    // Initialize array with 0 shares for each pool
+    const userSharesPerPool: number[] = new Array(totalPools).fill(0)
 
-  // Loop through all bands that user owns and set the amount of shares
-  for (let i = 0; i < bandsAmount; i++) {
-    const bandId = bandIds[i];
-    const band = await staking.getStakerBand(bandId);
-    const bandShares = await calculateBandShares(
-      band,
-      distributionDate,
-      sharesInMonth,
-    );
+    // Loop through all bands that user owns and set the amount of shares
+    for (let i = 0; i < bandsAmount; i++) {
+        const bandId: number = bandIds[i]
 
-    // No need to add shares if there is nothing to add
-    if (bandShares > 0) {
-      const pools = bandLevelPoolIds[band.bandLevel - 1];
-      const poolsAmount = pools.length;
+        const band: StakerBand = await staking.getStakerBand(bandId)
+        const bandShares: number = await calculateBandShares(
+            band,
+            distributionDate,
+            sharesInMonth,
+        )
 
-      // Loop through all pools and set the amount of shares
-      for (let j = 0; j < poolsAmount; j++) {
-        const poolId = pools[j];
+        // No need to add shares if there is nothing to add
+        if (bandShares > 0) {
+            const pools: number[] = bandLevelPoolIds[band.bandLevel - 1]
+            const poolsAmount: number = pools.length
 
-        // Add shares to the user in the pool
-        userSharesPerPool[poolId - 1] += bandShares;
-      }
+            // Loop through all pools and set the amount of shares
+            for (let j = 0; j < poolsAmount; j++) {
+                const poolId: number = pools[j]
+
+                // Add shares to the user in the pool
+                userSharesPerPool[poolId - 1] += bandShares
+            }
+        }
     }
-  }
 
-  return userSharesPerPool;
+    return userSharesPerPool
 }
 
 async function getBandLevelPoolIds(
-  staking: Contract,
-  totalBandLevels: number,
+    staking: Contract,
+    totalBandLevels: number,
 ): Promise<number[][]> {
-  const poolIds: number[][] = [];
+    const poolIds: number[][] = []
 
-  // Loop through all band levels and store all accessible pools
-  for (let bandLevel = 1; bandLevel <= totalBandLevels; bandLevel++) {
-    const bandLevelData = await staking.getBandLevel(bandLevel);
-    poolIds.push(bandLevelData.accessiblePools);
-  }
+    // Loop through all band levels and store all accessible pools
+    for (let bandLevel = 1; bandLevel <= totalBandLevels; bandLevel++) {
+        const bandLevelData: BandLevel = await staking.getBandLevel(bandLevel)
+        poolIds.push(bandLevelData.accessiblePools)
+    }
 
-  return poolIds;
+    return poolIds
 }
 
 function calculateCompletedMonths(
-  startDateInSeconds: number,
-  endDateInSeconds: number,
+    startDateInSeconds: number,
+    endDateInSeconds: number,
 ): number {
-  // 60 seconds * 60 minutes * 24 hours * 30 days
-  // This is hardcoded because it's a constant value
-  const secondsInMonth: number = 60 * 60 * 24 * 30;
-  return Math.floor((endDateInSeconds - startDateInSeconds) / secondsInMonth);
+    // 60 seconds * 60 minutes * 24 hours * 30 days
+    // This is hardcoded because it's a constant value
+    const secondsInMonth: number = 60 * 60 * 24 * 30
+    return Math.floor((endDateInSeconds - startDateInSeconds) / secondsInMonth)
 }
 
 async function calculateAllPoolAllocations(
-  staking: Contract,
-  totalPools: number,
-  totalAmount: BigNumber,
+    staking: Contract,
+    totalPools: number,
+    totalAmount: BigNumber,
 ): Promise<BigNumber[]> {
-  // This value is hardcoded because it's a constant value
-  const percentagePrecision: number = 10 ** 8;
-  const allocations = [];
+    // This value is hardcoded because it's a constant value
+    const percentagePrecision: number = 10 ** 8
+    const allocations: BigNumber[] = []
 
-  // Loop through all pools and set the amount of tokens
-  for (let poolId = 1; poolId <= totalPools; poolId++) {
-    // Calculate the amount of tokens for the pool
-    const poolTokens = await calculatePoolAllocation(
-      staking,
-      totalAmount,
-      percentagePrecision,
-      poolId,
-    );
+    // Loop through all pools and set the amount of tokens
+    for (let poolId = 1; poolId <= totalPools; poolId++) {
+        // Calculate the amount of tokens for the pool
+        const poolTokens: BigNumber = await calculatePoolAllocation(
+            staking,
+            totalAmount,
+            percentagePrecision,
+            poolId,
+        )
 
-    allocations.push(poolTokens);
-  }
+        allocations.push(poolTokens)
+    }
 
-  return allocations;
+    return allocations
 }
 
 async function calculatePoolAllocation(
-  staking: Contract,
-  totalAmount: BigNumber,
-  percentagePrecision: number,
-  poolId: number,
+    staking: Contract,
+    totalAmount: BigNumber,
+    percentagePrecision: number,
+    poolId: number,
 ): Promise<BigNumber> {
-  const poolData = await staking.getPool(poolId);
+    const distributionPercentage: number = await staking.getPool(poolId)
 
-  // totalAmount * (distribution% * 10**6) / (100% * 10**6)
-  const poolTokens: BigNumber = totalAmount
-    .mul(poolData.distributionPercentage)
-    .div(percentagePrecision);
+    // totalAmount * (distribution% * 10**6) / (100% * 10**6)
+    const poolTokens: BigNumber = totalAmount
+        .mul(distributionPercentage)
+        .div(percentagePrecision)
 
-  return poolTokens;
+    return poolTokens
 }
 
 async function calculateBandShares(
-  band: StakerBand,
-  endDateInSeconds: number,
-  sharesInMonth: number[],
+    band: StakerBand,
+    endDateInSeconds: number,
+    sharesInMonth: number[],
 ): Promise<number> {
-  let bandShares: number = 0;
+    let bandShares: number = 0
 
-  // If staking type is FLEXI calculate shares based on months passed
-  if (band.stakingType === StakingTypes.FLEXI) {
-    // Calculate months that passed since staking started
-    const monthsPassed = calculateCompletedMonths(
-      band.stakingStartDate,
-      endDateInSeconds,
-    );
+    // If staking type is FLEXI calculate shares based on months passed
+    if (band.stakingType === StakingTypes.FLEXI) {
+        // Calculate months that passed since staking started
+        const monthsPassed: number = calculateCompletedMonths(
+            band.stakingStartDate,
+            endDateInSeconds,
+        )
 
-    // If at least 1 month passed, calculate shares based on months
-    if (monthsPassed > 0) {
-      bandShares = sharesInMonth[monthsPassed - 1];
+        // If at least 1 month passed, calculate shares based on months
+        if (monthsPassed > 0) {
+            bandShares = sharesInMonth[monthsPassed - 1]
+        }
     }
-  }
-  // Else type is FIX
-  else {
-    // For FIX type, shares are set at the start and do not change over time
-    bandShares = band.fixedShares;
-  }
+    // Else type is FIX
+    else {
+        // For FIX type, shares are set at the start and do not change over time
+        bandShares = sharesInMonth[band.fixedMonths - 1]
+    }
 
-  return bandShares;
+    return bandShares
 }
-
-// main().catch((err) => {
-//   console.error(err);
-// });

@@ -1,53 +1,67 @@
-import dotenv from "dotenv";
-import path from "path";
-import { fileURLToPath } from "url";
+import { BigNumber } from "ethers"
+import { Interface } from "@ethersproject/abi"
 import {
-  Web3Function,
-  Web3FunctionEventContext,
-} from "@gelatonetwork/web3-functions-sdk";
-import { Contract } from "@ethersproject/contracts";
-import { Wallet } from "ethers";
-import { main } from "./main";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-// Configure dotenv to load the .env file from the root directory
-dotenv.config({ path: path.resolve(__dirname, "../../.env") });
-const STAKING_ABI = [
-  "event DistributionCreated(IERC20 token, uint256 amount, uint256 totalPools, uint256 totalBandLevels, uint256 totalStakers)",
-  "function distributeRewards(IERC20 token, address[] memory stakers, uint256[] memory rewards)",
-];
+    Web3Function,
+    Web3FunctionEventContext,
+} from "@gelatonetwork/web3-functions-sdk"
+import { main } from "./main"
+import { stakingABI } from "./stakingABI"
 
 Web3Function.onRun(async (context: Web3FunctionEventContext) => {
-  // Get event log from Web3FunctionEventContext
-  const { userArgs, multiChainProvider, storage, log } = context;
+    const { userArgs, multiChainProvider, log } = context
+    const provider = multiChainProvider.default()
+    const stakingInterface = new Interface(stakingABI)
 
-  const privateKey = await context.secrets.get("PRIVATE_KEY");
-  const sepoliaRpcUrl = await context.secrets.get("SEPOLIA_RPC_URL");
-  const provider = multiChainProvider.default();
-  const stakingAddress = userArgs.staking as string;
-  const wallet = new Wallet(privateKey!, provider);
-  const staking = new Contract(stakingAddress, STAKING_ABI, wallet);
+    try {
+        // Parse the event from the log using the provided event ABI
+        console.log("Parsing event")
+        const event = stakingInterface.parseLog(log)
 
-  // Parse event from ABI
-  const event = staking.interface.parseLog(log);
-  const currentBlock = await provider.getBlockNumber();
-  const distributionTimestamp = (await provider.getBlock(currentBlock))
-    .timestamp;
+        // Handle event data
+        console.log(`Event detected: ${event.eventFragment.name}`)
 
-  // Handle event data
-  const { token, amount, totalPools, totalBandLevels, totalStakers } =
-    event.args;
+        const [
+            token,
+            amount,
+            totalPools,
+            totalBandLevels,
+            totalStakers,
+            distributionTimestamp,
+        ] = event.args
 
-  await main(
-    token,
-    amount,
-    totalPools,
-    totalBandLevels,
-    totalStakers,
-    distributionTimestamp,
-    stakingAddress,
-    privateKey!,
-    sepoliaRpcUrl!,
-  );
-  return { canExec: false, message: `Event processed ${log.transactionHash}` };
-});
+        const stakingAddress = userArgs.staking as string
+
+        const userRewards: Map<string, BigNumber> = await main(
+            amount,
+            totalPools,
+            totalBandLevels,
+            totalStakers,
+            distributionTimestamp,
+            stakingAddress,
+            provider,
+        )
+
+        const usersArray: string[] = Array.from(userRewards.keys())
+        const rewardsArray: BigNumber[] = Array.from(userRewards.values())
+
+        console.log("Rewards calculated successfully")
+
+        return {
+            canExec: true,
+            callData: [
+                {
+                    to: stakingAddress,
+                    data: stakingInterface.encodeFunctionData(
+                        "distributeRewards",
+                        [token, usersArray, rewardsArray],
+                    ),
+                },
+            ],
+        }
+    } catch (err) {
+        return {
+            canExec: false,
+            message: `Failed to parse event: ${(err as Error).message}`,
+        }
+    }
+})
