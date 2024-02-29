@@ -18,6 +18,8 @@ interface IStakingEvents {
 
     event SharesInMonthSet(uint48[] totalSharesInMonth);
 
+    event UpgradesTriggerSet(bool triggerStatus);
+
     event UsdtTokenSet(IERC20 token);
 
     event UsdcTokenSet(IERC20 token);
@@ -138,6 +140,8 @@ interface IStaking is IStakingEvents {
 
     function setWowToken(IERC20 token) external;
 
+    function setUpgradesTrigger(bool triggerStatus) external;
+
     function setTotalBandLevelsAmount(uint16 newTotalBandsAmount) external;
 
     function setTotalPoolAmount(uint16 newTotalPoolAmount) external;
@@ -182,6 +186,8 @@ interface IStaking is IStakingEvents {
     function getTokenUSDC() external view returns (IERC20);
 
     function getTokenWOW() external view returns (IERC20);
+
+    function getUpgradesTrigger() external view returns (bool);
 
     function getTotalPools() external view returns (uint16);
 

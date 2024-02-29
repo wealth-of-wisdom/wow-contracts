@@ -10,6 +10,8 @@ interface IVestingEvents {
                                        EVENTS
     //////////////////////////////////////////////////////////////////////////*/
 
+    event AllTokensClaimed(address indexed user, uint256 tokenAmount);
+
     event VestingPoolAdded(
         uint16 indexed poolIndex,
         uint256 totalPoolTokenAmount
@@ -137,6 +139,8 @@ interface IVesting is IVestingEvents {
     function setStakingContract(IStaking newStaking) external;
 
     function claimTokens(uint16 pid) external;
+
+    function claimAllTokens() external;
 
     function stakeVestedTokens(
         IStaking.StakingTypes stakingType,
