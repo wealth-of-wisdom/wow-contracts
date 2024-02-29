@@ -132,6 +132,11 @@ contract Base_Test is
         _;
     }
 
+    modifier stakeVestedTokens(address beneficiary) {
+        _stakeVestedTokens(beneficiary);
+        _;
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                     HELPER FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
@@ -172,6 +177,18 @@ contract Base_Test is
             beneficiary,
             BENEFICIARY_TOKEN_AMOUNT
         );
+    }
+
+    function _stakeVestedTokens(address beneficiary) internal {
+        vm.startPrank(beneficiary);
+        vesting.stakeVestedTokens(
+            STAKING_TYPE_FLEXI,
+            BAND_LEVEL_1,
+            0,
+            PRIMARY_POOL,
+            BENEFICIARY_TOKEN_AMOUNT
+        );
+        vm.stopPrank();
     }
 
     function _setBandLevelData() internal {

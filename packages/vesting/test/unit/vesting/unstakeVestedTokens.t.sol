@@ -6,79 +6,69 @@ import {IVesting, IVestingEvents} from "../../../contracts/interfaces/IVesting.s
 import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {Vesting_Unit_Test} from "../VestingUnit.t.sol";
 
-contract Vesting_StakeVestedTokens_Unit_Test is Vesting_Unit_Test {
-    function test_stakeVestedTokens_RevertIf_PoolDoesNotExist() external {
+contract Vesting_UnstakeVestedTokens_Unit_Test is Vesting_Unit_Test {
+    function test_unstakeVestedTokens_RevertIf_PoolDoesNotExist() external {
         vm.expectRevert(Errors.Vesting__PoolDoesNotExist.selector);
         vm.prank(alice);
-        vesting.stakeVestedTokens(
-            STAKING_TYPE_FIX,
-            BAND_LEVEL_2,
-            DEFAULT_STAKING_MONTH_AMOUNT,
+        vesting.unstakeVestedTokens(
+            BAND_ID_0,
             PRIMARY_POOL,
+            alice,
             BENEFICIARY_TOKEN_AMOUNT
         );
     }
 
-    function test_stakeVestedTokens_RevertIf_NotBeneficiary()
+    function test_unstakeVestedTokens_RevertIf_Vesting__BeneficiaryDoesNotExist()
         external
         approveAndAddPool
+        addBeneficiary(alice)
     {
-        vm.expectRevert(Errors.Vesting__NotBeneficiary.selector);
+        vm.expectRevert(Errors.Vesting__BeneficiaryDoesNotExist.selector);
         vm.prank(alice);
-        vesting.stakeVestedTokens(
-            STAKING_TYPE_FIX,
-            BAND_LEVEL_2,
-            DEFAULT_STAKING_MONTH_AMOUNT,
+        vesting.unstakeVestedTokens(
+            BAND_ID_0,
             PRIMARY_POOL,
+            bob,
             BENEFICIARY_TOKEN_AMOUNT
         );
     }
 
-    function test_stakeVestedTokens_RevertIf_TokenAmountZero()
+    function test_unstakeVestedTokens_RevertIf_TokenAmountZero()
         external
         approveAndAddPool
         addBeneficiary(alice)
     {
         vm.expectRevert(Errors.Vesting__TokenAmountZero.selector);
         vm.prank(alice);
-        vesting.stakeVestedTokens(
-            STAKING_TYPE_FIX,
-            BAND_LEVEL_2,
-            DEFAULT_STAKING_MONTH_AMOUNT,
-            PRIMARY_POOL,
-            0
-        );
+        vesting.unstakeVestedTokens(BAND_ID_0, PRIMARY_POOL, alice, 0);
     }
 
-    function test_stakeVestedTokens_RevertIf_NotEnoughVestedTokensForStaking()
+    function test_unstakeVestedTokens_RevertIf_UnstakingTooManyTokens()
         external
         approveAndAddPool
         addBeneficiary(alice)
     {
-        vm.expectRevert(
-            Errors.Vesting__NotEnoughVestedTokensForStaking.selector
-        );
+        vm.expectRevert(Errors.Vesting__UnstakingTooManyTokens.selector);
         vm.prank(alice);
-        vesting.stakeVestedTokens(
-            STAKING_TYPE_FIX,
-            BAND_LEVEL_2,
-            DEFAULT_STAKING_MONTH_AMOUNT,
+        vesting.unstakeVestedTokens(
+            BAND_ID_0,
             PRIMARY_POOL,
+            alice,
             BENEFICIARY_TOKEN_AMOUNT + 1
         );
     }
 
-    function test_stakeVestedTokens_ShouldStakeVestedTokens_AndUpdateData()
+    function test_unstakeVestedTokens_ShouldUnstakeVestedTokens_AndUpdateData()
         external
         approveAndAddPool
         addBeneficiary(alice)
+        stakeVestedTokens(alice)
     {
         vm.startPrank(alice);
-        vesting.stakeVestedTokens(
-            STAKING_TYPE_FIX,
-            BAND_LEVEL_1,
-            DEFAULT_STAKING_MONTH_AMOUNT,
+        vesting.unstakeVestedTokens(
+            BAND_ID_0,
             PRIMARY_POOL,
+            alice,
             BENEFICIARY_TOKEN_AMOUNT
         );
         vm.stopPrank();
@@ -86,11 +76,7 @@ contract Vesting_StakeVestedTokens_Unit_Test is Vesting_Unit_Test {
             PRIMARY_POOL,
             alice
         );
-        assertEq(
-            user.stakedTokenAmount,
-            BENEFICIARY_TOKEN_AMOUNT,
-            "Staked tokens not set"
-        );
+        assertEq(user.stakedTokenAmount, 0, "Staked tokens not set");
         assertEq(
             user.totalTokenAmount,
             BENEFICIARY_TOKEN_AMOUNT,
@@ -98,19 +84,19 @@ contract Vesting_StakeVestedTokens_Unit_Test is Vesting_Unit_Test {
         );
     }
 
-    function test_stakeVestedTokens_EmitsStakedTokensUpdated()
+    function test_unstakeVestedTokens_EmitsStakedTokensUpdated()
         external
         approveAndAddPool
         addBeneficiary(alice)
+        stakeVestedTokens(alice)
     {
         vm.startPrank(alice);
         vm.expectEmit(address(vesting));
         emit StakedTokensUpdated(PRIMARY_POOL, alice, BENEFICIARY_TOKEN_AMOUNT);
-        vesting.stakeVestedTokens(
-            STAKING_TYPE_FIX,
-            BAND_LEVEL_1,
-            DEFAULT_STAKING_MONTH_AMOUNT,
+        vesting.unstakeVestedTokens(
+            BAND_ID_0,
             PRIMARY_POOL,
+            alice,
             BENEFICIARY_TOKEN_AMOUNT
         );
         vm.stopPrank();

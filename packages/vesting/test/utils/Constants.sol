@@ -241,6 +241,12 @@ abstract contract Constants {
         BAND_9_ACCESSIBLE_POOLS
     ];
 
+    uint16 internal constant BAND_ID_0 = 0;
+    uint16 internal constant BAND_ID_1 = 1;
+    uint16 internal constant BAND_ID_2 = 2;
+    uint16 internal constant BAND_ID_3 = 3;
+    uint16 internal constant BAND_ID_4 = 4;
+
     /*//////////////////////////////////////////////////////////////////////////
                               SHARES DATA
     //////////////////////////////////////////////////////////////////////////*/
