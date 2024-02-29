@@ -2,6 +2,8 @@
     "network": "mainnet",
     "vestingAddress": "0x155b151a75788C30B968De92D72e32AeA4f466dC",
     "stakingAddress": "0x00000000000000000000000000000000000",
-    "nftSalesAddress": "0x623f4BA2b0CEE3d49a7A17ECA20E3Bb348D08F2C",
-    "startBlock": 5019002
+    "nftSalesAddress": "0x00F8b9910fec63212D40f4ca5d1b7F2c12063706",
+    "nftAddress": "0x1e0eE02eb4ce98327db0B9467FA148F6add5eDba",
+    "startBlock": 19077589,
+    "includeVesting": false
 }
