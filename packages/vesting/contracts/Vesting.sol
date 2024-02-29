@@ -459,6 +459,47 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     }
 
     /**
+     * @notice Function lets caller claim all unlocked tokens from all vested pools.
+     * @notice if the vesting period has ended - user is transferred all unclaimed tokens.
+     */
+    function claimAllTokens() external {
+        uint16 poolCount = s_poolCount;
+        uint256 allTokensToClaim;
+        for (uint16 i; i < poolCount; i++) {
+            uint256 unlockedTokens = getUnlockedTokenAmount(i, msg.sender);
+
+            // Checks: At least some tokens are unlocked
+            // if none - continue to other pool
+            if (unlockedTokens == 0) {
+                continue;
+            }
+
+            Pool storage pool = s_vestingPools[i];
+            Beneficiary storage user = pool.beneficiaries[msg.sender];
+
+            // Available tokens are the maximum amount that user should be able claim
+            // if all tokens are unlocked for the user,
+            uint256 availableTokens = user.totalTokenAmount -
+                user.claimedTokenAmount -
+                user.stakedTokenAmount;
+
+            // Checks: Unlocked tokens are not withdrawing from staked token pool
+            // if withdrawn - continue to other pool
+            if (unlockedTokens > availableTokens) {
+                continue;
+            }
+
+            // Effects
+            user.claimedTokenAmount += unlockedTokens;
+            allTokensToClaim += unlockedTokens;
+        }
+        // Interactions
+        s_token.safeTransfer(msg.sender, allTokensToClaim);
+
+        emit AllTokensClaimed(msg.sender, allTokensToClaim);
+    }
+
+    /**
      * @notice Stakes vested tokesns via vesting contract in staking contract
      * @param stakingType  enumerable type for flexi or fixed staking
      * @param bandLevel  band level number (1-9)
