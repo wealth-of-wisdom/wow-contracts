@@ -82,9 +82,11 @@ contract Base_Test is Test, Constants, Events {
             usdcToken,
             wowToken,
             address(vesting),
+            ZERO_ADDRESS, // @todo: future gelato service address
             TOTAL_POOLS,
             TOTAL_BAND_LEVELS
         );
+        staking.setUpgradesTrigger(true);
 
         // MINT TOKENS TO TEST ACCOUNTS
         uint8 accountsAmount = uint8(TEST_ACCOUNTS.length);

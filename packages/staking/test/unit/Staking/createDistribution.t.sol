@@ -74,14 +74,15 @@ contract Staking_CreateDistribution_Unit_Test is Unit_Test {
 
         vm.startPrank(admin);
         usdtToken.approve(address(staking), DISTRIBUTION_AMOUNT);
-
+        uint256 currentTimestamp = block.timestamp;
         vm.expectEmit(address(staking));
         emit DistributionCreated(
             usdtToken,
             DISTRIBUTION_AMOUNT,
             TOTAL_POOLS,
             TOTAL_BAND_LEVELS,
-            TOTAL_BAND_LEVELS // one user for each band level
+            TOTAL_BAND_LEVELS, // one user for each band level
+            currentTimestamp
         );
 
         staking.createDistribution(usdtToken, DISTRIBUTION_AMOUNT);

@@ -30,6 +30,7 @@ contract Staking_Initialize_Unit_Test is Unit_Test {
             usdcToken,
             wowToken,
             address(vesting),
+            ZERO_ADDRESS, // @todo: future gelato service address
             TOTAL_POOLS,
             TOTAL_BAND_LEVELS
         );
@@ -47,6 +48,7 @@ contract Staking_Initialize_Unit_Test is Unit_Test {
             usdcToken,
             wowToken,
             address(vesting),
+            ZERO_ADDRESS, // @todo: future gelato service address
             TOTAL_POOLS,
             TOTAL_BAND_LEVELS
         );
@@ -59,6 +61,7 @@ contract Staking_Initialize_Unit_Test is Unit_Test {
             IERC20(ZERO_ADDRESS),
             wowToken,
             address(vesting),
+            ZERO_ADDRESS, // @todo: future gelato service address
             TOTAL_POOLS,
             TOTAL_BAND_LEVELS
         );
@@ -71,6 +74,7 @@ contract Staking_Initialize_Unit_Test is Unit_Test {
             usdcToken,
             IERC20(ZERO_ADDRESS),
             address(vesting),
+            ZERO_ADDRESS, // @todo: future gelato service address
             TOTAL_POOLS,
             TOTAL_BAND_LEVELS
         );
@@ -83,6 +87,7 @@ contract Staking_Initialize_Unit_Test is Unit_Test {
             usdcToken,
             wowToken,
             ZERO_ADDRESS,
+            ZERO_ADDRESS, // @todo: future gelato service address
             TOTAL_POOLS,
             TOTAL_BAND_LEVELS
         );
@@ -95,6 +100,7 @@ contract Staking_Initialize_Unit_Test is Unit_Test {
             usdcToken,
             wowToken,
             address(vesting),
+            ZERO_ADDRESS, // @todo: future gelato service address
             0,
             TOTAL_BAND_LEVELS
         );
@@ -107,6 +113,7 @@ contract Staking_Initialize_Unit_Test is Unit_Test {
             usdcToken,
             wowToken,
             address(vesting),
+            ZERO_ADDRESS, // @todo: future gelato service address
             TOTAL_POOLS,
             0
         );

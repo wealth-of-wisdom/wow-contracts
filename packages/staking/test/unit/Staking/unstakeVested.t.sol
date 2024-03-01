@@ -262,22 +262,23 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
                                     FIX STAKING
     //////////////////////////////////////////////////////////////////////////*/
 
-    function test_unstakeVested_RevertIf_FixType_UnlockDateNotReached()
-        external
-        setBandLevelData
-        setSharesInMonth
-        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_12)
-    {
-        vm.expectRevert(Errors.Staking__UnlockDateNotReached.selector);
-        vm.prank(address(vesting));
-        staking.unstakeVested(alice, BAND_ID_0);
-    }
+    // NOTE: no more FIX staking for vesting
+    // function test_unstakeVested_RevertIf_FixType_UnlockDateNotReached()
+    //     external
+    //     setBandLevelData
+    //     setSharesInMonth
+    //     stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_12)
+    // {
+    //     vm.expectRevert(Errors.Staking__UnlockDateNotReached.selector);
+    //     vm.prank(address(vesting));
+    //     staking.unstakeVested(alice, BAND_ID_0);
+    // }
 
     function test_unstakeVested_FixType_DeletesBandDetails()
         external
         setBandLevelData
         setSharesInMonth
-        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_12)
+        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         skip(12 * MONTH);
         vm.prank(address(vesting));
@@ -304,7 +305,7 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
         external
         setBandLevelData
         setSharesInMonth
-        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_12)
+        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         skip(12 * MONTH);
         vm.prank(address(vesting));
@@ -319,9 +320,9 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
         external
         setBandLevelData
         setSharesInMonth
-        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_1)
-        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_5, MONTH_12)
-        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_9, MONTH_24)
+        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0)
+        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_5, MONTH_0)
+        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_9, MONTH_0)
     {
         skip(MONTH);
         vm.prank(address(vesting));
@@ -338,7 +339,7 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
         external
         setBandLevelData
         setSharesInMonth
-        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_12)
+        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         skip(12 * MONTH);
         vm.prank(address(vesting));
@@ -353,7 +354,7 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
         setSharesInMonth
         createDistribution(usdtToken)
         distributeRewards(usdtToken)
-        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_12)
+        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         skip(12 * MONTH);
         vm.prank(address(vesting));
@@ -371,7 +372,7 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
         setSharesInMonth
         createDistribution(usdtToken)
         distributeRewards(usdtToken)
-        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_12)
+        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         uint256 stakingBalanceBefore = usdtToken.balanceOf(address(staking));
 
@@ -394,7 +395,7 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
         setSharesInMonth
         createDistribution(usdtToken)
         distributeRewards(usdtToken)
-        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_12)
+        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         uint256 stakerBalanceBefore = usdtToken.balanceOf(alice);
 
@@ -415,7 +416,7 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
         external
         setBandLevelData
         setSharesInMonth
-        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_12)
+        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         uint256 stakingBalanceBefore = usdtToken.balanceOf(address(staking));
 
@@ -436,7 +437,7 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
         external
         setBandLevelData
         setSharesInMonth
-        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_12)
+        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         uint256 stakerBalanceBefore = usdtToken.balanceOf(alice);
 
@@ -459,7 +460,7 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
         setSharesInMonth
         createDistribution(usdtToken)
         distributeRewards(usdtToken)
-        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_12)
+        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         skip(12 * MONTH);
 
@@ -474,7 +475,7 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
         external
         setBandLevelData
         setSharesInMonth
-        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_12)
+        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         skip(12 * MONTH);
 

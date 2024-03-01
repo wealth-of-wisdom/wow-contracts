@@ -218,7 +218,7 @@ contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
         external
         setBandLevelData
         setSharesInMonth
-        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_12)
+        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         vm.prank(address(vesting));
         staking.deleteVestingUser(alice);
@@ -244,9 +244,9 @@ contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
         external
         setBandLevelData
         setSharesInMonth
-        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_12)
-        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_5, MONTH_12)
-        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_9, MONTH_12)
+        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0)
+        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_5, MONTH_0)
+        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_9, MONTH_0)
     {
         vm.prank(address(vesting));
         staking.deleteVestingUser(alice);
@@ -304,7 +304,7 @@ contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
         external
         setBandLevelData
         setSharesInMonth
-        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_12)
+        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         vm.prank(address(vesting));
         staking.deleteVestingUser(alice);
@@ -317,9 +317,9 @@ contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
         external
         setBandLevelData
         setSharesInMonth
-        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_12)
-        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_5, MONTH_12)
-        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_9, MONTH_12)
+        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0)
+        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_5, MONTH_0)
+        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_9, MONTH_0)
     {
         vm.prank(address(vesting));
         staking.deleteVestingUser(alice);
@@ -334,7 +334,7 @@ contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
         setSharesInMonth
         createDistribution(usdtToken)
         distributeRewards(usdtToken)
-        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_12)
+        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         vm.prank(address(vesting));
         staking.deleteVestingUser(alice);
@@ -354,7 +354,7 @@ contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
         setSharesInMonth
         createDistribution(usdcToken)
         distributeRewards(usdcToken)
-        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_12)
+        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         vm.prank(address(vesting));
         staking.deleteVestingUser(alice);
@@ -372,7 +372,7 @@ contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
         external
         setBandLevelData
         setSharesInMonth
-        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_12)
+        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         vm.prank(address(vesting));
         staking.deleteVestingUser(alice);
@@ -384,7 +384,7 @@ contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
         external
         setBandLevelData
         setSharesInMonth
-        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_12)
+        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         vm.expectEmit(address(staking));
         emit VestingUserDeleted(alice);
