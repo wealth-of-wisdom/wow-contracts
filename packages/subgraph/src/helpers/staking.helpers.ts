@@ -1,34 +1,36 @@
-import { Address, BigInt, log, Bytes } from "@graphprotocol/graph-ts";
-import { BIGINT_ZERO, StakingType } from "../utils/constants";
+import { Address, BigInt } from "@graphprotocol/graph-ts";
 import {
     StakingContract,
     Pool,
+    BandLevel,
+    Staker,
+    StakerRewards,
     Band,
-    FundDistribution,
-} from "../../generated/schema"
+    FundsDistribution,
+} from "../../generated/schema";
+import { Staking } from "../../generated/Staking/Staking";
+import { ADDRESS_ZERO, BIGINT_ZERO, StakingType } from "../utils/constants";
 import { stringifyStakingType } from "../utils/utils";
-
-
 /**
  * Retrieves or initializes a StakingContract entity.
- * @param stakingContractAddress - The address of the stakingContractAddress.
  * @returns The StakingContract entity.
  */
-export function getOrInitStakingContract(stakingContractAddress: Address): StakingContract {
-
-    //  @note: redundant ID and vesting contract address.
-    let stakingContractId = "0";
-    let stakingContract = StakingContract.load(stakingContractId);
+export function getOrInitStakingContract(): StakingContract {
+    const id = "0";
+    let stakingContract = StakingContract.load(id);
 
     if (!stakingContract) {
-
-        stakingContract = new StakingContract(stakingContractId);
-
-        // set default Vesting contract entity values
-        stakingContract.id = "0";
-        stakingContract.stakingContractAddress = stakingContractAddress;
-        stakingContract.totalPools = BIGINT_ZERO;
-        stakingContract.totalBands = BIGINT_ZERO;
+        stakingContract = new StakingContract(id);
+        stakingContract.stakingContractAddress = ADDRESS_ZERO;
+        stakingContract.usdtToken = ADDRESS_ZERO;
+        stakingContract.usdcToken = ADDRESS_ZERO;
+        stakingContract.wowToken = ADDRESS_ZERO;
+        stakingContract.sharesInMonths = [];
+        stakingContract.nextBandId = BIGINT_ZERO;
+        stakingContract.percentagePrecision = 0;
+        stakingContract.totalPools = 0;
+        stakingContract.totalBandLevels = 0;
+        stakingContract.areUpgradesEnabled = true;
 
         stakingContract.save();
     }
@@ -36,70 +38,129 @@ export function getOrInitStakingContract(stakingContractAddress: Address): Staki
     return stakingContract;
 }
 
-
+/**
+ * Retrieves or initializes a Pool entity.
+ * @param poolId - The pool id in the staking contract.
+ * @returns The Pool entity.
+ */
 export function getOrInitPool(poolId: BigInt): Pool {
-    
-    let stakingPoolId = poolId.toString();
-    let stakingPool = Pool.load(stakingPoolId);
+    const id = poolId.toString();
+    let stakingPool = Pool.load(id);
 
     if (!stakingPool) {
+        stakingPool = new Pool(id);
+        stakingPool.distributionPercentage = 0;
 
-        stakingPool = new Pool(stakingPoolId);
-
-        // set default Vesting contract entity values
-        stakingPool.id = stakingPoolId;
-        stakingPool.distributionPercentage = BIGINT_ZERO;
-        stakingPool.usdtTokenAmount = BIGINT_ZERO;
-        stakingPool.usdcTokenAmount = BIGINT_ZERO;
- 
         stakingPool.save();
     }
 
     return stakingPool;
 }
 
-export function getOrInitBand(bandId: BigInt): Band {
-    
-    let stakingBandId = bandId.toString();
-    let stakingBand = Band.load(stakingBandId);
+/**
+ * Retrieves or initializes a BandLevel entity.
+ * @param level - The band level in the staking contract.
+ * @returns The BandLevel entity.
+ */
+export function getOrInitBandLevel(level: BigInt): BandLevel {
+    const id = level.toString();
+    let bandLevel = BandLevel.load(id);
 
-    if (!stakingBand) {
+    if (!bandLevel) {
+        bandLevel = new BandLevel(id);
+        bandLevel.price = BIGINT_ZERO;
+        bandLevel.accessiblePools = [];
 
-        stakingBand = new Band(stakingBandId);
-
-        stakingBand.id = stakingBandId;
-        stakingBand.stakingType = stringifyStakingType(StakingType.FIX);
-        stakingBand.bandLevel = BIGINT_ZERO;
-        stakingBand.price = BIGINT_ZERO;
-        stakingBand.owner = Address.empty();
-        stakingBand.startingSharesAmount = BIGINT_ZERO;
-        stakingBand.stakingStartTimestamp = BIGINT_ZERO;
-        stakingBand.claimableRewardsAmount = BIGINT_ZERO;
-        stakingBand.usdtRewardsClaimed = BIGINT_ZERO;
-        stakingBand.usdcRewardsClaimed = BIGINT_ZERO;
- 
-        stakingBand.save();
+        bandLevel.save();
     }
 
-    return stakingBand;
+    return bandLevel;
 }
 
-export function getOrInitFundDistribution(fundDistributionID: Bytes): FundDistribution {
-    
-    let fundDistributionId = fundDistributionID.toHex();
-    let fundDistribution = FundDistribution.load(fundDistributionId);
+/**
+ * Retrieves or initializes a Staker entity.
+ * @param stakerAddress - The address of the staker.
+ * @returns The Staker entity.
+ */
+export function getOrInitStaker(stakerAddress: Address): Staker {
+    const id = stakerAddress.toHex();
+    let staker = Staker.load(id);
 
-    if (!fundDistribution) {
+    if (!staker) {
+        staker = new Staker(id);
+        staker.bands = [];
 
-        fundDistribution = new FundDistribution(fundDistributionId);
-
-        fundDistribution.id = fundDistributionId;
-        fundDistribution.token = Address.empty();
-        fundDistribution.amount = BIGINT_ZERO;
-        fundDistribution.timestamp = BIGINT_ZERO;
-        
-        fundDistribution.save();
+        staker.save();
     }
 
-    return fundDistribution;
+    return staker;
+}
+
+/**
+ * Retrieves or initializes a StakerRewards entity.
+ * @param stakerAddress - The address of the staker.
+ * @param tokenAddress - The address of the token.
+ * @returns The StakerRewards entity.
+ */
+export function getOrInitStakerRewards(stakerAddress: Address, tokenAddress: Address): StakerRewards {
+    const id = `${stakerAddress.toHex()}-${tokenAddress.toHex()}`;
+    let stakerRewards = StakerRewards.load(id);
+
+    if (!stakerRewards) {
+        stakerRewards = new StakerRewards(id);
+        stakerRewards.staker = stakerAddress.toHex();
+        stakerRewards.token = tokenAddress;
+        stakerRewards.unclaimedAmount = BIGINT_ZERO;
+        stakerRewards.claimedAmount = BIGINT_ZERO;
+
+        stakerRewards.save();
+    }
+
+    return stakerRewards;
+}
+
+/**
+ * Retrieves or initializes unique Band entity.
+ * @param bandId - The band id in the staking contract.
+ * @returns The Band entity.
+ */
+export function getOrInitBand(bandId: BigInt): Band {
+    const id = bandId.toString();
+    let band = Band.load(id);
+
+    if (!band) {
+        band = new Band(id);
+        band.owner = ADDRESS_ZERO;
+        band.stakingStartDate = BIGINT_ZERO;
+        band.bandLevel = 0;
+        band.fixedMonths = 0;
+        band.stakingType = stringifyStakingType(StakingType.FIX);
+        band.areTokensVested = false;
+
+        band.save();
+    }
+
+    return band;
+}
+
+/**
+ * Retrieves or initializes a FundsDistribution entity.
+ * @param id - The id of the funds distribution.
+ * @returns The FundsDistribution entity.
+ */
+export function getOrInitFundsDistribution(distributionId: BigInt): FundsDistribution {
+    const id = distributionId.toString();
+    let fundsDistribution = FundsDistribution.load(id);
+
+    if (!fundsDistribution) {
+        fundsDistribution = new FundsDistribution(id);
+        fundsDistribution.token = ADDRESS_ZERO;
+        fundsDistribution.amount = BIGINT_ZERO;
+        fundsDistribution.createdAt = BIGINT_ZERO;
+        fundsDistribution.distributedAt = BIGINT_ZERO;
+
+        fundsDistribution.save();
+    }
+
+    return fundsDistribution;
 }

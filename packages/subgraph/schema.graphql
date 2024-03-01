@@ -3,8 +3,13 @@ enum UnlockType {
     MONTHLY # Unlock type for monthly vesting
 }
 
+enum StakingType {
+    FIX # Staking type for fixed months where band is locked and shares don't change
+    FLEXI # Staking type for flexible months where band is unlocked and shares increase
+}
+
 ############################################################
-#                          Vesting                   
+#                          Vesting
 ############################################################
 
 # Entity representing Vesting Contract
@@ -216,7 +221,7 @@ type Beneficiary @entity {
 }
 
 ############################################################
-#                       NFT & NFT Sale                      
+#                       NFT & NFT Sale
 ############################################################
 
 type NftContract @entity {
@@ -242,39 +247,80 @@ type User @entity {
 }
 
 ############################################################
-#                         Staking                    
+#                         Staking
 ############################################################
 
 type StakingContract @entity {
+    """
+    Always equal to 0.
+    """
     id: ID!
+
     stakingContractAddress: Bytes!
+    usdtToken: Bytes!
+    usdcToken: Bytes!
+    wowToken: Bytes!
+    sharesInMonths: [BigInt!]!
+    nextBandId: BigInt!
+    nextDistributionId: BigInt!
+    percentagePrecision: Int!
     totalPools: Int!
-    totalBands: Int!
+    totalBandLevels: Int!
+    areUpgradesEnabled: Boolean!
+
+    stakers: [Staker!]! # Don't use derivedfrom, as we will need all stakers in mapping
 }
 
 type Pool @entity {
     id: ID!
     distributionPercentage: Int!
-    usdtTokenAmount: BigInt!
-    usdcTokenAmount: BigInt!
+}
+
+type BandLevel @entity {
+    id: ID!
+    price: BigInt!
+    accessiblePools: [Pool!]!
+}
+
+type Staker @entity {
+    """
+    Staker address
+    """
+    id: ID!
+
+    bands: [Band!]! # Don't use derivedfrom, as we will need all band ids in mapping
+    rewards: [StakerRewards!]! @derivedFrom(field: "staker")
+}
+
+type StakerRewards @entity {
+    """
+    ID composed of: staker-token
+    """
+    id: ID!
+
+    staker: Staker!
+    token: Bytes!
+    unclaimedAmount: BigInt!
+    claimedAmount: BigInt!
 }
 
 type Band @entity {
     id: ID!
-    stakingType: String!
-    bandLevel: Int!
-    price: BigInt!
+
     owner: Bytes!
-    startingSharesAmount: BigInt!
-    stakingStartTimestamp: BigInt!
-    claimableRewardsAmount: BigInt!
-    usdtRewardsClaimed: BigInt!
-    usdcRewardsClaimed: BigInt!
+    stakingStartDate: BigInt!
+    bandLevel: Int!
+    fixedMonths: Int!
+    stakingType: StakingType!
+    areTokensVested: Boolean!
 }
 
-type FundDistribution @entity {
+type FundsDistribution @entity {
     id: ID!
     token: Bytes!
     amount: BigInt!
-    timestamp: BigInt!
+    createdAt: BigInt!
+    distributedAt: BigInt!
+    stakers: [Staker!]!
+    rewards: [BigInt!]!
 }

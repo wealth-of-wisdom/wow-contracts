@@ -94,38 +94,40 @@ dataSources:
           eventHandlers:
             - event: Initialized(uint64)
               handler: handleInitialized
-            - event: AllRewardsClaimed(address)
-              handler: handleAllRewardsClaimed
-            - event: BandDowngraded(address,uint256,uint16,uint16)
-              handler: handleBandDowngraded
-            # - event: BandLevelSet(uint16,uint256,uint16[])
-            #   handler: handleBandLevelSet
-            - event: BandStaked(address,uint16,uint256)
-              handler: handleBandStaked
-            - event: BandUnstaked(address,uint16,uint256)
-              handler: handleBandUnstaked
-            - event: BandUpgaded(address,uint256,uint16,uint16)
-              handler: handleBandUpgaded
-            - event: FundsDistributed(address,uint256)
-              handler: handleFundsDistributed
-            # - event: PoolSet(uint16,uint48)
-            #   handler: handlePoolSet
-            - event: RewardsClaimed(address,address,uint256)
-              handler: handleRewardsClaimed
+            - event: PoolSet(indexed uint16,uint48)
+              handler: handlePoolSet
+            - event: BandLevelSet(indexed uint16,uint256,uint16[])
+              handler: handleBandLevelSet
             - event: SharesInMonthSet(uint48[])
               handler: handleSharesInMonthSet
-            - event: Staked(address,uint16,uint8,bool)
-              handler: handleStaked
-            - event: TokensWithdrawn(address,address,uint256)
-              handler: handleTokensWithdrawn
+            - event: UsdtTokenSet(address)
+              handler: handleUsdtTokenSet
+            - event: UsdcTokenSet(address)
+              handler: handleUsdcTokenSet
+            - event: WowTokenSet(address)
+              handler: handleWowTokenSet
             - event: TotalBandLevelsAmountSet(uint16)
               handler: handleTotalBandLevelsAmountSet
             - event: TotalPoolAmountSet(uint16)
               handler: handleTotalPoolAmountSet
+            - event: UpgradesTriggerSet(bool)
+              handler: handleUpgradesTriggerSet
+            - event: TokensWithdrawn(address,address,uint256)
+              handler: handleTokensWithdrawn
+            - event: DistributionCreated(address,uint256,uint16,uint16,uint256,uint256)
+              handler: handleDistributionCreated
+            - event: RewardsDistributed(address)
+              handler: handleRewardsDistributed
+            - event: Staked(address,uint16,uint256,uint8,bool)
+              handler: handleStaked
             - event: Unstaked(address,uint256,bool)
               handler: handleUnstaked
-            # - event: Upgraded(address)
-            #   handler: handleUpgraded
-            - event: VestingUserRemoved(address)
+            - event: VestingUserDeleted(address)
               handler: handleVestingUserRemoved
+            - event: BandUpgaded(address,uint256,uint16,uint16)
+              handler: handleBandUpgaded
+            - event: BandDowngraded(address,uint256,uint16,uint16)
+              handler: handleBandDowngraded
+            - event: RewardsClaimed(address,address,uint256)
+              handler: handleRewardsClaimed
 {{/includeStaking}}
