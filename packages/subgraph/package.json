@@ -13,7 +13,7 @@
         "remove-local": "graph remove --node http://localhost:8020/ wealth-of-wisdom/vesting",
         "deploy-local": "graph deploy wow/subgraph --node https://deploy.stream.superhow.net --ipfs https://ipfs.stream.superhow.net --version-label 0.0.1 ./sepolia.subgraph.yaml",
         "deploy-sepolia": "graph deploy --product hosted-service matasvosylius/vesting-subgraph ./sepolia.subgraph.yaml",
-        "deploy-mainnet": "graph deploy --product hosted-service wealth-of-wisdom/vesting-eth ./subgraph.yaml"
+        "deploy-mainnet": "graph deploy --product hosted-service wealth-of-wisdom/subgraph-eth ./subgraph.yaml"
     },
     "devDependencies": {
         "@graphprotocol/graph-cli": "^0.56.0",

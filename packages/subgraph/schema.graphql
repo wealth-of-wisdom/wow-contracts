@@ -210,3 +210,26 @@ type Beneficiary @entity {
     """
     claimedTokens: BigInt!
 }
+
+type NftContract @entity {
+    id: ID!
+    nftContractAddress: Bytes!
+}
+
+# NFT details
+type Nft @entity {
+    id: ID!
+    idInLevel: BigInt!
+    level: BigInt!
+    isGenesis: Boolean!
+    activityEndTimestamp: BigInt!
+    extendedActivityEndTimestamp: BigInt!
+    owner: User!
+
+}
+
+# NFT holder info
+type User @entity {
+    id: ID!
+    nfts: [Nft!]! @derivedFrom(field: "owner")
+}
