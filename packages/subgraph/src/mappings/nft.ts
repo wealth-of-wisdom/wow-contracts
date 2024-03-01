@@ -26,7 +26,7 @@ export function handleNftMinted(event: NftMintedEvent): void {
     nft.owner = user.id;
 
     nft.save();
-    user.save();
+
 }
 
 
@@ -38,9 +38,9 @@ export function handleNftActivation(event: NftDataActivatedEvent): void {
 
     nft.activityEndTimestamp = event.params.activityEndTimestamp;
     nft.extendedActivityEndTimestamp =event.params.extendedActivityEndTimestamp;
-    nft.owner = user.id;
+
 
     nft.save();
-    user.save();
+
 }
 
