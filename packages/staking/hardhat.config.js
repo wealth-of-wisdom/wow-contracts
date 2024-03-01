@@ -31,5 +31,8 @@ module.exports = {
             url: process.env.ETHEREUM_HOST,
             accounts: [process.env.PRIVATE_KEY],
         },
+        hardhat: {
+            chainId: 31337,
+        },
     },
 }

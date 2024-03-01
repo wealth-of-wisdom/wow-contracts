@@ -8,7 +8,7 @@ library Errors {
 
     error Staking__InvalidBandLevel(uint16 bandLevel);
     error Staking__InvalidBandId(uint256 bandId);
-    error Staking__CantModifyFixTypeBand();
+    error Staking__NotFlexiTypeBand();
     error Staking__NotBandOwner(uint256 bandId, address owner);
     error Staking__InvalidStakingType();
     error Staking__MaximumLevelExceeded();
@@ -23,7 +23,17 @@ library Errors {
     error Staking__BandAllocationExceedsMaximum(uint48 percentage);
     error Staking__TotalAllocationExceedsMaximum(uint48 percentage);
     error Staking__InvalidBandsAmount();
+    error Staking__UpgradesDisabled();
+    error Staking__OnlyFlexiTypeAllowed();
     error Staking__ZeroAmount();
     error Staking__ZeroAddress();
     error Staking__ZeroPoolShares();
+    error Staking__MismatchedArrayLengths(
+        uint256 stakersLength,
+        uint256 rewardsLength
+    );
+    error Staking__NoRewardsToClaim();
+    error Staking__InvalidMonth(uint8 month);
+    error Staking__BandFromVestedTokens(bool areTokensVested);
+    error Staking__UnlockDateNotReached();
 }

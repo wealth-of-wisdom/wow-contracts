@@ -21,9 +21,12 @@ contract TokenMock is
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
+    uint8 private decimalsAmount;
+
     function initialize(
         string memory name,
         string memory symbol,
+        uint8 decimalsNum,
         uint256 initialAmount
     ) public initializer {
         __ERC20_init(name, symbol);
@@ -33,7 +36,9 @@ contract TokenMock is
         __ERC20Votes_init();
         __UUPSUpgradeable_init();
 
+        decimalsAmount = decimalsNum;
         _mint(msg.sender, initialAmount * 10 ** decimals());
+
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, msg.sender);
         _grantRole(UPGRADER_ROLE, msg.sender);
@@ -41,6 +46,10 @@ contract TokenMock is
 
     function mint(address to, uint256 amount) public onlyRole(MINTER_ROLE) {
         _mint(to, amount);
+    }
+
+    function decimals() public view override returns (uint8) {
+        return decimalsAmount;
     }
 
     function nonces(

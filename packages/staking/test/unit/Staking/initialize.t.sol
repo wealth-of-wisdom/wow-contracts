@@ -7,17 +7,9 @@ import {StakingMock} from "../../mocks/StakingMock.sol";
 import {Unit_Test} from "../Unit.t.sol";
 
 contract Staking_Initialize_Unit_Test is Unit_Test {
-    modifier initializeStaking() {
-        vm.prank(admin);
-        staking.initialize(
-            usdtToken,
-            usdcToken,
-            wowToken,
-            TOTAL_POOLS,
-            TOTAL_BAND_LEVELS
-        );
-        _;
-    }
+    /*//////////////////////////////////////////////////////////////////////////
+                                  SET UP
+    //////////////////////////////////////////////////////////////////////////*/
 
     function setUp() public virtual override {
         Unit_Test.setUp();
@@ -27,12 +19,34 @@ contract Staking_Initialize_Unit_Test is Unit_Test {
         vm.stopPrank();
     }
 
+    /*//////////////////////////////////////////////////////////////////////////
+                                  MODIFIERS
+    //////////////////////////////////////////////////////////////////////////*/
+
+    modifier initializeStaking() {
+        vm.prank(admin);
+        staking.initialize(
+            usdtToken,
+            usdcToken,
+            wowToken,
+            address(vesting),
+            TOTAL_POOLS,
+            TOTAL_BAND_LEVELS
+        );
+        _;
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                  TESTS
+    //////////////////////////////////////////////////////////////////////////*/
+
     function test_initialize_RevertIf_USDTTokenIsZeroAddress() external {
         vm.expectRevert(Errors.Staking__ZeroAddress.selector);
         staking.initialize(
             IERC20(ZERO_ADDRESS),
             usdcToken,
             wowToken,
+            address(vesting),
             TOTAL_POOLS,
             TOTAL_BAND_LEVELS
         );
@@ -44,6 +58,7 @@ contract Staking_Initialize_Unit_Test is Unit_Test {
             usdtToken,
             IERC20(ZERO_ADDRESS),
             wowToken,
+            address(vesting),
             TOTAL_POOLS,
             TOTAL_BAND_LEVELS
         );
@@ -55,6 +70,19 @@ contract Staking_Initialize_Unit_Test is Unit_Test {
             usdtToken,
             usdcToken,
             IERC20(ZERO_ADDRESS),
+            address(vesting),
+            TOTAL_POOLS,
+            TOTAL_BAND_LEVELS
+        );
+    }
+
+    function test_initialize_RevertIf_VestingIsZeroAddress() external {
+        vm.expectRevert(Errors.Staking__ZeroAddress.selector);
+        staking.initialize(
+            usdtToken,
+            usdcToken,
+            wowToken,
+            ZERO_ADDRESS,
             TOTAL_POOLS,
             TOTAL_BAND_LEVELS
         );
@@ -66,6 +94,7 @@ contract Staking_Initialize_Unit_Test is Unit_Test {
             usdtToken,
             usdcToken,
             wowToken,
+            address(vesting),
             0,
             TOTAL_BAND_LEVELS
         );
@@ -73,7 +102,14 @@ contract Staking_Initialize_Unit_Test is Unit_Test {
 
     function test_initialize_RevertIf_TotalBandsIsZero() external {
         vm.expectRevert(Errors.Staking__ZeroAmount.selector);
-        staking.initialize(usdtToken, usdcToken, wowToken, TOTAL_POOLS, 0);
+        staking.initialize(
+            usdtToken,
+            usdcToken,
+            wowToken,
+            address(vesting),
+            TOTAL_POOLS,
+            0
+        );
     }
 
     function test_initialize_GrantsDefaultAdminRoleToDeployer()
@@ -134,7 +170,7 @@ contract Staking_Initialize_Unit_Test is Unit_Test {
         initializeStaking
     {
         assertEq(
-            staking.getTotalBands(),
+            staking.getTotalBandLevels(),
             TOTAL_BAND_LEVELS,
             "Total bands should be set correctly"
         );

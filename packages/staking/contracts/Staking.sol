@@ -27,11 +27,19 @@ contract Staking is
                                 PRIVATE CONSTANTS
     //////////////////////////////////////////////////////////////////////////*/
 
-    bytes32 private constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
-    bytes32 private constant VESTING_ROLE = keccak256("VESTING_ROLE");
-    uint48 private constant MONTH = 30 days;
-    uint48 private constant SHARE = 1e6; // 1 share = 10^6
-    uint48 private constant PERCENTAGE_PRECISION = 1e8; // 100% = 10^8
+    uint32 private constant MONTH = 30 days;
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                PUBLIC CONSTANTS
+    //////////////////////////////////////////////////////////////////////////*/
+
+    bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+    bytes32 public constant VESTING_ROLE = keccak256("VESTING_ROLE");
+    bytes32 public constant GELATO_EXECUTOR_ROLE =
+        keccak256("GELATO_EXECUTOR_ROLE");
+
+    uint48 public constant SHARE = 1e6; // 1 share = 10^6
+    uint48 public constant PERCENTAGE_PRECISION = 1e8; // 100% = 10^8
 
     /*//////////////////////////////////////////////////////////////////////////
                                 INTERNAL STORAGE
@@ -41,29 +49,26 @@ contract Staking is
     // 0 - false (not staking), 1 - true (is staking)
     EnumerableMap.AddressToUintMap internal s_users;
 
-    // Map user => all the band ids that user owns
+    // Map staker => all the band ids that staker owns
     mapping(address staker => uint256[] bandIds) internal s_stakerBands;
 
+    // Map staker => token => claimed and unclaimed rewards
+    mapping(bytes32 stakerAndToken => StakerReward) internal s_stakerRewards;
+
     // Map single band id => band data
-    mapping(uint256 bandId => StakerBandData) internal s_bands;
+    mapping(uint256 bandId => StakerBand) internal s_bands;
 
     // Map pool id (1-9) => pool data
     mapping(uint16 poolId => Pool) internal s_poolData;
 
     // Map band level (1-9) => band data
-    mapping(uint16 bandLevel => Band) internal s_bandLevelData;
+    mapping(uint16 bandLevel => BandLevel) internal s_bandLevelData;
 
-    // Map token => all fund distributions
-    // Array of all distributions is used for storing shares and tokens info
-    mapping(IERC20 token => FundDistribution[]) internal s_fundDistributions;
-
-    // Map single distribution id => pool id => pool distribution data
-    mapping(bytes32 distributionIdAndPoolId => PoolDistribution)
-        internal s_poolsDistribution;
-
-    // Map single distribution id => pool id => staker address => staker shares data
-    mapping(bytes32 distributionIdWithPoolIdAndStaker => StakerShares)
-        internal s_stakerShares;
+    // Array of 24 integers, each representing the amount of shares
+    // User owns in the pool for each month. Used for FLEXI staking
+    // 0 index represents shares after 1 month, 1 index represents shares after 2 months, etc.
+    // 10**6 = 1 share
+    uint48[] internal sharesInMonth;
 
     // Token to be payed as reward
     IERC20 internal s_usdtToken;
@@ -74,23 +79,17 @@ contract Staking is
     // Token to be staked
     IERC20 internal s_wowToken;
 
-    // Array of 24 integers, each representing the amount of shares
-    // User owns in the pool for each month. Used for FLEXI staking
-    // 0 index represents shares after 1 month, 1 index represents shares after 2 months, etc.
-    // in 10**6 = 1 share
-    uint48[] internal sharesInMonth;
-
     // Next unique band id to be used
     uint256 internal s_nextBandId;
-
-    // Next unique distribution id to be used
-    uint256 internal s_nextDistributionId;
 
     // Total amount of pools used for staking (currently, 9)
     uint16 internal s_totalPools;
 
     // Total amount of bands used for staking (currently, 9)
     uint16 internal s_totalBandLevels;
+
+    // Trigger for upgrade/downgrades
+    bool internal s_upgradesTrigger;
 
     /*//////////////////////////////////////////////////////////////////////////
                             STORAGE FOR FUTURE UPGRADES
@@ -130,9 +129,34 @@ contract Staking is
         _;
     }
 
-    modifier mNotFixStakingType(uint256 bandId) {
+    modifier mOnlyFlexiType(uint256 bandId) {
         if (StakingTypes.FIX == s_bands[bandId].stakingType) {
-            revert Errors.Staking__CantModifyFixTypeBand();
+            revert Errors.Staking__NotFlexiTypeBand();
+        }
+        _;
+    }
+
+    modifier mValidMonth(StakingTypes stakingType, uint8 month) {
+        // Checks: month must be undefined (0) for flexible staking
+        if (StakingTypes.FLEXI == stakingType && month != 0) {
+            revert Errors.Staking__InvalidMonth(month);
+        }
+
+        // Checks: month must be defined (1-24) for fixed staking
+        if (
+            StakingTypes.FIX == stakingType &&
+            (month == 0 || month > sharesInMonth.length)
+        ) {
+            revert Errors.Staking__InvalidMonth(month);
+        }
+
+        _;
+    }
+
+    modifier mOnlyBandFromVestedTokens(uint256 bandId, bool shouldBeVested) {
+        bool areTokensVested = s_bands[bandId].areTokensVested;
+        if (areTokensVested != shouldBeVested) {
+            revert Errors.Staking__BandFromVestedTokens(areTokensVested);
         }
         _;
     }
@@ -144,16 +168,16 @@ contract Staking is
         _;
     }
 
-    modifier mStakingTypeExists(StakingTypes stakingType) {
-        if (
-            StakingTypes.FIX != stakingType || StakingTypes.FLEXI != stakingType
-        ) revert Errors.Staking__InvalidStakingType();
-        _;
-    }
-
     modifier mTokenExists(IERC20 token) {
         if (token != s_usdtToken && token != s_usdcToken) {
             revert Errors.Staking__NonExistantToken();
+        }
+        _;
+    }
+
+    modifier mUpgradesEnabled() {
+        if (!s_upgradesTrigger) {
+            revert Errors.Staking__UpgradesDisabled();
         }
         _;
     }
@@ -162,27 +186,47 @@ contract Staking is
                                   INITIALIZER
     //////////////////////////////////////////////////////////////////////////*/
 
+    /**
+     * @notice  Initializes the contract with the required data
+     * @param   usdtToken  USDT token
+     * @param   usdcToken  USDC token
+     * @param   wowToken  WOW token
+     * @param   vesting  address of the vesting contract (not contract as we don't call any functions from it)
+     * @param   totalPools  total amount of pools used for staking
+     */
     function initialize(
         IERC20 usdtToken,
         IERC20 usdcToken,
         IERC20 wowToken,
+        address vesting,
+        address gelato,
         uint16 totalPools,
         uint16 totalBandLevels
     )
         external
         initializer
-        mAddressNotZero(address(usdtToken))
-        mAddressNotZero(address(usdcToken))
-        mAddressNotZero(address(wowToken))
         mAmountNotZero(totalPools)
         mAmountNotZero(totalBandLevels)
     {
+        // Checks: Address cannot be zero (not using modifers to avoid stack too deep error)
+        if (
+            address(usdtToken) == address(0) ||
+            address(usdcToken) == address(0) ||
+            address(wowToken) == address(0) ||
+            vesting == address(0)
+        ) {
+            revert Errors.Staking__ZeroAddress();
+        }
+
         __AccessControl_init();
         __UUPSUpgradeable_init();
 
         // Effects: set the roles
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(GELATO_EXECUTOR_ROLE, msg.sender);
         _grantRole(UPGRADER_ROLE, msg.sender);
+        _grantRole(VESTING_ROLE, vesting);
+        _grantRole(GELATO_EXECUTOR_ROLE, gelato);
 
         // Effects: set the storage
         s_usdtToken = usdtToken;
@@ -215,8 +259,7 @@ contract Staking is
             );
         }
         // Effects: set the storage
-        Pool storage pool = s_poolData[poolId];
-        pool.distributionPercentage = distributionPercentage;
+        s_poolData[poolId].distributionPercentage = distributionPercentage;
 
         // Effects: emit event
         emit PoolSet(poolId, distributionPercentage);
@@ -245,7 +288,7 @@ contract Staking is
         }
 
         // Effects: set band storage
-        s_bandLevelData[bandLevel] = Band({
+        s_bandLevelData[bandLevel] = BandLevel({
             price: price,
             accessiblePools: accessiblePools
         });
@@ -267,6 +310,42 @@ contract Staking is
 
         // Effects: emit event
         emit SharesInMonthSet(totalSharesInMonth);
+    }
+
+    /**
+     * @notice  Sets the USDC token which is used for rewards distribution
+     * @param   token  USDC token
+     */
+    function setUsdtToken(
+        IERC20 token
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) mAddressNotZero(address(token)) {
+        s_usdtToken = token;
+
+        emit UsdtTokenSet(token);
+    }
+
+    /**
+     * @notice  Sets the USDC token which is used for rewards distribution
+     * @param   token  USDC token
+     */
+    function setUsdcToken(
+        IERC20 token
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) mAddressNotZero(address(token)) {
+        s_usdcToken = token;
+
+        emit UsdcTokenSet(token);
+    }
+
+    /**
+     * @notice  Sets the WOW token which is used for staking by users
+     * @param   token  WOW token
+     */
+    function setWowToken(
+        IERC20 token
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) mAddressNotZero(address(token)) {
+        s_wowToken = token;
+
+        emit WowTokenSet(token);
     }
 
     /**
@@ -302,53 +381,17 @@ contract Staking is
     }
 
     /**
-     * @notice  Administrator function for transfering funds
-     *          to contract for pool distribution
-     * @param   token  USDT/USDC token
-     * @param   amount  amount to be distributed to pools
+     * @notice  Sets new trigger status for upgrades/downgrades
+     * @param   triggerStatus  true or false value for upgrades enabling
      */
-    function distributeFunds(
-        IERC20 token,
-        uint256 amount
-    )
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-        mTokenExists(token)
-        mAmountNotZero(amount)
-    {
-        uint16 totalPools = s_totalPools;
-        uint256 usersAmount = s_users.length();
-
-        uint256 distributionId = _createFundDistribution(token, amount);
-
-        // Effects: create all pool distributions for this fund distribution
-        _createAllPoolDistributions(token, amount, distributionId, totalPools);
-
-        // Loop through all users and set the amount of shares
-        for (uint256 userIndex; userIndex < usersAmount; userIndex++) {
-            (address user, ) = s_users.at(userIndex);
-
-            // Effects: Loop through all bands and add shares to pools
-            uint256[] memory userSharesPerPool = _addAllBandSharesToPools(
-                user,
-                distributionId,
-                totalPools
-            );
-
-            // Effects: Loop through all pools and set the amount of shares for the user
-            _addSharesToUser(
-                user,
-                distributionId,
-                totalPools,
-                userSharesPerPool
-            );
-        }
-
-        // Interaction: transfer the tokens to contract
-        token.safeTransferFrom(msg.sender, address(this), amount);
+    function setUpgradesTrigger(
+        bool triggerStatus
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        // Effects: set upgrades trigger
+        s_upgradesTrigger = triggerStatus;
 
         // Effects: emit event
-        emit FundsDistributed(token, amount);
+        emit UpgradesTriggerSet(triggerStatus);
     }
 
     /**
@@ -359,12 +402,7 @@ contract Staking is
     function withdrawTokens(
         IERC20 token,
         uint256 amount
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        // Checks: the amount must be greater than 0
-        if (amount == 0) {
-            revert Errors.Staking__ZeroAmount();
-        }
-
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) mAmountNotZero(amount) {
         uint256 balance = token.balanceOf(address(this));
 
         // Checks: the contract must have enough balance to withdraw
@@ -372,47 +410,152 @@ contract Staking is
             revert Errors.Staking__InsufficientContractBalance(balance, amount);
         }
 
+        // @question should we allow to withdraw USDT/USDC tokens?
+        // @question should we allow to withdraw WOW tokens?
+
         // Interaction: transfer the tokens to the sender
         token.safeTransfer(msg.sender, amount);
 
         emit TokensWithdrawn(token, msg.sender, amount);
     }
 
+    /**
+     * @notice  Creates a new distribution of the given amount of tokens
+     * @notice  Gelato backend will will monitor this function and call web3 function
+     * @notice  to calculate the amount of rewards for each staker and distribute them
+     * @notice  by calling distributeRewards function at the end
+     * @notice  It might look like this function is missing the actual distribution logic
+     * @notice  but this function is only indication for Gelato backend to calculate the rewards
+     * @notice  All logic is done on the server side
+     * @param   token  USDT/USDC token
+     * @param   amount  amount of tokens to distribute
+     */
+    function createDistribution(
+        IERC20 token,
+        uint256 amount
+    )
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        mTokenExists(token)
+        mAmountNotZero(amount)
+    {
+        // Only indication for Gelato backend to calculate the rewards
+        // We only need to transfer funds and emit an event here
+
+        // Interaction: transfer the tokens to the sender
+        token.safeTransferFrom(msg.sender, address(this), amount);
+
+        // Effects: emit event
+        emit DistributionCreated(
+            token,
+            amount,
+            s_totalPools,
+            s_totalBandLevels,
+            s_users.length(),
+            block.timestamp
+        );
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
-                            EXTERNAL FUNCTIONS
+                        EXTERNAL FUNCTIONS FOR GELATO EXECUTOR
+    //////////////////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice  Distribute rewards to all stakers
+     * @notice  This function is called by the Gelato backend
+     * @notice  after the rewards are calculated from the server side
+     * @notice  We trust the server side to calculate the rewards correctly
+     * @param   token  USDT/USDC token
+     * @param   stakers  array of stakers
+     * @param   rewards  array of rewards for each staker in the same order
+     */
+    function distributeRewards(
+        IERC20 token,
+        address[] memory stakers,
+        uint256[] memory rewards
+    ) external onlyRole(GELATO_EXECUTOR_ROLE) mTokenExists(token) {
+        uint256 stakersLength = stakers.length;
+        uint256 rewardsLength = rewards.length;
+
+        // Checks: stakers and rewards arrays must be the same length
+        if (stakersLength != rewardsLength) {
+            revert Errors.Staking__MismatchedArrayLengths(
+                stakersLength,
+                rewardsLength
+            );
+        }
+
+        // Loop through all stakers and distribute rewards
+        for (uint256 i; i < stakersLength; i++) {
+            // Effects: add rewards to the user
+            s_stakerRewards[_getStakerAndTokenHash(stakers[i], token)]
+                .unclaimedAmount += rewards[i];
+        }
+
+        // Effects: emit event
+        emit RewardsDistributed(token);
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                            EXTERNAL FUNCTIONS FOR USERS
     //////////////////////////////////////////////////////////////////////////*/
 
     /**
      * @notice  Stake and lock tokens to earn rewards
      * @param   stakingType  enumerable type for flexi or fixed staking
      * @param   bandLevel  band level number
+     * @param   month  fixed staking period in months (if not fixed, set to 0)
      */
     function stake(
         StakingTypes stakingType,
-        uint16 bandLevel
-    ) external mBandLevelExists(bandLevel) mStakingTypeExists(stakingType) {
-        uint256 price = s_bandLevelData[bandLevel].price;
-
+        uint16 bandLevel,
+        uint8 month
+    ) external mBandLevelExists(bandLevel) mValidMonth(stakingType, month) {
         // Effects: Create a new band and add it to the user
-        _stakeBand(stakingType, bandLevel, msg.sender);
+        uint256 bandId = _stakeBand(
+            msg.sender,
+            stakingType,
+            bandLevel,
+            month,
+            false
+        );
+
+        uint256 price = s_bandLevelData[bandLevel].price;
 
         // Interaction: transfer transaction funds to contract
         s_wowToken.safeTransferFrom(msg.sender, address(this), price);
 
         // Effects: emit event
-        emit Staked(msg.sender, bandLevel, stakingType, false);
+        emit Staked(msg.sender, bandLevel, bandId, stakingType, false);
     }
 
     /**
      * @notice  Unstake tokens at any time and claim earned rewards
      * @param   bandId  Id of the band (0-max uint)
      */
-    function unstake(uint256 bandId) external mBandOwner(msg.sender, bandId) {
-        // Effects: delete band data
-        _unstakeBand(bandId, msg.sender);
+    function unstake(
+        uint256 bandId
+    )
+        external
+        mBandOwner(msg.sender, bandId)
+        mOnlyBandFromVestedTokens(bandId, false)
+    {
+        StakerBand storage band = s_bands[bandId];
 
-        // Interaction: transfer earned rewards to staker
-        _claimRewardsFromPools(bandId);
+        // Checks: if band is FIX, the fixed months period should be passed
+        _validateFixedPeriodPassed(band);
+
+        // Get amount before deleting band data
+        uint256 stakedAmount = s_bandLevelData[band.bandLevel].price;
+
+        // Effects: delete band data
+        _unstakeBand(msg.sender, bandId);
+
+        // Interaction: transfer earned rewards to staker for both tokens
+        _claimAllRewards(msg.sender);
+
+        // Interraction: transfer staked tokens
+        s_wowToken.safeTransfer(msg.sender, stakedAmount);
 
         // Effects: emit event
         emit Unstaked(msg.sender, bandId, false);
@@ -420,41 +563,58 @@ contract Staking is
 
     /**
      * @notice  Stakes vesting contract tokens to ear rewards
+     * @param   user  address of user staking vested tokens
      * @param   stakingType  enumerable type for flexi or fixed staking
      * @param   bandLevel  band level number
-     * @param   user  address of user staking vested tokens
+     * @param   month  fixed staking period in months (if not fixed, set to 0)
      */
     function stakeVested(
+        address user,
         StakingTypes stakingType,
         uint16 bandLevel,
-        address user
+        uint8 month
     )
         external
         onlyRole(VESTING_ROLE)
+        mAddressNotZero(user)
         mBandLevelExists(bandLevel)
-        mStakingTypeExists(stakingType)
+        mValidMonth(stakingType, month)
     {
+        if (StakingTypes.FLEXI != stakingType) {
+            revert Errors.Staking__OnlyFlexiTypeAllowed();
+        }
         // Effects: Create a new band and add it to the user
-        _stakeBand(stakingType, bandLevel, user);
+        uint256 bandId = _stakeBand(user, stakingType, bandLevel, month, true);
 
         // Effects: emit event
-        emit Staked(user, bandLevel, stakingType, true);
+        emit Staked(user, bandLevel, bandId, stakingType, true);
     }
 
     /**
      * @notice  Unstake tokens at any time and claim earned rewards
-     * @param   bandId  Id of the band (0-max uint)
+     * @notice  This function can only be called by the vesting contract
      * @param   user  address of user staking vested tokens
+     * @param   bandId  Id of the band (0-max uint)
      */
     function unstakeVested(
-        uint256 bandId,
-        address user
-    ) external onlyRole(VESTING_ROLE) mBandOwner(user, bandId) {
-        // Effects: delete band data
-        _unstakeBand(bandId, user);
+        address user,
+        uint256 bandId
+    )
+        external
+        onlyRole(VESTING_ROLE)
+        mBandOwner(user, bandId)
+        mOnlyBandFromVestedTokens(bandId, true)
+    {
+        StakerBand storage band = s_bands[bandId];
 
-        // Interaction: transfer earned rewards to staker
-        _claimRewardsFromPools(bandId);
+        // Checks: if band is FIX, the fixed months period should be passed
+        _validateFixedPeriodPassed(band);
+
+        // Effects: delete band data
+        _unstakeBand(user, bandId);
+
+        // Interaction: transfer earned rewards to staker for both tokens
+        _claimAllRewards(user);
 
         // Effects: emit event
         emit Unstaked(user, bandId, true);
@@ -462,26 +622,40 @@ contract Staking is
 
     /**
      * @notice  Delete all user band data if beneficiary removed from vesting
+     * @notice  All unlclaimed USDT/USDC rewards will be transferred to the rewards collector
      * @param   user  staker address
      */
-    function deleteVestingUserData(
+    function deleteVestingUser(
         address user
-    ) external onlyRole(VESTING_ROLE) {
+    ) external onlyRole(VESTING_ROLE) mAddressNotZero(user) {
         uint256[] memory bandIds = s_stakerBands[user];
         uint256 bandsAmount = bandIds.length;
 
         // Loop through all bands that user owns and delete data
         for (uint256 bandIndex; bandIndex < bandsAmount; bandIndex++) {
+            // Effects: delete all band data
             delete s_bands[bandIds[bandIndex]];
         }
-        s_users.remove(user);
+
+        // Effects: delete user from the staker bands map
         delete s_stakerBands[user];
-        emit VestingUserRemoved(msg.sender);
+
+        // Effects: delete users all claimed and unclaimed rewards for USDT
+        delete s_stakerRewards[_getStakerAndTokenHash(user, s_usdtToken)];
+
+        // Effects: delete users all claimed and unclaimed rewards for USDC
+        delete s_stakerRewards[_getStakerAndTokenHash(user, s_usdcToken)];
+
+        // Effects: delete user from the map
+        s_users.remove(user);
+
+        // Effects: emit event
+        emit VestingUserDeleted(user);
     }
 
     /**
      * @notice  Upgradea any owned band to a new level
-     * @param   bandId  Band Id being upgraded
+     * @param   bandId  BandLevel Id being upgraded
      * @param   newBandLevel  New band level being upgraded to
      */
     function upgradeBand(
@@ -489,9 +663,11 @@ contract Staking is
         uint16 newBandLevel
     )
         external
+        mUpgradesEnabled
         mBandOwner(msg.sender, bandId)
         mBandLevelExists(newBandLevel)
-        mNotFixStakingType(bandId)
+        mOnlyFlexiType(bandId)
+        mOnlyBandFromVestedTokens(bandId, false) // @todo decide if this is needed
     {
         uint16 oldBandLevel = s_bands[bandId].bandLevel;
 
@@ -516,7 +692,7 @@ contract Staking is
 
     /**
      * @notice  Downgrade any owned band to a new level
-     * @param   bandId  Band Id being downgraded
+     * @param   bandId  BandLevel Id being downgraded
      * @param   newBandLevel  New band level being downgraded to
      */
     function downgradeBand(
@@ -524,9 +700,11 @@ contract Staking is
         uint16 newBandLevel
     )
         external
+        mUpgradesEnabled
         mBandOwner(msg.sender, bandId)
         mBandLevelExists(newBandLevel)
-        mNotFixStakingType(bandId)
+        mOnlyFlexiType(bandId)
+        mOnlyBandFromVestedTokens(bandId, false) // @todo decide if this is needed
     {
         uint16 oldBandLevel = s_bands[bandId].bandLevel;
 
@@ -552,16 +730,10 @@ contract Staking is
     /**
      * @notice  Claim rewards for all pools and tokens
      * @notice  This function can be called by anyone
+     * @param   token  USDT/USDC token
      */
-    function claimAllRewards() external {
-        // Loop through all pools and claim rewards for USDT and USDC
-        for (uint16 poolId = 1; poolId <= s_totalPools; poolId++) {
-            claimPoolRewards(s_usdtToken, poolId);
-            claimPoolRewards(s_usdcToken, poolId);
-        }
-
-        // Effects: emit event
-        emit AllRewardsClaimed(msg.sender);
+    function claimRewards(IERC20 token) external mTokenExists(token) {
+        _claimRewards(msg.sender, token, true);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -593,6 +765,14 @@ contract Staking is
     }
 
     /**
+     * @notice  Returns current upgrades/downgrades trigger status
+     * @return  bool  enabled/disabled trigger
+     */
+    function getUpgradesTrigger() external view returns (bool) {
+        return s_upgradesTrigger;
+    }
+
+    /**
      * @notice Returns the total amount of pools users can stake in
      * @return uint16 Total amount of pools
      */
@@ -604,7 +784,7 @@ contract Staking is
      * @notice Returns the total amount of bands users can buy for staking
      * @return uint16 Total amount of bands
      */
-    function getTotalBands() external view returns (uint16) {
+    function getTotalBandLevels() external view returns (uint16) {
         return s_totalBandLevels;
     }
 
@@ -617,59 +797,18 @@ contract Staking is
     }
 
     /**
-     * @notice  Returns the next consecutive distribution Id number to be assigned
-     * @return  uint256  Next distribution Id
-     */
-    function getNextDistributionId() external view returns (uint256) {
-        return s_nextDistributionId;
-    }
-
-    /**
      * @notice  Returns all shares to be accumulated each month
      * @return  uint256[]  Array of all shares appending each month
      */
-    function getSharesInMonth() external view returns (uint48[] memory) {
+    function getSharesInMonthArray() external view returns (uint48[] memory) {
         return sharesInMonth;
     }
 
     /**
-     * @notice  Returns pool data such as distribution percentage and token amounts
-     * @param   poolId  Pool Id
-     * @return  distributionPercentage  Percentage in 10**6 precision
-     * @return  usdtTokenAmount  Total USDT tokens in pool
-     * @return  usdcTokenAmount  Total USDC tokens in pool
+     * @notice  Returns the amount of shares to be accumulated in the specified month
+     * @param   index  Index of the month (months start from 0)
+     * @return  shares  Amount of shares to be accumulated in total
      */
-    function getPool(
-        uint16 poolId
-    )
-        external
-        view
-        returns (
-            uint48 distributionPercentage,
-            uint256 usdtTokenAmount,
-            uint256 usdcTokenAmount
-        )
-    {
-        Pool memory pool = s_poolData[poolId];
-        distributionPercentage = pool.distributionPercentage;
-        usdtTokenAmount = pool.totalUsdtPoolTokenAmount;
-        usdcTokenAmount = pool.totalUsdcPoolTokenAmount;
-    }
-
-    /**
-     * @notice  Returns band data such as band price, accessible pools and timespan
-     * @param   bandLevel  Band level
-     * @return  price  Band price in WOW tokens
-     * @return  accessiblePools  List of accessible pools after purchase
-     */
-    function getBand(
-        uint16 bandLevel
-    ) external view returns (uint256 price, uint16[] memory accessiblePools) {
-        Band memory band = s_bandLevelData[bandLevel];
-        price = band.price;
-        accessiblePools = band.accessiblePools;
-    }
-
     function getSharesInMonth(
         uint256 index
     ) external view returns (uint48 shares) {
@@ -677,39 +816,80 @@ contract Staking is
     }
 
     /**
-     * @notice  Returns staker data on each band they purchased
-     * @param   bandId  Band Id
-     * @return  stakingType  FIx/FLEXI staking type
-     * @return  startingSharesAmount  Starting assigned share amount
-     * @return  owner  Staker address
-     * @return  bandLevel  Band level
-     * @return  stakingStartTimestamp  Timestamp of staking start
-     * @return  usdtRewardsClaimed  Amount of USDT tokens claimed
-     * @return  usdcRewardsClaimed  Amount of USDC tokens claimed
+     * @notice  Returns pool data such as distribution percentage and token amounts
+     * @param   poolId  Pool Id
+     * @return  distributionPercentage  Percentage in 10**6 precision
      */
-    function getStakerBandData(
+    function getPool(
+        uint16 poolId
+    ) external view returns (uint48 distributionPercentage) {
+        Pool memory pool = s_poolData[poolId];
+        distributionPercentage = pool.distributionPercentage;
+    }
+
+    /**
+     * @notice  Returns band data such as band price, accessible pools and timespan
+     * @param   bandLevel  BandLevel level
+     * @return  price  BandLevel price in WOW tokens
+     * @return  accessiblePools  List of accessible pools after purchase
+     */
+    function getBandLevel(
+        uint16 bandLevel
+    ) external view returns (uint256 price, uint16[] memory accessiblePools) {
+        BandLevel memory band = s_bandLevelData[bandLevel];
+        price = band.price;
+        accessiblePools = band.accessiblePools;
+    }
+
+    /**
+     * @notice  Returns staker data on each band they purchased
+     * @param   bandId  BandLevel Id
+     * @return  owner  Staker address
+     * @return  stakingStartDate  Timestamp of staking start
+     * @return  bandLevel  BandLevel level
+     * @return  fixedMonths  Fixed staking period in months (if not fixed, set to 0)
+     * @return  stakingType  FIx/FLEXI staking type
+     * @return  areTokensVested  If band was bought from vested tokens
+     */
+    function getStakerBand(
         uint256 bandId
     )
         external
         view
         returns (
-            StakingTypes stakingType,
-            uint256 startingSharesAmount,
             address owner,
+            uint32 stakingStartDate,
             uint16 bandLevel,
-            uint256 stakingStartTimestamp,
-            uint256 usdtRewardsClaimed,
-            uint256 usdcRewardsClaimed
+            uint8 fixedMonths,
+            StakingTypes stakingType,
+            bool areTokensVested
         )
     {
-        StakerBandData memory stakerBandData = s_bands[bandId];
-        stakingType = stakerBandData.stakingType;
-        startingSharesAmount = stakerBandData.startingSharesAmount;
-        owner = stakerBandData.owner;
-        bandLevel = stakerBandData.bandLevel;
-        stakingStartTimestamp = stakerBandData.stakingStartTimestamp;
-        usdtRewardsClaimed = stakerBandData.usdtRewardsClaimed;
-        usdcRewardsClaimed = stakerBandData.usdcRewardsClaimed;
+        StakerBand memory band = s_bands[bandId];
+        owner = band.owner;
+        stakingStartDate = band.stakingStartDate;
+        bandLevel = band.bandLevel;
+        fixedMonths = band.fixedMonths;
+        stakingType = band.stakingType;
+        areTokensVested = band.areTokensVested;
+    }
+
+    /**
+     * @notice  Returns staker reward data for the specified token
+     * @param   staker  Staker address
+     * @param   token  USDT/USDC token
+     * @return  unclaimedAmount  Amount of unclaimed rewards
+     * @return  claimedAmount  Amount of claimed rewards
+     */
+    function getStakerReward(
+        address staker,
+        IERC20 token
+    ) external view returns (uint256 unclaimedAmount, uint256 claimedAmount) {
+        StakerReward memory reward = s_stakerRewards[
+            _getStakerAndTokenHash(staker, token)
+        ];
+        unclaimedAmount = reward.unclaimedAmount;
+        claimedAmount = reward.claimedAmount;
     }
 
     /**
@@ -724,126 +904,87 @@ contract Staking is
     }
 
     /**
-     * @notice  Returns all fund distributions by specified token
-     * @param   token  IERC20 USDT/USDC token
-     * @return  fundDistributionData  Array of funDistribution data
+     * @notice  Get user address in the users map from index in array
+     * @param   index  Index in the users array
+     * @return  user  User address
      */
-    function getFundDistribution(
-        IERC20 token
-    ) external view returns (FundDistribution[] memory fundDistributionData) {
-        fundDistributionData = s_fundDistributions[token];
+    function getUser(uint256 index) external view returns (address user) {
+        (user, ) = s_users.at(index);
     }
 
     /**
-     * @notice  Returns pool distribution information:
-     *          token, token amount and share amount
-     * @param   distributionIdAndPoolId  Hashed distribution and pool Id
-     * @return  token  ERC20 USDT/USDC
-     * @return  tokensAmount  Amount of tokens distributed to pool
-     * @return  sharesAmount  Amount of shares present in pool
+     * @notice  Returns the amount of users in the staking contract
+     * @return  usersAmount  Amount of users
      */
-    function getPoolDistribution(
-        bytes32 distributionIdAndPoolId
-    )
-        external
-        view
-        returns (IERC20 token, uint256 tokensAmount, uint256 sharesAmount)
-    {
-        PoolDistribution memory poolDistributionData = s_poolsDistribution[
-            distributionIdAndPoolId
-        ];
-        token = poolDistributionData.token;
-        tokensAmount = poolDistributionData.tokensAmount;
-        sharesAmount = poolDistributionData.sharesAmount;
-    }
-
-    /**
-     * @notice  Returns data on staker shares and claimed status
-     * @param   distributionIdWithPoolIdAndStaker  Hashed distribution, pool Id and staker
-     * @return  shares  Total claimable shares
-     * @return  claimed  Claimed share status
-     */
-    function getStakerShares(
-        bytes32 distributionIdWithPoolIdAndStaker
-    ) external view returns (uint256 shares, bool claimed) {
-        StakerShares memory stakerSharesData = s_stakerShares[
-            distributionIdWithPoolIdAndStaker
-        ];
-        shares = stakerSharesData.shares;
-        claimed = stakerSharesData.claimed;
+    function getTotalUsers() external view returns (uint256 usersAmount) {
+        usersAmount = s_users.length();
     }
 
     /*//////////////////////////////////////////////////////////////////////////
-                                    PUBLIC FUNCTIONS
+                                INTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
-    /**
-     * @notice  Claim rewards for all bands
-     * @param   token  USDT/USDC token
-     * @param   poolId  Id of the pool (1-9)
-     */
-    function claimPoolRewards(IERC20 token, uint16 poolId) public {
-        uint256 distributionsAmount = s_fundDistributions[token].length;
-        uint256 totalRewards;
+    function _claimAllRewards(address staker) internal {
+        // If claiming in unstake function, we don't want to revert if there are no rewards
+        _claimRewards(staker, s_usdtToken, false);
+        _claimRewards(staker, s_usdcToken, false);
+    }
 
-        // Loop through all fund distributions for a single pool
-        // Iterate from the last distribution to the first one
-        // We know that only distributions with unclaimed rewards are at the end
-        for (uint256 index = distributionsAmount - 1; index >= 0; index--) {
-            uint256 distributionId = s_fundDistributions[token][index].id;
-            bytes32 stakerConfigHash = _getStakerHash(
-                distributionId,
-                poolId,
-                msg.sender
-            );
-            StakerShares memory stakerShares = s_stakerShares[stakerConfigHash];
+    function _claimRewards(
+        address staker,
+        IERC20 token,
+        bool revertIfZeroAmount
+    ) internal {
+        StakerReward storage stakerRewards = s_stakerRewards[
+            _getStakerAndTokenHash(staker, token)
+        ];
 
-            // Break the loop if the user has already claimed the rewards
-            if (stakerShares.claimed) {
-                break;
-            }
+        uint256 rewardsToClaim = stakerRewards.unclaimedAmount;
 
-            bytes32 poolConfigHash = _getPoolHash(distributionId, poolId);
-            PoolDistribution memory distribution = s_poolsDistribution[
-                poolConfigHash
-            ];
-
-            // Calculate rewards for the user and add them to the total
-            totalRewards += _calculateRewards(
-                distribution.tokensAmount,
-                distribution.sharesAmount,
-                stakerShares.shares
-            );
-
-            // Effects: set the user shares to claimed
-            s_stakerShares[stakerConfigHash].claimed = true;
+        // Checks: user must have rewards to claim
+        if (rewardsToClaim == 0 && revertIfZeroAmount) {
+            revert Errors.Staking__NoRewardsToClaim();
         }
 
-        // Interaction: transfer the tokens to the sender
-        token.safeTransfer(msg.sender, totalRewards);
+        if (rewardsToClaim > 0) {
+            // Effects: update rewards data
+            stakerRewards.unclaimedAmount = 0;
+            stakerRewards.claimedAmount += rewardsToClaim;
 
-        // Effects: emit event
-        emit RewardsClaimed(msg.sender, token, totalRewards);
+            // Interaction: transfer the tokens to the sender
+            token.safeTransfer(staker, rewardsToClaim);
+
+            // Effects: emit event
+            emit RewardsClaimed(staker, token, rewardsToClaim);
+        }
     }
 
-    /*//////////////////////////////////////////////////////////////////////////
-                            INTERNAL  FUNCTIONS
-    //////////////////////////////////////////////////////////////////////////*/
-
     function _stakeBand(
+        address user,
         StakingTypes stakingType,
         uint16 bandLevel,
-        address user
-    ) internal {
+        uint8 month,
+        bool areTokensVested
+    ) internal returns (uint256 bandId) {
         // Effects: increment bandId (variable is set before incrementing to start from 0)
-        uint256 bandId = s_nextBandId++;
+        bandId = s_nextBandId++;
 
         // Effects: set staker band data
-        StakerBandData storage band = s_bands[bandId];
-        band.stakingType = stakingType;
+        StakerBand storage band = s_bands[bandId];
         band.owner = user;
+        band.stakingStartDate = uint32(block.timestamp);
         band.bandLevel = bandLevel;
-        band.stakingStartTimestamp = block.timestamp;
+        band.stakingType = stakingType;
+
+        if (month > 0) {
+            // Effects: set fixed months for the band
+            band.fixedMonths = month;
+        }
+
+        if (areTokensVested) {
+            // Effects: set that band is bought from vested tokens
+            band.areTokensVested = true;
+        }
 
         // Effects: add bandId to the user
         s_stakerBands[user].push(bandId);
@@ -853,14 +994,9 @@ contract Staking is
             // Effects: add user to the map
             s_users.set(user, 1);
         }
-
-        // Effects: emit event
-        emit BandStaked(user, bandLevel, bandId);
     }
 
-    function _unstakeBand(uint256 bandId, address user) internal {
-        uint16 bandLevel = s_bands[bandId].bandLevel;
-
+    function _unstakeBand(address user, uint256 bandId) internal {
         // Effects: delete band data
         delete s_bands[bandId];
 
@@ -880,136 +1016,6 @@ contract Staking is
             // Effects: remove user from the map
             s_users.remove(user);
         }
-
-        // Effects: emit event
-        emit BandUnstaked(user, bandLevel, bandId);
-    }
-
-    /**
-     * @notice  Claim rewards for specified band
-     * @dev  This function can be called by anyone
-     * @param   bandId  Band Id
-     */
-    function _claimRewardsFromPools(uint256 bandId) internal {
-        uint16 bandLevel = s_bands[bandId].bandLevel;
-        uint256 maxPoolId = s_bandLevelData[bandLevel].accessiblePools.length;
-        // Loop through all pools and claim rewards for USDT and USDC
-        for (uint16 poolId = 1; poolId <= maxPoolId; poolId++) {
-            claimPoolRewards(s_usdtToken, poolId);
-        }
-    }
-
-    function _createFundDistribution(
-        IERC20 token,
-        uint256 amount
-    ) internal returns (uint256 distributionId) {
-        // Effects: increment distributionId
-        distributionId = s_nextDistributionId++;
-
-        // Create fund distribution data
-        FundDistribution memory fundDistribution = FundDistribution({
-            id: distributionId,
-            token: token,
-            amount: amount,
-            timestamp: block.timestamp
-        });
-
-        // Effects: set fund distribution data
-        s_fundDistributions[token].push(fundDistribution);
-    }
-
-    function _createAllPoolDistributions(
-        IERC20 token,
-        uint256 amount,
-        uint256 distributionId,
-        uint16 totalPools
-    ) internal {
-        // Loop through all pools and set the amount of tokens
-        for (uint16 poolId = 1; poolId <= totalPools; poolId++) {
-            bytes32 configHash = _getPoolHash(distributionId, poolId);
-            uint256 poolTokens = _calculatePoolAllocation(amount, poolId);
-
-            // Effects: set pool distribution data
-            PoolDistribution storage poolDistribution = s_poolsDistribution[
-                configHash
-            ];
-            poolDistribution.token = token;
-            poolDistribution.tokensAmount = poolTokens;
-        }
-    }
-
-    function _addSharesToAccessiblePools(
-        uint256 bandShares,
-        uint256 distributionId,
-        uint16 bandLevel,
-        uint256[] memory userSharesPerPool
-    ) internal returns (uint256[] memory) {
-        uint16[] memory pools = s_bandLevelData[bandLevel].accessiblePools;
-        uint256 poolsAmount = pools.length;
-
-        // No need to add shares if there is nothing to add
-        if (bandShares == 0) {
-            return userSharesPerPool;
-        }
-
-        // Loop through all pools and set the amount of shares
-        for (uint16 poolIndex; poolIndex < poolsAmount; poolIndex++) {
-            uint16 poolId = pools[poolIndex];
-            bytes32 poolConfigHash = _getPoolHash(distributionId, poolId);
-
-            // Add shares to the user in the pool
-            userSharesPerPool[poolId - 1] = bandShares;
-
-            // Effects: increase pool shares
-            s_poolsDistribution[poolConfigHash].sharesAmount += bandShares;
-        }
-
-        return userSharesPerPool;
-    }
-
-    function _addSharesToUser(
-        address user,
-        uint256 distributionId,
-        uint16 totalPools,
-        uint256[] memory userSharesPerPool
-    ) internal {
-        // Loop through all pools and set the amount of shares
-        for (uint16 poolId = 1; poolId <= totalPools; poolId++) {
-            bytes32 stakerConfigHash = _getStakerHash(
-                distributionId,
-                poolId,
-                user
-            );
-
-            // Effects: increase user shares
-            s_stakerShares[stakerConfigHash].shares += userSharesPerPool[
-                poolId - 1
-            ];
-        }
-    }
-
-    function _addAllBandSharesToPools(
-        address user,
-        uint256 distributionId,
-        uint16 totalPools
-    ) internal returns (uint256[] memory userSharesPerPool) {
-        uint256[] memory bandIds = s_stakerBands[user];
-        uint256 bandsAmount = bandIds.length;
-        userSharesPerPool = new uint256[](totalPools);
-
-        // Loop through all bands that user owns and set the amount of shares
-        for (uint256 bandIndex; bandIndex < bandsAmount; bandIndex++) {
-            uint256 bandId = bandIds[bandIndex];
-            StakerBandData memory band = s_bands[bandId];
-            uint256 bandShares = _calculateBandShares(band, block.timestamp);
-
-            userSharesPerPool = _addSharesToAccessiblePools(
-                bandShares,
-                distributionId,
-                band.bandLevel,
-                userSharesPerPool
-            );
-        }
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -1026,70 +1032,22 @@ contract Staking is
                             INTERNAL VIEW/PURE FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
-    function _calculateCompletedMonths(
-        uint256 startDate,
-        uint256 endDate
-    ) internal pure returns (uint256 perionInMonths) {
-        perionInMonths = (endDate - startDate) / MONTH;
-    }
+    function _validateFixedPeriodPassed(StakerBand storage band) internal view {
+        if (band.stakingType == StakingTypes.FIX) {
+            uint32 monthsPassed = (uint32(block.timestamp) -
+                band.stakingStartDate) / MONTH;
 
-    function _calculatePoolAllocation(
-        uint256 amount,
-        uint16 poolId
-    ) internal view returns (uint256 poolTokens) {
-        // amount * (distribution % * 10**6) / (100% * 10**6)
-        poolTokens = ((amount * s_poolData[poolId].distributionPercentage) /
-            PERCENTAGE_PRECISION);
-    }
-
-    function _calculateBandShares(
-        StakerBandData memory band,
-        uint256 endDate
-    ) internal view returns (uint256 bandShares) {
-        // If staking type is FLEXI calculate shares based months passed
-        if (band.stakingType == StakingTypes.FLEXI) {
-            // Calculate months that passed since staking start
-            uint256 monthsPassed = _calculateCompletedMonths(
-                band.stakingStartTimestamp,
-                endDate
-            );
-
-            // If at least 1 month passed, calculate shares based on months
-            if (monthsPassed > 0) {
-                bandShares = sharesInMonth[monthsPassed - 1];
+            // Checks: fixed staking can only be unstaked after the fixed period
+            if (monthsPassed < band.fixedMonths) {
+                revert Errors.Staking__UnlockDateNotReached();
             }
         }
-        // Else type is FIX
-        else {
-            // For FIX type, shares are set at the start and do not change over time
-            bandShares = band.startingSharesAmount;
-        }
     }
 
-    function _calculateRewards(
-        uint256 poolTokens,
-        uint256 poolShares,
-        uint256 userShares
-    ) internal pure returns (uint256 rewards) {
-        if (poolShares == 0) {
-            revert Errors.Staking__ZeroPoolShares();
-        }
-
-        rewards = (poolTokens * userShares) / poolShares;
-    }
-
-    function _getPoolHash(
-        uint256 distributionId,
-        uint16 poolId
+    function _getStakerAndTokenHash(
+        address staker,
+        IERC20 token
     ) internal pure returns (bytes32) {
-        return keccak256(abi.encode(distributionId, poolId));
-    }
-
-    function _getStakerHash(
-        uint256 distributionId,
-        uint16 poolId,
-        address staker
-    ) internal pure returns (bytes32) {
-        return keccak256(abi.encode(distributionId, poolId, staker));
+        return keccak256(abi.encode(staker, token));
     }
 }

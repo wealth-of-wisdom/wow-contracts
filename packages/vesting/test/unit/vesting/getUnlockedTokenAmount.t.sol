@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.20;
 
-import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
-import {Errors} from "@wealth-of-wisdom/vesting/contracts/libraries/Errors.sol";
-import {Vesting_Unit_Test} from "@wealth-of-wisdom/vesting/test/unit/VestingUnit.t.sol";
+import {IVesting} from "../../../contracts/interfaces/IVesting.sol";
+import {Errors} from "../../../contracts/libraries/Errors.sol";
+import {Vesting_Unit_Test} from "../VestingUnit.t.sol";
 
 contract Vesting_GetUnlockedTokenAmount_Unit_Test is Vesting_Unit_Test {
     // Current time is 1 minute before listing date
@@ -354,7 +354,7 @@ contract Vesting_GetUnlockedTokenAmount_Unit_Test is Vesting_Unit_Test {
         );
     }
 
-    // Current time is 1 month after cliff end date
+    // Current time is 2 month after cliff end date
     function test_getUnlockedTokenAmount_ReturnsVestedMinusClaimedAmountIfTwoPeriodPassed()
         external
         approveAndAddPool

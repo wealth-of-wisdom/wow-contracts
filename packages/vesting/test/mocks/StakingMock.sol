@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import {IStaking} from "@wealth-of-wisdom/staking/contracts/interfaces/IStaking.sol";
+import {Staking} from "@wealth-of-wisdom/staking/contracts/Staking.sol";
 
-contract StakingMock is IStaking {
+contract StakingMock is Staking {
     bool public wasUnstakesVestedTokensCalled;
 
     /*//////////////////////////////////////////////////////////////////////////

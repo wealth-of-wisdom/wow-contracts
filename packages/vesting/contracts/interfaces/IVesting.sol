@@ -10,6 +10,8 @@ interface IVestingEvents {
                                        EVENTS
     //////////////////////////////////////////////////////////////////////////*/
 
+    event AllTokensClaimed(address indexed user, uint256 tokenAmount);
+
     event VestingPoolAdded(
         uint16 indexed poolIndex,
         uint256 totalPoolTokenAmount
@@ -51,7 +53,7 @@ interface IVestingEvents {
 }
 
 interface IVesting is IVestingEvents {
-    /*////////////////////////////////////////////////////////////////  //////////
+    /*//////////////////////////////////////////////////////////////////////////
                                        ENUMS
     //////////////////////////////////////////////////////////////////////////*/
 
@@ -138,16 +140,17 @@ interface IVesting is IVestingEvents {
 
     function claimTokens(uint16 pid) external;
 
+    function claimAllTokens() external;
+
     function stakeVestedTokens(
         IStaking.StakingTypes stakingType,
         uint16 bandLevel,
+        uint8 month,
         uint16 pid,
-        address beneficiary,
         uint256 tokenAmount
     ) external;
 
     function unstakeVestedTokens(
-        uint16 bandLevel,
         uint16 bandId,
         uint16 pid,
         address beneficiary,

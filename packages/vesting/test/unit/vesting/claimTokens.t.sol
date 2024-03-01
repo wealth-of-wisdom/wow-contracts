@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.20;
 
-import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
-import {Errors} from "@wealth-of-wisdom/vesting/contracts/libraries/Errors.sol";
-import {Vesting_Unit_Test} from "@wealth-of-wisdom/vesting/test/unit/VestingUnit.t.sol";
+import {IVesting} from "../../../contracts/interfaces/IVesting.sol";
+import {Errors} from "../../../contracts/libraries/Errors.sol";
+import {Vesting_Unit_Test} from "../VestingUnit.t.sol";
 
 contract Vesting_ClaimTokens_Unit_Test is Vesting_Unit_Test {
     function test_claimTokens_RevertIf_PoolDoesNotExist() external {
@@ -38,34 +38,32 @@ contract Vesting_ClaimTokens_Unit_Test is Vesting_Unit_Test {
         vesting.claimTokens(PRIMARY_POOL);
     }
 
-    function test_claimTokens_RevertIf_NotEnoughTokens()
+    function test_claimTokens_RevertIf_NotEnoughTokensInContract()
         external
         approveAndAddPool
         addBeneficiary(alice)
     {
         vm.warp(LISTING_DATE + 1 minutes);
         vm.prank(address(vesting));
-        token.burn(TOTAL_POOL_TOKEN_AMOUNT);
+        wowToken.burn(TOTAL_POOL_TOKEN_AMOUNT);
 
         vm.expectRevert(Errors.Vesting__NotEnoughTokens.selector);
         vm.prank(alice);
         vesting.claimTokens(PRIMARY_POOL);
     }
 
-    function test_claimTokens_RevertIf_ClaimingStakedTokens()
+    function test_claimTokens_RevertIf_UnlockedMoreTokensThanAvailable()
         external
         approveAndAddPool
         addBeneficiary(alice)
     {
-        vm.prank(address(staking));
-        vesting.updateVestedStakedTokens(
+        vm.warp(LISTING_DATE + 1 minutes);
+        vesting.mock_setStakedAmount(
             PRIMARY_POOL,
             alice,
-            BENEFICIARY_TOKEN_AMOUNT,
-            true
+            BENEFICIARY_TOKEN_AMOUNT
         );
 
-        vm.warp(LISTING_DATE + 1 minutes);
         vm.expectRevert(Errors.Vesting__StakedTokensCanNotBeClaimed.selector);
         vm.prank(alice);
         vesting.claimTokens(PRIMARY_POOL);
@@ -95,7 +93,7 @@ contract Vesting_ClaimTokens_Unit_Test is Vesting_Unit_Test {
         approveAndAddPool
         addBeneficiary(alice)
     {
-        vm.warp(LISTING_DATE + CLIFF_IN_DAYS * 1 days);
+        vm.warp(LISTING_DATE + CLIFF_IN_SECONDS);
         vm.prank(alice);
         vesting.claimTokens(PRIMARY_POOL);
 
@@ -109,18 +107,34 @@ contract Vesting_ClaimTokens_Unit_Test is Vesting_Unit_Test {
         );
     }
 
+    function test_claimTokens_IncreasesClaimedTokensAmountWhenClaimingAfterEndDate()
+        external
+        approveAndAddPool
+        addBeneficiary(alice)
+    {
+        vm.warp(LISTING_DATE + CLIFF_IN_SECONDS + VESTING_DURATION_IN_SECONDS);
+        vm.prank(alice);
+        vesting.claimTokens(PRIMARY_POOL);
+
+        IVesting.Beneficiary memory beneficiary = vesting.getBeneficiary(
+            PRIMARY_POOL,
+            alice
+        );
+        assertEq(beneficiary.claimedTokenAmount, beneficiary.totalTokenAmount);
+    }
+
     function test_claimTokens_TransfersTokensToSender()
         external
         approveAndAddPool
         addBeneficiary(alice)
     {
-        uint256 balanceBefore = token.balanceOf(alice);
+        uint256 balanceBefore = wowToken.balanceOf(alice);
 
         vm.warp(LISTING_DATE + 1 minutes);
         vm.prank(alice);
         vesting.claimTokens(PRIMARY_POOL);
 
-        uint256 balanceAfter = token.balanceOf(alice);
+        uint256 balanceAfter = wowToken.balanceOf(alice);
 
         IVesting.Beneficiary memory beneficiary = vesting.getBeneficiary(
             PRIMARY_POOL,
@@ -134,13 +148,13 @@ contract Vesting_ClaimTokens_Unit_Test is Vesting_Unit_Test {
         approveAndAddPool
         addBeneficiary(alice)
     {
-        uint256 balanceBefore = token.balanceOf(address(vesting));
+        uint256 balanceBefore = wowToken.balanceOf(address(vesting));
 
         vm.warp(LISTING_DATE + 1 minutes);
         vm.prank(alice);
         vesting.claimTokens(PRIMARY_POOL);
 
-        uint256 balanceAfter = token.balanceOf(address(vesting));
+        uint256 balanceAfter = wowToken.balanceOf(address(vesting));
 
         IVesting.Beneficiary memory beneficiary = vesting.getBeneficiary(
             PRIMARY_POOL,
@@ -159,7 +173,7 @@ contract Vesting_ClaimTokens_Unit_Test is Vesting_Unit_Test {
             alice
         );
 
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit(address(vesting));
         emit TokensClaimed(PRIMARY_POOL, alice, beneficiary.listingTokenAmount);
 
         vm.warp(LISTING_DATE + 1 minutes);

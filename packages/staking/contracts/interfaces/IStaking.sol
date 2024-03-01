@@ -18,24 +18,44 @@ interface IStakingEvents {
 
     event SharesInMonthSet(uint48[] totalSharesInMonth);
 
+    event UpgradesTriggerSet(bool triggerStatus);
+
+    event UsdtTokenSet(IERC20 token);
+
+    event UsdcTokenSet(IERC20 token);
+
+    event WowTokenSet(IERC20 token);
+
+    event RewardsCollectorSet(address collector);
+
     event TotalBandLevelsAmountSet(uint16 newTotalBandsAmount);
 
     event TotalPoolAmountSet(uint16 newTotalPoolAmount);
 
-    event FundsDistributed(IERC20 token, uint256 amount);
+    event TokensWithdrawn(IERC20 token, address receiver, uint256 amount);
+
+    event DistributionCreated(
+        IERC20 token,
+        uint256 amount,
+        uint16 totalPools,
+        uint16 totalBandLevels,
+        uint256 totalStakers,
+        uint256 distributionTimestamp
+    );
+
+    event RewardsDistributed(IERC20 token);
 
     event Staked(
         address user,
         uint16 bandLevel,
+        uint256 bandId,
         IStaking.StakingTypes stakingType,
-        bool isVested
+        bool areTokensVested
     );
 
-    event Unstaked(address user, uint256 bandId, bool isVested);
+    event Unstaked(address user, uint256 bandId, bool areTokensVested);
 
-    event BandStaked(address user, uint16 bandLevel, uint256 bandId);
-
-    event BandUnstaked(address user, uint16 bandLevel, uint256 bandId);
+    event VestingUserDeleted(address user);
 
     event BandUpgaded(
         address user,
@@ -51,13 +71,7 @@ interface IStakingEvents {
         uint16 newBandLevel
     );
 
-    event TokensWithdrawn(IERC20 token, address receiver, uint256 amount);
-
-    event VestingUserRemoved(address vestingSaker);
-
     event RewardsClaimed(address user, IERC20 token, uint256 totalRewards);
-
-    event AllRewardsClaimed(address user);
 }
 
 interface IStaking is IStakingEvents {
@@ -73,52 +87,42 @@ interface IStaking is IStakingEvents {
                                        STRUCTS
     //////////////////////////////////////////////////////////////////////////*/
 
-    // Distribution of funds
-
-    struct FundDistribution {
-        uint256 id;
-        IERC20 token;
-        uint256 amount;
-        uint256 timestamp;
+    struct StakerBand {
+        address owner; // staker who owns the band
+        uint32 stakingStartDate; // timestamp for initial band creation
+        uint16 bandLevel; // band levels (1-9)
+        uint8 fixedMonths; // 0 for flexi, 1-24 for fix
+        StakingTypes stakingType; // FLEXI or FIX
+        bool areTokensVested; // true if tokens from which the band was created are vested
     }
 
-    struct PoolDistribution {
-        IERC20 token;
-        uint256 tokensAmount;
-        uint256 sharesAmount;
+    struct StakerReward {
+        uint256 unclaimedAmount; // amount of tokens that can be claimed
+        uint256 claimedAmount; // amount of tokens that have been claimed
     }
 
-    struct StakerShares {
-        uint256 shares;
-        bool claimed;
-    }
-
-    // Staking
-
-    struct StakerBandData {
-        StakingTypes stakingType;
-        uint256 startingSharesAmount;
-        address owner;
-        uint16 bandLevel;
-        uint256 stakingStartTimestamp;
-        uint256 usdtRewardsClaimed;
-        uint256 usdcRewardsClaimed;
-    }
-
-    struct Band {
-        uint256 price;
-        uint16[] accessiblePools; // 1-9
+    struct BandLevel {
+        uint256 price; // price in WOW tokens
+        uint16[] accessiblePools; // pool ids (1-9)
     }
 
     struct Pool {
-        uint48 distributionPercentage; // in 10**6 integrals, for divident calculation
-        uint256 totalUsdtPoolTokenAmount;
-        uint256 totalUsdcPoolTokenAmount;
+        uint48 distributionPercentage; // in 10^6 integrals, for divident calculation
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                                        FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
+
+    function initialize(
+        IERC20 usdtToken,
+        IERC20 usdcToken,
+        IERC20 wowToken,
+        address vesting,
+        address gelato,
+        uint16 totalPools,
+        uint16 totalBandLevels
+    ) external;
 
     function setPool(uint16 poolId, uint48 distributionPercentage) external;
 
@@ -130,40 +134,52 @@ interface IStaking is IStakingEvents {
 
     function setSharesInMonth(uint48[] calldata totalSharesInMonth) external;
 
+    function setUsdtToken(IERC20 token) external;
+
+    function setUsdcToken(IERC20 token) external;
+
+    function setWowToken(IERC20 token) external;
+
+    function setUpgradesTrigger(bool triggerStatus) external;
+
     function setTotalBandLevelsAmount(uint16 newTotalBandsAmount) external;
 
     function setTotalPoolAmount(uint16 newTotalPoolAmount) external;
 
-    function distributeFunds(IERC20 token, uint256 amount) external;
-
     function withdrawTokens(IERC20 token, uint256 amount) external;
 
-    function stake(StakingTypes stakingType, uint16 bandLevel) external;
+    function createDistribution(IERC20 token, uint256 amount) external;
+
+    function distributeRewards(
+        IERC20 token,
+        address[] memory stakers,
+        uint256[] memory rewards
+    ) external;
+
+    function stake(
+        StakingTypes stakingType,
+        uint16 bandLevel,
+        uint8 month
+    ) external;
 
     function unstake(uint256 bandId) external;
 
     function stakeVested(
+        address user,
         StakingTypes stakingType,
         uint16 bandLevel,
-        address user
+        uint8 month
     ) external;
 
-    // /**
-    //  * @notice Stops staking of vested tokens for a beneficiary in a pool
-    //  * @notice Beneficiary needs to claim staking rewards with an external call
-    //  * @notice This function can only be called by the vesting contract
-    //  */
-    function unstakeVested(uint256 bandId, address user) external;
+    function unstakeVested(address user, uint256 bandId) external;
 
-    function deleteVestingUserData(address user) external;
+    function deleteVestingUser(address user) external;
 
     function upgradeBand(uint256 bandId, uint16 newBandLevel) external;
 
     function downgradeBand(uint256 bandId, uint16 newBandLevel) external;
 
-    function claimAllRewards() external;
-
-    function claimPoolRewards(IERC20 token, uint16 poolId) external;
+    function claimRewards(IERC20 token) external;
 
     function getTokenUSDT() external view returns (IERC20);
 
@@ -171,26 +187,52 @@ interface IStaking is IStakingEvents {
 
     function getTokenWOW() external view returns (IERC20);
 
+    function getUpgradesTrigger() external view returns (bool);
+
     function getTotalPools() external view returns (uint16);
 
-    function getTotalBands() external view returns (uint16);
+    function getTotalBandLevels() external view returns (uint16);
 
-    function getPool(
-        uint16 poolId
-    )
-        external
-        view
-        returns (
-            uint48 distributionPercentage,
-            uint256 usdtTokenAmount,
-            uint256 usdcTokenAmount
-        );
+    function getNextBandId() external view returns (uint256);
 
-    function getBand(
-        uint16 bandLevel
-    ) external view returns (uint256 price, uint16[] memory accessiblePools);
+    function getSharesInMonthArray() external view returns (uint48[] memory);
 
     function getSharesInMonth(
         uint256 index
     ) external view returns (uint48 shares);
+
+    function getPool(
+        uint16 poolId
+    ) external view returns (uint48 distributionPercentage);
+
+    function getBandLevel(
+        uint16 bandLevel
+    ) external view returns (uint256 price, uint16[] memory accessiblePools);
+
+    function getStakerBand(
+        uint256 bandId
+    )
+        external
+        view
+        returns (
+            address owner,
+            uint32 stakingStartDate,
+            uint16 bandLevel,
+            uint8 fixedMonths,
+            StakingTypes stakingType,
+            bool areTokensVested
+        );
+
+    function getStakerReward(
+        address staker,
+        IERC20 token
+    ) external view returns (uint256 unclaimedAmount, uint256 claimedAmount);
+
+    function getStakerBandIds(
+        address staker
+    ) external view returns (uint256[] memory bandIds);
+
+    function getUser(uint256 index) external view returns (address user);
+
+    function getTotalUsers() external view returns (uint256 usersAmount);
 }

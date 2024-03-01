@@ -69,6 +69,7 @@ dataSources:
           handler: handleNftMinted
         - event: NftDataActivated(indexed address,indexed uint256,uint16,bool,uint256,uint256)
           handler: handleNftActivation
+      
     - kind: ethereum/contract      
       name: Staking
       network: {{network}}
@@ -125,3 +126,4 @@ dataSources:
             #   handler: handleUpgraded
             - event: VestingUserRemoved(address)
               handler: handleVestingUserRemoved
+

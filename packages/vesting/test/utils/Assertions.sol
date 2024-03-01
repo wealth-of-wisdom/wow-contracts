@@ -10,7 +10,7 @@ abstract contract Assertions is StdAssertions, Constants {
         IVesting.UnlockTypes expected,
         IVesting.UnlockTypes actual
     ) internal {
-        assertEq(uint8(expected), uint8(actual));
+        assertEq(uint8(expected), uint8(actual), "Unlock type is incorrect");
     }
 
     function assertBeneficiaryData(
@@ -72,7 +72,7 @@ abstract contract Assertions is StdAssertions, Constants {
         ) = vesting.getGeneralPoolData(poolIndex);
 
         assertEq(POOL_NAME, name, "Pool name is incorrect");
-        assertUnlockType(VESTING_UNLOCK_TYPE, unlockType);
+        assertUnlockType(MONTHLY_UNLOCK_TYPE, unlockType);
         assertEq(
             TOTAL_POOL_TOKEN_AMOUNT,
             totalAmount,
