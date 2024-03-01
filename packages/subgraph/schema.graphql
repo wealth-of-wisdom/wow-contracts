@@ -3,6 +3,10 @@ enum UnlockType {
     MONTHLY # Unlock type for monthly vesting
 }
 
+############################################################
+#                          Vesting                   
+############################################################
+
 # Entity representing Vesting Contract
 type VestingContract @entity {
     """
@@ -211,6 +215,10 @@ type Beneficiary @entity {
     claimedTokens: BigInt!
 }
 
+############################################################
+#                       NFT & NFT Sale                      
+############################################################
+
 type NftContract @entity {
     id: ID!
     nftContractAddress: Bytes!
@@ -225,7 +233,6 @@ type Nft @entity {
     activityEndTimestamp: BigInt!
     extendedActivityEndTimestamp: BigInt!
     owner: User!
-
 }
 
 # NFT holder info
@@ -234,8 +241,10 @@ type User @entity {
     nfts: [Nft!]! @derivedFrom(field: "owner")
 }
 
-# Staking schema
- 
+############################################################
+#                         Staking                    
+############################################################
+
 type StakingContract @entity {
     id: ID!
     stakingContractAddress: Bytes!
@@ -243,14 +252,12 @@ type StakingContract @entity {
     totalBands: Int!
 }
 
-
 type Pool @entity {
     id: ID!
     distributionPercentage: Int!
     usdtTokenAmount: BigInt!
     usdcTokenAmount: BigInt!
 }
-
 
 type Band @entity {
     id: ID!
