@@ -109,14 +109,14 @@ contract Vesting_StakeVestedTokens_Unit_Test is Vesting_Unit_Test {
         );
     }
 
-    function test_stakeVestedTokens_EmitsStakedTokensUpdated()
+    function test_stakeVestedTokens_EmitsVestedTokensStaked()
         external
         approveAndAddPool
         addBeneficiary(alice)
     {
         vm.startPrank(alice);
         vm.expectEmit(address(vesting));
-        emit StakedTokensUpdated(PRIMARY_POOL, alice, BENEFICIARY_TOKEN_AMOUNT);
+        emit VestedTokensStaked(PRIMARY_POOL, alice, BENEFICIARY_TOKEN_AMOUNT);
         vesting.stakeVestedTokens(
             STAKING_TYPE_FLEXI,
             BAND_LEVEL_1,

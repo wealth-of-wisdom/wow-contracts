@@ -492,6 +492,8 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
             // Effects
             user.claimedTokenAmount += unlockedTokens;
             allTokensToClaim += unlockedTokens;
+
+            emit TokensClaimed(i, msg.sender, unlockedTokens);
         }
         // Interactions
         s_token.safeTransfer(msg.sender, allTokensToClaim);
@@ -539,29 +541,27 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         s_staking.stakeVested(msg.sender, stakingType, bandLevel, month);
 
         // Effects: Emit event
-        emit StakedTokensUpdated(pid, msg.sender, tokenAmount);
+        emit VestedTokensStaked(pid, msg.sender, tokenAmount);
     }
 
     /**
      * @notice Unstakes vested tokesns via vesting contract in staking contract
      * @param bandId  Id of the band (0-max uint)
      * @param pid Index that refers to vesting pool object.
-     * @param beneficiary Address of the staker.
      * @param tokenAmount Amount used to stake or unstake from vesting pool.
      */
     function unstakeVestedTokens(
         uint16 bandId,
         uint16 pid,
-        address beneficiary,
         uint256 tokenAmount
     )
         external
         mPoolExists(pid)
-        mBeneficiaryExists(pid, beneficiary)
+        mBeneficiaryExists(pid, msg.sender)
         mAmountNotZero(tokenAmount)
     {
         Pool storage pool = s_vestingPools[pid];
-        Beneficiary storage user = pool.beneficiaries[beneficiary];
+        Beneficiary storage user = pool.beneficiaries[msg.sender];
 
         // Effects: Unstake tokens
         if (tokenAmount - user.stakedTokenAmount > 0) {
@@ -571,7 +571,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         s_staking.unstakeVested(msg.sender, bandId);
 
         // Effects: Emit event
-        emit StakedTokensUpdated(pid, beneficiary, tokenAmount);
+        emit VestedTokensUnstaked(pid, msg.sender, tokenAmount);
     }
 
     /*//////////////////////////////////////////////////////////////////////////

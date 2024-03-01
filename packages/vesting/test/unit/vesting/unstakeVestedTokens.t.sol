@@ -13,7 +13,6 @@ contract Vesting_UnstakeVestedTokens_Unit_Test is Vesting_Unit_Test {
         vesting.unstakeVestedTokens(
             BAND_ID_0,
             PRIMARY_POOL,
-            alice,
             BENEFICIARY_TOKEN_AMOUNT
         );
     }
@@ -24,11 +23,10 @@ contract Vesting_UnstakeVestedTokens_Unit_Test is Vesting_Unit_Test {
         addBeneficiary(alice)
     {
         vm.expectRevert(Errors.Vesting__BeneficiaryDoesNotExist.selector);
-        vm.prank(alice);
+        vm.prank(bob);
         vesting.unstakeVestedTokens(
             BAND_ID_0,
             PRIMARY_POOL,
-            bob,
             BENEFICIARY_TOKEN_AMOUNT
         );
     }
@@ -40,7 +38,7 @@ contract Vesting_UnstakeVestedTokens_Unit_Test is Vesting_Unit_Test {
     {
         vm.expectRevert(Errors.Vesting__TokenAmountZero.selector);
         vm.prank(alice);
-        vesting.unstakeVestedTokens(BAND_ID_0, PRIMARY_POOL, alice, 0);
+        vesting.unstakeVestedTokens(BAND_ID_0, PRIMARY_POOL, 0);
     }
 
     function test_unstakeVestedTokens_RevertIf_UnstakingTooManyTokens()
@@ -53,7 +51,6 @@ contract Vesting_UnstakeVestedTokens_Unit_Test is Vesting_Unit_Test {
         vesting.unstakeVestedTokens(
             BAND_ID_0,
             PRIMARY_POOL,
-            alice,
             BENEFICIARY_TOKEN_AMOUNT + 1
         );
     }
@@ -71,14 +68,12 @@ contract Vesting_UnstakeVestedTokens_Unit_Test is Vesting_Unit_Test {
                 IVesting.unstakeVestedTokens.selector,
                 BAND_ID_0,
                 PRIMARY_POOL,
-                alice,
                 BENEFICIARY_TOKEN_AMOUNT
             )
         );
         vesting.unstakeVestedTokens(
             BAND_ID_0,
             PRIMARY_POOL,
-            alice,
             BENEFICIARY_TOKEN_AMOUNT
         );
         vm.stopPrank();
@@ -94,7 +89,7 @@ contract Vesting_UnstakeVestedTokens_Unit_Test is Vesting_Unit_Test {
         );
     }
 
-    function test_unstakeVestedTokens_EmitsStakedTokensUpdated()
+    function test_unstakeVestedTokens_EmitsVestedTokensUnstaked()
         external
         approveAndAddPool
         addBeneficiary(alice)
@@ -102,11 +97,14 @@ contract Vesting_UnstakeVestedTokens_Unit_Test is Vesting_Unit_Test {
     {
         vm.startPrank(alice);
         vm.expectEmit(address(vesting));
-        emit StakedTokensUpdated(PRIMARY_POOL, alice, BENEFICIARY_TOKEN_AMOUNT);
+        emit VestedTokensUnstaked(
+            PRIMARY_POOL,
+            alice,
+            BENEFICIARY_TOKEN_AMOUNT
+        );
         vesting.unstakeVestedTokens(
             BAND_ID_0,
             PRIMARY_POOL,
-            alice,
             BENEFICIARY_TOKEN_AMOUNT
         );
         vm.stopPrank();
