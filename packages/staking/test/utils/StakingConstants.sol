@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import {IStaking} from "@wealth-of-wisdom/staking/contracts/interfaces/IStaking.sol";
-import {IVesting} from "../../contracts/interfaces/IVesting.sol";
+import {IStaking} from "../../contracts/interfaces/IStaking.sol";
 
-abstract contract Constants {
+abstract contract StakingConstants {
     /*//////////////////////////////////////////////////////////////////////////
                                     ADDRESSES
     //////////////////////////////////////////////////////////////////////////*/
@@ -12,13 +11,14 @@ abstract contract Constants {
     address internal constant ZERO_ADDRESS = address(0x0);
 
     /*//////////////////////////////////////////////////////////////////////////
-                                    ROLES   
+                                    ROLES
     //////////////////////////////////////////////////////////////////////////*/
 
     bytes32 internal constant DEFAULT_ADMIN_ROLE = 0x00;
-    bytes32 internal constant BENEFICIARIES_MANAGER_ROLE =
-        keccak256("BENEFICIARIES_MANAGER_ROLE");
     bytes32 internal constant VESTING_ROLE = keccak256("VESTING_ROLE");
+    bytes32 internal constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+    bytes32 internal constant GELATO_EXECUTOR_ROLE =
+        keccak256("GELATO_EXECUTOR_ROLE");
 
     /*//////////////////////////////////////////////////////////////////////////
                                     DECIMALS
@@ -26,66 +26,44 @@ abstract contract Constants {
 
     uint8 internal constant USD_DECIMALS = 6;
     uint8 internal constant WOW_DECIMALS = 18;
+    uint128 internal constant USD_DECIMALS_FOR_MULTIPLICATION =
+        uint128(10 ** USD_DECIMALS);
     uint128 internal constant WOW_DECIMALS_FOR_MULTIPLICATION =
         uint128(10 ** WOW_DECIMALS);
-    uint48 internal constant PERCENTAGE_PRECISION = 1e8;
 
     /*//////////////////////////////////////////////////////////////////////////
-                                    AMOUNTS   
+                                    AMOUNTS
     //////////////////////////////////////////////////////////////////////////*/
 
-    uint256 internal constant INIT_ETH_BALANCE = 100_000 ether;
-    uint256 internal constant INIT_TOKEN_BALANCE = 100_000 ether;
+    uint256 internal constant INIT_ETH_BALANCE = type(uint128).max;
+    uint256 internal constant INIT_TOKEN_BALANCE = type(uint128).max;
     uint256 internal constant INIT_TOKEN_SUPPLY = 100_000 ether;
+
+    uint256 internal constant DISTRIBUTION_AMOUNT =
+        1_000_000 * USD_DECIMALS_FOR_MULTIPLICATION;
+
+    uint256 internal constant ALICE_REWARDS = DISTRIBUTION_AMOUNT / 10; // 10%
+    uint256 internal constant BOB_REWARDS = (DISTRIBUTION_AMOUNT * 15) / 100; // 15%
+    uint256 internal constant CAROL_REWARDS = DISTRIBUTION_AMOUNT / 5; // 20%
+    uint256 internal constant DAN_REWARDS = DISTRIBUTION_AMOUNT / 4; // 25%
+    uint256 internal constant EVE_REWARDS = (DISTRIBUTION_AMOUNT * 3) / 10; // 30%
+    uint256[] internal DISTRIBUTION_REWARDS = [
+        ALICE_REWARDS,
+        BOB_REWARDS,
+        CAROL_REWARDS,
+        DAN_REWARDS,
+        EVE_REWARDS
+    ];
+
     /*//////////////////////////////////////////////////////////////////////////
-                                VESTING DETAILS   
+                                    TESTING VARS
     //////////////////////////////////////////////////////////////////////////*/
 
-    uint32 internal constant DAY = 1 days;
-    uint32 internal constant MONTH = 30 days;
-    uint8 internal constant DEFAULT_STAKING_MONTH_AMOUNT = 23;
-
-    uint16 internal constant LISTING_PERCENTAGE_DIVIDEND = 1;
-    uint16 internal constant LISTING_PERCENTAGE_DIVISOR = 20;
-
-    uint16 internal constant CLIFF_IN_DAYS = 1;
-    uint32 internal constant CLIFF_IN_SECONDS = CLIFF_IN_DAYS * DAY;
-
-    uint16 internal constant CLIFF_PERCENTAGE_DIVIDEND = 1;
-    uint16 internal constant CLIFF_PERCENTAGE_DIVISOR = 10;
-
-    uint16 internal constant VESTING_DURATION_IN_MONTHS = 3;
-    uint16 internal constant VESTING_DURATION_IN_DAYS = 3 * 30;
-    uint32 internal constant VESTING_DURATION_IN_SECONDS =
-        VESTING_DURATION_IN_DAYS * DAY;
+    uint256[] STAKER_BAND_IDS = [0];
+    uint256[] EMPTY_STAKER_BAND_IDS;
 
     /*//////////////////////////////////////////////////////////////////////////
-                                VESTING AMOUNTS   
-    //////////////////////////////////////////////////////////////////////////*/
-
-    uint256 internal constant BENEFICIARY_TOKEN_AMOUNT = 1 ether;
-    uint256 internal constant LISTING_TOKEN_AMOUNT =
-        (BENEFICIARY_TOKEN_AMOUNT * LISTING_PERCENTAGE_DIVIDEND) /
-            LISTING_PERCENTAGE_DIVISOR;
-    uint256 internal constant CLIFF_TOKEN_AMOUNT =
-        (BENEFICIARY_TOKEN_AMOUNT * CLIFF_PERCENTAGE_DIVIDEND) /
-            CLIFF_PERCENTAGE_DIVISOR;
-    uint256 internal constant LISTING_AND_CLIFF_TOKEN_AMOUNT =
-        LISTING_TOKEN_AMOUNT + CLIFF_TOKEN_AMOUNT;
-    uint256 internal constant VESTING_TOKEN_AMOUNT =
-        BENEFICIARY_TOKEN_AMOUNT - LISTING_AND_CLIFF_TOKEN_AMOUNT;
-
-    /*//////////////////////////////////////////////////////////////////////////
-                                UNLOCK TYPES
-    //////////////////////////////////////////////////////////////////////////*/
-
-    IVesting.UnlockTypes internal constant MONTHLY_UNLOCK_TYPE =
-        IVesting.UnlockTypes.MONTHLY;
-    IVesting.UnlockTypes internal constant DAILY_UNLOCK_TYPE =
-        IVesting.UnlockTypes.DAILY;
-
-    /*//////////////////////////////////////////////////////////////////////////
-                                STAKIN TYPES
+                                    ENUMS
     //////////////////////////////////////////////////////////////////////////*/
 
     IStaking.StakingTypes internal constant STAKING_TYPE_FIX =
@@ -94,18 +72,51 @@ abstract contract Constants {
         IStaking.StakingTypes.FLEXI;
 
     /*//////////////////////////////////////////////////////////////////////////
-                                VESTING POOL DATA   
+                                STAKING DATA
     //////////////////////////////////////////////////////////////////////////*/
 
-    uint16 internal constant TOTAL_STAKING_POOLS = 9;
-    uint256 internal constant TOTAL_POOL_TOKEN_AMOUNT = 100_000 ether;
+    uint16 internal constant TOTAL_POOLS = 9;
+    uint16 internal constant TOTAL_BAND_LEVELS = 9;
+    uint48 internal constant PERCENTAGE_PRECISION = 1e8;
 
-    uint16 internal constant PRIMARY_POOL = 0;
-    uint16 internal constant SECONDARY_POOL = 1;
-    uint32 internal constant PRIMARY_POOL_DISTRIBUTION_PERCENTAGE = 1300000;
-    uint32 internal constant SECONDARY_POOL_DISTRIBUTION_PERCENTAGE = 1700000;
-    string internal constant POOL_NAME = "Test1";
-    string internal constant POOL_NAME_2 = "Test2";
+    uint48 internal constant MONTH = 30 days;
+    uint8 internal constant MONTH_0 = 0;
+    uint8 internal constant MONTH_1 = 1;
+    uint8 internal constant MONTH_12 = 12;
+    uint8 internal constant MONTH_24 = 24;
+    uint8 internal constant MONTH_25 = 25;
+
+    uint48 internal constant SHARE = 1e6;
+    uint48[] internal SHARES_IN_MONTH = [
+        SHARE,
+        SHARE * 2,
+        SHARE * 3,
+        SHARE * 4,
+        SHARE * 5,
+        SHARE * 6,
+        SHARE * 7,
+        SHARE * 8,
+        SHARE * 9,
+        SHARE * 10,
+        SHARE * 11,
+        SHARE * 12,
+        SHARE * 13,
+        SHARE * 14,
+        SHARE * 15,
+        SHARE * 16,
+        SHARE * 17,
+        SHARE * 18,
+        SHARE * 19,
+        SHARE * 20,
+        SHARE * 21,
+        SHARE * 22,
+        SHARE * 23,
+        SHARE * 24
+    ];
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                STAKING POOL DATA
+    //////////////////////////////////////////////////////////////////////////*/
 
     uint16 internal constant POOL_ID_1 = 1;
     uint16 internal constant POOL_ID_2 = 2;
@@ -161,10 +172,10 @@ abstract contract Constants {
     ];
 
     /*//////////////////////////////////////////////////////////////////////////
-                              VESTING BAND LEVEL DATA
+                              STAKING BAND LEVEL DATA
     //////////////////////////////////////////////////////////////////////////*/
 
-    uint16 internal constant TOTAL_BAND_LEVELS = 9;
+    uint16 internal constant TOTAL_4_BAND_LEVELS = 4;
 
     uint16 internal constant BAND_LEVEL_1 = 1;
     uint16 internal constant BAND_LEVEL_2 = 2;
@@ -241,41 +252,13 @@ abstract contract Constants {
         BAND_9_ACCESSIBLE_POOLS
     ];
 
+    /*//////////////////////////////////////////////////////////////////////////
+                              STAKING BAND DATA
+    //////////////////////////////////////////////////////////////////////////*/
+
     uint16 internal constant BAND_ID_0 = 0;
     uint16 internal constant BAND_ID_1 = 1;
     uint16 internal constant BAND_ID_2 = 2;
     uint16 internal constant BAND_ID_3 = 3;
     uint16 internal constant BAND_ID_4 = 4;
-
-    /*//////////////////////////////////////////////////////////////////////////
-                              SHARES DATA
-    //////////////////////////////////////////////////////////////////////////*/
-
-    uint48 internal constant SHARE = 1e6;
-    uint48[] internal SHARES_IN_MONTH = [
-        SHARE,
-        SHARE * 2,
-        SHARE * 3,
-        SHARE * 4,
-        SHARE * 5,
-        SHARE * 6,
-        SHARE * 7,
-        SHARE * 8,
-        SHARE * 9,
-        SHARE * 10,
-        SHARE * 11,
-        SHARE * 12,
-        SHARE * 13,
-        SHARE * 14,
-        SHARE * 15,
-        SHARE * 16,
-        SHARE * 17,
-        SHARE * 18,
-        SHARE * 19,
-        SHARE * 20,
-        SHARE * 21,
-        SHARE * 22,
-        SHARE * 23,
-        SHARE * 24
-    ];
 }

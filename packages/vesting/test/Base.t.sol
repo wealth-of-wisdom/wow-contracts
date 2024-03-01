@@ -95,7 +95,7 @@ contract Base_Test is
             wowToken,
             address(vesting),
             ZERO_ADDRESS, // @todo: future gelato service address
-            TOTAL_STAKING_POOLS,
+            TOTAL_POOLS,
             TOTAL_BAND_LEVELS
         );
         // SET POOLS
@@ -207,7 +207,7 @@ contract Base_Test is
     function _setPools() internal {
         vm.startPrank(admin);
 
-        for (uint16 i; i < TOTAL_STAKING_POOLS; i++) {
+        for (uint16 i; i < TOTAL_POOLS; i++) {
             staking.setPool(POOL_IDS[i], POOL_PERCENTAGES[i]);
         }
 

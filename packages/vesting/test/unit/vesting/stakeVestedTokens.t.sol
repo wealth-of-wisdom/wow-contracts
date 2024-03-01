@@ -46,7 +46,7 @@ contract Vesting_StakeVestedTokens_Unit_Test is Vesting_Unit_Test {
             BAND_LEVEL_2,
             DEFAULT_STAKING_MONTH_AMOUNT,
             PRIMARY_POOL,
-            0
+            MONTH_0
         );
     }
 
@@ -80,7 +80,7 @@ contract Vesting_StakeVestedTokens_Unit_Test is Vesting_Unit_Test {
                 IVesting.stakeVestedTokens.selector,
                 STAKING_TYPE_FLEXI,
                 BAND_LEVEL_1,
-                0,
+                MONTH_0,
                 PRIMARY_POOL,
                 BENEFICIARY_TOKEN_AMOUNT
             )
@@ -88,7 +88,7 @@ contract Vesting_StakeVestedTokens_Unit_Test is Vesting_Unit_Test {
         vesting.stakeVestedTokens(
             STAKING_TYPE_FLEXI,
             BAND_LEVEL_1,
-            0,
+            MONTH_0,
             PRIMARY_POOL,
             BENEFICIARY_TOKEN_AMOUNT
         );
@@ -120,7 +120,7 @@ contract Vesting_StakeVestedTokens_Unit_Test is Vesting_Unit_Test {
         vesting.stakeVestedTokens(
             STAKING_TYPE_FLEXI,
             BAND_LEVEL_1,
-            0,
+            MONTH_0,
             PRIMARY_POOL,
             BENEFICIARY_TOKEN_AMOUNT
         );
