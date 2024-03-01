@@ -94,7 +94,7 @@ contract Base_Test is
             usdcToken,
             wowToken,
             address(vesting),
-            ZERO_ADDRESS, // @todo: future gelato service address
+            GELATO_EXECUTOR_ADDRESS,
             TOTAL_POOLS,
             TOTAL_BAND_LEVELS
         );
@@ -184,8 +184,7 @@ contract Base_Test is
             STAKING_TYPE_FLEXI,
             BAND_LEVEL_1,
             0,
-            PRIMARY_POOL,
-            BENEFICIARY_TOKEN_AMOUNT
+            PRIMARY_POOL
         );
         vm.stopPrank();
     }

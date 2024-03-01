@@ -262,167 +262,168 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
         staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_2, MONTH_0);
     }
 
-    /*//////////////////////////////////////////////////////////////////////////
-                                    FIX STAKING
-    //////////////////////////////////////////////////////////////////////////*/
+    // NOTE: FIX type staking removed
+    //  /*//////////////////////////////////////////////////////////////////////////
+    //                                     FIX STAKING
+    //     //////////////////////////////////////////////////////////////////////////*/
 
-    function test_stakeVested_FixType_SetsBandData()
-        external
-        setBandLevelData
-        setSharesInMonth
-    {
-        uint256 currentTimestamp = 100;
-        vm.warp(currentTimestamp);
+    //     function test_stakeVested_FixType_SetsBandData()
+    //         external
+    //         setBandLevelData
+    //         setSharesInMonth
+    //     {
+    //         uint256 currentTimestamp = 100;
+    //         vm.warp(currentTimestamp);
 
-        vm.prank(address(vesting));
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_2, MONTH_0);
+    //         vm.prank(address(vesting));
+    //         staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_2, MONTH_12);
 
-        (
-            address owner,
-            uint32 stakingStartDate,
-            uint16 bandLevel,
-            uint8 fixedMonths,
-            IStaking.StakingTypes stakingType,
-            bool areTokensVested
-        ) = staking.getStakerBand(BAND_ID_0);
+    //         (
+    //             address owner,
+    //             uint32 stakingStartDate,
+    //             uint16 bandLevel,
+    //             uint8 fixedMonths,
+    //             IStaking.StakingTypes stakingType,
+    //             bool areTokensVested
+    //         ) = staking.getStakerBand(BAND_ID_0);
 
-        assertEq(owner, alice, "Owner not set");
-        assertEq(stakingStartDate, currentTimestamp, "Timestamp not set");
-        assertEq(bandLevel, BAND_LEVEL_2, "BandLevel Level not set");
-        assertEqStakingType(stakingType, STAKING_TYPE_FLEXI);
-        assertEq(fixedMonths, MONTH_0, "Fixed months set");
-        assertTrue(areTokensVested, "Tokens not vested");
-    }
+    //         assertEq(owner, alice, "Owner not set");
+    //         assertEq(stakingStartDate, currentTimestamp, "Timestamp not set");
+    //         assertEq(bandLevel, BAND_LEVEL_2, "BandLevel Level not set");
+    //         assertEqStakingType(stakingType, STAKING_TYPE_FIX);
+    //         assertEq(fixedMonths, MONTH_12, "Fixed months not set");
+    //         assertTrue(areTokensVested, "Tokens not vested");
+    //     }
 
-    function test_stakeVested_FixType_Adds1BandToAllStakerBands()
-        external
-        setBandLevelData
-        setSharesInMonth
-    {
-        vm.prank(address(vesting));
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_2, MONTH_0);
+    //     function test_stakeVested_FixType_Adds1BandToAllStakerBands()
+    //         external
+    //         setBandLevelData
+    //         setSharesInMonth
+    //     {
+    //         vm.prank(address(vesting));
+    //         staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_2, MONTH_12);
 
-        uint256[] memory allStakerBands = staking.getStakerBandIds(alice);
-        assertEq(allStakerBands.length, 1, "Band not added to allStakerBands");
-        assertEq(
-            allStakerBands[0],
-            BAND_ID_0,
-            "Band not added to allStakerBands"
-        );
-    }
+    //         uint256[] memory allStakerBands = staking.getStakerBandIds(alice);
+    //         assertEq(allStakerBands.length, 1, "Band not added to allStakerBands");
+    //         assertEq(
+    //             allStakerBands[0],
+    //             BAND_ID_0,
+    //             "Band not added to allStakerBands"
+    //         );
+    //     }
 
-    function test_stakeVested_FixType_Adds3BandsToAllStakerBands()
-        external
-        setBandLevelData
-        setSharesInMonth
-    {
-        vm.startPrank(address(vesting));
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_5, MONTH_0);
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_9, MONTH_0);
-        vm.stopPrank();
+    //     function test_stakeVested_FixType_Adds3BandsToAllStakerBands()
+    //         external
+    //         setBandLevelData
+    //         setSharesInMonth
+    //     {
+    //         vm.startPrank(address(vesting));
+    //         staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_1);
+    //         staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_5, MONTH_12);
+    //         staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_9, MONTH_24);
+    //         vm.stopPrank();
 
-        uint256[] memory allStakerBands = staking.getStakerBandIds(alice);
-        assertEq(allStakerBands.length, 3, "Band not added to allStakerBands");
-        assertEq(
-            allStakerBands[0],
-            BAND_ID_0,
-            "Band not added to allStakerBands"
-        );
-        assertEq(
-            allStakerBands[1],
-            BAND_ID_1,
-            "Band not added to allStakerBands"
-        );
-        assertEq(
-            allStakerBands[2],
-            BAND_ID_2,
-            "Band not added to allStakerBands"
-        );
-    }
+    //         uint256[] memory allStakerBands = staking.getStakerBandIds(alice);
+    //         assertEq(allStakerBands.length, 3, "Band not added to allStakerBands");
+    //         assertEq(
+    //             allStakerBands[0],
+    //             BAND_ID_0,
+    //             "Band not added to allStakerBands"
+    //         );
+    //         assertEq(
+    //             allStakerBands[1],
+    //             BAND_ID_1,
+    //             "Band not added to allStakerBands"
+    //         );
+    //         assertEq(
+    //             allStakerBands[2],
+    //             BAND_ID_2,
+    //             "Band not added to allStakerBands"
+    //         );
+    //     }
 
-    function test_stakeVested_FixType_Adds4BandsForDifferentUsers()
-        external
-        setBandLevelData
-        setSharesInMonth
-    {
-        vm.startPrank(address(vesting));
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
-        staking.stakeVested(bob, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_9, MONTH_0);
-        staking.stakeVested(bob, STAKING_TYPE_FLEXI, BAND_LEVEL_9, MONTH_0);
-        vm.stopPrank();
+    //     function test_stakeVested_FixType_Adds4BandsForDifferentUsers()
+    //         external
+    //         setBandLevelData
+    //         setSharesInMonth
+    //     {
+    //         vm.startPrank(address(vesting));
+    //         staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_12);
+    //         staking.stakeVested(bob, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_12);
+    //         staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_9, MONTH_12);
+    //         staking.stakeVested(bob, STAKING_TYPE_FIX, BAND_LEVEL_9, MONTH_12);
+    //         vm.stopPrank();
 
-        uint256[] memory aliceBands = staking.getStakerBandIds(alice);
-        uint256[] memory bobBands = staking.getStakerBandIds(bob);
+    //         uint256[] memory aliceBands = staking.getStakerBandIds(alice);
+    //         uint256[] memory bobBands = staking.getStakerBandIds(bob);
 
-        assertEq(aliceBands.length, 2, "Incorrect amount of bands for alice");
-        assertEq(bobBands.length, 2, "Incorrect amount of bands for bob");
-        assertEq(aliceBands[0], BAND_ID_0, "Band not added to array");
-        assertEq(aliceBands[1], BAND_ID_2, "Band not added to array");
-        assertEq(
-            bobBands[0],
-            BAND_ID_1,
-            "Band not added to allSarraytakerBands"
-        );
-        assertEq(bobBands[1], BAND_ID_3, "Band not added to array");
-    }
+    //         assertEq(aliceBands.length, 2, "Incorrect amount of bands for alice");
+    //         assertEq(bobBands.length, 2, "Incorrect amount of bands for bob");
+    //         assertEq(aliceBands[0], BAND_ID_0, "Band not added to array");
+    //         assertEq(aliceBands[1], BAND_ID_2, "Band not added to array");
+    //         assertEq(
+    //             bobBands[0],
+    //             BAND_ID_1,
+    //             "Band not added to allSarraytakerBands"
+    //         );
+    //         assertEq(bobBands[1], BAND_ID_3, "Band not added to array");
+    //     }
 
-    function test_stakeVested_FixType_Adds1UserToEnumerableMap()
-        external
-        setBandLevelData
-        setSharesInMonth
-    {
-        vm.prank(address(vesting));
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
+    //     function test_stakeVested_FixType_Adds1UserToEnumerableMap()
+    //         external
+    //         setBandLevelData
+    //         setSharesInMonth
+    //     {
+    //         vm.prank(address(vesting));
+    //         staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_12);
 
-        assertEq(staking.getTotalUsers(), 1, "User count not incremented");
-        assertEq(staking.getUser(0), alice, "Staker not added");
-    }
+    //         assertEq(staking.getTotalUsers(), 1, "User count not incremented");
+    //         assertEq(staking.getUser(0), alice, "Staker not added");
+    //     }
 
-    function test_stakeVested_FixType_Adds3UsersToEnumerableMap()
-        external
-        setBandLevelData
-        setSharesInMonth
-    {
-        vm.startPrank(address(vesting));
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
-        staking.stakeVested(bob, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
-        staking.stakeVested(carol, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
-        vm.stopPrank();
+    //     function test_stakeVested_FixType_Adds3UsersToEnumerableMap()
+    //         external
+    //         setBandLevelData
+    //         setSharesInMonth
+    //     {
+    //         vm.startPrank(address(vesting));
+    //         staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_12);
+    //         staking.stakeVested(bob, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_12);
+    //         staking.stakeVested(carol, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_12);
+    //         vm.stopPrank();
 
-        assertEq(staking.getTotalUsers(), 3, "User count not incremented");
-        assertEq(staking.getUser(0), alice, "Staker not added");
-        assertEq(staking.getUser(1), bob, "Staker not added");
-        assertEq(staking.getUser(2), carol, "Staker not added");
-    }
+    //         assertEq(staking.getTotalUsers(), 3, "User count not incremented");
+    //         assertEq(staking.getUser(0), alice, "Staker not added");
+    //         assertEq(staking.getUser(1), bob, "Staker not added");
+    //         assertEq(staking.getUser(2), carol, "Staker not added");
+    //     }
 
-    function test_stakeVested_FixType_Adds2UsersWithMultipleBandsToEnumerableMap()
-        external
-        setBandLevelData
-        setSharesInMonth
-    {
-        vm.startPrank(address(vesting));
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
-        staking.stakeVested(bob, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_9, MONTH_0);
-        staking.stakeVested(bob, STAKING_TYPE_FLEXI, BAND_LEVEL_9, MONTH_0);
-        vm.stopPrank();
+    //     function test_stakeVested_FixType_Adds2UsersWithMultipleBandsToEnumerableMap()
+    //         external
+    //         setBandLevelData
+    //         setSharesInMonth
+    //     {
+    //         vm.startPrank(address(vesting));
+    //         staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_12);
+    //         staking.stakeVested(bob, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_12);
+    //         staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_9, MONTH_12);
+    //         staking.stakeVested(bob, STAKING_TYPE_FIX, BAND_LEVEL_9, MONTH_12);
+    //         vm.stopPrank();
 
-        assertEq(staking.getTotalUsers(), 2, "User count not incremented");
-        assertEq(staking.getUser(0), alice, "Staker not added");
-        assertEq(staking.getUser(1), bob, "Staker not added");
-    }
+    //         assertEq(staking.getTotalUsers(), 2, "User count not incremented");
+    //         assertEq(staking.getUser(0), alice, "Staker not added");
+    //         assertEq(staking.getUser(1), bob, "Staker not added");
+    //     }
 
-    function test_stakeVested_FixType_EmitsStakedEvent()
-        external
-        setBandLevelData
-        setSharesInMonth
-    {
-        vm.expectEmit(address(staking));
-        emit Staked(alice, BAND_LEVEL_2, BAND_ID_0, STAKING_TYPE_FLEXI, true);
+    //     function test_stakeVested_FixType_EmitsStakedEvent()
+    //         external
+    //         setBandLevelData
+    //         setSharesInMonth
+    //     {
+    //         vm.expectEmit(address(staking));
+    //         emit Staked(alice, BAND_LEVEL_2, BAND_ID_0, STAKING_TYPE_FIX, true);
 
-        vm.prank(address(vesting));
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_2, MONTH_0);
-    }
+    //         vm.prank(address(vesting));
+    //         staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_2, MONTH_12);
+    //     }
 }

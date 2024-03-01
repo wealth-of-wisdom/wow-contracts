@@ -82,7 +82,7 @@ contract Base_Test is Test, StakingConstants, Events {
             usdcToken,
             wowToken,
             address(vesting),
-            ZERO_ADDRESS, // @todo: future gelato service address
+            GELATO_EXECUTOR_ADDRESS,
             TOTAL_POOLS,
             TOTAL_BAND_LEVELS
         );

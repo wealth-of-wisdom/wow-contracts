@@ -213,6 +213,7 @@ contract Staking is
             address(usdtToken) == address(0) ||
             address(usdcToken) == address(0) ||
             address(wowToken) == address(0) ||
+            gelato == address(0) ||
             vesting == address(0)
         ) {
             revert Errors.Staking__ZeroAddress();

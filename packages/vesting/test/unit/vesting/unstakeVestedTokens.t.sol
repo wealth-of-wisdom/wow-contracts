@@ -10,11 +10,7 @@ contract Vesting_UnstakeVestedTokens_Unit_Test is Vesting_Unit_Test {
     function test_unstakeVestedTokens_RevertIf_PoolDoesNotExist() external {
         vm.expectRevert(Errors.Vesting__PoolDoesNotExist.selector);
         vm.prank(alice);
-        vesting.unstakeVestedTokens(
-            BAND_ID_0,
-            PRIMARY_POOL,
-            BENEFICIARY_TOKEN_AMOUNT
-        );
+        vesting.unstakeVestedTokens(BAND_ID_0, PRIMARY_POOL);
     }
 
     function test_unstakeVestedTokens_RevertIf_Vesting__BeneficiaryDoesNotExist()
@@ -24,35 +20,7 @@ contract Vesting_UnstakeVestedTokens_Unit_Test is Vesting_Unit_Test {
     {
         vm.expectRevert(Errors.Vesting__BeneficiaryDoesNotExist.selector);
         vm.prank(bob);
-        vesting.unstakeVestedTokens(
-            BAND_ID_0,
-            PRIMARY_POOL,
-            BENEFICIARY_TOKEN_AMOUNT
-        );
-    }
-
-    function test_unstakeVestedTokens_RevertIf_TokenAmountZero()
-        external
-        approveAndAddPool
-        addBeneficiary(alice)
-    {
-        vm.expectRevert(Errors.Vesting__TokenAmountZero.selector);
-        vm.prank(alice);
-        vesting.unstakeVestedTokens(BAND_ID_0, PRIMARY_POOL, 0);
-    }
-
-    function test_unstakeVestedTokens_RevertIf_UnstakingTooManyTokens()
-        external
-        approveAndAddPool
-        addBeneficiary(alice)
-    {
-        vm.expectRevert(Errors.Vesting__UnstakingTooManyTokens.selector);
-        vm.prank(alice);
-        vesting.unstakeVestedTokens(
-            BAND_ID_0,
-            PRIMARY_POOL,
-            BENEFICIARY_TOKEN_AMOUNT + 1
-        );
+        vesting.unstakeVestedTokens(BAND_ID_0, PRIMARY_POOL);
     }
 
     function test_unstakeVestedTokens_ShouldUnstakeVestedTokens_AndUpdateData()
@@ -67,15 +35,10 @@ contract Vesting_UnstakeVestedTokens_Unit_Test is Vesting_Unit_Test {
             abi.encodeWithSelector(
                 IVesting.unstakeVestedTokens.selector,
                 BAND_ID_0,
-                PRIMARY_POOL,
-                BENEFICIARY_TOKEN_AMOUNT
+                PRIMARY_POOL
             )
         );
-        vesting.unstakeVestedTokens(
-            BAND_ID_0,
-            PRIMARY_POOL,
-            BENEFICIARY_TOKEN_AMOUNT
-        );
+        vesting.unstakeVestedTokens(BAND_ID_0, PRIMARY_POOL);
         vm.stopPrank();
         IVesting.Beneficiary memory user = vesting.getBeneficiary(
             PRIMARY_POOL,
@@ -102,11 +65,7 @@ contract Vesting_UnstakeVestedTokens_Unit_Test is Vesting_Unit_Test {
             alice,
             BENEFICIARY_TOKEN_AMOUNT
         );
-        vesting.unstakeVestedTokens(
-            BAND_ID_0,
-            PRIMARY_POOL,
-            BENEFICIARY_TOKEN_AMOUNT
-        );
+        vesting.unstakeVestedTokens(BAND_ID_0, PRIMARY_POOL);
         vm.stopPrank();
     }
 }

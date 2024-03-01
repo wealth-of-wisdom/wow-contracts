@@ -506,27 +506,21 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      * @param stakingType  enumerable type for flexi or fixed staking
      * @param bandLevel  band level number (1-9)
      * @param pid Index that refers to vesting pool object.
-     * @param tokenAmount Amount used to stake or unstake from vesting pool.
      */
     function stakeVestedTokens(
         IStaking.StakingTypes stakingType,
         uint16 bandLevel,
         uint8 month,
-        uint16 pid,
-        uint256 tokenAmount
-    )
-        external
-        mPoolExists(pid)
-        mOnlyBeneficiary(pid)
-        mAmountNotZero(tokenAmount)
-    {
+        uint16 pid
+    ) external mPoolExists(pid) mOnlyBeneficiary(pid) {
         Beneficiary storage user = s_vestingPools[pid].beneficiaries[
             msg.sender
         ];
+        (uint256 bandPrice, ) = s_staking.getBandLevel(bandLevel);
 
         // Checks: Enough unstaked tokens in the contract
         if (
-            tokenAmount >
+            bandPrice >
             user.totalTokenAmount -
                 user.stakedTokenAmount -
                 user.claimedTokenAmount
@@ -535,43 +529,35 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         }
 
         // Effects: Stake tokens
-        user.stakedTokenAmount += tokenAmount;
+        user.stakedTokenAmount += bandPrice;
 
         // Interactions: Stake tokens in staking contract
         s_staking.stakeVested(msg.sender, stakingType, bandLevel, month);
 
         // Effects: Emit event
-        emit VestedTokensStaked(pid, msg.sender, tokenAmount);
+        emit VestedTokensStaked(pid, msg.sender, bandPrice);
     }
 
     /**
      * @notice Unstakes vested tokesns via vesting contract in staking contract
      * @param bandId  Id of the band (0-max uint)
      * @param pid Index that refers to vesting pool object.
-     * @param tokenAmount Amount used to stake or unstake from vesting pool.
      */
     function unstakeVestedTokens(
         uint16 bandId,
-        uint16 pid,
-        uint256 tokenAmount
-    )
-        external
-        mPoolExists(pid)
-        mBeneficiaryExists(pid, msg.sender)
-        mAmountNotZero(tokenAmount)
-    {
+        uint16 pid
+    ) external mPoolExists(pid) mBeneficiaryExists(pid, msg.sender) {
         Pool storage pool = s_vestingPools[pid];
         Beneficiary storage user = pool.beneficiaries[msg.sender];
+        (, , uint16 bandLevel, , , ) = s_staking.getStakerBand(bandId);
+        (uint256 bandPrice, ) = s_staking.getBandLevel(bandLevel);
 
         // Effects: Unstake tokens
-        if (tokenAmount - user.stakedTokenAmount > 0) {
-            revert Errors.Vesting__UnstakingTooManyTokens();
-        }
-        user.stakedTokenAmount -= tokenAmount;
+        user.stakedTokenAmount -= bandPrice;
         s_staking.unstakeVested(msg.sender, bandId);
 
         // Effects: Emit event
-        emit VestedTokensUnstaked(pid, msg.sender, tokenAmount);
+        emit VestedTokensUnstaked(pid, msg.sender, bandPrice);
     }
 
     /*//////////////////////////////////////////////////////////////////////////

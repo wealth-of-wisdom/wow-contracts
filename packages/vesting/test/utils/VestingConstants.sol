@@ -39,7 +39,7 @@ abstract contract VestingConstants is StakingConstants {
     //////////////////////////////////////////////////////////////////////////*/
 
     uint256 internal constant TOTAL_POOL_TOKEN_AMOUNT = 100_000 ether;
-    uint256 internal constant BENEFICIARY_TOKEN_AMOUNT = 1 ether;
+    uint256 internal constant BENEFICIARY_TOKEN_AMOUNT = 1000 ether;
     uint256 internal constant LISTING_TOKEN_AMOUNT =
         (BENEFICIARY_TOKEN_AMOUNT * LISTING_PERCENTAGE_DIVIDEND) /
             LISTING_PERCENTAGE_DIVISOR;

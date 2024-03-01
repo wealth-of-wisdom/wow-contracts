@@ -9,6 +9,7 @@ abstract contract StakingConstants {
     //////////////////////////////////////////////////////////////////////////*/
 
     address internal constant ZERO_ADDRESS = address(0x0);
+    address internal constant GELATO_EXECUTOR_ADDRESS = address(0x1);
 
     /*//////////////////////////////////////////////////////////////////////////
                                     ROLES

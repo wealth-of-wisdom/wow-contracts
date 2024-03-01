@@ -14,8 +14,7 @@ contract Vesting_StakeVestedTokens_Unit_Test is Vesting_Unit_Test {
             STAKING_TYPE_FLEXI,
             BAND_LEVEL_2,
             DEFAULT_STAKING_MONTH_AMOUNT,
-            PRIMARY_POOL,
-            BENEFICIARY_TOKEN_AMOUNT
+            PRIMARY_POOL
         );
     }
 
@@ -29,24 +28,7 @@ contract Vesting_StakeVestedTokens_Unit_Test is Vesting_Unit_Test {
             STAKING_TYPE_FLEXI,
             BAND_LEVEL_2,
             DEFAULT_STAKING_MONTH_AMOUNT,
-            PRIMARY_POOL,
-            BENEFICIARY_TOKEN_AMOUNT
-        );
-    }
-
-    function test_stakeVestedTokens_RevertIf_TokenAmountZero()
-        external
-        approveAndAddPool
-        addBeneficiary(alice)
-    {
-        vm.expectRevert(Errors.Vesting__TokenAmountZero.selector);
-        vm.prank(alice);
-        vesting.stakeVestedTokens(
-            STAKING_TYPE_FLEXI,
-            BAND_LEVEL_2,
-            DEFAULT_STAKING_MONTH_AMOUNT,
-            PRIMARY_POOL,
-            MONTH_0
+            PRIMARY_POOL
         );
     }
 
@@ -63,8 +45,7 @@ contract Vesting_StakeVestedTokens_Unit_Test is Vesting_Unit_Test {
             STAKING_TYPE_FLEXI,
             BAND_LEVEL_2,
             DEFAULT_STAKING_MONTH_AMOUNT,
-            PRIMARY_POOL,
-            BENEFICIARY_TOKEN_AMOUNT + 1
+            PRIMARY_POOL
         );
     }
 
@@ -81,16 +62,14 @@ contract Vesting_StakeVestedTokens_Unit_Test is Vesting_Unit_Test {
                 STAKING_TYPE_FLEXI,
                 BAND_LEVEL_1,
                 MONTH_0,
-                PRIMARY_POOL,
-                BENEFICIARY_TOKEN_AMOUNT
+                PRIMARY_POOL
             )
         );
         vesting.stakeVestedTokens(
             STAKING_TYPE_FLEXI,
             BAND_LEVEL_1,
             MONTH_0,
-            PRIMARY_POOL,
-            BENEFICIARY_TOKEN_AMOUNT
+            PRIMARY_POOL
         );
         vm.stopPrank();
         IVesting.Beneficiary memory user = vesting.getBeneficiary(
@@ -121,8 +100,7 @@ contract Vesting_StakeVestedTokens_Unit_Test is Vesting_Unit_Test {
             STAKING_TYPE_FLEXI,
             BAND_LEVEL_1,
             MONTH_0,
-            PRIMARY_POOL,
-            BENEFICIARY_TOKEN_AMOUNT
+            PRIMARY_POOL
         );
         vm.stopPrank();
     }
