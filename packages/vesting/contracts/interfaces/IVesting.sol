@@ -155,7 +155,7 @@ interface IVesting is IVestingEvents {
         uint16 pid
     ) external;
 
-    function unstakeVestedTokens(uint16 bandId, uint16 pid) external;
+    function unstakeVestedTokens(uint16 bandId) external;
 
     function getBeneficiary(
         uint16 pid,

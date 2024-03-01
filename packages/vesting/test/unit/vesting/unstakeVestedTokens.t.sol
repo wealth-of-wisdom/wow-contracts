@@ -7,12 +7,6 @@ import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {Vesting_Unit_Test} from "../VestingUnit.t.sol";
 
 contract Vesting_UnstakeVestedTokens_Unit_Test is Vesting_Unit_Test {
-    function test_unstakeVestedTokens_RevertIf_PoolDoesNotExist() external {
-        vm.expectRevert(Errors.Vesting__PoolDoesNotExist.selector);
-        vm.prank(alice);
-        vesting.unstakeVestedTokens(BAND_ID_0, PRIMARY_POOL);
-    }
-
     function test_unstakeVestedTokens_RevertIf_Vesting__BeneficiaryDoesNotExist()
         external
         approveAndAddPool
@@ -20,7 +14,7 @@ contract Vesting_UnstakeVestedTokens_Unit_Test is Vesting_Unit_Test {
     {
         vm.expectRevert(Errors.Vesting__BeneficiaryDoesNotExist.selector);
         vm.prank(bob);
-        vesting.unstakeVestedTokens(BAND_ID_0, PRIMARY_POOL);
+        vesting.unstakeVestedTokens(BAND_ID_0);
     }
 
     function test_unstakeVestedTokens_ShouldUnstakeVestedTokens_AndUpdateData()
@@ -34,11 +28,10 @@ contract Vesting_UnstakeVestedTokens_Unit_Test is Vesting_Unit_Test {
             address(vesting),
             abi.encodeWithSelector(
                 IVesting.unstakeVestedTokens.selector,
-                BAND_ID_0,
-                PRIMARY_POOL
+                BAND_ID_0
             )
         );
-        vesting.unstakeVestedTokens(BAND_ID_0, PRIMARY_POOL);
+        vesting.unstakeVestedTokens(BAND_ID_0);
         vm.stopPrank();
         IVesting.Beneficiary memory user = vesting.getBeneficiary(
             PRIMARY_POOL,
@@ -65,7 +58,7 @@ contract Vesting_UnstakeVestedTokens_Unit_Test is Vesting_Unit_Test {
             alice,
             BENEFICIARY_TOKEN_AMOUNT
         );
-        vesting.unstakeVestedTokens(BAND_ID_0, PRIMARY_POOL);
+        vesting.unstakeVestedTokens(BAND_ID_0);
         vm.stopPrank();
     }
 }

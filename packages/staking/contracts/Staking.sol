@@ -580,12 +580,13 @@ contract Staking is
         mAddressNotZero(user)
         mBandLevelExists(bandLevel)
         mValidMonth(stakingType, month)
+        returns (uint256 bandId)
     {
         if (StakingTypes.FLEXI != stakingType) {
             revert Errors.Staking__OnlyFlexiTypeAllowed();
         }
         // Effects: Create a new band and add it to the user
-        uint256 bandId = _stakeBand(user, stakingType, bandLevel, month, true);
+        bandId = _stakeBand(user, stakingType, bandLevel, month, true);
 
         // Effects: emit event
         emit Staked(user, bandLevel, bandId, stakingType, true);

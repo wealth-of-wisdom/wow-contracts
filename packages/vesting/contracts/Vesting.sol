@@ -34,6 +34,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     IERC20 internal s_token;
     IStaking internal s_staking;
     mapping(uint16 => Pool) internal s_vestingPools;
+    mapping(uint256 bandId => uint16 poolId) internal s_stakedPools;
     uint32 internal s_listingDate;
     uint16 internal s_poolCount;
     /* solhint-enable */
@@ -532,7 +533,13 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         user.stakedTokenAmount += bandPrice;
 
         // Interactions: Stake tokens in staking contract
-        s_staking.stakeVested(msg.sender, stakingType, bandLevel, month);
+        uint256 bandId = s_staking.stakeVested(
+            msg.sender,
+            stakingType,
+            bandLevel,
+            month
+        );
+        s_stakedPools[bandId] = pid;
 
         // Effects: Emit event
         emit VestedTokensStaked(pid, msg.sender, bandPrice);
@@ -541,12 +548,13 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     /**
      * @notice Unstakes vested tokesns via vesting contract in staking contract
      * @param bandId  Id of the band (0-max uint)
-     * @param pid Index that refers to vesting pool object.
      */
-    function unstakeVestedTokens(
-        uint16 bandId,
-        uint16 pid
-    ) external mPoolExists(pid) mBeneficiaryExists(pid, msg.sender) {
+    function unstakeVestedTokens(uint16 bandId) external {
+        uint16 pid = s_stakedPools[bandId];
+        if (!_isBeneficiaryAdded(pid, msg.sender)) {
+            revert Errors.Vesting__BeneficiaryDoesNotExist();
+        }
+
         Pool storage pool = s_vestingPools[pid];
         Beneficiary storage user = pool.beneficiaries[msg.sender];
         (, , uint16 bandLevel, , , ) = s_staking.getStakerBand(bandId);
