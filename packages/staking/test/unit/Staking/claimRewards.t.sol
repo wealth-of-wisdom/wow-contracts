@@ -15,6 +15,15 @@ contract Staking_ClaimRewards_Unit_Test is Unit_Test {
         staking.claimRewards(wowToken);
     }
 
+    function test_claimRewards_RevertIf_DistributionInProgress()
+        external
+        setDistributionInProgress(true)
+    {
+        vm.expectRevert(Errors.Staking__DistributionInProgress.selector);
+        vm.prank(alice);
+        staking.claimRewards(usdtToken);
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                     USDT TOKEN
     //////////////////////////////////////////////////////////////////////////*/

@@ -6,7 +6,7 @@ import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {Unit_Test} from "../Unit.t.sol";
 
 contract Staking_SetSharesInMonth_Unit_Test is Unit_Test {
-    function test_setSharesInMonth_RevertIf_NotDefaultAdmin() external {
+    function test_setSharesInMonth_RevertIf_CallerNotDefaultAdmin() external {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,

@@ -40,6 +40,18 @@ contract Staking_Unstake_Unit_Test is Unit_Test {
         staking.unstake(BAND_ID_0);
     }
 
+    function test_unstake_RevertIf_DistributionInProgress()
+        external
+        setBandLevelData
+        setSharesInMonth
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+        setDistributionInProgress(true)
+    {
+        vm.expectRevert(Errors.Staking__DistributionInProgress.selector);
+        vm.prank(alice);
+        staking.unstake(BAND_ID_0);
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                     FLEXI STAKING
     //////////////////////////////////////////////////////////////////////////*/

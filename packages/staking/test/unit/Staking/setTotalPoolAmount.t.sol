@@ -7,13 +7,8 @@ import {Unit_Test} from "../Unit.t.sol";
 
 contract Staking_SetTotalPoolAmount_Unit_Test is Unit_Test {
     uint16 internal constant NEW_TOTAL_POOL_AMOUNT = 7;
-    modifier mSetTotalPoolAmount() {
-        vm.prank(admin);
-        staking.setTotalPoolAmount(NEW_TOTAL_POOL_AMOUNT);
-        _;
-    }
 
-    function test_setTotalPoolAmount_RevertIf_NotDefaultAdmin() external {
+    function test_setTotalPoolAmount_RevertIf_CallerNotDefaultAdmin() external {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
@@ -33,10 +28,9 @@ contract Staking_SetTotalPoolAmount_Unit_Test is Unit_Test {
         staking.setTotalPoolAmount(0);
     }
 
-    function test_setTotalPoolAmount_SetsTotalPoolAmount()
-        external
-        mSetTotalPoolAmount
-    {
+    function test_setTotalPoolAmount_SetsTotalPoolAmount() external {
+        vm.prank(admin);
+        staking.setTotalPoolAmount(NEW_TOTAL_POOL_AMOUNT);
         assertEq(
             staking.getTotalPools(),
             NEW_TOTAL_POOL_AMOUNT,

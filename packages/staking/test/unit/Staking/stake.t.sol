@@ -68,6 +68,17 @@ contract Staking_Stake_Unit_Test is Unit_Test {
         staking.stake(STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_25);
     }
 
+    function test_stake_RevertIf_DistributionInProgress()
+        external
+        setBandLevelData
+        setSharesInMonth
+        setDistributionInProgress(true)
+    {
+        vm.expectRevert(Errors.Staking__DistributionInProgress.selector);
+        vm.prank(alice);
+        staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                     FLEXI STAKING
     //////////////////////////////////////////////////////////////////////////*/

@@ -7,6 +7,32 @@ import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {Unit_Test} from "../Unit.t.sol";
 
 contract Staking_DowngradeBand_Unit_Test is Unit_Test {
+    /*//////////////////////////////////////////////////////////////////////////
+                                        SETUP
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function setUp() public override {
+        Unit_Test.setUp();
+
+        vm.prank(admin);
+        staking.setBandUpgradesEnabled(true);
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                        TESTS
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function test_upgradeBand_RevertIf_BandUpgradesDisabled()
+        external
+    {
+        vm.prank(admin);
+        staking.setBandUpgradesEnabled(false);
+
+        vm.expectRevert(Errors.Staking__UpgradesDisabled.selector);
+        vm.prank(alice);
+        staking.downgradeBand(BAND_ID_0, BAND_LEVEL_1);
+    }
+
     function test_downgradeBand_RevertIf_CallerNotBandOwner()
         external
         setBandLevelData
@@ -61,6 +87,18 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
                 true
             )
         );
+        vm.prank(alice);
+        staking.downgradeBand(BAND_ID_0, BAND_LEVEL_1);
+    }
+
+    function test_downgradeBand_RevertIf_DistributionInProgress()
+        external
+        setBandLevelData
+        setSharesInMonth
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+        setDistributionInProgress(true)
+    {
+        vm.expectRevert(Errors.Staking__DistributionInProgress.selector);
         vm.prank(alice);
         staking.downgradeBand(BAND_ID_0, BAND_LEVEL_1);
     }

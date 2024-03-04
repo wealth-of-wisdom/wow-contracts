@@ -332,8 +332,10 @@ contract Staking is
     function setUsdtToken(
         IERC20 token
     ) external onlyRole(DEFAULT_ADMIN_ROLE) mAddressNotZero(address(token)) {
+        // Effects: set the token
         s_usdtToken = token;
 
+        // Effects: emit event
         emit UsdtTokenSet(token);
     }
 
@@ -344,8 +346,10 @@ contract Staking is
     function setUsdcToken(
         IERC20 token
     ) external onlyRole(DEFAULT_ADMIN_ROLE) mAddressNotZero(address(token)) {
+        // Effects: set the token
         s_usdcToken = token;
 
+        // Effects: emit event
         emit UsdcTokenSet(token);
     }
 
@@ -356,8 +360,10 @@ contract Staking is
     function setWowToken(
         IERC20 token
     ) external onlyRole(DEFAULT_ADMIN_ROLE) mAddressNotZero(address(token)) {
+        // Effects: set the token
         s_wowToken = token;
 
+        // Effects: emit event
         emit WowTokenSet(token);
     }
 
@@ -424,6 +430,9 @@ contract Staking is
 
     /**
      * @notice  Withdraw the given amount of tokens from the contract
+     * @notice  We trust the admin to withdraw the correct amount of tokens
+     * @notice  Admin should be careful when calling this function not to
+     * @notice  withdraw tokens that are still in use by the contract
      * @param   token Token to withdraw
      * @param   amount Amount to withdraw
      */
@@ -437,9 +446,6 @@ contract Staking is
         if (balance < amount) {
             revert Errors.Staking__InsufficientContractBalance(balance, amount);
         }
-
-        // @question should we allow to withdraw USDT/USDC tokens?
-        // @question should we allow to withdraw WOW tokens?
 
         // Interaction: transfer the tokens to the sender
         token.safeTransfer(msg.sender, amount);
@@ -628,9 +634,11 @@ contract Staking is
         mDistributionNotInProgress
         returns (uint256 bandId)
     {
+        // Checks: only flexi type is allowed for vesting
         if (StakingTypes.FLEXI != stakingType) {
             revert Errors.Staking__OnlyFlexiTypeAllowed();
         }
+
         // Effects: Create a new band and add it to the user
         bandId = _stakeBand(user, stakingType, bandLevel, month, true);
 
