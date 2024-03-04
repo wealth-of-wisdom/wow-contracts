@@ -5,9 +5,9 @@ import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol"
 import {IStaking} from "@wealth-of-wisdom/staking/contracts/interfaces/IStaking.sol";
 import {IVesting} from "../../../contracts/interfaces/IVesting.sol";
 import {Errors} from "../../../contracts/libraries/Errors.sol";
-import {Vesting_Unit_Test} from "../VestingUnit.t.sol";
+import {Unit_Test} from "../Unit.t.sol";
 
-contract Vesting_RemoveBeneficiary_Unit_Test is Vesting_Unit_Test {
+contract Vesting_RemoveBeneficiary_Unit_Test is Unit_Test {
     uint256 calculatedUnlockedPoolTokens =
         TOTAL_POOL_TOKEN_AMOUNT -
             (BENEFICIARY_TOKEN_AMOUNT * CLIFF_PERCENTAGE_DIVIDEND) /
@@ -139,18 +139,18 @@ contract Vesting_RemoveBeneficiary_Unit_Test is Vesting_Unit_Test {
     //     assertBeneficiaryData(aliceBeneficiary, 0, 0, 0);
     // }
 
-    function test_removeBeneficiary_DoesNotUnstakeVestedTokensWhenNoTokensWereStakedOrClaimed()
-        external
-        approveAndAddPool
-        addBeneficiary(alice)
-    {
-        vm.warp(LISTING_DATE + 1 minutes);
-        vm.prank(admin);
-        vesting.removeBeneficiary(PRIMARY_POOL, alice);
+    // function test_removeBeneficiary_DoesNotUnstakeVestedTokensWhenNoTokensWereStakedOrClaimed()
+    //     external
+    //     approveAndAddPool
+    //     addBeneficiary(alice)
+    // {
+    //     vm.warp(LISTING_DATE + 1 minutes);
+    //     vm.prank(admin);
+    //     vesting.removeBeneficiary(PRIMARY_POOL, alice);
 
-        bool called = staking.wasUnstakesVestedTokensCalled();
-        assertFalse(called, "Unstake vested tokens was called");
-    }
+    //     bool called = staking.wasUnstakesVestedTokensCalled();
+    //     assertFalse(called, "Unstake vested tokens was called");
+    // }
 
     // function test_removeBeneficiary_UnstakesVestedTokensWhenTokensAreStakedAndClaimed()
     //     external

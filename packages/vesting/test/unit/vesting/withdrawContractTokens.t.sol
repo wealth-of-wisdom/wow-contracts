@@ -6,14 +6,14 @@ import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol"
 import {IVesting} from "../../../contracts/interfaces/IVesting.sol";
 import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {TokenMock} from "../../mocks/TokenMock.sol";
-import {Vesting_Unit_Test} from "../VestingUnit.t.sol";
+import {Unit_Test} from "../Unit.t.sol";
 
-contract Vesting_WithdrawContractTokens_Unit_Test is Vesting_Unit_Test {
+contract Vesting_WithdrawContractTokens_Unit_Test is Unit_Test {
     uint256 internal withdrawAmount = 1 ether;
     TokenMock internal customToken;
 
     function setUp() public virtual override {
-        Vesting_Unit_Test.setUp();
+        Unit_Test.setUp();
 
         vm.startPrank(admin);
         customToken = new TokenMock();

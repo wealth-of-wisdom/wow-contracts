@@ -89,6 +89,10 @@ contract Base_Test is
 
         // STAKING
         staking = new StakingMock();
+
+        vesting.initialize(
+            wowToken, staking, LISTING_DATE
+        );
         staking.initialize(
             usdtToken,
             usdcToken,

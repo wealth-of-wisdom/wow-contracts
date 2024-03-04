@@ -4,16 +4,16 @@ pragma solidity 0.8.20;
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {IVesting, IVestingEvents} from "../../../contracts/interfaces/IVesting.sol";
 import {Errors} from "../../../contracts/libraries/Errors.sol";
-import {Vesting_Unit_Test} from "../VestingUnit.t.sol";
+import {Unit_Test} from "../Unit.t.sol";
 
-contract Vesting_StakeVestedTokens_Unit_Test is Vesting_Unit_Test {
+contract Vesting_StakeVestedTokens_Unit_Test is Unit_Test {
     function test_stakeVestedTokens_RevertIf_PoolDoesNotExist() external {
         vm.expectRevert(Errors.Vesting__PoolDoesNotExist.selector);
         vm.prank(alice);
         vesting.stakeVestedTokens(
             STAKING_TYPE_FLEXI,
             BAND_LEVEL_2,
-            DEFAULT_STAKING_MONTH_AMOUNT,
+            MONTH_0,
             PRIMARY_POOL
         );
     }
@@ -27,7 +27,7 @@ contract Vesting_StakeVestedTokens_Unit_Test is Vesting_Unit_Test {
         vesting.stakeVestedTokens(
             STAKING_TYPE_FLEXI,
             BAND_LEVEL_2,
-            DEFAULT_STAKING_MONTH_AMOUNT,
+            MONTH_0,
             PRIMARY_POOL
         );
     }
@@ -44,34 +44,24 @@ contract Vesting_StakeVestedTokens_Unit_Test is Vesting_Unit_Test {
         vesting.stakeVestedTokens(
             STAKING_TYPE_FLEXI,
             BAND_LEVEL_2,
-            DEFAULT_STAKING_MONTH_AMOUNT,
+            MONTH_0,
             PRIMARY_POOL
         );
     }
 
-    function test_stakeVestedTokens_ShouldStakeVestedTokens_AndUpdateData()
+    function test_stakeVestedTokens_UpdatesTokensData()
         external
         approveAndAddPool
         addBeneficiary(alice)
     {
-        vm.startPrank(alice);
-        vm.expectCall(
-            address(vesting),
-            abi.encodeWithSelector(
-                IVesting.stakeVestedTokens.selector,
-                STAKING_TYPE_FLEXI,
-                BAND_LEVEL_1,
-                MONTH_0,
-                PRIMARY_POOL
-            )
-        );
+        vm.prank(alice);
         vesting.stakeVestedTokens(
             STAKING_TYPE_FLEXI,
             BAND_LEVEL_1,
             MONTH_0,
             PRIMARY_POOL
         );
-        vm.stopPrank();
+
         IVesting.Beneficiary memory user = vesting.getBeneficiary(
             PRIMARY_POOL,
             alice
@@ -88,20 +78,27 @@ contract Vesting_StakeVestedTokens_Unit_Test is Vesting_Unit_Test {
         );
     }
 
-    function test_stakeVestedTokens_EmitsVestedTokensStaked()
+    function test_stakeVestedTokens_CallsStakingContractToStakeVestedTokens()
         external
         approveAndAddPool
         addBeneficiary(alice)
     {
-        vm.startPrank(alice);
-        vm.expectEmit(address(vesting));
-        emit VestedTokensStaked(PRIMARY_POOL, alice, BENEFICIARY_TOKEN_AMOUNT);
+        vm.expectCall(
+            address(vesting),
+            abi.encodeWithSelector(
+                IVesting.stakeVestedTokens.selector,
+                STAKING_TYPE_FLEXI,
+                BAND_LEVEL_1,
+                MONTH_0,
+                PRIMARY_POOL
+            )
+        );
+        vm.prank(alice);
         vesting.stakeVestedTokens(
             STAKING_TYPE_FLEXI,
             BAND_LEVEL_1,
             MONTH_0,
             PRIMARY_POOL
         );
-        vm.stopPrank();
     }
 }

@@ -517,7 +517,11 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         Beneficiary storage user = s_vestingPools[pid].beneficiaries[
             msg.sender
         ];
-        (uint256 bandPrice, ) = s_staking.getBandLevel(bandLevel);
+
+        // Cache staking contract
+        IStaking staking = s_staking;
+
+        (uint256 bandPrice, ) = staking.getBandLevel(bandLevel);
 
         // Checks: Enough unstaked tokens in the contract
         if (
@@ -533,12 +537,14 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         user.stakedTokenAmount += bandPrice;
 
         // Interactions: Stake tokens in staking contract
-        uint256 bandId = s_staking.stakeVested(
+        uint256 bandId = staking.stakeVested(
             msg.sender,
             stakingType,
             bandLevel,
             month
         );
+
+        // Effects: Update staked pool id
         s_stakedPools[bandId] = pid;
 
         // Effects: Emit event
@@ -549,20 +555,25 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      * @notice Unstakes vested tokesns via vesting contract in staking contract
      * @param bandId  Id of the band (0-max uint)
      */
-    function unstakeVestedTokens(uint256 bandId) external {
+    function unstakeVestedTokens(
+        uint256 bandId
+    ) external mBeneficiaryExists(s_stakedPools[bandId], msg.sender) {
         uint16 pid = s_stakedPools[bandId];
-        if (!_isBeneficiaryAdded(pid, msg.sender)) {
-            revert Errors.Vesting__BeneficiaryDoesNotExist();
-        }
+
+        // Cache staking contract
+        IStaking staking = s_staking;
 
         Pool storage pool = s_vestingPools[pid];
         Beneficiary storage user = pool.beneficiaries[msg.sender];
-        (, , uint16 bandLevel, , , ) = s_staking.getStakerBand(bandId);
-        (uint256 bandPrice, ) = s_staking.getBandLevel(bandLevel);
+
+        (, , uint16 bandLevel, , , ) = staking.getStakerBand(bandId);
+        (uint256 bandPrice, ) = staking.getBandLevel(bandLevel);
 
         // Effects: Unstake tokens
         user.stakedTokenAmount -= bandPrice;
-        s_staking.unstakeVested(msg.sender, bandId);
+
+        // Interactions: Unstake tokens in staking contract
+        staking.unstakeVested(msg.sender, bandId);
 
         // Effects: Emit event
         emit VestedTokensUnstaked(pid, msg.sender, bandPrice);

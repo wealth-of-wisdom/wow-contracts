@@ -3,18 +3,18 @@ pragma solidity 0.8.20;
 
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {IStaking} from "@wealth-of-wisdom/staking/contracts/interfaces/IStaking.sol";
-import {StakingMock} from "@wealth-of-wisdom/vesting/test/mocks/StakingMock.sol";
 import {IVesting} from "../../../contracts/interfaces/IVesting.sol";
+import {StakingMock} from "../../mocks/StakingMock.sol";
 import {Errors} from "../../../contracts/libraries/Errors.sol";
-import {Vesting_Unit_Test} from "../VestingUnit.t.sol";
+import {Unit_Test} from "../Unit.t.sol";
 
-contract Vesting_SetStakingContract_Unit_Test is Vesting_Unit_Test {
-    StakingMock internal newStakingContract;
+contract Vesting_SetStakingContract_Unit_Test is Unit_Test {
+    IStaking internal newStakingContract;
 
     function setUp() public virtual override {
-        Vesting_Unit_Test.setUp();
+        Unit_Test.setUp();
 
-        newStakingContract = new StakingMock();
+        newStakingContract = IStaking(address(new StakingMock()));
     }
 
     function test_setStakingContract_RevertIf_CallerNotAdmin() external {
