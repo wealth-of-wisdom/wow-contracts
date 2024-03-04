@@ -22,9 +22,15 @@ contract Staking_SetSharesInMonth_Unit_Test is Unit_Test {
         vm.prank(admin);
         staking.setSharesInMonth(SHARES_IN_MONTH);
 
+        uint48[] memory sharesArray = staking.getSharesInMonthArray();
         for (uint256 i = 0; i < SHARES_IN_MONTH.length; i++) {
             uint48 shares = staking.getSharesInMonth(i);
             assertEq(shares, SHARES_IN_MONTH[i], "Shares in month not set");
+            assertEq(
+                sharesArray[i],
+                SHARES_IN_MONTH[i],
+                "Shares in month array not set"
+            );
         }
     }
 

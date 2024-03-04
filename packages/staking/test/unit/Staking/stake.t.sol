@@ -83,6 +83,26 @@ contract Staking_Stake_Unit_Test is Unit_Test {
                                     FLEXI STAKING
     //////////////////////////////////////////////////////////////////////////*/
 
+    function test_stake_FlexiType_IncreasesNextBandId()
+        external
+        setBandLevelData
+        setSharesInMonth
+    {
+        uint256 nextBandIdBefore = staking.getNextBandId();
+
+        vm.startPrank(alice);
+        wowToken.approve(address(staking), BAND_2_PRICE);
+        staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_2, MONTH_0);
+        vm.stopPrank();
+
+        uint256 nextBandIdAfter = staking.getNextBandId();
+        assertEq(
+            nextBandIdBefore + 1,
+            nextBandIdAfter,
+            "NextBandId not increased"
+        );
+    }
+
     function test_stake_FlexiType_SetsBandData()
         external
         setBandLevelData
@@ -328,6 +348,26 @@ contract Staking_Stake_Unit_Test is Unit_Test {
     /*//////////////////////////////////////////////////////////////////////////
                                     FIX STAKING
     //////////////////////////////////////////////////////////////////////////*/
+
+    function test_stake_FixType_IncreasesNextBandId()
+        external
+        setBandLevelData
+        setSharesInMonth
+    {
+        uint256 nextBandIdBefore = staking.getNextBandId();
+
+        vm.startPrank(alice);
+        wowToken.approve(address(staking), BAND_2_PRICE);
+        staking.stake(STAKING_TYPE_FIX, BAND_LEVEL_2, MONTH_12);
+        vm.stopPrank();
+
+        uint256 nextBandIdAfter = staking.getNextBandId();
+        assertEq(
+            nextBandIdBefore + 1,
+            nextBandIdAfter,
+            "NextBandId not increased"
+        );
+    }
 
     function test_stake_FixType_SetsBandData()
         external

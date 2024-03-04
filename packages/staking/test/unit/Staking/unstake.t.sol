@@ -96,7 +96,7 @@ contract Staking_Unstake_Unit_Test is Unit_Test {
         assertEq(bandIds.length, 0, "Band id not removed");
     }
 
-    function test_unstake_FlexiType_Deletes1BandFrom3StakerBands()
+    function test_unstake_FlexiType_DeletesFirstBandFrom3StakerBands()
         external
         setBandLevelData
         setSharesInMonth
@@ -112,6 +112,25 @@ contract Staking_Unstake_Unit_Test is Unit_Test {
         assertEq(bandIds.length, 2, "Band id not removed");
         assertEq(bandIds[0], BAND_ID_2, "Band id not removed");
         assertEq(bandIds[1], BAND_ID_1, "Band id not removed");
+    }
+
+
+    function test_unstake_FlexiType_DeletesSecondBandFrom3StakerBands()
+        external
+        setBandLevelData
+        setSharesInMonth
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0)
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_5, MONTH_0)
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_9, MONTH_0)
+    {
+        vm.prank(alice);
+        staking.unstake(BAND_ID_1);
+
+        uint256[] memory bandIds = staking.getStakerBandIds(alice);
+
+        assertEq(bandIds.length, 2, "Band id not removed");
+        assertEq(bandIds[0], BAND_ID_0, "Band id not removed");
+        assertEq(bandIds[1], BAND_ID_2, "Band id not removed");
     }
 
     function test_unstake_FlexiType_RemovesUserIfLastBandIdDeleted()
