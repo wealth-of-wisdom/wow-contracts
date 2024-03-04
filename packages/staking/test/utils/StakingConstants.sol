@@ -3,12 +3,13 @@ pragma solidity 0.8.20;
 
 import {IStaking} from "../../contracts/interfaces/IStaking.sol";
 
-abstract contract Constants {
+abstract contract StakingConstants {
     /*//////////////////////////////////////////////////////////////////////////
                                     ADDRESSES
     //////////////////////////////////////////////////////////////////////////*/
 
     address internal constant ZERO_ADDRESS = address(0x0);
+    address internal constant GELATO_EXECUTOR_ADDRESS = address(0x129);
 
     /*//////////////////////////////////////////////////////////////////////////
                                     ROLES

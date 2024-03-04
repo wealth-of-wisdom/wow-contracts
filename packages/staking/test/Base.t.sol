@@ -6,10 +6,10 @@ import {IStaking} from "../contracts/interfaces/IStaking.sol";
 import {StakingMock} from "./mocks/StakingMock.sol";
 import {VestingMock} from "./mocks/VestingMock.sol";
 import {TokenMock} from "./mocks/TokenMock.sol";
-import {Constants} from "./utils/Constants.sol";
+import {StakingConstants} from "./utils/StakingConstants.sol";
 import {Events} from "./utils/Events.sol";
 
-contract Base_Test is Test, Constants, Events {
+contract Base_Test is Test, StakingConstants, Events {
     /*//////////////////////////////////////////////////////////////////////////
                                   STATE VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
@@ -82,9 +82,11 @@ contract Base_Test is Test, Constants, Events {
             usdcToken,
             wowToken,
             address(vesting),
+            GELATO_EXECUTOR_ADDRESS,
             TOTAL_POOLS,
             TOTAL_BAND_LEVELS
         );
+        staking.setUpgradesTrigger(true);
 
         // MINT TOKENS TO TEST ACCOUNTS
         uint8 accountsAmount = uint8(TEST_ACCOUNTS.length);

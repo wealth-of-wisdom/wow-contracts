@@ -213,6 +213,7 @@ contract Staking is
             address(usdtToken) == address(0) ||
             address(usdcToken) == address(0) ||
             address(wowToken) == address(0) ||
+            gelato == address(0) ||
             vesting == address(0)
         ) {
             revert Errors.Staking__ZeroAddress();
@@ -579,12 +580,13 @@ contract Staking is
         mAddressNotZero(user)
         mBandLevelExists(bandLevel)
         mValidMonth(stakingType, month)
+        returns (uint256 bandId)
     {
         if (StakingTypes.FLEXI != stakingType) {
             revert Errors.Staking__OnlyFlexiTypeAllowed();
         }
         // Effects: Create a new band and add it to the user
-        uint256 bandId = _stakeBand(user, stakingType, bandLevel, month, true);
+        bandId = _stakeBand(user, stakingType, bandLevel, month, true);
 
         // Effects: emit event
         emit Staked(user, bandLevel, bandId, stakingType, true);

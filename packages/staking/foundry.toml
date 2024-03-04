@@ -5,6 +5,8 @@ allow_paths = ["../.."]
 libs = ["../../node_modules", "../../lib"]
 remappings = [
     "@openzeppelin/=../../node_modules/@openzeppelin/",
+    "@wealth-of-wisdom/vesting=../../packages/vesting",
+    "@wealth-of-wisdom/staking=../../packages/staking",
 ]
 gas_reports = ["*"]
 
