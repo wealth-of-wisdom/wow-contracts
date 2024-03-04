@@ -9,7 +9,7 @@ abstract contract StakingConstants {
     //////////////////////////////////////////////////////////////////////////*/
 
     address internal constant ZERO_ADDRESS = address(0x0);
-    address internal constant GELATO_EXECUTOR_ADDRESS = address(0x1);
+    address internal constant GELATO_EXECUTOR_ADDRESS = address(0x129);
 
     /*//////////////////////////////////////////////////////////////////////////
                                     ROLES
@@ -257,9 +257,9 @@ abstract contract StakingConstants {
                               STAKING BAND DATA
     //////////////////////////////////////////////////////////////////////////*/
 
-    uint16 internal constant BAND_ID_0 = 0;
-    uint16 internal constant BAND_ID_1 = 1;
-    uint16 internal constant BAND_ID_2 = 2;
-    uint16 internal constant BAND_ID_3 = 3;
-    uint16 internal constant BAND_ID_4 = 4;
+    uint256 internal constant BAND_ID_0 = 0;
+    uint256 internal constant BAND_ID_1 = 1;
+    uint256 internal constant BAND_ID_2 = 2;
+    uint256 internal constant BAND_ID_3 = 3;
+    uint256 internal constant BAND_ID_4 = 4;
 }

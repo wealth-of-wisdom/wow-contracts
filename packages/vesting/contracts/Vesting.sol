@@ -549,7 +549,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      * @notice Unstakes vested tokesns via vesting contract in staking contract
      * @param bandId  Id of the band (0-max uint)
      */
-    function unstakeVestedTokens(uint16 bandId) external {
+    function unstakeVestedTokens(uint256 bandId) external {
         uint16 pid = s_stakedPools[bandId];
         if (!_isBeneficiaryAdded(pid, msg.sender)) {
             revert Errors.Vesting__BeneficiaryDoesNotExist();
