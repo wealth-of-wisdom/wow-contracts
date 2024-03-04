@@ -307,9 +307,6 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         Pool storage pool = s_vestingPools[pid];
         Beneficiary storage user = pool.beneficiaries[beneficiary];
 
-        // Get staked amount that will be unstaked from staking contract
-        uint256 stakedAmount = user.stakedTokenAmount;
-
         // Get unlocked amount that will be transferred to the user
         // We don't need to check whether the user has staked tokens
         // because we are unstaking all staked tokens, which means it will be 0
@@ -324,10 +321,8 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         // Effects: Delete user from the pool
         delete pool.beneficiaries[beneficiary];
 
-        if (stakedAmount > 0) {
-            // Interactions: delete user data from staking contract
-            s_staking.deleteVestingUser(msg.sender);
-        }
+        // Interactions: delete user data from staking contract
+        s_staking.deleteVestingUser(beneficiary);
 
         // Effects: Emit event
         emit BeneficiaryRemoved(pid, beneficiary, availableAmount);
@@ -464,8 +459,11 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      * @notice if the vesting period has ended - user is transferred all unclaimed tokens.
      */
     function claimAllTokens() external {
-        uint16 poolCount = s_poolCount;
         uint256 allTokensToClaim;
+
+        // Cache pool count to use in loop
+        uint16 poolCount = s_poolCount;
+
         for (uint16 i; i < poolCount; i++) {
             uint256 unlockedTokens = getUnlockedTokenAmount(i, msg.sender);
 
@@ -490,15 +488,24 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
                 continue;
             }
 
-            // Effects
+            // Effects: Update user claimed token amount
             user.claimedTokenAmount += unlockedTokens;
+
             allTokensToClaim += unlockedTokens;
 
+            // Effects: Emit event
             emit TokensClaimed(i, msg.sender, unlockedTokens);
         }
-        // Interactions
+
+        // Checks: At least some tokens are unlocked
+        if (allTokensToClaim == 0) {
+            revert Errors.Vesting__NoTokensUnlocked();
+        }
+
+        // Interactions: Transfer tokens to the user
         s_token.safeTransfer(msg.sender, allTokensToClaim);
 
+        // Effects: Emit event
         emit AllTokensClaimed(msg.sender, allTokensToClaim);
     }
 

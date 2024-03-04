@@ -58,10 +58,12 @@ contract Vesting_ClaimTokens_Unit_Test is Unit_Test {
         addBeneficiary(alice)
     {
         vm.warp(LISTING_DATE + 1 minutes);
-        vesting.mock_setStakedAmount(
-            PRIMARY_POOL,
-            alice,
-            BENEFICIARY_TOKEN_AMOUNT
+        vm.prank(alice);
+        vesting.stakeVestedTokens(
+            STAKING_TYPE_FLEXI,
+            BAND_LEVEL_1,
+            MONTH_0,
+            PRIMARY_POOL
         );
 
         vm.expectRevert(Errors.Vesting__StakedTokensCanNotBeClaimed.selector);

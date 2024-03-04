@@ -94,7 +94,7 @@ contract Vesting_RemoveBeneficiary_Unit_Test is Unit_Test {
         );
     }
 
-    function test_removeBeneficiary_DeletesUserWhenNoTokensWereStakedOrClaimed()
+    function test_removeBeneficiary_DeletesUserWhenNoTokensAreStakedOrClaimed()
         external
         approveAndAddPool
         addBeneficiary(alice)
@@ -111,107 +111,101 @@ contract Vesting_RemoveBeneficiary_Unit_Test is Unit_Test {
         assertBeneficiaryData(aliceBeneficiary, 0, 0, 0);
     }
 
-    // function test_removeBeneficiary_DeletesUserWhenTokensAreStakedAndClaimed()
-    //     external
-    //     approveAndAddPool
-    //     addBeneficiary(alice)
-    // {
-    //     vm.warp(CLIFF_END_DATE);
-    //     vm.prank(alice);
-    //     vesting.claimTokens(PRIMARY_POOL);
+    function test_removeBeneficiary_DeletesUserWhenTokensAreStaked()
+        external
+        approveAndAddPool
+        addBeneficiary(alice)
+    {
+        vm.warp(CLIFF_END_DATE);
+        vm.prank(alice);
+        vesting.stakeVestedTokens(
+            STAKING_TYPE_FLEXI,
+            BAND_LEVEL_1,
+            MONTH_0,
+            PRIMARY_POOL
+        );
 
-    //     vm.prank(address(staking));
-    //     vesting.updateVestedStakedTokens(
-    //         PRIMARY_POOL,
-    //         alice,
-    //         BENEFICIARY_TOKEN_AMOUNT - LISTING_AND_CLIFF_TOKEN_AMOUNT,
-    //         true
-    //     );
+        vm.prank(admin);
+        vesting.removeBeneficiary(PRIMARY_POOL, alice);
 
-    //     vm.prank(admin);
-    //     vesting.removeBeneficiary(PRIMARY_POOL, alice);
+        IVesting.Beneficiary memory aliceBeneficiary = vesting.getBeneficiary(
+            PRIMARY_POOL,
+            alice
+        );
+        assertBeneficiaryData(aliceBeneficiary, 0, 0, 0);
+    }
 
-    //     IVesting.Beneficiary memory aliceBeneficiary = vesting.getBeneficiary(
-    //         PRIMARY_POOL,
-    //         alice
-    //     );
+    function test_removeBeneficiary_DeletesUserWhenTokensAreClaimed()
+        external
+        approveAndAddPool
+        addBeneficiary(alice)
+    {
+        vm.warp(CLIFF_END_DATE);
+        vm.prank(alice);
+        vesting.claimTokens(PRIMARY_POOL);
 
-    //     assertBeneficiaryData(aliceBeneficiary, 0, 0, 0);
-    // }
+        vm.prank(admin);
+        vesting.removeBeneficiary(PRIMARY_POOL, alice);
 
-    // function test_removeBeneficiary_DoesNotUnstakeVestedTokensWhenNoTokensWereStakedOrClaimed()
-    //     external
-    //     approveAndAddPool
-    //     addBeneficiary(alice)
-    // {
-    //     vm.warp(LISTING_DATE + 1 minutes);
-    //     vm.prank(admin);
-    //     vesting.removeBeneficiary(PRIMARY_POOL, alice);
+        IVesting.Beneficiary memory aliceBeneficiary = vesting.getBeneficiary(
+            PRIMARY_POOL,
+            alice
+        );
+        assertBeneficiaryData(aliceBeneficiary, 0, 0, 0);
+    }
 
-    //     bool called = staking.wasUnstakesVestedTokensCalled();
-    //     assertFalse(called, "Unstake vested tokens was called");
-    // }
+    function test_removeBeneficiary_CallsStakingWhenNoTokensAreStakedOrClaimed()
+        external
+        approveAndAddPool
+        addBeneficiary(alice)
+    {
+        vm.warp(LISTING_DATE + 1 minutes);
+        vm.expectCall(
+            address(staking),
+            abi.encodeWithSelector(IStaking.deleteVestingUser.selector, alice)
+        );
+        vm.prank(admin);
+        vesting.removeBeneficiary(PRIMARY_POOL, alice);
+    }
 
-    // function test_removeBeneficiary_UnstakesVestedTokensWhenTokensAreStakedAndClaimed()
-    //     external
-    //     approveAndAddPool
-    //     addBeneficiary(alice)
-    // {
-    //     vm.warp(CLIFF_END_DATE);
-    //     vm.prank(alice);
-    //     vesting.claimTokens(PRIMARY_POOL);
+    function test_removeBeneficiary_CallsStakingWhenTokensAreStaked()
+        external
+        approveAndAddPool
+        addBeneficiary(alice)
+    {
+        vm.warp(CLIFF_END_DATE);
+        vm.prank(alice);
+        vesting.stakeVestedTokens(
+            STAKING_TYPE_FLEXI,
+            BAND_LEVEL_1,
+            MONTH_0,
+            PRIMARY_POOL
+        );
 
-    //     vm.prank(address(staking));
-    //     vesting.updateVestedStakedTokens(
-    //         PRIMARY_POOL,
-    //         alice,
-    //         BENEFICIARY_TOKEN_AMOUNT - LISTING_AND_CLIFF_TOKEN_AMOUNT,
-    //         true
-    //     );
+        vm.expectCall(
+            address(staking),
+            abi.encodeWithSelector(IStaking.deleteVestingUser.selector, alice)
+        );
+        vm.prank(admin);
+        vesting.removeBeneficiary(PRIMARY_POOL, alice);
+    }
 
-    //     vm.expectCall(
-    //         address(staking),
-    //         abi.encodeWithSelector(
-    //             IStaking.unstakeVestedTokens.selector,
-    //             alice,
-    //             BENEFICIARY_TOKEN_AMOUNT - LISTING_AND_CLIFF_TOKEN_AMOUNT
-    //         )
-    //     );
-    //     vm.prank(admin);
-    //     vesting.removeBeneficiary(PRIMARY_POOL, alice);
+    function test_removeBeneficiary_CallsStakingWhenTokensAreClaimed()
+        external
+        approveAndAddPool
+        addBeneficiary(alice)
+    {
+        vm.warp(CLIFF_END_DATE);
+        vm.prank(alice);
+        vesting.claimTokens(PRIMARY_POOL);
 
-    //     bool called = staking.wasUnstakesVestedTokensCalled();
-    //     assertTrue(called, "Unstake vested tokens was not called");
-    // }
-
-    // function test_removeBeneficiary_UnstakesVestedTokensWhenTokensAreStakedButNotClaimed()
-    //     external
-    //     approveAndAddPool
-    //     addBeneficiary(alice)
-    // {
-    //     vm.warp(CLIFF_END_DATE);
-    //     vm.prank(address(staking));
-    //     vesting.updateVestedStakedTokens(
-    //         PRIMARY_POOL,
-    //         alice,
-    //         BENEFICIARY_TOKEN_AMOUNT,
-    //         true
-    //     );
-
-    //     vm.expectCall(
-    //         address(staking),
-    //         abi.encodeWithSelector(
-    //             IStaking.unstakeVestedTokens.selector,
-    //             alice,
-    //             BENEFICIARY_TOKEN_AMOUNT
-    //         )
-    //     );
-    //     vm.prank(admin);
-    //     vesting.removeBeneficiary(PRIMARY_POOL, alice);
-
-    //     bool called = staking.wasUnstakesVestedTokensCalled();
-    //     assertTrue(called, "Unstake vested tokens was not called");
-    // }
+        vm.expectCall(
+            address(staking),
+            abi.encodeWithSelector(IStaking.deleteVestingUser.selector, alice)
+        );
+        vm.prank(admin);
+        vesting.removeBeneficiary(PRIMARY_POOL, alice);
+    }
 
     function test_removeBeneficiary_EmitsBeneficiaryRemovedEvent()
         external
