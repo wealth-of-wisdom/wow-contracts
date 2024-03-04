@@ -194,7 +194,7 @@ contract Staking_UpgradeBand_Unit_Test is Unit_Test {
         wowToken.approve(address(staking), bandPriceDifference);
 
         vm.expectEmit(address(staking));
-        emit BandUpgaded(alice, BAND_ID_0, BAND_LEVEL_4, BAND_LEVEL_7);
+        emit BandUpgraded(alice, BAND_ID_0, BAND_LEVEL_4, BAND_LEVEL_7);
 
         staking.upgradeBand(BAND_ID_0, BAND_LEVEL_7);
         vm.stopPrank();

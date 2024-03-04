@@ -86,7 +86,6 @@ contract Base_Test is Test, StakingConstants, Events {
             TOTAL_POOLS,
             TOTAL_BAND_LEVELS
         );
-        staking.setUpgradesTrigger(true);
 
         // MINT TOKENS TO TEST ACCOUNTS
         uint8 accountsAmount = uint8(TEST_ACCOUNTS.length);
