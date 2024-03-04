@@ -45,7 +45,13 @@ interface IVestingEvents {
         uint256 tokenAmount
     );
 
-    event StakedTokensUpdated(
+    event VestedTokensStaked(
+        uint16 indexed poolIndex,
+        address indexed beneficiary,
+        uint256 amount
+    );
+
+    event VestedTokensUnstaked(
         uint16 indexed poolIndex,
         address indexed beneficiary,
         uint256 amount
@@ -146,16 +152,10 @@ interface IVesting is IVestingEvents {
         IStaking.StakingTypes stakingType,
         uint16 bandLevel,
         uint8 month,
-        uint16 pid,
-        uint256 tokenAmount
+        uint16 pid
     ) external;
 
-    function unstakeVestedTokens(
-        uint16 bandId,
-        uint16 pid,
-        address beneficiary,
-        uint256 tokenAmount
-    ) external;
+    function unstakeVestedTokens(uint256 bandId) external;
 
     function getBeneficiary(
         uint16 pid,

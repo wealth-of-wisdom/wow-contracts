@@ -3,9 +3,9 @@ pragma solidity 0.8.20;
 
 import {StdAssertions} from "forge-std/Test.sol";
 import {IVesting} from "../../contracts/interfaces/IVesting.sol";
-import {Constants} from "./Constants.sol";
+import {VestingConstants} from "./VestingConstants.sol";
 
-abstract contract Assertions is StdAssertions, Constants {
+abstract contract Assertions is StdAssertions, VestingConstants {
     function assertUnlockType(
         IVesting.UnlockTypes expected,
         IVesting.UnlockTypes actual

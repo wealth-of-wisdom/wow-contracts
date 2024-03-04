@@ -34,6 +34,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     IERC20 internal s_token;
     IStaking internal s_staking;
     mapping(uint16 => Pool) internal s_vestingPools;
+    mapping(uint256 bandId => uint16 poolId) internal s_stakedPools;
     uint32 internal s_listingDate;
     uint16 internal s_poolCount;
     /* solhint-enable */
@@ -492,6 +493,8 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
             // Effects
             user.claimedTokenAmount += unlockedTokens;
             allTokensToClaim += unlockedTokens;
+
+            emit TokensClaimed(i, msg.sender, unlockedTokens);
         }
         // Interactions
         s_token.safeTransfer(msg.sender, allTokensToClaim);
@@ -504,27 +507,21 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      * @param stakingType  enumerable type for flexi or fixed staking
      * @param bandLevel  band level number (1-9)
      * @param pid Index that refers to vesting pool object.
-     * @param tokenAmount Amount used to stake or unstake from vesting pool.
      */
     function stakeVestedTokens(
         IStaking.StakingTypes stakingType,
         uint16 bandLevel,
         uint8 month,
-        uint16 pid,
-        uint256 tokenAmount
-    )
-        external
-        mPoolExists(pid)
-        mOnlyBeneficiary(pid)
-        mAmountNotZero(tokenAmount)
-    {
+        uint16 pid
+    ) external mPoolExists(pid) mOnlyBeneficiary(pid) {
         Beneficiary storage user = s_vestingPools[pid].beneficiaries[
             msg.sender
         ];
+        (uint256 bandPrice, ) = s_staking.getBandLevel(bandLevel);
 
         // Checks: Enough unstaked tokens in the contract
         if (
-            tokenAmount >
+            bandPrice >
             user.totalTokenAmount -
                 user.stakedTokenAmount -
                 user.claimedTokenAmount
@@ -533,45 +530,42 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         }
 
         // Effects: Stake tokens
-        user.stakedTokenAmount += tokenAmount;
+        user.stakedTokenAmount += bandPrice;
 
         // Interactions: Stake tokens in staking contract
-        s_staking.stakeVested(msg.sender, stakingType, bandLevel, month);
+        uint256 bandId = s_staking.stakeVested(
+            msg.sender,
+            stakingType,
+            bandLevel,
+            month
+        );
+        s_stakedPools[bandId] = pid;
 
         // Effects: Emit event
-        emit StakedTokensUpdated(pid, msg.sender, tokenAmount);
+        emit VestedTokensStaked(pid, msg.sender, bandPrice);
     }
 
     /**
      * @notice Unstakes vested tokesns via vesting contract in staking contract
      * @param bandId  Id of the band (0-max uint)
-     * @param pid Index that refers to vesting pool object.
-     * @param beneficiary Address of the staker.
-     * @param tokenAmount Amount used to stake or unstake from vesting pool.
      */
-    function unstakeVestedTokens(
-        uint16 bandId,
-        uint16 pid,
-        address beneficiary,
-        uint256 tokenAmount
-    )
-        external
-        mPoolExists(pid)
-        mBeneficiaryExists(pid, beneficiary)
-        mAmountNotZero(tokenAmount)
-    {
+    function unstakeVestedTokens(uint256 bandId) external {
+        uint16 pid = s_stakedPools[bandId];
+        if (!_isBeneficiaryAdded(pid, msg.sender)) {
+            revert Errors.Vesting__BeneficiaryDoesNotExist();
+        }
+
         Pool storage pool = s_vestingPools[pid];
-        Beneficiary storage user = pool.beneficiaries[beneficiary];
+        Beneficiary storage user = pool.beneficiaries[msg.sender];
+        (, , uint16 bandLevel, , , ) = s_staking.getStakerBand(bandId);
+        (uint256 bandPrice, ) = s_staking.getBandLevel(bandLevel);
 
         // Effects: Unstake tokens
-        if (tokenAmount - user.stakedTokenAmount > 0) {
-            revert Errors.Vesting__UnstakingTooManyTokens();
-        }
-        user.stakedTokenAmount -= tokenAmount;
+        user.stakedTokenAmount -= bandPrice;
         s_staking.unstakeVested(msg.sender, bandId);
 
         // Effects: Emit event
-        emit StakedTokensUpdated(pid, beneficiary, tokenAmount);
+        emit VestedTokensUnstaked(pid, msg.sender, bandPrice);
     }
 
     /*//////////////////////////////////////////////////////////////////////////

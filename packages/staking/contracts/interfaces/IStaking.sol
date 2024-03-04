@@ -170,7 +170,7 @@ interface IStaking is IStakingEvents {
         StakingTypes stakingType,
         uint16 bandLevel,
         uint8 month
-    ) external;
+    ) external returns (uint256 bandId);
 
     function unstakeVested(address user, uint256 bandId) external;
 
