@@ -183,7 +183,7 @@ export function handleStaked(event: StakedEvent): void {
     band.owner = event.params.user;
     band.stakingStartDate = event.block.timestamp;
     band.bandLevel = event.params.bandLevel;
-    band.stakingType = event.params.stakingType;
+    band.stakingType = event.params.stakingType.toString();
     if (event.params.stakingType == StakingType.FIX) band.fixedMonths = event.params.fixedMonths;
     band.areTokensVested = event.params.areTokensVested;
     band.save();
@@ -245,7 +245,7 @@ export function handleVestingUserDeleted(event: VestingUserDeletedEvent): void {
     }
 
     for (let i = 0; i < staker.bands.length; i++) {
-        const band: Band = getOrInitBand(new BigInt(parseInt(staker.bands[i])));
+        const band: Band = getOrInitBand(BigInt.fromString(staker.bands[i]));
         store.remove("Band", band.id);
     }
     store.remove("StakerRewards", usdtRewards.id);
