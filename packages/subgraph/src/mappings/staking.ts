@@ -68,7 +68,7 @@ export function handleBandLevelSet(event: BandLevelSetEvent): void {
     bandLevel.save();
 }
 
-export function handleSharesInMonths(event: SharesInMonthSetEvent): void {
+export function handleSharesInMonthSet(event: SharesInMonthSetEvent): void {
     const stakingContract = getOrInitStakingContract();
 
     stakingContract.sharesInMonths = event.params.totalSharesInMonth;
