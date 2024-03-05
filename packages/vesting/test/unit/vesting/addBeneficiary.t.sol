@@ -4,9 +4,9 @@ pragma solidity 0.8.20;
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {IVesting} from "../../../contracts/interfaces/IVesting.sol";
 import {Errors} from "../../../contracts/libraries/Errors.sol";
-import {Vesting_Unit_Test} from "../VestingUnit.t.sol";
+import {Unit_Test} from "../Unit.t.sol";
 
-contract Vesting_AddBeneficiary_Unit_Test is Vesting_Unit_Test {
+contract Vesting_AddBeneficiary_Unit_Test is Unit_Test {
     function test_addBeneficiary_RevertIf_CallerNotAdmin() external {
         vm.expectRevert(
             abi.encodeWithSelector(

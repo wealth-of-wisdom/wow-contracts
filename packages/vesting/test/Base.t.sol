@@ -89,6 +89,8 @@ contract Base_Test is
 
         // STAKING
         staking = new StakingMock();
+
+        vesting.initialize(wowToken, staking, LISTING_DATE);
         staking.initialize(
             usdtToken,
             usdcToken,
@@ -98,6 +100,7 @@ contract Base_Test is
             TOTAL_POOLS,
             TOTAL_BAND_LEVELS
         );
+
         // SET POOLS
         _setPools();
         // SET BAND LEVEL DATA

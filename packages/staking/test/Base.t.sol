@@ -86,7 +86,6 @@ contract Base_Test is Test, StakingConstants, Events {
             TOTAL_POOLS,
             TOTAL_BAND_LEVELS
         );
-        staking.setUpgradesTrigger(true);
 
         // MINT TOKENS TO TEST ACCOUNTS
         uint8 accountsAmount = uint8(TEST_ACCOUNTS.length);
@@ -144,6 +143,11 @@ contract Base_Test is Test, StakingConstants, Events {
         _;
     }
 
+    modifier setDistributionInProgress(bool _isInProgress) {
+        _setDistributionInProgress(_isInProgress);
+        _;
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                 HELPER FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
@@ -197,6 +201,11 @@ contract Base_Test is Test, StakingConstants, Events {
     function _distributeRewards(TokenMock _token) internal {
         vm.prank(admin);
         staking.distributeRewards(_token, STAKERS, DISTRIBUTION_REWARDS);
+    }
+
+    function _setDistributionInProgress(bool _isInProgress) internal {
+        vm.prank(admin);
+        staking.setDistributionInProgress(_isInProgress);
     }
 
     /*//////////////////////////////////////////////////////////////////////////

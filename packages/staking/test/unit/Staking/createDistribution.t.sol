@@ -32,6 +32,27 @@ contract Staking_CreateDistribution_Unit_Test is Unit_Test {
         staking.createDistribution(usdtToken, 0);
     }
 
+    function test_createDistribution_RevertIf_DistributionInProgress()
+        external
+        setDistributionInProgress(true)
+    {
+        vm.expectRevert(Errors.Staking__DistributionInProgress.selector);
+        vm.prank(admin);
+        staking.createDistribution(usdtToken, DISTRIBUTION_AMOUNT);
+    }
+
+    function test_createDistribution_SetsDistributionToBeInProgress() external {
+        vm.startPrank(admin);
+        usdtToken.approve(address(staking), DISTRIBUTION_AMOUNT);
+        staking.createDistribution(usdtToken, DISTRIBUTION_AMOUNT);
+        vm.stopPrank();
+
+        assertTrue(
+            staking.isDistributionInProgress(),
+            "Distribution status not set to in progress"
+        );
+    }
+
     function test_createDistribution_TransfersTokensFromSender() external {
         uint256 adminBalanceBefore = usdtToken.balanceOf(admin);
 

@@ -23,7 +23,7 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
         staking.unstakeVested(alice, BAND_ID_0);
     }
 
-    function test_unstakeVested_RevertIf_CallerNotBandOwner()
+    function test_unstakeVested_RevertIf_UserNotBandOwner()
         external
         setBandLevelData
         setSharesInMonth
@@ -51,6 +51,18 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
                 false
             )
         );
+        vm.prank(address(vesting));
+        staking.unstakeVested(alice, BAND_ID_0);
+    }
+
+    function test_stakeVested_RevertIf_DistributionInProgress()
+        external
+        setBandLevelData
+        setSharesInMonth
+        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+        setDistributionInProgress(true)
+    {
+        vm.expectRevert(Errors.Staking__DistributionInProgress.selector);
         vm.prank(address(vesting));
         staking.unstakeVested(alice, BAND_ID_0);
     }

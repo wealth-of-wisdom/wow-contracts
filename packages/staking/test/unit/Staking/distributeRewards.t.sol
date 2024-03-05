@@ -43,6 +43,27 @@ contract Staking_DistributeRewards_Unit_Test is Unit_Test {
         staking.distributeRewards(usdtToken, STAKERS, DISTRIBUTION_REWARDS);
     }
 
+    function test_distributeRewards_RevertIf_DistributionNotInProgress()
+        external
+    {
+        vm.expectRevert(Errors.Staking__DistributionNotInProgress.selector);
+        vm.prank(admin);
+        staking.distributeRewards(usdtToken, STAKERS, DISTRIBUTION_REWARDS);
+    }
+
+    function test_distributeRewards_SetsDistributionStatusToNotBeInProgress()
+        external
+        createDistribution(usdtToken)
+    {
+        vm.prank(admin);
+        staking.distributeRewards(usdtToken, STAKERS, DISTRIBUTION_REWARDS);
+
+        assertFalse(
+            staking.isDistributionInProgress(),
+            "Distribution status not set to in progress"
+        );
+    }
+
     function test_distributeRewards_IncreasesUnclaimedRewardsForFirstTime()
         external
         createDistribution(usdtToken)
@@ -104,6 +125,7 @@ contract Staking_DistributeRewards_Unit_Test is Unit_Test {
     function test_distributeRewards_IncreasesUnclaimedRewardsForSecondTime()
         external
         createDistribution(usdtToken)
+        distributeRewards(usdtToken)
         createDistribution(usdtToken)
     {
         (uint256 aliceRewardsBefore, ) = staking.getStakerReward(
@@ -118,10 +140,8 @@ contract Staking_DistributeRewards_Unit_Test is Unit_Test {
         (uint256 danRewardsBefore, ) = staking.getStakerReward(dan, usdtToken);
         (uint256 eveRewardsBefore, ) = staking.getStakerReward(eve, usdtToken);
 
-        vm.startPrank(admin);
+        vm.prank(admin);
         staking.distributeRewards(usdtToken, STAKERS, DISTRIBUTION_REWARDS);
-        staking.distributeRewards(usdtToken, STAKERS, DISTRIBUTION_REWARDS);
-        vm.stopPrank();
 
         (uint256 aliceRewardsAfter, ) = staking.getStakerReward(
             alice,
@@ -136,27 +156,27 @@ contract Staking_DistributeRewards_Unit_Test is Unit_Test {
         (uint256 eveRewardsAfter, ) = staking.getStakerReward(eve, usdtToken);
 
         assertEq(
-            aliceRewardsBefore + ALICE_REWARDS * 2,
+            aliceRewardsBefore + ALICE_REWARDS,
             aliceRewardsAfter,
             "Alice DISTRIBUTION_REWARDS not increased"
         );
         assertEq(
-            bobRewardsBefore + BOB_REWARDS * 2,
+            bobRewardsBefore + BOB_REWARDS,
             bobRewardsAfter,
             "Bob DISTRIBUTION_REWARDS not increased"
         );
         assertEq(
-            carolRewardsBefore + CAROL_REWARDS * 2,
+            carolRewardsBefore + CAROL_REWARDS,
             carolRewardsAfter,
             "Carol DISTRIBUTION_REWARDS not increased"
         );
         assertEq(
-            danRewardsBefore + DAN_REWARDS * 2,
+            danRewardsBefore + DAN_REWARDS,
             danRewardsAfter,
             "Dan DISTRIBUTION_REWARDS not increased"
         );
         assertEq(
-            eveRewardsBefore + EVE_REWARDS * 2,
+            eveRewardsBefore + EVE_REWARDS,
             eveRewardsAfter,
             "Eve DISTRIBUTION_REWARDS not increased"
         );

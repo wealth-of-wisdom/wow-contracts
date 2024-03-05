@@ -307,9 +307,6 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         Pool storage pool = s_vestingPools[pid];
         Beneficiary storage user = pool.beneficiaries[beneficiary];
 
-        // Get staked amount that will be unstaked from staking contract
-        uint256 stakedAmount = user.stakedTokenAmount;
-
         // Get unlocked amount that will be transferred to the user
         // We don't need to check whether the user has staked tokens
         // because we are unstaking all staked tokens, which means it will be 0
@@ -324,10 +321,8 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         // Effects: Delete user from the pool
         delete pool.beneficiaries[beneficiary];
 
-        if (stakedAmount > 0) {
-            // Interactions: delete user data from staking contract
-            s_staking.deleteVestingUser(msg.sender);
-        }
+        // Interactions: delete user data from staking contract
+        s_staking.deleteVestingUser(beneficiary);
 
         // Effects: Emit event
         emit BeneficiaryRemoved(pid, beneficiary, availableAmount);
@@ -464,8 +459,11 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      * @notice if the vesting period has ended - user is transferred all unclaimed tokens.
      */
     function claimAllTokens() external {
-        uint16 poolCount = s_poolCount;
         uint256 allTokensToClaim;
+
+        // Cache pool count to use in loop
+        uint16 poolCount = s_poolCount;
+
         for (uint16 i; i < poolCount; i++) {
             uint256 unlockedTokens = getUnlockedTokenAmount(i, msg.sender);
 
@@ -490,15 +488,24 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
                 continue;
             }
 
-            // Effects
+            // Effects: Update user claimed token amount
             user.claimedTokenAmount += unlockedTokens;
+
             allTokensToClaim += unlockedTokens;
 
+            // Effects: Emit event
             emit TokensClaimed(i, msg.sender, unlockedTokens);
         }
-        // Interactions
+
+        // Checks: At least some tokens are unlocked
+        if (allTokensToClaim == 0) {
+            revert Errors.Vesting__NoTokensUnlocked();
+        }
+
+        // Interactions: Transfer tokens to the user
         s_token.safeTransfer(msg.sender, allTokensToClaim);
 
+        // Effects: Emit event
         emit AllTokensClaimed(msg.sender, allTokensToClaim);
     }
 
@@ -517,7 +524,11 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         Beneficiary storage user = s_vestingPools[pid].beneficiaries[
             msg.sender
         ];
-        (uint256 bandPrice, ) = s_staking.getBandLevel(bandLevel);
+
+        // Cache staking contract
+        IStaking staking = s_staking;
+
+        (uint256 bandPrice, ) = staking.getBandLevel(bandLevel);
 
         // Checks: Enough unstaked tokens in the contract
         if (
@@ -533,12 +544,14 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         user.stakedTokenAmount += bandPrice;
 
         // Interactions: Stake tokens in staking contract
-        uint256 bandId = s_staking.stakeVested(
+        uint256 bandId = staking.stakeVested(
             msg.sender,
             stakingType,
             bandLevel,
             month
         );
+
+        // Effects: Update staked pool id
         s_stakedPools[bandId] = pid;
 
         // Effects: Emit event
@@ -549,20 +562,25 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      * @notice Unstakes vested tokesns via vesting contract in staking contract
      * @param bandId  Id of the band (0-max uint)
      */
-    function unstakeVestedTokens(uint256 bandId) external {
+    function unstakeVestedTokens(
+        uint256 bandId
+    ) external mBeneficiaryExists(s_stakedPools[bandId], msg.sender) {
         uint16 pid = s_stakedPools[bandId];
-        if (!_isBeneficiaryAdded(pid, msg.sender)) {
-            revert Errors.Vesting__BeneficiaryDoesNotExist();
-        }
+
+        // Cache staking contract
+        IStaking staking = s_staking;
 
         Pool storage pool = s_vestingPools[pid];
         Beneficiary storage user = pool.beneficiaries[msg.sender];
-        (, , uint16 bandLevel, , , ) = s_staking.getStakerBand(bandId);
-        (uint256 bandPrice, ) = s_staking.getBandLevel(bandLevel);
+
+        (, , uint16 bandLevel, , , ) = staking.getStakerBand(bandId);
+        (uint256 bandPrice, ) = staking.getBandLevel(bandLevel);
 
         // Effects: Unstake tokens
         user.stakedTokenAmount -= bandPrice;
-        s_staking.unstakeVested(msg.sender, bandId);
+
+        // Interactions: Unstake tokens in staking contract
+        staking.unstakeVested(msg.sender, bandId);
 
         // Effects: Emit event
         emit VestedTokensUnstaked(pid, msg.sender, bandPrice);

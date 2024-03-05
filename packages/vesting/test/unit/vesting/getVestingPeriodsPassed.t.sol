@@ -3,9 +3,9 @@ pragma solidity 0.8.20;
 
 import {IVesting} from "../../../contracts/interfaces/IVesting.sol";
 import {Errors} from "../../../contracts/libraries/Errors.sol";
-import {Vesting_Unit_Test} from "../VestingUnit.t.sol";
+import {Unit_Test} from "../Unit.t.sol";
 
-contract Vesting_GetVestingPeriodsPassed_Unit_Test is Vesting_Unit_Test {
+contract Vesting_GetVestingPeriodsPassed_Unit_Test is Unit_Test {
     /*//////////////////////////////////////////////////////////////////////////
                                       MODIFIERS
     //////////////////////////////////////////////////////////////////////////*/

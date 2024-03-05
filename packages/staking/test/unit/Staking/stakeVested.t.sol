@@ -66,6 +66,27 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
         staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_1);
     }
 
+    function test_stakeVested_RevertIf_DistributionInProgress()
+        external
+        setBandLevelData
+        setSharesInMonth
+        setDistributionInProgress(true)
+    {
+        vm.expectRevert(Errors.Staking__DistributionInProgress.selector);
+        vm.prank(address(vesting));
+        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
+    }
+
+    function test_stakeVested_RevertIf_StakingTypeNotFlexi()
+        external
+        setBandLevelData
+        setSharesInMonth
+    {
+        vm.expectRevert(Errors.Staking__OnlyFlexiTypeAllowed.selector);
+        vm.prank(address(vesting));
+        staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_1);
+    }
+
     // NOTE: no more FIX staking for vesting
     // function test_stakeVested_RevertIf_MonthForFixTypeIsZero()
     //     external
@@ -101,6 +122,24 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
     /*//////////////////////////////////////////////////////////////////////////
                                     FLEXI STAKING
     //////////////////////////////////////////////////////////////////////////*/
+
+    function test_stakeVested_FlexiType_IncreasesNextBandId()
+        external
+        setBandLevelData
+        setSharesInMonth
+    {
+        uint256 nextBandIdBefore = staking.getNextBandId();
+
+        vm.prank(address(vesting));
+        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_2, MONTH_0);
+
+        uint256 nextBandIdAfter = staking.getNextBandId();
+        assertEq(
+            nextBandIdBefore + 1,
+            nextBandIdAfter,
+            "NextBandId not increased"
+        );
+    }
 
     function test_stakeVested_FlexiType_SetsBandData()
         external
@@ -263,9 +302,9 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
     }
 
     // NOTE: FIX type staking removed
-    //  /*//////////////////////////////////////////////////////////////////////////
+    // /*//////////////////////////////////////////////////////////////////////////
     //                                     FIX STAKING
-    //     //////////////////////////////////////////////////////////////////////////*/
+    // //////////////////////////////////////////////////////////////////////////*/
 
     //     function test_stakeVested_FixType_SetsBandData()
     //         external
