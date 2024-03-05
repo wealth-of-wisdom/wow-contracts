@@ -9,7 +9,7 @@ import {
     WowTokenSet as WowTokenSetEvent,
     TotalBandLevelsAmountSet as TotalBandLevelsAmountSetEvent,
     TotalPoolAmountSet as TotalPoolAmountSetEvent,
-    UpgradesTriggerSet as UpgradesTriggerSetEvent,
+    // UpgradesTriggerSet as UpgradesTriggerSetEvent,
     TokensWithdrawn as TokensWithdrawnEvent,
     DistributionCreated as DistributionCreatedEvent,
     RewardsDistributed as RewardsDistributedEvent,
@@ -17,7 +17,7 @@ import {
     Unstaked as UnstakedEvent,
     VestingUserDeleted as VestingUserDeletedEvent,
     BandDowngraded as BandDowngradedEvent,
-    BandUpgaded as BandUpgadedEvent,
+    BandUpgraded as BandUpgradedEvent,
     RewardsClaimed as RewardsClaimedEvent,
     Staking,
 } from "../../generated/Staking/Staking";
@@ -32,7 +32,7 @@ import {
     getOrInitFundsDistribution,
 } from "../helpers/staking.helpers";
 import { stringifyStakingType } from "../utils/utils";
-import { BIGINT_ZERO, BIGINT_ONE } from "../utils/constants";
+import { BIGINT_ZERO, BIGINT_ONE, StakingType } from "../utils/constants";
 
 export function handleInitialized(event: InitializedEvent): void {
     const stakingContract = getOrInitStakingContract();
@@ -110,12 +110,12 @@ export function handleTotalPoolAmountSet(event: TotalPoolAmountSetEvent): void {
     stakingContract.save();
 }
 
-export function handleUpgradesTriggerSet(event: UpgradesTriggerSetEvent): void {
-    const stakingContract = getOrInitStakingContract();
+// export function handleUpgradesTriggerSet(event: UpgradesTriggerSetEvent): void {
+//     const stakingContract = getOrInitStakingContract();
 
-    stakingContract.areUpgradesEnabled = event.params.triggerStatus;
-    stakingContract.save();
-}
+//     stakingContract.areUpgradesEnabled = event.params.triggerStatus;
+//     stakingContract.save();
+// }
 
 export function handleTokensWithdrawn(event: TokensWithdrawnEvent): void {
     // No state is changed in contracts
@@ -168,18 +168,91 @@ export function handleRewardsDistributed(event: RewardsDistributedEvent): void {
 }
 
 export function handleStaked(event: StakedEvent): void {
-    // @todo add implementation
+    const stakingContract = getOrInitStakingContract();
+    const staker = getOrInitStaker(event.params.user);
+    const nextBandId = stakingContract.nextBandId;
+    const band: Band = getOrInitBand(event.params.bandId);
+
+    stakingContract.nextBandId = nextBandId.plus(BIGINT_ONE);
+    stakingContract.save();
+
+    band.owner = event.params.user;
+    band.stakingStartDate = event.block.timestamp;
+    band.bandLevel = event.params.bandLevel;
+    band.stakingType = event.params.stakingType;
+    if (event.params.stakingType == StakingType.FIX) band.fixedMonths = event.params.fixedMonths;
+    if (event.params.areTokensVested) band.areTokensVested = event.params.areTokensVested;
+    band.save();
+
+    staker.bands.push(event.params.bandId.toString());
+    staker.save();
 }
 
 export function handleUnstaked(event: UnstakedEvent): void {
-    // @todo add implementation
+    const stakingContract = getOrInitStakingContract();
+    const staking = Staking.bind(Address.fromBytes(stakingContract.stakingContractAddress));
+    const usdtToken = Address.fromBytes(stakingContract.usdtToken);
+    const usdcToken = Address.fromBytes(stakingContract.usdcToken);
+
+    const staker = getOrInitStaker(event.params.user);
+    const band: Band = getOrInitBand(event.params.bandId);
+
+    const stakerAddress = Address.fromString(staker.id);
+    const usdtRewards = getOrInitStakerRewards(stakerAddress, usdtToken);
+    const usdcRewards = getOrInitStakerRewards(stakerAddress, usdcToken);
+
+    for (let i = 0; i < staker.bands.length; i++) {
+        if (staker.bands[i] === band.id) {
+            staker.bands[i] = staker.bands[i - 1];
+            staker.bands.pop();
+        }
+    }
+    if (staker.bands.length == 0) {
+        for (let i = 0; i < stakingContract.stakers.length; i++) {
+            if (stakingContract.stakers[i] === staker.id) {
+                stakingContract.stakers[i] = stakingContract.stakers[i - 1];
+                stakingContract.stakers.pop();
+            }
+        }
+        store.remove("Staker", staker.id);
+    }
+    store.remove("Band", band.id);
+
+    usdtRewards.claimedAmount = staking.getStakerReward(stakerAddress, usdtToken).getClaimedAmount();
+    usdtRewards.save();
+
+    usdcRewards.claimedAmount = staking.getStakerReward(stakerAddress, usdcToken).getClaimedAmount();
+    usdcRewards.save();
 }
 
 export function handleVestingUserDeleted(event: VestingUserDeletedEvent): void {
-    // @todo add implementation
+    const stakingContract = getOrInitStakingContract();
+    const usdtToken = Address.fromBytes(stakingContract.usdtToken);
+    const usdcToken = Address.fromBytes(stakingContract.usdcToken);
+
+    const staker = getOrInitStaker(event.params.user);
+
+    const stakerAddress = Address.fromString(staker.id);
+    const usdtRewards = getOrInitStakerRewards(stakerAddress, usdtToken);
+    const usdcRewards = getOrInitStakerRewards(stakerAddress, usdcToken);
+
+    for (let i = 0; i < stakingContract.stakers.length; i++) {
+        if (stakingContract.stakers[i] === staker.id) {
+            stakingContract.stakers[i] = stakingContract.stakers[i - 1];
+            stakingContract.stakers.pop();
+        }
+    }
+
+    for (let i = 0; i < staker.bands.length; i++) {
+        const band: Band = getOrInitBand(new BigInt(parseInt(staker.bands[i])));
+        store.remove("Band", band.id);
+    }
+    store.remove("StakerRewards", usdtRewards.id);
+    store.remove("StakerRewards", usdcRewards.id);
+    store.remove("Staker", event.params.user.toString());
 }
 
-export function handleBandUpgaded(event: BandUpgadedEvent): void {
+export function handleBandUpgraded(event: BandUpgradedEvent): void {
     const band: Band = getOrInitBand(event.params.bandId);
 
     band.bandLevel = event.params.newBandLevel;
@@ -194,7 +267,17 @@ export function handleBandDowngraded(event: BandDowngradedEvent): void {
 }
 
 export function handleRewardsClaimed(event: RewardsClaimedEvent): void {
-    // @todo add implementation
+    const stakingContract = getOrInitStakingContract();
+    const staking = Staking.bind(Address.fromBytes(stakingContract.stakingContractAddress));
+    const rewardToken = Address.fromBytes(event.params.token);
+
+    const staker = getOrInitStaker(event.params.user);
+
+    const stakerAddress = Address.fromString(staker.id);
+    const tokenRewards = getOrInitStakerRewards(stakerAddress, rewardToken);
+
+    tokenRewards.claimedAmount = staking.getStakerReward(stakerAddress, rewardToken).getClaimedAmount();
+    tokenRewards.save();
 }
 
 // @note The following commented out functions are old and should only be used as reference

@@ -577,7 +577,7 @@ contract Staking is
         s_wowToken.safeTransferFrom(msg.sender, address(this), price);
 
         // Effects: emit event
-        emit Staked(msg.sender, bandLevel, bandId, stakingType, false);
+        emit Staked(msg.sender, bandLevel, bandId, month, stakingType, false);
     }
 
     /**
@@ -643,7 +643,7 @@ contract Staking is
         bandId = _stakeBand(user, stakingType, bandLevel, month, true);
 
         // Effects: emit event
-        emit Staked(user, bandLevel, bandId, stakingType, true);
+        emit Staked(user, bandLevel, bandId, month, stakingType, true);
     }
 
     /**

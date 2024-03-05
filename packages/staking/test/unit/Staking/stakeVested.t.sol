@@ -295,7 +295,14 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
         setSharesInMonth
     {
         vm.expectEmit(address(staking));
-        emit Staked(alice, BAND_LEVEL_2, BAND_ID_0, STAKING_TYPE_FLEXI, true);
+        emit Staked(
+            alice,
+            BAND_LEVEL_2,
+            BAND_ID_0,
+            MONTH_0,
+            STAKING_TYPE_FLEXI,
+            true
+        );
 
         vm.prank(address(vesting));
         staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_2, MONTH_0);

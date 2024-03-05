@@ -110,22 +110,22 @@ dataSources:
               handler: handleTotalBandLevelsAmountSet
             - event: TotalPoolAmountSet(uint16)
               handler: handleTotalPoolAmountSet
-            - event: UpgradesTriggerSet(bool)
-              handler: handleUpgradesTriggerSet
+            # - event: UpgradesTriggerSet(bool)
+            #   handler: handleUpgradesTriggerSet
             - event: TokensWithdrawn(address,address,uint256)
               handler: handleTokensWithdrawn
             - event: DistributionCreated(address,uint256,uint16,uint16,uint256,uint256)
               handler: handleDistributionCreated
             - event: RewardsDistributed(address)
               handler: handleRewardsDistributed
-            - event: Staked(address,uint16,uint256,uint8,bool)
+            - event: Staked(address,uint16,uint256,uint8,uint8,bool)
               handler: handleStaked
             - event: Unstaked(address,uint256,bool)
               handler: handleUnstaked
             - event: VestingUserDeleted(address)
               handler: handleVestingUserRemoved
-            - event: BandUpgaded(address,uint256,uint16,uint16)
-              handler: handleBandUpgaded
+            - event: BandUpgraded(address,uint256,uint16,uint16)
+              handler: handleBandUpgraded
             - event: BandDowngraded(address,uint256,uint16,uint16)
               handler: handleBandDowngraded
             - event: RewardsClaimed(address,address,uint256)
