@@ -6,11 +6,11 @@ import {IStaking} from "@wealth-of-wisdom/staking/contracts/interfaces/IStaking.
 import {IVesting} from "../../../contracts/interfaces/IVesting.sol";
 import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {VestingMock} from "../../mocks/VestingMock.sol";
-import {Vesting_Unit_Test} from "../VestingUnit.t.sol";
+import {Unit_Test} from "../Unit.t.sol";
 
-contract Vesting_Initialize_Unit_Test is Vesting_Unit_Test {
+contract Vesting_Initialize_Unit_Test is Unit_Test {
     function setUp() public virtual override {
-        Vesting_Unit_Test.setUp();
+        Unit_Test.setUp();
 
         vesting = new VestingMock();
     }

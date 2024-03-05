@@ -6,7 +6,9 @@ import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {Unit_Test} from "../Unit.t.sol";
 
 contract Staking_SetTotalBandLevelsAmount_Unit_Test is Unit_Test {
-    function test_setTotalBandLevelsAmount_RevertIf_NotDefaultAdmin() external {
+    function test_setTotalBandLevelsAmount_RevertIf_CallerNotDefaultAdmin()
+        external
+    {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,

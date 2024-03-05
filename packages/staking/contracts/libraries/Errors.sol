@@ -36,4 +36,6 @@ library Errors {
     error Staking__InvalidMonth(uint8 month);
     error Staking__BandFromVestedTokens(bool areTokensVested);
     error Staking__UnlockDateNotReached();
+    error Staking__DistributionInProgress();
+    error Staking__DistributionNotInProgress();
 }

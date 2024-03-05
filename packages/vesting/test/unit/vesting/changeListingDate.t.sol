@@ -4,12 +4,12 @@ pragma solidity 0.8.20;
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {IVesting} from "../../../contracts/interfaces/IVesting.sol";
 import {Errors} from "../../../contracts/libraries/Errors.sol";
-import {Vesting_Unit_Test} from "../VestingUnit.t.sol";
+import {Unit_Test} from "../Unit.t.sol";
 
-contract Vesting_ChangeListingDate_Unit_Test is Vesting_Unit_Test {
+contract Vesting_ChangeListingDate_Unit_Test is Unit_Test {
     uint32 internal immutable NEW_LISTING_DATE;
 
-    constructor() Vesting_Unit_Test() {
+    constructor() Unit_Test() {
         NEW_LISTING_DATE = LISTING_DATE + 1 days;
     }
 

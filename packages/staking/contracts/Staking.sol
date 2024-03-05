@@ -68,7 +68,7 @@ contract Staking is
     // User owns in the pool for each month. Used for FLEXI staking
     // 0 index represents shares after 1 month, 1 index represents shares after 2 months, etc.
     // 10**6 = 1 share
-    uint48[] internal sharesInMonth;
+    uint48[] internal s_sharesInMonth;
 
     // Token to be payed as reward
     IERC20 internal s_usdtToken;
@@ -88,8 +88,13 @@ contract Staking is
     // Total amount of bands used for staking (currently, 9)
     uint16 internal s_totalBandLevels;
 
-    // Trigger for upgrade/downgrades
-    bool internal s_upgradesTrigger;
+    // Flag to know if upgrades are enabled or not
+    bool internal s_bandUpgradesEnabled;
+
+    // Flag to know if rewards distribution is in progress
+    // True if distribution was created but rewards were not yet distributed
+    // False if no distribution created or rewards were already distributed
+    bool internal s_distributionInProgress;
 
     /*//////////////////////////////////////////////////////////////////////////
                             STORAGE FOR FUTURE UPGRADES
@@ -145,7 +150,7 @@ contract Staking is
         // Checks: month must be defined (1-24) for fixed staking
         if (
             StakingTypes.FIX == stakingType &&
-            (month == 0 || month > sharesInMonth.length)
+            (month == 0 || month > s_sharesInMonth.length)
         ) {
             revert Errors.Staking__InvalidMonth(month);
         }
@@ -153,7 +158,7 @@ contract Staking is
         _;
     }
 
-    modifier mOnlyBandFromVestedTokens(uint256 bandId, bool shouldBeVested) {
+    modifier mBandFromVestedTokens(uint256 bandId, bool shouldBeVested) {
         bool areTokensVested = s_bands[bandId].areTokensVested;
         if (areTokensVested != shouldBeVested) {
             revert Errors.Staking__BandFromVestedTokens(areTokensVested);
@@ -176,8 +181,15 @@ contract Staking is
     }
 
     modifier mUpgradesEnabled() {
-        if (!s_upgradesTrigger) {
+        if (!s_bandUpgradesEnabled) {
             revert Errors.Staking__UpgradesDisabled();
+        }
+        _;
+    }
+
+    modifier mDistributionNotInProgress() {
+        if (s_distributionInProgress) {
+            revert Errors.Staking__DistributionInProgress();
         }
         _;
     }
@@ -307,7 +319,7 @@ contract Staking is
         uint48[] calldata totalSharesInMonth
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         // Effects: set the shares array
-        sharesInMonth = totalSharesInMonth;
+        s_sharesInMonth = totalSharesInMonth;
 
         // Effects: emit event
         emit SharesInMonthSet(totalSharesInMonth);
@@ -320,8 +332,10 @@ contract Staking is
     function setUsdtToken(
         IERC20 token
     ) external onlyRole(DEFAULT_ADMIN_ROLE) mAddressNotZero(address(token)) {
+        // Effects: set the token
         s_usdtToken = token;
 
+        // Effects: emit event
         emit UsdtTokenSet(token);
     }
 
@@ -332,8 +346,10 @@ contract Staking is
     function setUsdcToken(
         IERC20 token
     ) external onlyRole(DEFAULT_ADMIN_ROLE) mAddressNotZero(address(token)) {
+        // Effects: set the token
         s_usdcToken = token;
 
+        // Effects: emit event
         emit UsdcTokenSet(token);
     }
 
@@ -344,8 +360,10 @@ contract Staking is
     function setWowToken(
         IERC20 token
     ) external onlyRole(DEFAULT_ADMIN_ROLE) mAddressNotZero(address(token)) {
+        // Effects: set the token
         s_wowToken = token;
 
+        // Effects: emit event
         emit WowTokenSet(token);
     }
 
@@ -383,22 +401,40 @@ contract Staking is
 
     /**
      * @notice  Sets new trigger status for upgrades/downgrades
-     * @param   triggerStatus  true or false value for upgrades enabling
+     * @param   enabled  true or false value for upgrades enabling
      */
-    function setUpgradesTrigger(
-        bool triggerStatus
+    function setBandUpgradesEnabled(
+        bool enabled
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         // Effects: set upgrades trigger
-        s_upgradesTrigger = triggerStatus;
+        s_bandUpgradesEnabled = enabled;
 
         // Effects: emit event
-        emit UpgradesTriggerSet(triggerStatus);
+        emit BandUpgradeStatusSet(enabled);
     }
 
     /**
-     * @notice Withdraw the given amount of tokens from the contract
-     * @param token Token to withdraw
-     * @param amount Amount to withdraw
+     * @notice  Sets the status of the rewards distribution
+     * @param   inProgress  true if distribution is in progress
+     *                      false if distribution not started or completed
+     */
+    function setDistributionInProgress(
+        bool inProgress
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        // Effects: set distribution in progress
+        s_distributionInProgress = inProgress;
+
+        // Effects: emit event
+        emit DistributionStatusSet(inProgress);
+    }
+
+    /**
+     * @notice  Withdraw the given amount of tokens from the contract
+     * @notice  We trust the admin to withdraw the correct amount of tokens
+     * @notice  Admin should be careful when calling this function not to
+     * @notice  withdraw tokens that are still in use by the contract
+     * @param   token Token to withdraw
+     * @param   amount Amount to withdraw
      */
     function withdrawTokens(
         IERC20 token,
@@ -410,9 +446,6 @@ contract Staking is
         if (balance < amount) {
             revert Errors.Staking__InsufficientContractBalance(balance, amount);
         }
-
-        // @question should we allow to withdraw USDT/USDC tokens?
-        // @question should we allow to withdraw WOW tokens?
 
         // Interaction: transfer the tokens to the sender
         token.safeTransfer(msg.sender, amount);
@@ -439,9 +472,13 @@ contract Staking is
         onlyRole(DEFAULT_ADMIN_ROLE)
         mTokenExists(token)
         mAmountNotZero(amount)
+        mDistributionNotInProgress
     {
         // Only indication for Gelato backend to calculate the rewards
         // We only need to transfer funds and emit an event here
+
+        // Effects: set distribution in progress
+        s_distributionInProgress = true;
 
         // Interaction: transfer the tokens to the sender
         token.safeTransferFrom(msg.sender, address(this), amount);
@@ -486,6 +523,14 @@ contract Staking is
             );
         }
 
+        // Checks: distribution must be in progress
+        if (!s_distributionInProgress) {
+            revert Errors.Staking__DistributionNotInProgress();
+        }
+
+        // Effects: set distribution not in progress
+        s_distributionInProgress = false;
+
         // Loop through all stakers and distribute rewards
         for (uint256 i; i < stakersLength; i++) {
             // Effects: add rewards to the user
@@ -511,7 +556,12 @@ contract Staking is
         StakingTypes stakingType,
         uint16 bandLevel,
         uint8 month
-    ) external mBandLevelExists(bandLevel) mValidMonth(stakingType, month) {
+    )
+        external
+        mBandLevelExists(bandLevel)
+        mValidMonth(stakingType, month)
+        mDistributionNotInProgress
+    {
         // Effects: Create a new band and add it to the user
         uint256 bandId = _stakeBand(
             msg.sender,
@@ -539,7 +589,8 @@ contract Staking is
     )
         external
         mBandOwner(msg.sender, bandId)
-        mOnlyBandFromVestedTokens(bandId, false)
+        mBandFromVestedTokens(bandId, false)
+        mDistributionNotInProgress
     {
         StakerBand storage band = s_bands[bandId];
 
@@ -580,11 +631,14 @@ contract Staking is
         mAddressNotZero(user)
         mBandLevelExists(bandLevel)
         mValidMonth(stakingType, month)
+        mDistributionNotInProgress
         returns (uint256 bandId)
     {
+        // Checks: only flexi type is allowed for vesting
         if (StakingTypes.FLEXI != stakingType) {
             revert Errors.Staking__OnlyFlexiTypeAllowed();
         }
+
         // Effects: Create a new band and add it to the user
         bandId = _stakeBand(user, stakingType, bandLevel, month, true);
 
@@ -605,7 +659,8 @@ contract Staking is
         external
         onlyRole(VESTING_ROLE)
         mBandOwner(user, bandId)
-        mOnlyBandFromVestedTokens(bandId, true)
+        mBandFromVestedTokens(bandId, true)
+        mDistributionNotInProgress
     {
         StakerBand storage band = s_bands[bandId];
 
@@ -669,7 +724,8 @@ contract Staking is
         mBandOwner(msg.sender, bandId)
         mBandLevelExists(newBandLevel)
         mOnlyFlexiType(bandId)
-        mOnlyBandFromVestedTokens(bandId, false) // @todo decide if this is needed
+        mBandFromVestedTokens(bandId, false)
+        mDistributionNotInProgress
     {
         uint16 oldBandLevel = s_bands[bandId].bandLevel;
 
@@ -689,7 +745,7 @@ contract Staking is
         s_wowToken.safeTransferFrom(msg.sender, address(this), priceDifference);
 
         // Effects: emit event
-        emit BandUpgaded(msg.sender, bandId, oldBandLevel, newBandLevel);
+        emit BandUpgraded(msg.sender, bandId, oldBandLevel, newBandLevel);
     }
 
     /**
@@ -706,7 +762,8 @@ contract Staking is
         mBandOwner(msg.sender, bandId)
         mBandLevelExists(newBandLevel)
         mOnlyFlexiType(bandId)
-        mOnlyBandFromVestedTokens(bandId, false) // @todo decide if this is needed
+        mBandFromVestedTokens(bandId, false)
+        mDistributionNotInProgress
     {
         uint16 oldBandLevel = s_bands[bandId].bandLevel;
 
@@ -734,7 +791,9 @@ contract Staking is
      * @notice  This function can be called by anyone
      * @param   token  USDT/USDC token
      */
-    function claimRewards(IERC20 token) external mTokenExists(token) {
+    function claimRewards(
+        IERC20 token
+    ) external mTokenExists(token) mDistributionNotInProgress {
         _claimRewards(msg.sender, token, true);
     }
 
@@ -767,14 +826,6 @@ contract Staking is
     }
 
     /**
-     * @notice  Returns current upgrades/downgrades trigger status
-     * @return  bool  enabled/disabled trigger
-     */
-    function getUpgradesTrigger() external view returns (bool) {
-        return s_upgradesTrigger;
-    }
-
-    /**
      * @notice Returns the total amount of pools users can stake in
      * @return uint16 Total amount of pools
      */
@@ -803,7 +854,7 @@ contract Staking is
      * @return  uint256[]  Array of all shares appending each month
      */
     function getSharesInMonthArray() external view returns (uint48[] memory) {
-        return sharesInMonth;
+        return s_sharesInMonth;
     }
 
     /**
@@ -814,7 +865,7 @@ contract Staking is
     function getSharesInMonth(
         uint256 index
     ) external view returns (uint48 shares) {
-        shares = sharesInMonth[index];
+        shares = s_sharesInMonth[index];
     }
 
     /**
@@ -920,6 +971,28 @@ contract Staking is
      */
     function getTotalUsers() external view returns (uint256 usersAmount) {
         usersAmount = s_users.length();
+    }
+
+    /**
+     * @notice  Returns status of the upgrades and downgrades
+     * @return  enabled  True if upgrades/downgrades are enabled
+     *                   False if upgrades/downgrades are disabled
+     */
+    function areBandUpgradesEnabled() external view returns (bool enabled) {
+        return s_bandUpgradesEnabled;
+    }
+
+    /**
+     * @notice  Returns the status of the rewards distribution
+     * @return  inProgress  True if distribution is in progress
+     *                      False if distribution not started or completed
+     */
+    function isDistributionInProgress()
+        external
+        view
+        returns (bool inProgress)
+    {
+        inProgress = s_distributionInProgress;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
