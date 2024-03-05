@@ -173,7 +173,11 @@ export function handleStaked(event: StakedEvent): void {
     const nextBandId = stakingContract.nextBandId;
     const band: Band = getOrInitBand(event.params.bandId);
 
+    staker.bands.push(band.id);
+    staker.save();
+
     stakingContract.nextBandId = nextBandId.plus(BIGINT_ONE);
+    if (staker.bands.length == 1) stakingContract.stakers.push(staker.id);
     stakingContract.save();
 
     band.owner = event.params.user;
@@ -181,11 +185,8 @@ export function handleStaked(event: StakedEvent): void {
     band.bandLevel = event.params.bandLevel;
     band.stakingType = event.params.stakingType;
     if (event.params.stakingType == StakingType.FIX) band.fixedMonths = event.params.fixedMonths;
-    if (event.params.areTokensVested) band.areTokensVested = event.params.areTokensVested;
+    band.areTokensVested = event.params.areTokensVested;
     band.save();
-
-    staker.bands.push(event.params.bandId.toString());
-    staker.save();
 }
 
 export function handleUnstaked(event: UnstakedEvent): void {
