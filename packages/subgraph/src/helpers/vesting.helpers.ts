@@ -42,7 +42,7 @@ export function getOrInitVestingPool(poolId: BigInt): VestingPool {
 
         // Set default Vesting pool entity values
         vestingPool.poolId = BIGINT_ZERO;
-        vestingPool.vestingContract = ADDRESS_ZERO.toString();
+        vestingPool.vestingContract = BIGINT_ZERO.toString();
         vestingPool.name = "";
         vestingPool.listingPercentageDividend = BIGINT_ZERO;
         vestingPool.listingPercentageDivisor = BIGINT_ZERO;

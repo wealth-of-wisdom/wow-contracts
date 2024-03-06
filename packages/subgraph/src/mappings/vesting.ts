@@ -62,7 +62,7 @@ export function handleVestingPoolAdded(event: VestingPoolAddedEvent): void {
 
     // Update VestingPool entity properties
     vestingPool.poolId = poolIndex;
-    vestingPool.vestingContract = event.address.toString();
+    vestingPool.vestingContract = event.address.toHex();
     vestingPool.name = poolName;
     vestingPool.unlockType = stringifyUnlockType(getUnlockTypeFromBigInt(BigInt.fromI32(unlockType)));
     // TotalPoolTokens is the total number of tokens that are allocated for each pool

@@ -61,7 +61,9 @@ export function handleBandLevelSet(event: BandLevelSetEvent): void {
     const poolsAmount = event.params.accessiblePools.length;
     for (let i = 0; i < poolsAmount; i++) {
         const pool = getOrInitPool(BigInt.fromI32(event.params.accessiblePools[i]));
-        bandLevel.accessiblePools.push(pool.id);
+        let bandPoolIds = bandLevel.accessiblePools;
+        bandPoolIds.push(pool.id);
+        bandLevel.accessiblePools = bandPoolIds;
     }
 
     bandLevel.price = event.params.price;
@@ -175,7 +177,12 @@ export function handleStaked(event: StakedEvent): void {
     const nextBandId = stakingContract.nextBandId;
 
     stakingContract.nextBandId = nextBandId.plus(BIGINT_ONE);
-    if (BigInt.fromI32(staker.bands.length).equals(BIGINT_ZERO)) stakingContract.stakers.push(staker.id);
+    if (BigInt.fromI32(staker.bands.length).equals(BIGINT_ZERO)) {
+        let stakerIds = stakingContract.stakers;
+        stakerIds.push(staker.id);
+        stakingContract.stakers = stakerIds;
+    }
+    stakingContract.save();
 
     band.owner = staker.id;
     band.stakingStartDate = event.block.timestamp;
@@ -184,10 +191,11 @@ export function handleStaked(event: StakedEvent): void {
     if (event.params.stakingType == StakingType.FIX) band.fixedMonths = event.params.fixedMonths;
     if (event.params.areTokensVested) band.areTokensVested = event.params.areTokensVested;
 
-    staker.bands.push(band.id);
-
     band.save();
-    stakingContract.save();
+
+    let stakerBandIds = staker.bands;
+    stakerBandIds.push(band.id);
+    staker.bands = stakerBandIds;
     staker.save();
 }
 
@@ -204,30 +212,32 @@ export function handleUnstaked(event: UnstakedEvent): void {
     const usdtRewards = getOrInitStakerRewards(stakerAddress, usdtToken);
     const usdcRewards = getOrInitStakerRewards(stakerAddress, usdcToken);
 
-    for (let i = 0; i < staker.bands.length; i++) {
-        if (staker.bands[i] === band.id) {
-            staker.bands[i] = staker.bands[i - 1];
+    const bandAmount = staker.bands.length;
+    for (let i = 0; i < bandAmount; i++) {
+        if (staker.bands[i] == band.id) {
+            staker.bands[i] = staker.bands[staker.bands.length - 1];
             staker.bands.pop();
         }
     }
+    staker.save();
+
     if (BigInt.fromI32(staker.bands.length).equals(BIGINT_ZERO)) {
-        for (let i = 0; i < stakingContract.stakers.length; i++) {
-            if (stakingContract.stakers[i] === staker.id) {
-                stakingContract.stakers[i] = stakingContract.stakers[i - 1];
+        const stakerAmount = stakingContract.stakers.length;
+        for (let i = 0; i < stakerAmount; i++) {
+            if (stakingContract.stakers[i] == staker.id) {
+                stakingContract.stakers[i] = stakingContract.stakers[stakingContract.stakers.length - 1];
                 stakingContract.stakers.pop();
                 store.remove("Staker", staker.id);
+                store.remove("Band", band.id);
                 break;
             }
         }
     }
-    store.remove("Band", band.id);
 
     usdtRewards.claimedAmount = staking.getStakerReward(stakerAddress, usdtToken).getClaimedAmount();
-    usdcRewards.claimedAmount = staking.getStakerReward(stakerAddress, usdcToken).getClaimedAmount();
-
     usdtRewards.save();
+    usdcRewards.claimedAmount = staking.getStakerReward(stakerAddress, usdcToken).getClaimedAmount();
     usdcRewards.save();
-    staker.save();
 }
 
 export function handleVestingUserDeleted(event: VestingUserDeletedEvent): void {
@@ -241,19 +251,20 @@ export function handleVestingUserDeleted(event: VestingUserDeletedEvent): void {
     const usdtRewards = getOrInitStakerRewards(stakerAddress, usdtToken);
     const usdcRewards = getOrInitStakerRewards(stakerAddress, usdcToken);
 
-    const stakerBands = staker.bands;
-
-    for (let i = 0; i < stakingContract.stakers.length; i++) {
-        if (stakingContract.stakers[i] === staker.id) {
-            stakingContract.stakers[i] = stakingContract.stakers[i - 1];
+    const stakerAmount = stakingContract.stakers.length;
+    for (let i = 0; i < stakerAmount; i++) {
+        if (stakingContract.stakers[i] == staker.id) {
+            stakingContract.stakers[i] = stakingContract.stakers[stakingContract.stakers.length - 1];
             stakingContract.stakers.pop();
             break;
         }
     }
 
-    for (let i = 0; i < stakerBands.length; i++) {
-        const band: Band = getOrInitBand(BigInt.fromI32(i));
-        if (band.owner == staker.id) store.remove("Band", band.id);
+    const stakerBands = staker.bands;
+    const bandAmount = stakerBands.length;
+    for (let i = 0; i < bandAmount; i++) {
+        const band: Band = getOrInitBand(BigInt.fromString(staker.bands[i]));
+        store.remove("Band", band.id);
     }
     store.remove("StakerRewards", usdtRewards.id);
     store.remove("StakerRewards", usdcRewards.id);
