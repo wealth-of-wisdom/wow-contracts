@@ -1,5 +1,5 @@
 import { Address, BigInt, log, Bytes } from "@graphprotocol/graph-ts";
-import { BIGINT_ZERO, UnlockType } from "../utils/constants";
+import { BIGINT_ZERO, ADDRESS_ZERO, UnlockType } from "../utils/constants";
 import { VestingContract, VestingPool, Beneficiary } from "../../generated/schema";
 import { stringifyUnlockType } from "../utils/utils";
 
@@ -33,7 +33,7 @@ export function getOrInitVestingContract(vestingContractAddress: Address): Vesti
  * @param poolId - The pool ID.
  * @returns The VestingPool entity.
  */
-export function getOrInitVestingPool(vestingContractAddress: Address, poolId: BigInt): VestingPool {
+export function getOrInitVestingPool(poolId: BigInt): VestingPool {
     let vestingPoolId = poolId.toString();
     let vestingPool = VestingPool.load(vestingPoolId);
 
@@ -42,7 +42,7 @@ export function getOrInitVestingPool(vestingContractAddress: Address, poolId: Bi
 
         // Set default Vesting pool entity values
         vestingPool.poolId = BIGINT_ZERO;
-        vestingPool.vestingContract = getOrInitVestingContract(vestingContractAddress).id;
+        vestingPool.vestingContract = ADDRESS_ZERO.toString();
         vestingPool.name = "";
         vestingPool.listingPercentageDividend = BIGINT_ZERO;
         vestingPool.listingPercentageDivisor = BIGINT_ZERO;
@@ -69,11 +69,7 @@ export function getOrInitVestingPool(vestingContractAddress: Address, poolId: Bi
  * @param poolId - The pool ID.
  * @returns The Beneficiary entity.
  */
-export function getOrInitBeneficiaries(
-    vestingContractAddress: Address,
-    beneficiaryAddress: Address,
-    poolId: BigInt,
-): Beneficiary {
+export function getOrInitBeneficiary(beneficiaryAddress: Address, poolId: BigInt): Beneficiary {
     let beneficiaryId = beneficiaryAddress.toHex() + "-" + poolId.toHex();
 
     let beneficiary = Beneficiary.load(beneficiaryId);
@@ -83,7 +79,7 @@ export function getOrInitBeneficiaries(
 
         // Set default Vesting pool entity values
         beneficiary.address = beneficiaryAddress;
-        beneficiary.vestingPool = getOrInitVestingPool(vestingContractAddress, poolId).id;
+        beneficiary.vestingPool = getOrInitVestingPool(poolId).id;
         beneficiary.totalTokens = BIGINT_ZERO;
         beneficiary.cliffTokens = BIGINT_ZERO;
         beneficiary.listingTokens = BIGINT_ZERO;

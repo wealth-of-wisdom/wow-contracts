@@ -268,8 +268,7 @@ type StakingContract @entity {
     totalBandLevels: Int!
     areUpgradesEnabled: Boolean!
 
-    stakerAmount: BigInt!
-    stakers: [Staker!]! @derivedFrom(field: "stakingContract")
+    stakers: [Staker!]!
 }
 
 type Pool @entity {
@@ -289,10 +288,8 @@ type Staker @entity {
     """
     id: ID!
 
-    bands: [Band!]! @derivedFrom(field: "owner")
+    bands: [Band!]!
     rewards: [StakerRewards!]! @derivedFrom(field: "staker")
-    stakingContract: StakingContract!
-    bandAmount: BigInt!
 }
 
 type StakerRewards @entity {

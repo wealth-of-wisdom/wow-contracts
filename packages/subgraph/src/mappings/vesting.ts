@@ -12,7 +12,7 @@ import {
     VestingPoolAdded as VestingPoolAddedEvent,
 } from "../../generated/Vesting/Vesting";
 import { VestingContract, Beneficiary, VestingPool } from "../../generated/schema";
-import { getOrInitBeneficiaries, getOrInitVestingContract, getOrInitVestingPool } from "../helpers/vesting.helpers";
+import { getOrInitBeneficiary, getOrInitVestingContract, getOrInitVestingPool } from "../helpers/vesting.helpers";
 import { getUnlockTypeFromBigInt, stringifyUnlockType } from "../utils/utils";
 import { BigInt, store } from "@graphprotocol/graph-ts";
 
@@ -34,7 +34,7 @@ export function handleVestingPoolAdded(event: VestingPoolAddedEvent): void {
     const vestingContract: Vesting = Vesting.bind(event.address);
     const poolIndex: BigInt = BigInt.fromI32(event.params.poolIndex);
 
-    const vestingPool: VestingPool = getOrInitVestingPool(event.address, poolIndex);
+    const vestingPool: VestingPool = getOrInitVestingPool(poolIndex);
 
     // Fetch data from Vesting contract
     const generalData = vestingContract.getGeneralPoolData(event.params.poolIndex);
@@ -62,6 +62,7 @@ export function handleVestingPoolAdded(event: VestingPoolAddedEvent): void {
 
     // Update VestingPool entity properties
     vestingPool.poolId = poolIndex;
+    vestingPool.vestingContract = event.address.toString();
     vestingPool.name = poolName;
     vestingPool.unlockType = stringifyUnlockType(getUnlockTypeFromBigInt(BigInt.fromI32(unlockType)));
     // TotalPoolTokens is the total number of tokens that are allocated for each pool
@@ -84,8 +85,7 @@ export function handleVestingPoolAdded(event: VestingPoolAddedEvent): void {
  * @param event - The BeneficiaryAddedEvent containing beneficiary, pool, and token amount details.
  */
 export function handleBeneficiaryAdded(event: BeneficiaryAddedEvent): void {
-    const beneficiary: Beneficiary = getOrInitBeneficiaries(
-        event.address,
+    const beneficiary: Beneficiary = getOrInitBeneficiary(
         event.params.beneficiary,
         BigInt.fromI32(event.params.poolIndex),
     );
@@ -113,8 +113,7 @@ export function handleBeneficiaryAdded(event: BeneficiaryAddedEvent): void {
  * @param event - The BeneficiaryRemovedEvent containing beneficiary and pool details.
  */
 export function handleBeneficiaryRemoved(event: BeneficiaryRemovedEvent): void {
-    const beneficiary: Beneficiary = getOrInitBeneficiaries(
-        event.address,
+    const beneficiary: Beneficiary = getOrInitBeneficiary(
         event.params.beneficiary,
         BigInt.fromI32(event.params.poolIndex),
     );
@@ -164,11 +163,7 @@ export function handleStakingContractSet(event: StakingContractSetEvent): void {
  */
 export function handleTokensClaimed(event: TokensClaimedEvent): void {
     const vestingContract: Vesting = Vesting.bind(event.address);
-    const beneficiary: Beneficiary = getOrInitBeneficiaries(
-        event.address,
-        event.params.user,
-        BigInt.fromI32(event.params.poolIndex),
-    );
+    const beneficiary: Beneficiary = getOrInitBeneficiary(event.params.user, BigInt.fromI32(event.params.poolIndex));
 
     // sum claimed amount
     beneficiary.claimedTokens = beneficiary.claimedTokens.plus(event.params.tokenAmount);
@@ -184,8 +179,7 @@ export function handleTokensClaimed(event: TokensClaimedEvent): void {
  * @param event - The VestedTokensStakedEvent containing poolIndex, beneficiary and amount details.
  */
 export function handleVestedTokensStaked(event: VestedTokensStakedEvent): void {
-    const beneficiary: Beneficiary = getOrInitBeneficiaries(
-        event.address,
+    const beneficiary: Beneficiary = getOrInitBeneficiary(
         event.params.beneficiary,
         BigInt.fromI32(event.params.poolIndex),
     );
@@ -199,8 +193,7 @@ export function handleVestedTokensStaked(event: VestedTokensStakedEvent): void {
  * @param event - The VestedTokensUnstakedEvent containing poolIndex, beneficiary and amount details.
  */
 export function handleVestedTokensUnstaked(event: VestedTokensUnstakedEvent): void {
-    const beneficiary: Beneficiary = getOrInitBeneficiaries(
-        event.address,
+    const beneficiary: Beneficiary = getOrInitBeneficiary(
         event.params.beneficiary,
         BigInt.fromI32(event.params.poolIndex),
     );

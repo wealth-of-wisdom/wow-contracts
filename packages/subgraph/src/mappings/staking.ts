@@ -9,7 +9,7 @@ import {
     WowTokenSet as WowTokenSetEvent,
     TotalBandLevelsAmountSet as TotalBandLevelsAmountSetEvent,
     TotalPoolAmountSet as TotalPoolAmountSetEvent,
-    // UpgradesTriggerSet as UpgradesTriggerSetEvent,
+    BandUpgradeStatusSet as BandUpgradeStatusSetEvent,
     TokensWithdrawn as TokensWithdrawnEvent,
     DistributionCreated as DistributionCreatedEvent,
     RewardsDistributed as RewardsDistributedEvent,
@@ -110,12 +110,12 @@ export function handleTotalPoolAmountSet(event: TotalPoolAmountSetEvent): void {
     stakingContract.save();
 }
 
-// export function handleUpgradesTriggerSet(event: UpgradesTriggerSetEvent): void {
-//     const stakingContract = getOrInitStakingContract();
+export function handleBandUpgradeStatusSet(event: BandUpgradeStatusSetEvent): void {
+    const stakingContract = getOrInitStakingContract();
 
-//     stakingContract.areUpgradesEnabled = event.params.triggerStatus;
-//     stakingContract.save();
-// }
+    stakingContract.areUpgradesEnabled = event.params.enabled;
+    stakingContract.save();
+}
 
 export function handleTokensWithdrawn(event: TokensWithdrawnEvent): void {
     // No state is changed in contracts
@@ -147,24 +147,24 @@ export function handleRewardsDistributed(event: RewardsDistributedEvent): void {
     distribution.distributedAt = event.block.timestamp;
     distribution.save();
 
-    // const stakers = stakingContract.stakers;
-    // const stakersAmount =  staking stakers.length;
-    // const usdtToken = Address.fromBytes(stakingContract.usdtToken);
-    // const usdcToken = Address.fromBytes(stakingContract.usdcToken);
+    const stakers = stakingContract.stakers;
+    const stakersAmount = stakers.length;
+    const usdtToken = Address.fromBytes(stakingContract.usdtToken);
+    const usdcToken = Address.fromBytes(stakingContract.usdcToken);
 
-    // // Loop through each staker and update their rewards for USDT/USDC tokens
-    // for (let i = 0; i < stakersAmount; i++) {
-    //     const staker = getOrInitStaker(Address.fromString(stakers[i]));
-    //     const stakerAddress = Address.fromString(staker.id);
-    //     const usdtRewards = getOrInitStakerRewards(stakerAddress, usdtToken);
-    //     const usdcRewards = getOrInitStakerRewards(stakerAddress, usdcToken);
+    // Loop through each staker and update their rewards for USDT/USDC tokens
+    for (let i = 0; i < stakersAmount; i++) {
+        const staker = getOrInitStaker(Address.fromString(stakers[i]));
+        const stakerAddress = Address.fromString(staker.id);
+        const usdtRewards = getOrInitStakerRewards(stakerAddress, usdtToken);
+        const usdcRewards = getOrInitStakerRewards(stakerAddress, usdcToken);
 
-    //     usdtRewards.unclaimedAmount = staking.getStakerReward(stakerAddress, usdtToken).getUnclaimedAmount();
-    //     usdtRewards.save();
+        usdtRewards.unclaimedAmount = staking.getStakerReward(stakerAddress, usdtToken).getUnclaimedAmount();
+        usdtRewards.save();
 
-    //     usdcRewards.unclaimedAmount = staking.getStakerReward(stakerAddress, usdcToken).getUnclaimedAmount();
-    //     usdcRewards.save();
-    // }
+        usdcRewards.unclaimedAmount = staking.getStakerReward(stakerAddress, usdcToken).getUnclaimedAmount();
+        usdcRewards.save();
+    }
 }
 
 export function handleStaked(event: StakedEvent): void {
@@ -173,23 +173,22 @@ export function handleStaked(event: StakedEvent): void {
     const band: Band = getOrInitBand(event.params.bandId);
 
     const nextBandId = stakingContract.nextBandId;
-    const currentStakerAmount = stakingContract.stakerAmount;
-    const currentBandAmount = staker.bandAmount;
-
-    staker.bandAmount = currentBandAmount.plus(BIGINT_ONE);
-    staker.save();
 
     stakingContract.nextBandId = nextBandId.plus(BIGINT_ONE);
-    if (staker.bandAmount == BigInt.fromI32(0)) stakingContract.stakerAmount = currentStakerAmount.plus(BIGINT_ONE);
-    staker.stakingContract = stakingContract.id.toString();
-    stakingContract.save();
+    if (BigInt.fromI32(staker.bands.length).equals(BIGINT_ZERO)) stakingContract.stakers.push(staker.id);
 
+    band.owner = staker.id;
     band.stakingStartDate = event.block.timestamp;
     band.bandLevel = event.params.bandLevel;
-    band.stakingType = event.params.stakingType.toString();
+    band.stakingType = stringifyStakingType(event.params.stakingType);
     if (event.params.stakingType == StakingType.FIX) band.fixedMonths = event.params.fixedMonths;
-    band.areTokensVested = event.params.areTokensVested;
+    if (event.params.areTokensVested) band.areTokensVested = event.params.areTokensVested;
+
+    staker.bands.push(band.id);
+
     band.save();
+    stakingContract.save();
+    staker.save();
 }
 
 export function handleUnstaked(event: UnstakedEvent): void {
@@ -205,22 +204,30 @@ export function handleUnstaked(event: UnstakedEvent): void {
     const usdtRewards = getOrInitStakerRewards(stakerAddress, usdtToken);
     const usdcRewards = getOrInitStakerRewards(stakerAddress, usdcToken);
 
-    const currentBandAmount = staker.bandAmount;
-    const currentStakerAmount = stakingContract.stakerAmount;
-
-    staker.bandAmount = currentBandAmount.minus(BIGINT_ONE);
-    staker.save();
-    if (staker.bandAmount == BigInt.fromI32(0)) {
-        store.remove("Staker", staker.id);
-        stakingContract.stakerAmount = currentStakerAmount.minus(BIGINT_ONE);
+    for (let i = 0; i < staker.bands.length; i++) {
+        if (staker.bands[i] === band.id) {
+            staker.bands[i] = staker.bands[i - 1];
+            staker.bands.pop();
+        }
+    }
+    if (BigInt.fromI32(staker.bands.length).equals(BIGINT_ZERO)) {
+        for (let i = 0; i < stakingContract.stakers.length; i++) {
+            if (stakingContract.stakers[i] === staker.id) {
+                stakingContract.stakers[i] = stakingContract.stakers[i - 1];
+                stakingContract.stakers.pop();
+                store.remove("Staker", staker.id);
+                break;
+            }
+        }
     }
     store.remove("Band", band.id);
 
     usdtRewards.claimedAmount = staking.getStakerReward(stakerAddress, usdtToken).getClaimedAmount();
-    usdtRewards.save();
-
     usdcRewards.claimedAmount = staking.getStakerReward(stakerAddress, usdcToken).getClaimedAmount();
+
+    usdtRewards.save();
     usdcRewards.save();
+    staker.save();
 }
 
 export function handleVestingUserDeleted(event: VestingUserDeletedEvent): void {
@@ -234,10 +241,20 @@ export function handleVestingUserDeleted(event: VestingUserDeletedEvent): void {
     const usdtRewards = getOrInitStakerRewards(stakerAddress, usdtToken);
     const usdcRewards = getOrInitStakerRewards(stakerAddress, usdcToken);
 
-    const currentStakerAmount = stakingContract.stakerAmount;
+    const stakerBands = staker.bands;
 
-    stakingContract.stakerAmount = currentStakerAmount.minus(BIGINT_ONE);
+    for (let i = 0; i < stakingContract.stakers.length; i++) {
+        if (stakingContract.stakers[i] === staker.id) {
+            stakingContract.stakers[i] = stakingContract.stakers[i - 1];
+            stakingContract.stakers.pop();
+            break;
+        }
+    }
 
+    for (let i = 0; i < stakerBands.length; i++) {
+        const band: Band = getOrInitBand(BigInt.fromI32(i));
+        if (band.owner == staker.id) store.remove("Band", band.id);
+    }
     store.remove("StakerRewards", usdtRewards.id);
     store.remove("StakerRewards", usdcRewards.id);
     store.remove("Staker", staker.id);
@@ -267,7 +284,7 @@ export function handleRewardsClaimed(event: RewardsClaimedEvent): void {
     const stakerAddress = Address.fromString(staker.id);
     const tokenRewards = getOrInitStakerRewards(stakerAddress, rewardToken);
 
-    tokenRewards.claimedAmount = staking.getStakerReward(stakerAddress, rewardToken).getClaimedAmount();
+    tokenRewards.claimedAmount = event.params.totalRewards;
     tokenRewards.save();
 }
 

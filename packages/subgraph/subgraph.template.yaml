@@ -112,8 +112,8 @@ dataSources:
               handler: handleTotalBandLevelsAmountSet
             - event: TotalPoolAmountSet(uint16)
               handler: handleTotalPoolAmountSet
-            # - event: UpgradesTriggerSet(bool)
-            #   handler: handleUpgradesTriggerSet
+            # - event: BandUpgradeStatusSet(bool)
+            #   handler: handleBandUpgradeStatusSet
             - event: TokensWithdrawn(address,address,uint256)
               handler: handleTokensWithdrawn
             - event: DistributionCreated(address,uint256,uint16,uint16,uint256,uint256)
