@@ -93,6 +93,19 @@ contract Staking_Initialize_Unit_Test is Unit_Test {
         );
     }
 
+    function test_initialize_RevertIf_GelatoIsZeroAddress() external {
+        vm.expectRevert(Errors.Staking__ZeroAddress.selector);
+        staking.initialize(
+            usdtToken,
+            usdcToken,
+            wowToken,
+            address(vesting),
+            ZERO_ADDRESS,
+            TOTAL_POOLS,
+            TOTAL_BAND_LEVELS
+        );
+    }
+
     function test_initialize_RevertIf_TotalPoolsIsZero() external {
         vm.expectRevert(Errors.Staking__ZeroAmount.selector);
         staking.initialize(
@@ -135,7 +148,37 @@ contract Staking_Initialize_Unit_Test is Unit_Test {
     {
         assertTrue(
             staking.hasRole(UPGRADER_ROLE, admin),
-            "Admin should have default admin role"
+            "Admin should have upgrader role"
+        );
+    }
+
+    function test_initialize_GrantsGelatoExecutorRoleToDeployer()
+        external
+        initializeStaking
+    {
+        assertTrue(
+            staking.hasRole(GELATO_EXECUTOR_ROLE, admin),
+            "Admin should have gelato executor role"
+        );
+    }
+
+    function test_initialize_GrantsVestingRoleToVestingContract()
+        external
+        initializeStaking
+    {
+        assertTrue(
+            staking.hasRole(VESTING_ROLE, address(vesting)),
+            "Vesting contract should have vesting role"
+        );
+    }
+
+    function test_initialize_GrantsGelatoExecutorRoleToGelato()
+        external
+        initializeStaking
+    {
+        assertTrue(
+            staking.hasRole(GELATO_EXECUTOR_ROLE, GELATO_EXECUTOR_ADDRESS),
+            "Gelato should have gelato executor role"
         );
     }
 
@@ -147,6 +190,17 @@ contract Staking_Initialize_Unit_Test is Unit_Test {
             address(staking.getTokenUSDT()),
             address(usdtToken),
             "USDT token should be set correctly"
+        );
+    }
+
+    function test_initialize_SetsUSDCTokenCorrectly()
+        external
+        initializeStaking
+    {
+        assertEq(
+            address(staking.getTokenUSDC()),
+            address(usdcToken),
+            "USDC token should be set correctly"
         );
     }
 

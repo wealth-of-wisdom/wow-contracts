@@ -18,19 +18,19 @@ interface IStakingEvents {
 
     event SharesInMonthSet(uint48[] totalSharesInMonth);
 
-    event UpgradesTriggerSet(bool triggerStatus);
-
     event UsdtTokenSet(IERC20 token);
 
     event UsdcTokenSet(IERC20 token);
 
     event WowTokenSet(IERC20 token);
 
-    event RewardsCollectorSet(address collector);
-
     event TotalBandLevelsAmountSet(uint16 newTotalBandsAmount);
 
     event TotalPoolAmountSet(uint16 newTotalPoolAmount);
+
+    event BandUpgradeStatusSet(bool enabled);
+
+    event DistributionStatusSet(bool inProgress);
 
     event TokensWithdrawn(IERC20 token, address receiver, uint256 amount);
 
@@ -57,7 +57,7 @@ interface IStakingEvents {
 
     event VestingUserDeleted(address user);
 
-    event BandUpgaded(
+    event BandUpgraded(
         address user,
         uint256 bandId,
         uint16 oldBandLevel,
@@ -141,11 +141,15 @@ interface IStaking is IStakingEvents {
 
     function setWowToken(IERC20 token) external;
 
-    function setUpgradesTrigger(bool triggerStatus) external;
-
     function setTotalBandLevelsAmount(uint16 newTotalBandsAmount) external;
 
     function setTotalPoolAmount(uint16 newTotalPoolAmount) external;
+
+    function setBandUpgradesEnabled(bool enabled) external;
+
+    function setDistributionInProgress(
+        bool inProgress
+    ) external;
 
     function withdrawTokens(IERC20 token, uint256 amount) external;
 
@@ -187,8 +191,6 @@ interface IStaking is IStakingEvents {
     function getTokenUSDC() external view returns (IERC20);
 
     function getTokenWOW() external view returns (IERC20);
-
-    function getUpgradesTrigger() external view returns (bool);
 
     function getTotalPools() external view returns (uint16);
 
@@ -236,4 +238,8 @@ interface IStaking is IStakingEvents {
     function getUser(uint256 index) external view returns (address user);
 
     function getTotalUsers() external view returns (uint256 usersAmount);
+
+    function areBandUpgradesEnabled() external view returns (bool enabled);
+
+    function isDistributionInProgress() external view returns (bool inProgress);
 }

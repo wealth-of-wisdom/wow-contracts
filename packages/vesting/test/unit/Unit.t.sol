@@ -5,16 +5,8 @@ import {IVestingEvents} from "../../contracts/interfaces/IVesting.sol";
 import {VestingMock} from "../mocks/VestingMock.sol";
 import {Base_Test} from "../Base.t.sol";
 
-contract Vesting_Unit_Test is Base_Test, IVestingEvents {
-    constructor() Base_Test() {}
-
+contract Unit_Test is Base_Test {
     function setUp() public virtual override {
         Base_Test.setUp();
-
-        vm.startPrank(admin);
-        vesting = new VestingMock();
-        vesting.initialize(wowToken, staking, LISTING_DATE);
-        staking.grantRole(VESTING_ROLE, address(vesting));
-        vm.stopPrank();
     }
 }
