@@ -212,23 +212,28 @@ export function handleUnstaked(event: UnstakedEvent): void {
     const usdtRewards = getOrInitStakerRewards(stakerAddress, usdtToken);
     const usdcRewards = getOrInitStakerRewards(stakerAddress, usdcToken);
 
-    const bandAmount = staker.bands.length;
-    for (let i = 0; i < bandAmount; i++) {
+    const bandsAmount = staker.bands.length;
+    for (let i = 0; i < bandsAmount; i++) {
         if (staker.bands[i] == band.id) {
-            staker.bands[i] = staker.bands[staker.bands.length - 1];
-            staker.bands.pop();
+            let stakerBandIds = staker.bands;
+            stakerBandIds[i] = stakerBandIds[stakerBandIds.length - 1];
+            stakerBandIds.pop();
+            staker.bands = stakerBandIds;
+            staker.save();
+            store.remove("Band", band.id);
         }
     }
-    staker.save();
 
     if (BigInt.fromI32(staker.bands.length).equals(BIGINT_ZERO)) {
-        const stakerAmount = stakingContract.stakers.length;
-        for (let i = 0; i < stakerAmount; i++) {
+        const stakersAmount = stakingContract.stakers.length;
+        for (let i = 0; i < stakersAmount; i++) {
             if (stakingContract.stakers[i] == staker.id) {
-                stakingContract.stakers[i] = stakingContract.stakers[stakingContract.stakers.length - 1];
-                stakingContract.stakers.pop();
+                let stakersIds = stakingContract.stakers;
+                stakersIds[i] = stakersIds[stakersIds.length - 1];
+                stakersIds.pop();
+                stakingContract.stakers = stakersIds;
+                stakingContract.save();
                 store.remove("Staker", staker.id);
-                store.remove("Band", band.id);
                 break;
             }
         }
@@ -251,18 +256,21 @@ export function handleVestingUserDeleted(event: VestingUserDeletedEvent): void {
     const usdtRewards = getOrInitStakerRewards(stakerAddress, usdtToken);
     const usdcRewards = getOrInitStakerRewards(stakerAddress, usdcToken);
 
-    const stakerAmount = stakingContract.stakers.length;
-    for (let i = 0; i < stakerAmount; i++) {
+    const stakersAmount = stakingContract.stakers.length;
+    for (let i = 0; i < stakersAmount; i++) {
         if (stakingContract.stakers[i] == staker.id) {
-            stakingContract.stakers[i] = stakingContract.stakers[stakingContract.stakers.length - 1];
-            stakingContract.stakers.pop();
+            let stakersIds = stakingContract.stakers;
+            stakersIds[i] = stakersIds[stakersIds.length - 1];
+            stakersIds.pop();
+            stakingContract.stakers = stakersIds;
+            stakingContract.save();
             break;
         }
     }
 
     const stakerBands = staker.bands;
-    const bandAmount = stakerBands.length;
-    for (let i = 0; i < bandAmount; i++) {
+    const bandsAmount = stakerBands.length;
+    for (let i = 0; i < bandsAmount; i++) {
         const band: Band = getOrInitBand(BigInt.fromString(staker.bands[i]));
         store.remove("Band", band.id);
     }
