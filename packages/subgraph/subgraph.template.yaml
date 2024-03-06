@@ -32,12 +32,14 @@ dataSources:
               handler: handleBeneficiaryAdded
             - event: BeneficiaryRemoved(indexed uint16,indexed address,uint256)
               handler: handleBeneficiaryRemoved
+            - event: VestedTokensStaked(indexed uint16,indexed address,uint256)
+              handler: handleVestedTokensStaked
+            - event: VestedTokensUnstaked(indexed uint16,indexed address,uint256)
+              handler: handleVestedTokensUnstaked
             - event: ContractTokensWithdrawn(indexed address,indexed address,uint256)
               handler: handleContractTokensWithdrawn
             - event: ListingDateChanged(uint32,uint32)
               handler: handleListingDateChanged
-            - event: StakedTokensUpdated(indexed uint16,indexed address,uint256,bool)
-              handler: handleStakedTokensUpdated
             - event: StakingContractSet(indexed address)
               handler: handleStakingContractSet
             - event: TokensClaimed(indexed uint16,indexed address,uint256)

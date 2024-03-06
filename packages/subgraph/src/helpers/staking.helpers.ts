@@ -88,7 +88,6 @@ export function getOrInitStaker(stakerAddress: Address): Staker {
 
     if (!staker) {
         staker = new Staker(id);
-        staker.bands = [];
 
         staker.save();
     }
@@ -130,7 +129,6 @@ export function getOrInitBand(bandId: BigInt): Band {
 
     if (!band) {
         band = new Band(id);
-        band.owner = ADDRESS_ZERO;
         band.stakingStartDate = BIGINT_ZERO;
         band.bandLevel = 0;
         band.fixedMonths = 0;

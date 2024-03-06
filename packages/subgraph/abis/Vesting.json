@@ -155,11 +155,6 @@
     },
     {
         "inputs": [],
-        "name": "Vesting__UnstakingTooManyTokens",
-        "type": "error"
-    },
-    {
-        "inputs": [],
         "name": "Vesting__VestingDurationZero",
         "type": "error"
     },
@@ -374,31 +369,6 @@
         "inputs": [
             {
                 "indexed": true,
-                "internalType": "uint16",
-                "name": "poolIndex",
-                "type": "uint16"
-            },
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "beneficiary",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "amount",
-                "type": "uint256"
-            }
-        ],
-        "name": "StakedTokensUpdated",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
                 "internalType": "contract IStaking",
                 "name": "newContract",
                 "type": "address"
@@ -430,6 +400,56 @@
             }
         ],
         "name": "TokensClaimed",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint16",
+                "name": "poolIndex",
+                "type": "uint16"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "beneficiary",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "VestedTokensStaked",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint16",
+                "name": "poolIndex",
+                "type": "uint16"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "beneficiary",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "VestedTokensUnstaked",
         "type": "event"
     },
     {
@@ -1084,11 +1104,6 @@
                 "internalType": "uint16",
                 "name": "pid",
                 "type": "uint16"
-            },
-            {
-                "internalType": "uint256",
-                "name": "tokenAmount",
-                "type": "uint256"
             }
         ],
         "name": "stakeVestedTokens",
@@ -1118,23 +1133,8 @@
     {
         "inputs": [
             {
-                "internalType": "uint16",
-                "name": "bandId",
-                "type": "uint16"
-            },
-            {
-                "internalType": "uint16",
-                "name": "pid",
-                "type": "uint16"
-            },
-            {
-                "internalType": "address",
-                "name": "beneficiary",
-                "type": "address"
-            },
-            {
                 "internalType": "uint256",
-                "name": "tokenAmount",
+                "name": "bandId",
                 "type": "uint256"
             }
         ],
