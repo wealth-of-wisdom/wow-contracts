@@ -78,7 +78,6 @@ export function getOrInitBeneficiary(beneficiaryAddress: Address, poolId: BigInt
         beneficiary = new Beneficiary(beneficiaryId);
 
         // Set default Vesting pool entity values
-        beneficiary.address = beneficiaryAddress;
         beneficiary.vestingPool = getOrInitVestingPool(poolId).id;
         beneficiary.totalTokens = BIGINT_ZERO;
         beneficiary.cliffTokens = BIGINT_ZERO;

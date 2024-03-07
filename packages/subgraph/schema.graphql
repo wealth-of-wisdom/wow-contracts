@@ -38,11 +38,25 @@ type VestingContract @entity {
     stakingContractAddress: Bytes!
 
     """
+    Hexadecimal address of the token used for vesting contract.
+    Type: Bytes
+    Example: "0xghi789"
+    """
+    tokenContractAddress: Bytes!
+
+    """
     Date when the vesting contract was listed.
     Type: BigInt
     Example: 1642402345000
     """
     listingDate: BigInt!
+
+    """
+    Total added pool amount
+    Type: Int
+    Example: 1642402345000
+    """
+    poolAmount: Int!
 }
 
 # Entity representing Vesting Pool
@@ -153,24 +167,17 @@ type VestingPool @entity {
     """
     List of beneficiaries associated with the pool.
     """
-    beneficiaries: [Beneficiary!] @derivedFrom(field: "vestingPool")
+    beneficiaries: [Beneficiary!]!
 }
 
 # Entity representing Beneficiary
 type Beneficiary @entity {
     """
-    Unique identifier for the beneficiary.
-    Type: ID
-    Example: "789"
-    """
-    id: ID!
-
-    """
     Hexadecimal address of the beneficiary.
     Type: Bytes
-    Example: "0x123abc"
+        Example: "0x123abc"
     """
-    address: Bytes!
+    id: ID!
 
     """
     Associated Vesting Pool for the beneficiary.
