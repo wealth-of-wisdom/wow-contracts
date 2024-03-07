@@ -4,7 +4,7 @@
     "stakingAddress": "0x0000000000000000000000000000000000000001",
     "nftAddress": "0x1e0eE02eb4ce98327db0B9467FA148F6add5eDba",
     "startBlock": 19077589,
-    "includeVesting": false,
+    "includeVesting": true,
     "includeStaking": true,
     "includeNft": true
 }

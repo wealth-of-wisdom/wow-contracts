@@ -22,9 +22,7 @@ contract Staking_UpgradeBand_Unit_Test is Unit_Test {
                                         TESTS
     //////////////////////////////////////////////////////////////////////////*/
 
-    function test_upgradeBand_RevertIf_BandUpgradesDisabled()
-        external
-    {
+    function test_upgradeBand_RevertIf_BandUpgradesDisabled() external {
         vm.prank(admin);
         staking.setBandUpgradesEnabled(false);
 
@@ -222,7 +220,7 @@ contract Staking_UpgradeBand_Unit_Test is Unit_Test {
         );
     }
 
-    function test_upgradeBand_EmitsBandUpgadedEvent()
+    function test_upgradeBand_EmitsBandUpgradedEvent()
         external
         setBandLevelData
         stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)

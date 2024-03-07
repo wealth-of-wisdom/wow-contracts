@@ -196,7 +196,7 @@ export const stakingABI = [
                 type: "uint16",
             },
         ],
-        name: "BandUpgaded",
+        name: "BandUpgraded",
         type: "event",
     },
     {

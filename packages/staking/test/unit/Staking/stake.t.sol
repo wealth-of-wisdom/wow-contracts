@@ -339,7 +339,14 @@ contract Staking_Stake_Unit_Test is Unit_Test {
         wowToken.approve(address(staking), BAND_2_PRICE);
 
         vm.expectEmit(address(staking));
-        emit Staked(alice, BAND_LEVEL_2, BAND_ID_0, STAKING_TYPE_FLEXI, false);
+        emit Staked(
+            alice,
+            BAND_LEVEL_2,
+            BAND_ID_0,
+            MONTH_0,
+            STAKING_TYPE_FLEXI,
+            false
+        );
 
         staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_2, MONTH_0);
         vm.stopPrank();
@@ -605,7 +612,14 @@ contract Staking_Stake_Unit_Test is Unit_Test {
         wowToken.approve(address(staking), BAND_2_PRICE);
 
         vm.expectEmit(address(staking));
-        emit Staked(alice, BAND_LEVEL_2, BAND_ID_0, STAKING_TYPE_FIX, false);
+        emit Staked(
+            alice,
+            BAND_LEVEL_2,
+            BAND_ID_0,
+            MONTH_0,
+            STAKING_TYPE_FIX,
+            false
+        );
 
         staking.stake(STAKING_TYPE_FIX, BAND_LEVEL_2, MONTH_12);
         vm.stopPrank();

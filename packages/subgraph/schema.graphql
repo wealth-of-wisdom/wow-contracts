@@ -268,7 +268,7 @@ type StakingContract @entity {
     totalBandLevels: Int!
     areUpgradesEnabled: Boolean!
 
-    stakers: [Staker!]! # Don't use derivedfrom, as we will need all stakers in mapping
+    stakers: [Staker!]!
 }
 
 type Pool @entity {
@@ -288,7 +288,7 @@ type Staker @entity {
     """
     id: ID!
 
-    bands: [Band!]! # Don't use derivedfrom, as we will need all band ids in mapping
+    bands: [Band!]!
     rewards: [StakerRewards!]! @derivedFrom(field: "staker")
 }
 
@@ -307,7 +307,7 @@ type StakerRewards @entity {
 type Band @entity {
     id: ID!
 
-    owner: Bytes!
+    owner: Staker!
     stakingStartDate: BigInt!
     bandLevel: Int!
     fixedMonths: Int!
