@@ -14,7 +14,6 @@ import {
 import { getOrInitBand } from "../helpers/staking.helpers";
 import { VestingContract, Beneficiary, Band, VestingPool } from "../../generated/schema";
 import { getOrInitBeneficiary, getOrInitVestingContract, getOrInitVestingPool } from "../helpers/vesting.helpers";
-import { INT_ONE } from "../utils/constants";
 import { getUnlockTypeFromBigInt, stringifyUnlockType } from "../utils/utils";
 import { BigInt, store } from "@graphprotocol/graph-ts";
 
@@ -88,7 +87,7 @@ export function handleVestingPoolAdded(event: VestingPoolAddedEvent): void {
     vestingPool.save();
 
     // Update total pool amount in Vesting
-    vestingContract.totalAmountOfPools = totalPoolAmount + INT_ONE;
+    vestingContract.totalAmountOfPools = totalPoolAmount + 1;
     vestingContract.save();
 }
 
