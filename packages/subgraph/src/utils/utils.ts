@@ -1,5 +1,5 @@
 import { BigInt } from "@graphprotocol/graph-ts";
-import { BIGINT_ONE, BIGINT_ZERO, UnlockType } from "./constants";
+import { BIGINT_ONE, BIGINT_ZERO, UnlockType, StakingType } from "./constants";
 
 
 
@@ -33,5 +33,23 @@ import { BIGINT_ONE, BIGINT_ZERO, UnlockType } from "./constants";
         return "MONTHLY";
       default:
         throw new Error("Invalid unlock type");
+    }
+  };
+
+
+   /**
+   * Converts an StakingType enum value to its string representation.
+   * @param type - StakingType enum value.
+   * @returns String representation of the stake type.
+   * @throws Error if the input is not a valid stake type.
+   */
+   export const stringifyStakingType = (type: StakingType): string => {
+    switch (type) {
+      case StakingType.FIX:
+        return "FIX";
+      case StakingType.FLEXI:
+        return "FLEXI";
+      default:
+        throw new Error("Invalid staking type");
     }
   };

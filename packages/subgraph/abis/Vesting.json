@@ -115,11 +115,6 @@
     },
     {
         "inputs": [],
-        "name": "Vesting__NotEnoughStakedTokens",
-        "type": "error"
-    },
-    {
-        "inputs": [],
         "name": "Vesting__NotEnoughTokens",
         "type": "error"
     },
@@ -167,6 +162,25 @@
         "inputs": [],
         "name": "Vesting__ZeroAddress",
         "type": "error"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "tokenAmount",
+                "type": "uint256"
+            }
+        ],
+        "name": "AllTokensClaimed",
+        "type": "event"
     },
     {
         "anonymous": false,
@@ -355,37 +369,6 @@
         "inputs": [
             {
                 "indexed": true,
-                "internalType": "uint16",
-                "name": "poolIndex",
-                "type": "uint16"
-            },
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "beneficiary",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "amount",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "bool",
-                "name": "stake",
-                "type": "bool"
-            }
-        ],
-        "name": "StakedTokensUpdated",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
                 "internalType": "contract IStaking",
                 "name": "newContract",
                 "type": "address"
@@ -417,6 +400,56 @@
             }
         ],
         "name": "TokensClaimed",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint16",
+                "name": "poolIndex",
+                "type": "uint16"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "beneficiary",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "VestedTokensStaked",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint16",
+                "name": "poolIndex",
+                "type": "uint16"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "beneficiary",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "VestedTokensUnstaked",
         "type": "event"
     },
     {
@@ -485,19 +518,6 @@
                 "internalType": "uint32",
                 "name": "",
                 "type": "uint32"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "STAKING_ROLE",
-        "outputs": [
-            {
-                "internalType": "bytes32",
-                "name": "",
-                "type": "bytes32"
             }
         ],
         "stateMutability": "view",
@@ -611,6 +631,13 @@
             }
         ],
         "name": "changeListingDate",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "claimAllTokens",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -1059,6 +1086,34 @@
     {
         "inputs": [
             {
+                "internalType": "enum IStaking.StakingTypes",
+                "name": "stakingType",
+                "type": "uint8"
+            },
+            {
+                "internalType": "uint16",
+                "name": "bandLevel",
+                "type": "uint16"
+            },
+            {
+                "internalType": "uint8",
+                "name": "month",
+                "type": "uint8"
+            },
+            {
+                "internalType": "uint16",
+                "name": "pid",
+                "type": "uint16"
+            }
+        ],
+        "name": "stakeVestedTokens",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "bytes4",
                 "name": "interfaceId",
                 "type": "bytes4"
@@ -1078,27 +1133,12 @@
     {
         "inputs": [
             {
-                "internalType": "uint16",
-                "name": "pid",
-                "type": "uint16"
-            },
-            {
-                "internalType": "address",
-                "name": "beneficiary",
-                "type": "address"
-            },
-            {
                 "internalType": "uint256",
-                "name": "tokenAmount",
+                "name": "bandId",
                 "type": "uint256"
-            },
-            {
-                "internalType": "bool",
-                "name": "startStaking",
-                "type": "bool"
             }
         ],
-        "name": "updateVestedStakedTokens",
+        "name": "unstakeVestedTokens",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

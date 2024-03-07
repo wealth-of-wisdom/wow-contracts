@@ -49,6 +49,7 @@ interface IStakingEvents {
         address user,
         uint16 bandLevel,
         uint256 bandId,
+        uint8 fixedMonths,
         IStaking.StakingTypes stakingType,
         bool areTokensVested
     );
@@ -83,6 +84,7 @@ interface IStaking is IStakingEvents {
         FIX,
         FLEXI
     }
+
     /*//////////////////////////////////////////////////////////////////////////
                                        STRUCTS
     //////////////////////////////////////////////////////////////////////////*/
@@ -146,9 +148,7 @@ interface IStaking is IStakingEvents {
 
     function setBandUpgradesEnabled(bool enabled) external;
 
-    function setDistributionInProgress(
-        bool inProgress
-    ) external;
+    function setDistributionInProgress(bool inProgress) external;
 
     function withdrawTokens(IERC20 token, uint256 amount) external;
 

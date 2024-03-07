@@ -32,17 +32,20 @@ dataSources:
               handler: handleBeneficiaryAdded
             - event: BeneficiaryRemoved(indexed uint16,indexed address,uint256)
               handler: handleBeneficiaryRemoved
+            - event: VestedTokensStaked(indexed uint16,indexed address,uint256)
+              handler: handleVestedTokensStaked
+            - event: VestedTokensUnstaked(indexed uint16,indexed address,uint256)
+              handler: handleVestedTokensUnstaked
             - event: ContractTokensWithdrawn(indexed address,indexed address,uint256)
               handler: handleContractTokensWithdrawn
             - event: ListingDateChanged(uint32,uint32)
               handler: handleListingDateChanged
-            - event: StakedTokensUpdated(indexed uint16,indexed address,uint256,bool)
-              handler: handleStakedTokensUpdated
             - event: StakingContractSet(indexed address)
               handler: handleStakingContractSet
             - event: TokensClaimed(indexed uint16,indexed address,uint256)
               handler: handleTokensClaimed
 {{/includeVesting}}
+{{#includeNft}}
     - kind: ethereum/contract
       name: Nft
       network: {{network}}
@@ -69,3 +72,64 @@ dataSources:
           handler: handleNftMinted
         - event: NftDataActivated(indexed address,indexed uint256,uint16,bool,uint256,uint256)
           handler: handleNftActivation
+{{/includeNft}}
+{{#includeStaking}}
+    - kind: ethereum/contract      
+      name: Staking
+      network: {{network}}
+      source:
+          address: "{{stakingAddress}}"
+          abi: Staking
+          startBlock: {{startBlock}}
+      mapping:
+          kind: ethereum/events
+          apiVersion: 0.0.7
+          language: wasm/assemblyscript
+          file: ./src/mappings/staking.ts
+          entities:
+              - Pool
+              - Band
+              - FundDistribution
+          abis:
+            - name: Staking
+              file: ./abis/Staking.json
+          eventHandlers:
+            - event: Initialized(uint64)
+              handler: handleInitialized
+            - event: PoolSet(indexed uint16,uint48)
+              handler: handlePoolSet
+            - event: BandLevelSet(indexed uint16,uint256,uint16[])
+              handler: handleBandLevelSet
+            - event: SharesInMonthSet(uint48[])
+              handler: handleSharesInMonthSet
+            - event: UsdtTokenSet(address)
+              handler: handleUsdtTokenSet
+            - event: UsdcTokenSet(address)
+              handler: handleUsdcTokenSet
+            - event: WowTokenSet(address)
+              handler: handleWowTokenSet
+            - event: TotalBandLevelsAmountSet(uint16)
+              handler: handleTotalBandLevelsAmountSet
+            - event: TotalPoolAmountSet(uint16)
+              handler: handleTotalPoolAmountSet
+            - event: BandUpgradeStatusSet(bool)
+              handler: handleBandUpgradeStatusSet
+            - event: TokensWithdrawn(address,address,uint256)
+              handler: handleTokensWithdrawn
+            - event: DistributionCreated(address,uint256,uint16,uint16,uint256,uint256)
+              handler: handleDistributionCreated
+            - event: RewardsDistributed(address)
+              handler: handleRewardsDistributed
+            - event: Staked(address,uint16,uint256,uint8,uint8,bool)
+              handler: handleStaked
+            - event: Unstaked(address,uint256,bool)
+              handler: handleUnstaked
+            - event: VestingUserDeleted(address)
+              handler: handleVestingUserDeleted
+            - event: BandUpgraded(address,uint256,uint16,uint16)
+              handler: handleBandUpgraded
+            - event: BandDowngraded(address,uint256,uint16,uint16)
+              handler: handleBandDowngraded
+            - event: RewardsClaimed(address,address,uint256)
+              handler: handleRewardsClaimed
+{{/includeStaking}}

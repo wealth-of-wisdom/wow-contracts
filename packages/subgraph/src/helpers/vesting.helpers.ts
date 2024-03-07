@@ -1,12 +1,7 @@
 import { Address, BigInt, log, Bytes } from "@graphprotocol/graph-ts";
-import { BIGINT_ZERO, UnlockType } from "../utils/constants";
-import {
-    VestingContract,
-    VestingPool,
-    Beneficiary,
-} from "../../generated/schema"
+import { BIGINT_ZERO, ADDRESS_ZERO, UnlockType } from "../utils/constants";
+import { VestingContract, VestingPool, Beneficiary } from "../../generated/schema";
 import { stringifyUnlockType } from "../utils/utils";
-
 
 /**
  * Retrieves or initializes a VestingContract entity.
@@ -14,13 +9,11 @@ import { stringifyUnlockType } from "../utils/utils";
  * @returns The VestingContract entity.
  */
 export function getOrInitVestingContract(vestingContractAddress: Address): VestingContract {
-
     //  @note: redundant ID and vesting contract address.
     let vestingContractId = BIGINT_ZERO.toString();
     let vestingContract = VestingContract.load(vestingContractId);
 
     if (!vestingContract) {
-
         vestingContract = new VestingContract(vestingContractId);
 
         // set default Vesting contract entity values
@@ -40,8 +33,7 @@ export function getOrInitVestingContract(vestingContractAddress: Address): Vesti
  * @param poolId - The pool ID.
  * @returns The VestingPool entity.
  */
-export function getOrInitVestingPool(vestingContractAddress: Address, poolId: BigInt): VestingPool {
-
+export function getOrInitVestingPool(poolId: BigInt): VestingPool {
     let vestingPoolId = poolId.toString();
     let vestingPool = VestingPool.load(vestingPoolId);
 
@@ -50,7 +42,7 @@ export function getOrInitVestingPool(vestingContractAddress: Address, poolId: Bi
 
         // Set default Vesting pool entity values
         vestingPool.poolId = BIGINT_ZERO;
-        vestingPool.vestingContract = getOrInitVestingContract(vestingContractAddress).id;
+        vestingPool.vestingContract = BIGINT_ZERO.toString();
         vestingPool.name = "";
         vestingPool.listingPercentageDividend = BIGINT_ZERO;
         vestingPool.listingPercentageDivisor = BIGINT_ZERO;
@@ -61,9 +53,8 @@ export function getOrInitVestingPool(vestingContractAddress: Address, poolId: Bi
         vestingPool.vestingDuration = BIGINT_ZERO;
         vestingPool.vestingEndDate = BIGINT_ZERO;
         vestingPool.unlockType = stringifyUnlockType(UnlockType.DAILY);
-        vestingPool.dedicatedPoolTokens = BIGINT_ZERO
+        vestingPool.dedicatedPoolTokens = BIGINT_ZERO;
         vestingPool.totalPoolTokenAmount = BIGINT_ZERO;
-
 
         vestingPool.save();
     }
@@ -78,19 +69,17 @@ export function getOrInitVestingPool(vestingContractAddress: Address, poolId: Bi
  * @param poolId - The pool ID.
  * @returns The Beneficiary entity.
  */
-export function getOrInitBeneficiaries(vestingContractAddress: Address, beneficiaryAddress: Address, poolId: BigInt): Beneficiary {
-
+export function getOrInitBeneficiary(beneficiaryAddress: Address, poolId: BigInt): Beneficiary {
     let beneficiaryId = beneficiaryAddress.toHex() + "-" + poolId.toHex();
-    
+
     let beneficiary = Beneficiary.load(beneficiaryId);
 
     if (!beneficiary) {
-
         beneficiary = new Beneficiary(beneficiaryId);
 
         // Set default Vesting pool entity values
         beneficiary.address = beneficiaryAddress;
-        beneficiary.vestingPool = getOrInitVestingPool(vestingContractAddress, poolId).id;
+        beneficiary.vestingPool = getOrInitVestingPool(poolId).id;
         beneficiary.totalTokens = BIGINT_ZERO;
         beneficiary.cliffTokens = BIGINT_ZERO;
         beneficiary.listingTokens = BIGINT_ZERO;
@@ -98,12 +87,8 @@ export function getOrInitBeneficiaries(vestingContractAddress: Address, benefici
         beneficiary.stakedTokens = BIGINT_ZERO;
         beneficiary.claimedTokens = BIGINT_ZERO;
 
-
         beneficiary.save();
     }
 
     return beneficiary;
-
 }
-
-
