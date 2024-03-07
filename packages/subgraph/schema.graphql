@@ -56,7 +56,7 @@ type VestingContract @entity {
     Type: Int
     Example: 1642402345000
     """
-    poolAmount: Int!
+    totalAmountOfPools: Int!
 }
 
 # Entity representing Vesting Pool
@@ -167,12 +167,12 @@ type VestingPool @entity {
     """
     List of beneficiaries associated with the pool.
     """
-    beneficiaries: [Beneficiary!]!
+    beneficiaries: [Beneficiary!] @derivedFrom(field: "vestingPool")
 
     """
     List of band Ids staked from associated pool.
     """
-    bands: [ID!]!
+    bands: [Band!]! @derivedFrom(field: "vestingPool")
 }
 
 # Entity representing Beneficiary
@@ -325,6 +325,7 @@ type Band @entity {
     fixedMonths: Int!
     stakingType: StakingType!
     areTokensVested: Boolean!
+    vestingPool: VestingPool
 }
 
 type FundsDistribution @entity {

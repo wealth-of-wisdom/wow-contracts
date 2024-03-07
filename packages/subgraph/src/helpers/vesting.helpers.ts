@@ -55,8 +55,6 @@ export function getOrInitVestingPool(poolId: BigInt): VestingPool {
         vestingPool.unlockType = stringifyUnlockType(UnlockType.DAILY);
         vestingPool.dedicatedPoolTokens = BIGINT_ZERO;
         vestingPool.totalPoolTokenAmount = BIGINT_ZERO;
-        vestingPool.beneficiaries = [];
-        vestingPool.bands = [];
 
         vestingPool.save();
     }

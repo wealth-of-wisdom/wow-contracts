@@ -11,7 +11,8 @@ import {
     Vesting,
     VestingPoolAdded as VestingPoolAddedEvent,
 } from "../../generated/Vesting/Vesting";
-import { VestingContract, Beneficiary, VestingPool } from "../../generated/schema";
+import { getOrInitBand } from "../helpers/staking.helpers";
+import { VestingContract, Beneficiary, Band, VestingPool } from "../../generated/schema";
 import { getOrInitBeneficiary, getOrInitVestingContract, getOrInitVestingPool } from "../helpers/vesting.helpers";
 import { INT_ONE } from "../utils/constants";
 import { getUnlockTypeFromBigInt, stringifyUnlockType } from "../utils/utils";
@@ -66,7 +67,7 @@ export function handleVestingPoolAdded(event: VestingPoolAddedEvent): void {
     const cliffPercentageDivisor = BigInt.fromI32(cliffData.value3);
 
     const vestingContract: VestingContract = getOrInitVestingContract(event.address);
-    const totalPoolAmount = vestingContract.poolAmount;
+    const totalPoolAmount = vestingContract.totalAmountOfPools;
 
     // Update VestingPool entity properties
     vestingPool.poolId = poolIndex;
@@ -87,7 +88,7 @@ export function handleVestingPoolAdded(event: VestingPoolAddedEvent): void {
     vestingPool.save();
 
     // Update total pool amount in Vesting
-    vestingContract.poolAmount = totalPoolAmount + INT_ONE;
+    vestingContract.totalAmountOfPools = totalPoolAmount + INT_ONE;
     vestingContract.save();
 }
 
@@ -119,12 +120,7 @@ export function handleBeneficiaryAdded(event: BeneficiaryAddedEvent): void {
     beneficiary.claimedTokens = beneficiaryData.claimedTokenAmount;
     beneficiary.save();
 
-    let beneficiaries = vestingPool.beneficiaries;
-    beneficiaries.push(beneficiary.id.toString());
-    vestingPool.beneficiaries = beneficiaries;
-
     vestingPool.dedicatedPoolTokens = dedicatedPoolTokenAmount.plus(event.params.addedTokenAmount);
-    vestingPool;
     vestingPool.save();
 }
 
@@ -140,18 +136,7 @@ export function handleBeneficiaryRemoved(event: BeneficiaryRemovedEvent): void {
     const vestingPool: VestingPool = getOrInitVestingPool(BigInt.fromI32(event.params.poolIndex));
     const dedicatedPoolTokenAmount = vestingPool.dedicatedPoolTokens;
 
-    const beneficiariesAmount = vestingPool.beneficiaries.length;
-    for (let i = 0; i < beneficiariesAmount; i++) {
-        if (vestingPool.beneficiaries[i] == beneficiary.id.toString()) {
-            let beneficiaryIds = vestingPool.beneficiaries;
-            beneficiaryIds[i] = beneficiaryIds[beneficiariesAmount - 1];
-            beneficiaryIds.pop();
-            vestingPool.beneficiaries = beneficiaryIds;
-            vestingPool.save();
-            store.remove("Beneficiary", beneficiary.id);
-            break;
-        }
-    }
+    store.remove("Beneficiary", beneficiary.id);
 
     vestingPool.dedicatedPoolTokens = dedicatedPoolTokenAmount.minus(event.params.availableAmount);
     vestingPool.save();
@@ -176,7 +161,7 @@ export function handleListingDateChanged(event: ListingDateChangedEvent): void {
     vestingContract.listingDate = event.params.newDate;
     vestingContract.save();
 
-    const totalPoolAmount = vestingContract.poolAmount;
+    const totalPoolAmount = vestingContract.totalAmountOfPools;
     for (let i = 0; i < totalPoolAmount; i++) {
         const vestingPool: VestingPool = getOrInitVestingPool(BigInt.fromI32(i));
         const newListingDate = event.params.newDate;
@@ -218,7 +203,7 @@ export function handleTokensClaimed(event: TokensClaimedEvent): void {
  * @param event - The VestedTokensStakedEvent containing poolIndex, beneficiary and amount details.
  */
 export function handleVestedTokensStaked(event: VestedTokensStakedEvent): void {
-    const vestingPool: VestingPool = getOrInitVestingPool(BigInt.fromI32(event.params.poolIndex));
+    const band: Band = getOrInitBand(event.params.bandId);
     const beneficiary: Beneficiary = getOrInitBeneficiary(
         event.params.beneficiary,
         BigInt.fromI32(event.params.poolIndex),
@@ -226,10 +211,8 @@ export function handleVestedTokensStaked(event: VestedTokensStakedEvent): void {
     beneficiary.stakedTokens = beneficiary.stakedTokens.plus(event.params.amount);
     beneficiary.save();
 
-    let stakingBandIds = vestingPool.bands;
-    stakingBandIds.push(event.params.bandId.toString());
-    vestingPool.bands = stakingBandIds;
-    vestingPool.save();
+    band.vestingPool = event.params.poolIndex.toString();
+    band.save();
 }
 
 /**
@@ -237,7 +220,7 @@ export function handleVestedTokensStaked(event: VestedTokensStakedEvent): void {
  * @param event - The VestedTokensUnstakedEvent containing poolIndex, beneficiary and amount details.
  */
 export function handleVestedTokensUnstaked(event: VestedTokensUnstakedEvent): void {
-    const vestingPool: VestingPool = getOrInitVestingPool(BigInt.fromI32(event.params.poolIndex));
+    const band: Band = getOrInitBand(event.params.bandId);
     const beneficiary: Beneficiary = getOrInitBeneficiary(
         event.params.beneficiary,
         BigInt.fromI32(event.params.poolIndex),
@@ -245,15 +228,5 @@ export function handleVestedTokensUnstaked(event: VestedTokensUnstakedEvent): vo
     beneficiary.stakedTokens = beneficiary.stakedTokens.minus(event.params.amount);
     beneficiary.save();
 
-    const bandsAmount = vestingPool.bands.length;
-    for (let i = 0; i < bandsAmount; i++) {
-        if (vestingPool.bands[i] == event.params.bandId.toString()) {
-            let stakerBandIds = vestingPool.bands;
-            stakerBandIds[i] = stakerBandIds[bandsAmount - 1];
-            stakerBandIds.pop();
-            vestingPool.bands = stakerBandIds;
-            vestingPool.save();
-            break;
-        }
-    }
+    store.remove("Band", band.id);
 }
