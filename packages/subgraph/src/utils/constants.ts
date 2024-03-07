@@ -3,6 +3,7 @@ import { Address, BigDecimal, BigInt, Bytes } from "@graphprotocol/graph-ts";
 export const BIGINT_ZERO: BigInt = BigInt.zero();
 export const BIGINT_ONE: BigInt = BigInt.fromI32(1);
 export const BIGINT_1e12: BigInt = BigInt.fromString("1000000000000"); // 1e12
+export const INT_ONE = 1;
 
 export const BIGDEC_ZERO: BigDecimal = BigDecimal.zero();
 

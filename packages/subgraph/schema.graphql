@@ -168,6 +168,11 @@ type VestingPool @entity {
     List of beneficiaries associated with the pool.
     """
     beneficiaries: [Beneficiary!]!
+
+    """
+    List of band Ids staked from associated pool.
+    """
+    bands: [ID!]!
 }
 
 # Entity representing Beneficiary

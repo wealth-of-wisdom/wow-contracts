@@ -48,13 +48,15 @@ interface IVestingEvents {
     event VestedTokensStaked(
         uint16 indexed poolIndex,
         address indexed beneficiary,
-        uint256 amount
+        uint256 amount,
+        uint256 bandId
     );
 
     event VestedTokensUnstaked(
         uint16 indexed poolIndex,
         address indexed beneficiary,
-        uint256 amount
+        uint256 amount,
+        uint256 bandId
     );
 }
 
