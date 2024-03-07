@@ -555,7 +555,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         s_stakedPools[bandId] = pid;
 
         // Effects: Emit event
-        emit VestedTokensStaked(pid, msg.sender, bandPrice);
+        emit VestedTokensStaked(pid, msg.sender, bandPrice, bandId);
     }
 
     /**
@@ -579,11 +579,14 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         // Effects: Unstake tokens
         user.stakedTokenAmount -= bandPrice;
 
+        // Effects: Delete staked info
+        delete s_stakedPools[bandId];
+
         // Interactions: Unstake tokens in staking contract
         staking.unstakeVested(msg.sender, bandId);
 
         // Effects: Emit event
-        emit VestedTokensUnstaked(pid, msg.sender, bandPrice);
+        emit VestedTokensUnstaked(pid, msg.sender, bandPrice, bandId);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
