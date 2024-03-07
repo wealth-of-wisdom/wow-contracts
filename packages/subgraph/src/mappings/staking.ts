@@ -221,6 +221,7 @@ export function handleUnstaked(event: UnstakedEvent): void {
             staker.bands = stakerBandIds;
             staker.save();
             store.remove("Band", band.id);
+            break;
         }
     }
 
