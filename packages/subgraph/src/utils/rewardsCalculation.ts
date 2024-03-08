@@ -1,4 +1,4 @@
-import { Address, BigInt, dataSource } from "@graphprotocol/graph-ts";
+import { Address, BigInt, log } from "@graphprotocol/graph-ts";
 import { StakingContract, Band, BandLevel, Pool, Staker } from "../../generated/schema";
 import { getOrInitPool, getOrInitBandLevel, getOrInitStaker, getOrInitBand } from "../helpers/staking.helpers";
 import { stringifyStakingType } from "../utils/utils";
@@ -9,16 +9,10 @@ import { BIGINT_ONE, BIGINT_ZERO, StakingType } from "../utils/constants";
 //////////////////////////////////////////////////////////////////////////*/
 
 export class StakersAndRewards {
-    // stakers: string[];
-    // rewards: BigInt[];
-
     constructor(
         public stakers: string[],
         public rewards: BigInt[],
-    ) {
-        // this.stakers = stakersInput;
-        // this.rewards = rewardsInput;
-    }
+    ) {}
 }
 
 export class StakerAndPoolShares {
@@ -47,7 +41,7 @@ export function calculateRewards(
     const poolAllocations: BigInt[] = calculateAllPoolAllocations(staking, totalPools.toI32(), amount);
 
     // Loop through all band levels once to store all accessible pools
-    const bandLevelPoolIds: number[][] = getBandLevelPoolIds(staking.totalBandLevels);
+    const bandLevelPoolIds: BigInt[][] = getBandLevelPoolIds(staking.totalBandLevels);
 
     // Get all stakers to loop through them
     // Leave as string because it is going to be used for calling function by gelato function
@@ -110,7 +104,7 @@ function addPoolsAndStakersShares(
     stakers: string[],
     totalPools: BigInt,
     distributionDate: BigInt,
-    bandLevelPoolIds: number[][],
+    bandLevelPoolIds: BigInt[][],
     sharesInMonth: BigInt[],
 ): StakerAndPoolShares {
     // Initialize array with 0 shares for each pool
@@ -157,7 +151,7 @@ function addMultipleBandSharesToPools(
     staker: Staker,
     totalPools: BigInt,
     distributionDate: BigInt,
-    bandLevelPoolIds: number[][],
+    bandLevelPoolIds: BigInt[][],
     sharesInMonth: BigInt[],
 ): BigInt[] {
     const bandIds: string[] = staker.bands;
@@ -170,19 +164,18 @@ function addMultipleBandSharesToPools(
     for (let i = 0; i < bandsAmount; i++) {
         const bandId: BigInt = BigInt.fromString(bandIds[i]);
         const band: Band = getOrInitBand(bandId);
-
         const bandShares: BigInt = calculateBandShares(band, distributionDate, sharesInMonth);
 
         // No need to add shares if there is nothing to add
         if (bandShares.gt(BIGINT_ZERO)) {
             const bandLevel: BigInt = BigInt.fromString(band.bandLevel);
-            const poolIds: number[] = bandLevelPoolIds[bandLevel.minus(BIGINT_ONE).toI32()];
+            const poolIds: BigInt[] = bandLevelPoolIds[bandLevel.minus(BIGINT_ONE).toI32()];
             const poolsAmount: number = poolIds.length;
 
             // Loop through all pools and set the amount of shares
             for (let j = 0; j < poolsAmount; j++) {
                 // Typecast to BigInt because it's a number (f64) and we need number (i32)
-                const poolIndex: BigInt = BigInt.fromString(poolIds[j].toString()).minus(BIGINT_ONE);
+                const poolIndex: BigInt = poolIds[j].minus(BIGINT_ONE);
 
                 // Add shares to the staker in the pool
                 stakerSharesPerPool[poolIndex.toI32()] = stakerSharesPerPool[poolIndex.toI32()].plus(bandShares);
@@ -193,18 +186,18 @@ function addMultipleBandSharesToPools(
     return stakerSharesPerPool;
 }
 
-function getBandLevelPoolIds(totalBandLevels: number): number[][] {
-    const allPoolIds: number[][] = [];
+function getBandLevelPoolIds(totalBandLevels: number): BigInt[][] {
+    const allPoolIds: BigInt[][] = [];
 
     // Loop through all band levels and store all accessible pools
     for (let bandLevel = 1; bandLevel <= totalBandLevels; bandLevel++) {
         const bandLevelData: BandLevel = getOrInitBandLevel(BigInt.fromI32(bandLevel));
         const poolsCount: number = bandLevelData.accessiblePools.length;
-        const poolIds: number[] = [];
+        const poolIds: BigInt[] = [];
 
         // Loop through all pools and store the pool id as number
         for (let poolId = 0; poolId < poolsCount; poolId++) {
-            const poolIdNum = parseInt(bandLevelData.accessiblePools[poolId]);
+            const poolIdNum: BigInt = BigInt.fromString(bandLevelData.accessiblePools[poolId]);
             poolIds.push(poolIdNum);
         }
 

@@ -27,10 +27,12 @@ export function getOrInitStakingContract(): StakingContract {
         stakingContract.wowToken = ADDRESS_ZERO;
         stakingContract.sharesInMonths = [];
         stakingContract.nextBandId = BIGINT_ZERO;
+        stakingContract.nextDistributionId = BIGINT_ZERO;
         stakingContract.percentagePrecision = 0;
         stakingContract.totalPools = 0;
         stakingContract.totalBandLevels = 0;
         stakingContract.areUpgradesEnabled = true;
+        stakingContract.stakers = [];
 
         stakingContract.save();
     }
@@ -88,6 +90,7 @@ export function getOrInitStaker(stakerAddress: Address): Staker {
 
     if (!staker) {
         staker = new Staker(id);
+        staker.bands = [];
 
         staker.save();
     }
@@ -157,6 +160,8 @@ export function getOrInitFundsDistribution(distributionId: BigInt): FundsDistrib
         fundsDistribution.amount = BIGINT_ZERO;
         fundsDistribution.createdAt = BIGINT_ZERO;
         fundsDistribution.distributedAt = BIGINT_ZERO;
+        fundsDistribution.stakers = [];
+        fundsDistribution.rewards = [];
 
         fundsDistribution.save();
     }
