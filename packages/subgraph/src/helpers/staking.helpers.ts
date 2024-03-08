@@ -131,7 +131,7 @@ export function getOrInitBand(bandId: BigInt): Band {
         band = new Band(id);
         band.owner = ADDRESS_ZERO.toHex();
         band.stakingStartDate = BIGINT_ZERO;
-        band.bandLevel = 0;
+        band.bandLevel = "0";
         band.fixedMonths = 0;
         band.stakingType = stringifyStakingType(StakingType.FIX);
         band.areTokensVested = false;
