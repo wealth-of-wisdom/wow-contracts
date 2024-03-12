@@ -4,13 +4,23 @@ import {
     Web3Function,
     Web3FunctionEventContext,
 } from "@gelatonetwork/web3-functions-sdk"
-import { main } from "./main"
+import { ApolloClient, InMemoryCache, gql } from "@apollo/client"
 import { stakingABI } from "./stakingABI"
 
 Web3Function.onRun(async (context: Web3FunctionEventContext) => {
-    const { userArgs, multiChainProvider, log } = context
-    const provider = multiChainProvider.default()
+    const { userArgs, log } = context
     const stakingInterface = new Interface(stakingABI)
+    const tokensQuery = `
+        query {
+            fundsDistribution(id: "0") {
+                token
+                rewards
+                stakers {
+                id
+                }
+            }
+        }
+    `
 
     try {
         // Parse the event from the log using the provided event ABI
@@ -20,29 +30,18 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
         // Handle event data
         console.log(`Event detected: ${event.eventFragment.name}`)
 
-        const [
-            token,
-            amount,
-            totalPools,
-            totalBandLevels,
-            totalStakers,
-            distributionTimestamp,
-        ] = event.args
+        const client = new ApolloClient({
+            uri: process.env.SUBGRAPH_API_URL,
+            cache: new InMemoryCache(),
+        })
+        const clientData = await client.query({
+            query: gql(tokensQuery),
+        })
 
         const stakingAddress = userArgs.staking as string
-
-        const userRewards: Map<string, BigNumber> = await main(
-            amount,
-            totalPools,
-            totalBandLevels,
-            totalStakers,
-            distributionTimestamp,
-            stakingAddress,
-            provider,
-        )
-
-        const usersArray: string[] = Array.from(userRewards.keys())
-        const rewardsArray: BigNumber[] = Array.from(userRewards.values())
+        const usersArray: string[] = clientData.data.stakers.id
+        const rewardsArray: BigNumber[] = clientData.data.rewards
+        const token = clientData.data.token
 
         console.log("Rewards calculated successfully")
 
