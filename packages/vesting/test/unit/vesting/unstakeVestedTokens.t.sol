@@ -53,11 +53,7 @@ contract Vesting_UnstakeVestedTokens_Unit_Test is Unit_Test {
     {
         vm.startPrank(alice);
         vm.expectEmit(address(vesting));
-        emit VestedTokensUnstaked(
-            PRIMARY_POOL,
-            alice,
-            BENEFICIARY_TOKEN_AMOUNT
-        );
+        emit VestedTokensUnstaked(PRIMARY_POOL, alice, BAND_1_PRICE, BAND_ID_0);
         vesting.unstakeVestedTokens(BAND_ID_0);
         vm.stopPrank();
     }
