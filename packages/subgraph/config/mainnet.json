@@ -1,7 +1,7 @@
 {
     "network": "mainnet",
     "vestingAddress": "0x0000000000000000000000000000000000000000",
-    "stakingAddress": "0x0000000000000000000000000000000000000001",
+    "stakingAddress": "0x0000000000000000000000000000000000000000",
     "nftAddress": "0x1e0eE02eb4ce98327db0B9467FA148F6add5eDba",
     "startBlock": 19077589,
     "includeVesting": true,

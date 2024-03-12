@@ -321,7 +321,7 @@ type Band @entity {
 
     owner: Staker!
     stakingStartDate: BigInt!
-    bandLevel: Int!
+    bandLevel: BandLevel!
     fixedMonths: Int!
     stakingType: StakingType!
     areTokensVested: Boolean!

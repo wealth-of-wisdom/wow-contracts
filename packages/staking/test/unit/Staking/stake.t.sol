@@ -616,7 +616,7 @@ contract Staking_Stake_Unit_Test is Unit_Test {
             alice,
             BAND_LEVEL_2,
             BAND_ID_0,
-            MONTH_0,
+            MONTH_12,
             STAKING_TYPE_FIX,
             false
         );
