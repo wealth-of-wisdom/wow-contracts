@@ -4,19 +4,12 @@ import {
     Web3Function,
     Web3FunctionEventContext,
 } from "@gelatonetwork/web3-functions-sdk"
-import { ApolloClient, InMemoryCache, gql } from "@apollo/client"
+import { createClient } from "urql"
 import { stakingABI } from "./stakingABI"
 
-var s_nextDistributionId = 0
-
 Web3Function.onRun(async (context: Web3FunctionEventContext) => {
-    const { userArgs, log } = context
+    const { userArgs, storage, log } = context
     const stakingInterface = new Interface(stakingABI)
-
-    const client = new ApolloClient({
-        uri: process.env.SUBGRAPH_API_URL,
-        cache: new InMemoryCache(),
-    })
     const stakingContractsQuery = `
         query {
             stakingContracts {
@@ -33,16 +26,23 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
         // Handle event data
         console.log(`Event detected: ${event.eventFragment.name}`)
 
-        const stakingContractsData = await client.query({
-            query: gql(stakingContractsQuery),
+        const client = createClient({
+            url: userArgs.subgraph.toString(),
+            exchanges: [],
         })
-        const nextDistributionId = stakingContractsData.data.nextDistributionId
-        if (nextDistributionId > s_nextDistributionId) {
-            s_nextDistributionId = nextDistributionId
+        const stakingQueryResult = await client
+            .query(stakingContractsQuery, {})
+            .toPromise()
+
+        const distributionId = await storage.get("nextDistributionId")
+        const nextDistributionId = stakingQueryResult.data.nextDistributionId
+
+        if (nextDistributionId > distributionId) {
+            await storage.set("nextDistributionId", nextDistributionId)
 
             const fundsDistributionQuery = `
                 query {
-                    fundsDistribution(id: $s_nextDistributionId) {
+                    fundsDistribution(id: $distributionId) {
                         token
                         rewards
                         stakers {
@@ -52,14 +52,16 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
                 }
             `
 
-            const fundsDistributionData = await client.query({
-                query: gql(fundsDistributionQuery),
-            })
+            const fundsDistributionQueryResult = await client
+                .query(fundsDistributionQuery, {})
+                .toPromise()
 
             const stakingAddress = userArgs.staking as string
-            const usersArray: string[] = fundsDistributionData.data.stakers.id
-            const rewardsArray: BigNumber[] = fundsDistributionData.data.rewards
-            const token = fundsDistributionData.data.token
+            const usersArray: string[] =
+                fundsDistributionQueryResult.data.stakers.id
+            const rewardsArray: BigNumber[] =
+                fundsDistributionQueryResult.data.rewards
+            const token = fundsDistributionQueryResult.data.token
 
             console.log("Rewards calculated successfully")
 
