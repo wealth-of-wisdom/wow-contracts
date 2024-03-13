@@ -7,17 +7,20 @@ import {
 import { ApolloClient, InMemoryCache, gql } from "@apollo/client"
 import { stakingABI } from "./stakingABI"
 
+var s_nextDistributionId = 0
+
 Web3Function.onRun(async (context: Web3FunctionEventContext) => {
     const { userArgs, log } = context
     const stakingInterface = new Interface(stakingABI)
-    const tokensQuery = `
+
+    const client = new ApolloClient({
+        uri: process.env.SUBGRAPH_API_URL,
+        cache: new InMemoryCache(),
+    })
+    const stakingContractsQuery = `
         query {
-            fundsDistribution(id: "0") {
-                token
-                rewards
-                stakers {
-                id
-                }
+            stakingContracts {
+                nextDistributionId
             }
         }
     `
@@ -30,32 +33,52 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
         // Handle event data
         console.log(`Event detected: ${event.eventFragment.name}`)
 
-        const client = new ApolloClient({
-            uri: process.env.SUBGRAPH_API_URL,
-            cache: new InMemoryCache(),
+        const stakingContractsData = await client.query({
+            query: gql(stakingContractsQuery),
         })
-        const clientData = await client.query({
-            query: gql(tokensQuery),
-        })
+        const nextDistributionId = stakingContractsData.data.nextDistributionId
+        if (nextDistributionId > s_nextDistributionId) {
+            s_nextDistributionId = nextDistributionId
 
-        const stakingAddress = userArgs.staking as string
-        const usersArray: string[] = clientData.data.stakers.id
-        const rewardsArray: BigNumber[] = clientData.data.rewards
-        const token = clientData.data.token
+            const fundsDistributionQuery = `
+                query {
+                    fundsDistribution(id: $s_nextDistributionId) {
+                        token
+                        rewards
+                        stakers {
+                        id
+                        }
+                    }
+                }
+            `
 
-        console.log("Rewards calculated successfully")
+            const fundsDistributionData = await client.query({
+                query: gql(fundsDistributionQuery),
+            })
 
+            const stakingAddress = userArgs.staking as string
+            const usersArray: string[] = fundsDistributionData.data.stakers.id
+            const rewardsArray: BigNumber[] = fundsDistributionData.data.rewards
+            const token = fundsDistributionData.data.token
+
+            console.log("Rewards calculated successfully")
+
+            return {
+                canExec: true,
+                callData: [
+                    {
+                        to: stakingAddress,
+                        data: stakingInterface.encodeFunctionData(
+                            "distributeRewards",
+                            [token, usersArray, rewardsArray],
+                        ),
+                    },
+                ],
+            }
+        }
         return {
-            canExec: true,
-            callData: [
-                {
-                    to: stakingAddress,
-                    data: stakingInterface.encodeFunctionData(
-                        "distributeRewards",
-                        [token, usersArray, rewardsArray],
-                    ),
-                },
-            ],
+            canExec: false,
+            message: `No new distribution added`,
         }
     } catch (err) {
         return {
