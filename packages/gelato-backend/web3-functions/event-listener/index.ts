@@ -4,13 +4,13 @@ import {
     Web3Function,
     Web3FunctionEventContext,
 } from "@gelatonetwork/web3-functions-sdk"
-import { createClient, fetchExchange } from "@urql/core"
+import { createClient, fetchExchange, gql } from "@urql/core"
 import { stakingABI } from "./stakingABI"
 
 Web3Function.onRun(async (context: Web3FunctionEventContext) => {
     const { userArgs, storage, log } = context
     const stakingInterface = new Interface(stakingABI)
-    const stakingContractsQuery = `
+    const stakingContractsQuery = gql`
         query {
             stakingContracts {
                 nextDistributionId
@@ -35,18 +35,19 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
             .toPromise()
 
         const distributionId = (await storage.get("nextDistributionId")) ?? "0"
-        const nextDistributionId = stakingQueryResult.data.nextDistributionId
+        const stakingContractsData = stakingQueryResult.data.stakingContracts[0]
+        const nextDistributionId = stakingContractsData.nextDistributionId
 
         if (nextDistributionId > distributionId) {
             await storage.set("nextDistributionId", nextDistributionId)
 
-            const fundsDistributionQuery = `
-                query {
+            const fundsDistributionQuery = gql`
+                query ($distributionId: String!) {
                     fundsDistribution(id: $distributionId) {
                         token
                         rewards
                         stakers {
-                        id
+                            id
                         }
                     }
                 }
@@ -56,12 +57,15 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
                 .query(fundsDistributionQuery, { distributionId })
                 .toPromise()
 
+            const fundsDistributionData =
+                fundsDistributionQueryResult.data.fundsDistribution
+
             const stakingAddress = userArgs.staking as string
-            const usersArray: string[] =
-                fundsDistributionQueryResult.data.stakers.id
-            const rewardsArray: BigNumber[] =
-                fundsDistributionQueryResult.data.rewards
-            const token = fundsDistributionQueryResult.data.token
+            const usersArray: string[] = fundsDistributionData.stakers.map(
+                (staker: any) => staker.id,
+            )
+            const rewardsArray: BigNumber[] = fundsDistributionData.rewards
+            const token = fundsDistributionData.token
 
             console.log("Rewards calculated successfully")
 

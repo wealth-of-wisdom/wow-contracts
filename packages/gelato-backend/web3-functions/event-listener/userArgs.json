@@ -1,5 +1,5 @@
 {
     "staking": "0xdCccAC5512aED88eaA1b009187064200fDd3e8C6",
-    "subgraph": "https://api.studio.thegraph.com/query/wow-subgraph/",
+    "subgraph": "https://api.thegraph.com/subgraphs/name/benasvolkovas/wow-subgraph",
     "eventTopic": "DistributionCreated"
 }
