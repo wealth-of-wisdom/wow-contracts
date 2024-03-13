@@ -34,7 +34,7 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
             .query(stakingContractsQuery, {})
             .toPromise()
 
-        const distributionId = await storage.get("nextDistributionId")
+        const distributionId = (await storage.get("nextDistributionId")) ?? "0"
         const nextDistributionId = stakingQueryResult.data.nextDistributionId
 
         if (nextDistributionId > distributionId) {
