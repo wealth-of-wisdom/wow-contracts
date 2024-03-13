@@ -4,7 +4,7 @@ import {
     Web3Function,
     Web3FunctionEventContext,
 } from "@gelatonetwork/web3-functions-sdk"
-import { createClient } from "urql"
+import { createClient, fetchExchange } from "@urql/core"
 import { stakingABI } from "./stakingABI"
 
 Web3Function.onRun(async (context: Web3FunctionEventContext) => {
@@ -28,7 +28,7 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
 
         const client = createClient({
             url: userArgs.subgraph.toString(),
-            exchanges: [],
+            exchanges: [fetchExchange],
         })
         const stakingQueryResult = await client
             .query(stakingContractsQuery, {})
@@ -53,7 +53,7 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
             `
 
             const fundsDistributionQueryResult = await client
-                .query(fundsDistributionQuery, {})
+                .query(fundsDistributionQuery, { distributionId })
                 .toPromise()
 
             const stakingAddress = userArgs.staking as string
