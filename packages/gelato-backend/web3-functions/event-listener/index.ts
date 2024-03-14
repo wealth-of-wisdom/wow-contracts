@@ -78,7 +78,7 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
 
             // Query for the distribution data
             const fundsDistributionQuery = gql`
-                query ($distributionId: String) {
+                query ($distributionId: String!) {
                     fundsDistribution(id: $distributionId) {
                         token
                         rewards
