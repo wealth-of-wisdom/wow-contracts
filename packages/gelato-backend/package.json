@@ -43,7 +43,7 @@
     },
     "dependencies": {
         "@gelatonetwork/automate-sdk": "^3.0.9",
-        "@gelatonetwork/web3-functions-sdk": "2.3.0",
+        "@gelatonetwork/web3-functions-sdk": "^2.4.0",
         "@urql/core": "^4.3.0",
         "graphql": "^16.8.1"
     }

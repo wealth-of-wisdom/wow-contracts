@@ -695,10 +695,10 @@
     ethers "^5.5.2"
     siwe "^1.1.6"
 
-"@gelatonetwork/web3-functions-sdk@2.3.0":
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/@gelatonetwork/web3-functions-sdk/-/web3-functions-sdk-2.3.0.tgz#f9d3271ab0d4e4659ed41c6123bd9f753aa5d4b5"
-  integrity sha512-M8ll1Z/9VMkuopegV7WfzR9M0dZPH9Y502BPW9cODGdLXAOMAlpvHLcniJGItaLZhdstwxyGuFhLqSwwpOX10g==
+"@gelatonetwork/web3-functions-sdk@^2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@gelatonetwork/web3-functions-sdk/-/web3-functions-sdk-2.4.0.tgz#b35d67f85c8babe26f3e4b8085a6afd37f9e38eb"
+  integrity sha512-ZLjzHRX3xJcgAR24tZP/WzIdDlov9iMudomXkPMP7AlKAv54F+v+AOso7SP381sl63pkFN5DgRJytx1+VgO6ww==
   dependencies:
     "@ethersproject/address" "^5.7.0"
     "@ethersproject/contracts" "^5.7.0"

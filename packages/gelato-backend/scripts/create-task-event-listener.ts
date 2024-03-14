@@ -1,37 +1,19 @@
 import { AutomateSDK, TriggerType } from "@gelatonetwork/automate-sdk"
-import { ethers, w3f } from "hardhat"
+import { ethers, w3f, network } from "hardhat"
+import { HttpNetworkConfig } from "hardhat/types"
 import { JsonRpcProvider } from "@ethersproject/providers"
 import { Wallet } from "@ethersproject/wallet"
 import { stakingABI } from "../web3-functions/event-listener/stakingABI"
-import dotenv from "dotenv"
-dotenv.config()
 
 const main = async () => {
-    const network = await ethers.provider.getNetwork()
-    const chainId = Number(network.chainId)
-    const networkName = network.name
-
-    if (!process.env.PRIVATE_KEY) throw new Error("Missing env PRIVATE_KEY")
-    const pk = process.env.PRIVATE_KEY
-
-    let providerUrl
-    if (networkName === "sepolia" || networkName === "hardhat") {
-        if (!process.env.SEPOLIA_RPC_URL)
-            throw new Error("Missing env SEPOLIA_RPC_URL")
-        providerUrl = process.env.SEPOLIA_RPC_URL
-    } else if (networkName === "ethereum") {
-        if (!process.env.ETHEREUM_RPC_URL)
-            throw new Error("Missing env ETHEREUM_RPC_URL")
-        providerUrl = process.env.ETHEREUM_RPC_URL
-    }
-
-    console.log("Provider URL:", providerUrl)
-
     const eventListenerTask = w3f.get("event-listener")
     const userArgs = eventListenerTask.getUserArgs()
 
-    const provider = new JsonRpcProvider(providerUrl)
-    const signer = new Wallet(pk as string, provider)
+    const config = network.config as HttpNetworkConfig
+    const chainId = config.chainId as number
+    const pk = (config.accounts as string[])[0]
+    const provider = new JsonRpcProvider(config.url)
+    const signer = new Wallet(pk, provider)
 
     const automate = new AutomateSDK(chainId, signer)
 
