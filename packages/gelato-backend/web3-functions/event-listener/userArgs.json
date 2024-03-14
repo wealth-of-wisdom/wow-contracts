@@ -1,5 +1,5 @@
 {
-    "staking": "0xdCccAC5512aED88eaA1b009187064200fDd3e8C6",
-    "subgraph": "https://api.thegraph.com/subgraphs/name/benasvolkovas/wow-subgraph",
+    "stakingAddress": "0xc35d85070912030d90095ed225024e6adda0d664",
+    "subgraphUrl": "https://api.thegraph.com/subgraphs/name/benasvolkovas/wow-subgraph",
     "eventTopic": "DistributionCreated"
 }

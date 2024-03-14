@@ -28,13 +28,14 @@ const main = async () => {
         name: "Web3Function - Event listener",
         web3FunctionHash: cid,
         web3FunctionArgs: {
-            staking: userArgs.staking as string,
+            stakingAddress: userArgs.stakingAddress as string,
+            subgraphUrl: userArgs.subgraphUrl as string,
             eventTopic: userArgs.eventTopic as string,
         },
         trigger: {
             type: TriggerType.EVENT,
             filter: {
-                address: userArgs.staking as string,
+                address: userArgs.stakingAddress as string,
                 topics: [
                     [
                         stakingInterface.getEventTopic(

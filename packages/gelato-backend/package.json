@@ -45,6 +45,6 @@
         "@gelatonetwork/automate-sdk": "^3.0.2",
         "@gelatonetwork/web3-functions-sdk": "2.3.0",
         "@urql/core": "^4.3.0",
-        "graphql": "^16.8.1",
+        "graphql": "^16.8.1"
     }
 }
