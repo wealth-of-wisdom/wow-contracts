@@ -4,43 +4,79 @@ import {
     Web3Function,
     Web3FunctionEventContext,
 } from "@gelatonetwork/web3-functions-sdk"
-import { createClient, fetchExchange, gql } from "@urql/core"
+import { createClient, fetchExchange, cacheExchange, gql } from "@urql/core"
 import { stakingABI } from "./stakingABI"
 
 Web3Function.onRun(async (context: Web3FunctionEventContext) => {
+    // Get data from the context
     const { userArgs, storage, log } = context
     const stakingInterface = new Interface(stakingABI)
-    const stakingContractsQuery = gql`
-        query {
-            stakingContracts {
-                nextDistributionId
-            }
-        }
-    `
 
     try {
         // Parse the event from the log using the provided event ABI
         console.log("Parsing event")
         const event = stakingInterface.parseLog(log)
-
-        // Handle event data
         console.log(`Event detected: ${event.eventFragment.name}`)
 
+        // Get data from the user arguments
+        const stakingAddress: string = userArgs.stakingAddress as string
+        const subgraphUrl: string = userArgs.subgraphUrl as string
+
+        // Create a new client for querying the subgraph
         const client = createClient({
-            url: userArgs.subgraph.toString(),
-            exchanges: [fetchExchange],
+            url: subgraphUrl,
+            exchanges: [cacheExchange, fetchExchange],
         })
+
+        // Query for the next distribution ID
+        const stakingContractsQuery = gql`
+            query {
+                stakingContract(id: "0") {
+                    stakingContractAddress
+                    nextDistributionId
+                }
+            }
+        `
+
+        // Fetch the next distribution ID from the subgraph
         const stakingQueryResult = await client
             .query(stakingContractsQuery, {})
             .toPromise()
 
-        const distributionId = (await storage.get("nextDistributionId")) ?? "0"
-        const stakingContractsData = stakingQueryResult.data.stakingContracts[0]
-        const nextDistributionId = stakingContractsData.nextDistributionId
+        // Get the staking data from the subgraph
+        const stakingContractData = stakingQueryResult.data.stakingContract
+        const stakingAddressInSubgraph =
+            stakingContractData.stakingContractAddress
+        const nextDistributionId: number = Number(
+            stakingContractData.nextDistributionId,
+        )
 
+        // If the staking address in subgraph does not match the provided address
+        // It means that gelato function is using wrong staking contract or subgraph
+        if (stakingAddressInSubgraph !== stakingAddress) {
+            return {
+                canExec: false,
+                message: `Staking contract address in subgraph (${stakingAddressInSubgraph}) does not match the provided address (${stakingAddress})`,
+            }
+        }
+
+        // Get the current distribution ID from gelato storage
+        const gelatoNextDistributionId: string =
+            (await storage.get("nextDistributionId")) ?? "0"
+        const distributionId: number = Number(gelatoNextDistributionId)
+
+        // If the next distribution ID in subgraph is greater than in gelato storage
+        // It means that a new distribution has been added and we can execute the function
+        // Otherwise, all distributions have been processed
         if (nextDistributionId > distributionId) {
-            await storage.set("nextDistributionId", nextDistributionId)
+            // Increment the distribution ID in gelato storage by one
+            // Don't assign it to nextDistributionId to avoid leaving unprocessed distributions
+            await storage.set(
+                "nextDistributionId",
+                (distributionId + 1).toString(),
+            )
 
+            // Query for the distribution data
             const fundsDistributionQuery = gql`
                 query ($distributionId: String!) {
                     fundsDistribution(id: $distributionId) {
@@ -53,21 +89,25 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
                 }
             `
 
+            // Fetch the distribution data from the subgraph
             const fundsDistributionQueryResult = await client
-                .query(fundsDistributionQuery, { distributionId })
+                .query(fundsDistributionQuery, {
+                    distributionId: gelatoNextDistributionId,
+                })
                 .toPromise()
 
+            // Get the distribution data
             const fundsDistributionData =
                 fundsDistributionQueryResult.data.fundsDistribution
 
-            const stakingAddress = userArgs.staking as string
+            // Get data for the function call
             const usersArray: string[] = fundsDistributionData.stakers.map(
                 (staker: any) => staker.id,
             )
             const rewardsArray: BigNumber[] = fundsDistributionData.rewards
             const token = fundsDistributionData.token
 
-            console.log("Rewards calculated successfully")
+            console.log("Rewards retrieved successfully")
 
             return {
                 canExec: true,
@@ -82,6 +122,7 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
                 ],
             }
         }
+
         return {
             canExec: false,
             message: `No new distribution added`,

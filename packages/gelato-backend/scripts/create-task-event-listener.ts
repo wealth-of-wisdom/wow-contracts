@@ -1,21 +1,25 @@
 import { AutomateSDK, TriggerType } from "@gelatonetwork/automate-sdk"
-import hre from "hardhat"
+import { ethers, w3f, network } from "hardhat"
+import { HttpNetworkConfig } from "hardhat/types"
+import { JsonRpcProvider } from "@ethersproject/providers"
+import { Wallet } from "@ethersproject/wallet"
 import { stakingABI } from "../web3-functions/event-listener/stakingABI"
 
-const { ethers, w3f } = hre
-
 const main = async () => {
-    const eventTest = w3f.get("event-listener")
-    const userArgs = eventTest.getUserArgs()
+    const eventListenerTask = w3f.get("event-listener")
+    const userArgs = eventListenerTask.getUserArgs()
 
-    const [deployer] = await ethers.getSigners()
-    const chainId = (await ethers.provider.getNetwork()).chainId
+    const config = network.config as HttpNetworkConfig
+    const chainId = config.chainId as number
+    const pk = (config.accounts as string[])[0]
+    const provider = new JsonRpcProvider(config.url)
+    const signer = new Wallet(pk, provider)
 
-    const automate = new AutomateSDK(chainId, deployer)
+    const automate = new AutomateSDK(chainId, signer)
 
     // Deploy Web3Function on IPFS
     console.log("Deploying Web3Function on IPFS...")
-    const cid = await eventTest.deploy()
+    const cid = await eventListenerTask.deploy()
     if (!cid) throw new Error("IPFS deployment failed")
     console.log(`Web3Function IPFS CID: ${cid}`)
 
@@ -28,13 +32,14 @@ const main = async () => {
         name: "Web3Function - Event listener",
         web3FunctionHash: cid,
         web3FunctionArgs: {
-            staking: userArgs.staking as string,
+            stakingAddress: userArgs.stakingAddress as string,
+            subgraphUrl: userArgs.subgraphUrl as string,
             eventTopic: userArgs.eventTopic as string,
         },
         trigger: {
             type: TriggerType.EVENT,
             filter: {
-                address: userArgs.staking as string,
+                address: userArgs.stakingAddress as string,
                 topics: [
                     [
                         stakingInterface.getEventTopic(
@@ -55,14 +60,8 @@ const main = async () => {
 }
 
 main()
-    .then(() => {
-        process.exit()
-    })
-    .catch((err) => {
-        if (err.response) {
-            console.error("Error Response:", err.response.body)
-        } else {
-            console.error("Error:", err.message)
-        }
+    .then(() => process.exit(0))
+    .catch((error) => {
+        console.error(error)
         process.exit(1)
     })
