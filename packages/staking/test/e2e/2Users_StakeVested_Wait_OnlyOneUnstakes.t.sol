@@ -11,7 +11,7 @@ contract Staking_E2E_Test is StakingAssertions {
         /**
          * 1. Alice stakes to level 3 band
          * 2. Bob stakes to level 6 band
-         * 3. Bot users wait
+         * 3. Both users wait
          * 4. Bob unstakes
          */
 

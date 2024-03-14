@@ -62,6 +62,7 @@ abstract contract StakingConstants {
 
     uint256[] STAKER_BAND_IDS = [0];
     uint256[] EMPTY_STAKER_BAND_IDS;
+    uint256[] MINIMAL_REWARDS = [ALICE_REWARDS, BOB_REWARDS];
 
     /*//////////////////////////////////////////////////////////////////////////
                                     ENUMS

@@ -79,4 +79,56 @@ contract StakingAssertions is Base_Test {
             "Alice balance incorrect"
         );
     }
+
+    function assertDistributionCreated(
+        uint256 adminBalanceBefore,
+        uint256 stakingBalanceBefore
+    ) internal {
+        assertTrue(
+            staking.isDistributionInProgress(),
+            "Distribution status not set to in progress"
+        );
+        uint256 adminBalanceAfter = usdtToken.balanceOf(admin);
+        uint256 stakingBalanceAfter = usdtToken.balanceOf(address(staking));
+
+        assertEq(
+            adminBalanceBefore - DISTRIBUTION_AMOUNT,
+            adminBalanceAfter,
+            "Admin balance not decreased"
+        );
+        assertEq(
+            stakingBalanceBefore + DISTRIBUTION_AMOUNT,
+            stakingBalanceAfter,
+            "Staking balance not increased"
+        );
+    }
+
+    function assertRewardsClaimed(address staker) internal {
+        (uint256 unclaimedAmount, ) = staking.getStakerReward(
+            staker,
+            usdtToken
+        );
+        assertEq(unclaimedAmount, 0, "Staker claimed reward amount mismatch");
+    }
+
+    function assertRewardsDistributed(
+        address[] memory stakers,
+        uint256[] memory rewards
+    ) internal {
+        for (uint i = 0; i < stakers.length; i++) {
+            (uint256 unclaimedAmount, ) = staking.getStakerReward(
+                stakers[i],
+                usdtToken
+            );
+            assertEq(
+                unclaimedAmount,
+                rewards[i],
+                "Staker unclaimed amount mismatch after distribution"
+            );
+        }
+        assertFalse(
+            staking.isDistributionInProgress(),
+            "Distribution status reset to in progress"
+        );
+    }
 }
