@@ -4,13 +4,19 @@ import {
     Web3Function,
     Web3FunctionEventContext,
 } from "@gelatonetwork/web3-functions-sdk"
-import { main } from "./main"
+import { createClient, fetchExchange, gql } from "@urql/core"
 import { stakingABI } from "./stakingABI"
 
 Web3Function.onRun(async (context: Web3FunctionEventContext) => {
-    const { userArgs, multiChainProvider, log } = context
-    const provider = multiChainProvider.default()
+    const { userArgs, storage, log } = context
     const stakingInterface = new Interface(stakingABI)
+    const stakingContractsQuery = gql`
+        query {
+            stakingContracts {
+                nextDistributionId
+            }
+        }
+    `
 
     try {
         // Parse the event from the log using the provided event ABI
@@ -20,43 +26,65 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
         // Handle event data
         console.log(`Event detected: ${event.eventFragment.name}`)
 
-        const [
-            token,
-            amount,
-            totalPools,
-            totalBandLevels,
-            totalStakers,
-            distributionTimestamp,
-        ] = event.args
+        const client = createClient({
+            url: userArgs.subgraph.toString(),
+            exchanges: [fetchExchange],
+        })
+        const stakingQueryResult = await client
+            .query(stakingContractsQuery, {})
+            .toPromise()
 
-        const stakingAddress = userArgs.staking as string
+        const distributionId = (await storage.get("nextDistributionId")) ?? "0"
+        const stakingContractsData = stakingQueryResult.data.stakingContracts[0]
+        const nextDistributionId = stakingContractsData.nextDistributionId
 
-        const userRewards: Map<string, BigNumber> = await main(
-            amount,
-            totalPools,
-            totalBandLevels,
-            totalStakers,
-            distributionTimestamp,
-            stakingAddress,
-            provider,
-        )
+        if (nextDistributionId > distributionId) {
+            await storage.set("nextDistributionId", nextDistributionId)
 
-        const usersArray: string[] = Array.from(userRewards.keys())
-        const rewardsArray: BigNumber[] = Array.from(userRewards.values())
+            const fundsDistributionQuery = gql`
+                query ($distributionId: String!) {
+                    fundsDistribution(id: $distributionId) {
+                        token
+                        rewards
+                        stakers {
+                            id
+                        }
+                    }
+                }
+            `
 
-        console.log("Rewards calculated successfully")
+            const fundsDistributionQueryResult = await client
+                .query(fundsDistributionQuery, { distributionId })
+                .toPromise()
 
+            const fundsDistributionData =
+                fundsDistributionQueryResult.data.fundsDistribution
+
+            const stakingAddress = userArgs.staking as string
+            const usersArray: string[] = fundsDistributionData.stakers.map(
+                (staker: any) => staker.id,
+            )
+            const rewardsArray: BigNumber[] = fundsDistributionData.rewards
+            const token = fundsDistributionData.token
+
+            console.log("Rewards calculated successfully")
+
+            return {
+                canExec: true,
+                callData: [
+                    {
+                        to: stakingAddress,
+                        data: stakingInterface.encodeFunctionData(
+                            "distributeRewards",
+                            [token, usersArray, rewardsArray],
+                        ),
+                    },
+                ],
+            }
+        }
         return {
-            canExec: true,
-            callData: [
-                {
-                    to: stakingAddress,
-                    data: stakingInterface.encodeFunctionData(
-                        "distributeRewards",
-                        [token, usersArray, rewardsArray],
-                    ),
-                },
-            ],
+            canExec: false,
+            message: `No new distribution added`,
         }
     } catch (err) {
         return {
