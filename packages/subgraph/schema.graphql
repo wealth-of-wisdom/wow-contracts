@@ -264,10 +264,11 @@ type User @entity {
 
 type StakingContract @entity {
     """
-    Always equal to 0.
+    Always equal to 0
     """
     id: ID!
 
+    # Contract fields
     stakingContractAddress: Bytes!
     usdtToken: Bytes!
     usdcToken: Bytes!
@@ -279,17 +280,29 @@ type StakingContract @entity {
     totalPools: Int!
     totalBandLevels: Int!
     areUpgradesEnabled: Boolean!
-
     stakers: [Staker!]!
 }
 
 type Pool @entity {
+    """
+    Pool ID from 1 to 9
+    """
     id: ID!
+
+    # Contract fields
     distributionPercentage: Int!
+
+    # Additional fields
+    totalSharesAmount: BigInt!
 }
 
 type BandLevel @entity {
+    """
+    Band level from 1 to 9
+    """
     id: ID!
+
+    # Contract fields
     price: BigInt!
     accessiblePools: [Pool!]!
 }
@@ -300,8 +313,12 @@ type Staker @entity {
     """
     id: ID!
 
+    # Contract fields
     bands: [Band!]!
     rewards: [StakerRewards!]! @derivedFrom(field: "staker")
+
+    # Additional fields
+    poolShares: [BigInt!]! # 9 numbers for each poool
 }
 
 type StakerRewards @entity {
@@ -310,6 +327,7 @@ type StakerRewards @entity {
     """
     id: ID!
 
+    # Contract fields
     staker: Staker!
     token: Bytes!
     unclaimedAmount: BigInt!
@@ -319,6 +337,7 @@ type StakerRewards @entity {
 type Band @entity {
     id: ID!
 
+    # Contract fields
     owner: Staker!
     stakingStartDate: BigInt!
     bandLevel: BandLevel!
@@ -329,11 +348,16 @@ type Band @entity {
 }
 
 type FundsDistribution @entity {
+    """
+    ID incremented by 1 for each distribution
+    """
     id: ID!
+
+    # Contract fields
     token: Bytes!
     amount: BigInt!
     createdAt: BigInt!
     distributedAt: BigInt!
-    stakers: [Staker!]!
+    stakers: [Bytes!]!
     rewards: [BigInt!]!
 }

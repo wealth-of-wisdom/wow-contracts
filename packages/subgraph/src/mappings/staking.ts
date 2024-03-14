@@ -13,6 +13,7 @@ import {
     TokensWithdrawn as TokensWithdrawnEvent,
     DistributionCreated as DistributionCreatedEvent,
     RewardsDistributed as RewardsDistributedEvent,
+    SharesSyncTriggered as SharesSyncTriggeredEvent,
     Staked as StakedEvent,
     Unstaked as UnstakedEvent,
     VestingUserDeleted as VestingUserDeletedEvent,
@@ -21,7 +22,7 @@ import {
     RewardsClaimed as RewardsClaimedEvent,
     Staking,
 } from "../../generated/Staking/Staking";
-import { StakingContract, Pool, Band, FundsDistribution } from "../../generated/schema";
+import { Band } from "../../generated/schema";
 import {
     getOrInitStakingContract,
     getOrInitPool,
@@ -32,7 +33,8 @@ import {
     getOrInitFundsDistribution,
 } from "../helpers/staking.helpers";
 import { stringifyStakingType } from "../utils/utils";
-import { calculateRewards, StakersAndRewards } from "../utils/rewardsCalculation";
+import { calculateRewards } from "../utils/rewardsCalculation";
+import { updateSharesForPoolsAndStakers, StakerAndPoolShares } from "../utils/sharesSync";
 import { BIGINT_ZERO, BIGINT_ONE, StakingType } from "../utils/constants";
 
 export function handleInitialized(event: InitializedEvent): void {
@@ -121,7 +123,7 @@ export function handleBandUpgradeStatusSet(event: BandUpgradeStatusSetEvent): vo
 }
 
 export function handleTokensWithdrawn(event: TokensWithdrawnEvent): void {
-    // No state is changed in contracts
+    // No data needs to be updated
 }
 
 export function handleDistributionCreated(event: DistributionCreatedEvent): void {
@@ -131,19 +133,18 @@ export function handleDistributionCreated(event: DistributionCreatedEvent): void
     stakingContract.nextDistributionId = distributionId.plus(BIGINT_ONE);
     stakingContract.save();
 
+    // Update shares for stakers and pools
+    const sharesData: StakerAndPoolShares = updateSharesForPoolsAndStakers(stakingContract, event.block.timestamp);
+
+    // Calculate rewards for stakers
+    const stakerRewards: BigInt[] = calculateRewards(stakingContract, event.params.amount, sharesData);
+
     const distribution = getOrInitFundsDistribution(distributionId);
-
-    const stakersAndRewards: StakersAndRewards = calculateRewards(
-        stakingContract,
-        event.params.amount,
-        event.block.timestamp,
-    );
-
     distribution.token = event.params.token;
     distribution.amount = event.params.amount;
     distribution.createdAt = event.block.timestamp;
-    distribution.stakers = stakersAndRewards.stakers;
-    distribution.rewards = stakersAndRewards.rewards;
+    distribution.stakers = sharesData.stakers;
+    distribution.rewards = stakerRewards;
     distribution.save();
 }
 
@@ -156,24 +157,24 @@ export function handleRewardsDistributed(event: RewardsDistributedEvent): void {
     distribution.distributedAt = event.block.timestamp;
     distribution.save();
 
-    const stakers = stakingContract.stakers;
+    const stakers = distribution.stakers;
     const stakersAmount = stakers.length;
-    const usdtToken = Address.fromBytes(stakingContract.usdtToken);
-    const usdcToken = Address.fromBytes(stakingContract.usdcToken);
+    const distributionToken = Address.fromBytes(distribution.token);
 
     // Loop through each staker and update their rewards for USDT/USDC tokens
     for (let i = 0; i < stakersAmount; i++) {
         const staker = getOrInitStaker(Address.fromString(stakers[i]));
         const stakerAddress = Address.fromString(staker.id);
-        const usdtRewards = getOrInitStakerRewards(stakerAddress, usdtToken);
-        const usdcRewards = getOrInitStakerRewards(stakerAddress, usdcToken);
+        const stakerRewards = getOrInitStakerRewards(stakerAddress, distributionToken);
 
-        usdtRewards.unclaimedAmount = staking.getStakerReward(stakerAddress, usdtToken).getUnclaimedAmount();
-        usdtRewards.save();
-
-        usdcRewards.unclaimedAmount = staking.getStakerReward(stakerAddress, usdcToken).getUnclaimedAmount();
-        usdcRewards.save();
+        // @todo update should not call contract but increase with amount from distribution
+        stakerRewards.unclaimedAmount = staking.getStakerReward(stakerAddress, distributionToken).getUnclaimedAmount();
+        stakerRewards.save();
     }
+}
+
+export function handleSharesSyncTriggered(event: SharesSyncTriggeredEvent): void {
+    // Update shares for stakers and pools
 }
 
 export function handleStaked(event: StakedEvent): void {

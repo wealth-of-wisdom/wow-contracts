@@ -542,6 +542,17 @@ contract Staking is
         emit RewardsDistributed(token);
     }
 
+    /**
+     * @notice  Trigger the shares sync event
+     * @notice  This function is called by the Gelato backend
+     * @notice  to trigger the shares sync event in subgraph
+     * @notice  We trust the server side to call this function at the right time
+     */
+    function triggerSharesSync() external onlyRole(GELATO_EXECUTOR_ROLE) {
+        // Effects: emit event
+        emit SharesSyncTriggered();
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                             EXTERNAL FUNCTIONS FOR USERS
     //////////////////////////////////////////////////////////////////////////*/

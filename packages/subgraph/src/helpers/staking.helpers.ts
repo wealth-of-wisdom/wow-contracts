@@ -52,6 +52,7 @@ export function getOrInitPool(poolId: BigInt): Pool {
     if (!stakingPool) {
         stakingPool = new Pool(id);
         stakingPool.distributionPercentage = 0;
+        stakingPool.totalSharesAmount = BIGINT_ZERO;
 
         stakingPool.save();
     }
@@ -91,6 +92,7 @@ export function getOrInitStaker(stakerAddress: Address): Staker {
     if (!staker) {
         staker = new Staker(id);
         staker.bands = [];
+        staker.poolShares = [];
 
         staker.save();
     }
