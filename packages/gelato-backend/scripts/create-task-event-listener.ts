@@ -1,21 +1,43 @@
 import { AutomateSDK, TriggerType } from "@gelatonetwork/automate-sdk"
-import hre from "hardhat"
+import { ethers, w3f } from "hardhat"
+import { JsonRpcProvider } from "@ethersproject/providers"
+import { Wallet } from "@ethersproject/wallet"
 import { stakingABI } from "../web3-functions/event-listener/stakingABI"
-
-const { ethers, w3f } = hre
+import dotenv from "dotenv"
+dotenv.config()
 
 const main = async () => {
-    const eventTest = w3f.get("event-listener")
-    const userArgs = eventTest.getUserArgs()
+    const network = await ethers.provider.getNetwork()
+    const chainId = Number(network.chainId)
+    const networkName = network.name
 
-    const [deployer] = await ethers.getSigners()
-    const chainId = (await ethers.provider.getNetwork()).chainId
+    if (!process.env.PRIVATE_KEY) throw new Error("Missing env PRIVATE_KEY")
+    const pk = process.env.PRIVATE_KEY
 
-    const automate = new AutomateSDK(chainId, deployer)
+    let providerUrl
+    if (networkName === "sepolia" || networkName === "hardhat") {
+        if (!process.env.SEPOLIA_RPC_URL)
+            throw new Error("Missing env SEPOLIA_RPC_URL")
+        providerUrl = process.env.SEPOLIA_RPC_URL
+    } else if (networkName === "ethereum") {
+        if (!process.env.ETHEREUM_RPC_URL)
+            throw new Error("Missing env ETHEREUM_RPC_URL")
+        providerUrl = process.env.ETHEREUM_RPC_URL
+    }
+
+    console.log("Provider URL:", providerUrl)
+
+    const eventListenerTask = w3f.get("event-listener")
+    const userArgs = eventListenerTask.getUserArgs()
+
+    const provider = new JsonRpcProvider(providerUrl)
+    const signer = new Wallet(pk as string, provider)
+
+    const automate = new AutomateSDK(chainId, signer)
 
     // Deploy Web3Function on IPFS
     console.log("Deploying Web3Function on IPFS...")
-    const cid = await eventTest.deploy()
+    const cid = await eventListenerTask.deploy()
     if (!cid) throw new Error("IPFS deployment failed")
     console.log(`Web3Function IPFS CID: ${cid}`)
 
@@ -56,14 +78,8 @@ const main = async () => {
 }
 
 main()
-    .then(() => {
-        process.exit()
-    })
-    .catch((err) => {
-        if (err.response) {
-            console.error("Error Response:", err.response.body)
-        } else {
-            console.error("Error:", err.message)
-        }
+    .then(() => process.exit(0))
+    .catch((error) => {
+        console.error(error)
         process.exit(1)
     })
