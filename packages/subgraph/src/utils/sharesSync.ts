@@ -1,6 +1,12 @@
-import { Address, BigInt } from "@graphprotocol/graph-ts";
+import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts";
 import { StakingContract, Band, BandLevel, Pool, Staker } from "../../generated/schema";
-import { getOrInitPool, getOrInitBandLevel, getOrInitStaker, getOrInitBand } from "../helpers/staking.helpers";
+import {
+    getOrInitPool,
+    getOrInitBandLevel,
+    getOrInitStaker,
+    getOrInitBand,
+    getOrInitStakingContract,
+} from "../helpers/staking.helpers";
 import { stringifyStakingType } from "../utils/utils";
 import { BIGINT_ONE, BIGINT_ZERO, StakingType } from "../utils/constants";
 
@@ -17,9 +23,32 @@ export class StakerAndPoolShares {
 }
 
 /*//////////////////////////////////////////////////////////////////////////
-                                  MAIN FUNCTION
+                                  MAIN FUNCTIONS
 //////////////////////////////////////////////////////////////////////////*/
 
+// Sync all shares for stakers and pools each 12 hours
+export function syncAllSharesEvery12Hours(currentTime: BigInt): boolean {
+    const staking: StakingContract = getOrInitStakingContract();
+    const lastSyncDate: BigInt = staking.lastSharesSyncDate;
+    const timePassed = currentTime.minus(lastSyncDate);
+    const minSyncInterval: BigInt = BigInt.fromI32(60 * 60 * 12); // 12 hours in seconds
+
+    // If at least 12 hours passed since last sync, update shares
+    if (timePassed.ge(minSyncInterval)) {
+        // Update shares for pools and stakers
+        updateSharesForPoolsAndStakers(staking, currentTime);
+
+        // Update last sync date
+        staking.lastSharesSyncDate = currentTime;
+        staking.save();
+
+        return true;
+    }
+
+    return false;
+}
+
+// Update shares for pools and stakers when sync or distribution starts
 export function updateSharesForPoolsAndStakers(
     staking: StakingContract,
     distributionDate: BigInt,
@@ -49,8 +78,78 @@ export function updateSharesForPoolsAndStakers(
     return sharesData;
 }
 
+export function updateSharesWhenStaked(
+    staker: Staker,
+    band: Band,
+    sharesInMonths: BigInt[],
+    accessiblePools: string[],
+    executionDate: BigInt,
+): void {
+    // Try to sync all stakers shares
+    const syncExecuted: boolean = syncAllSharesEvery12Hours(executionDate);
+
+    // If full sync was not executed, update only the shares for the staker and the pools that changed
+    if (!syncExecuted && band.fixedMonths > 0) {
+        const stakerSharesPerPool = staker.sharesPerPool;
+
+        // Get band shares that user will receive instantly
+        const bandShares = sharesInMonths[band.fixedMonths - 1];
+
+        // Update band shares
+        band.sharesAmount = bandShares;
+        band.save();
+
+        const totalAccessiblePools = accessiblePools.length;
+        for (let i = 0; i < totalAccessiblePools; i++) {
+            // Update total pool shares
+            const pool = getOrInitPool(BigInt.fromString(accessiblePools[i]));
+            pool.totalSharesAmount = pool.totalSharesAmount.plus(bandShares);
+            pool.save();
+
+            stakerSharesPerPool[i] = stakerSharesPerPool[i].plus(bandShares);
+        }
+
+        // Update staker shares
+        staker.sharesPerPool = stakerSharesPerPool;
+        staker.save();
+    }
+}
+
+export function updateSharesWhenUnstaked(
+    staker: Staker | null,
+    bandShares: BigInt,
+    accessiblePools: string[],
+    executionDate: BigInt,
+): void {
+    const syncExecuted: boolean = syncAllSharesEvery12Hours(executionDate);
+
+    if (!syncExecuted) {
+        const totalAccessiblePools: number = accessiblePools.length;
+
+        // Update total shares for each pool
+        for (let i = 0; i < totalAccessiblePools; i++) {
+            const pool: Pool = getOrInitPool(BigInt.fromString(accessiblePools[i]));
+            pool.totalSharesAmount = pool.totalSharesAmount.minus(bandShares);
+            pool.save();
+        }
+
+        // If staker was not removed, update staker shares
+        if (staker) {
+            const stakerSharesPerPool: BigInt[] = staker.sharesPerPool;
+
+            // Update staker shares for each accessible pool
+            for (let i = 0; i < totalAccessiblePools; i++) {
+                stakerSharesPerPool[i] = stakerSharesPerPool[i].minus(bandShares);
+            }
+
+            staker.sharesPerPool = stakerSharesPerPool;
+            staker.save();
+        }
+    }
+}
+
 /*//////////////////////////////////////////////////////////////////////////
-                                HELPER FUNCTIONs
+                                HELPER FUNCTIONS
 //////////////////////////////////////////////////////////////////////////*/
 
 function addPoolsAndStakersShares(
@@ -72,6 +171,7 @@ function addPoolsAndStakersShares(
 
     // Loop through all stakers and set the amount of shares
     for (let stakerIndex = 0; stakerIndex < stakersCount; stakerIndex++) {
+        // Get or initialize staker
         const staker: Staker = getOrInitStaker(Address.fromString(stakers[stakerIndex]));
 
         // Loop through all bands and add shares to pools
@@ -87,7 +187,7 @@ function addPoolsAndStakersShares(
         sharesForStakers.push(stakerSharesPerPool);
 
         // Update staker shares for pools in the database and save it
-        staker.poolShares = stakerSharesPerPool;
+        staker.sharesPerPool = stakerSharesPerPool;
         staker.save();
 
         // Loop through all pools and add staker shares to the pool
@@ -135,6 +235,10 @@ function addMultipleBandSharesToPools(
             const bandLevel: BigInt = BigInt.fromString(band.bandLevel);
             const poolIds: BigInt[] = bandLevelPoolIds[bandLevel.minus(BIGINT_ONE).toI32()];
             const poolsAmount: number = poolIds.length;
+
+            // Update shares amount in database and save it
+            band.sharesAmount = bandShares;
+            band.save();
 
             // Loop through all pools and set the amount of shares
             for (let poolIndex = 0; poolIndex < poolsAmount; poolIndex++) {

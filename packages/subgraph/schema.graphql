@@ -281,6 +281,9 @@ type StakingContract @entity {
     totalBandLevels: Int!
     areUpgradesEnabled: Boolean!
     stakers: [Staker!]!
+
+    # Additional fields
+    lastSharesSyncDate: BigInt!
 }
 
 type Pool @entity {
@@ -318,7 +321,7 @@ type Staker @entity {
     rewards: [StakerRewards!]! @derivedFrom(field: "staker")
 
     # Additional fields
-    poolShares: [BigInt!]! # 9 numbers for each poool
+    sharesPerPool: [BigInt!]! # 9 numbers for each poool
 }
 
 type StakerRewards @entity {
@@ -345,6 +348,9 @@ type Band @entity {
     stakingType: StakingType!
     areTokensVested: Boolean!
     vestingPool: VestingPool
+
+    # Additional fields
+    sharesAmount: BigInt! # This is the amount of shares staker owns in each accessible pool
 }
 
 type FundsDistribution @entity {
@@ -358,6 +364,6 @@ type FundsDistribution @entity {
     amount: BigInt!
     createdAt: BigInt!
     distributedAt: BigInt!
-    stakers: [Bytes!]!
+    stakers: [String!]! # Store as string as this
     rewards: [BigInt!]!
 }
