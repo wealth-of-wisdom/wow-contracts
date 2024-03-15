@@ -3,10 +3,10 @@ import { ethers, w3f, network } from "hardhat"
 import { HttpNetworkConfig } from "hardhat/types"
 import { JsonRpcProvider } from "@ethersproject/providers"
 import { Wallet } from "@ethersproject/wallet"
-import { stakingABI } from "../web3-functions/event-listener/stakingABI"
+import { stakingABI } from "../web3-functions/stakingABI"
 
 const main = async () => {
-    const eventListenerTask = w3f.get("event-listener")
+    const eventListenerTask = w3f.get("distribution-task")
     const userArgs = eventListenerTask.getUserArgs()
 
     const config = network.config as HttpNetworkConfig

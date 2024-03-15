@@ -5,7 +5,7 @@ import {
     Web3FunctionEventContext,
 } from "@gelatonetwork/web3-functions-sdk"
 import { createClient, fetchExchange, cacheExchange, gql } from "@urql/core"
-import { stakingABI } from "./stakingABI"
+import { stakingABI } from "../stakingABI"
 
 Web3Function.onRun(async (context: Web3FunctionEventContext) => {
     // Get data from the context
@@ -82,9 +82,7 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
                     fundsDistribution(id: $distributionId) {
                         token
                         rewards
-                        stakers {
-                            id
-                        }
+                        stakers
                     }
                 }
             `
@@ -101,9 +99,7 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
                 fundsDistributionQueryResult.data.fundsDistribution
 
             // Get data for the function call
-            const usersArray: string[] = fundsDistributionData.stakers.map(
-                (staker: any) => staker.id,
-            )
+            const usersArray: string[] = fundsDistributionData.stakers
             const rewardsArray: BigNumber[] = fundsDistributionData.rewards
             const token = fundsDistributionData.token
 

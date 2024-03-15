@@ -3,9 +3,12 @@
     "version": "1.0.0",
     "description": "Gelato Web3 Functions",
     "scripts": {
-        "test-task": " npx hardhat w3f-run event-listener --logs",
-        "create-task:sepolia": "npx hardhat run ./scripts/create-task-event-listener.ts --network sepolia",
-        "create-task:ethereum": "npx hardhat run ./scripts/create-task-event-listener.ts --network ethereum"
+        "test-distribution-task": " npx hardhat w3f-run distribution-task --logs",
+        "test-sync-task": " npx hardhat w3f-run sync-shares-task --logs",
+        "create-distribution-task:sepolia": "npx hardhat run ./scripts/create-distribution-task.ts --network sepolia",
+        "create-distribution-task:ethereum": "npx hardhat run ./scripts/create-distribution-task.ts --network ethereum",
+        "create-sync-task:sepolia": "npx hardhat run ./scripts/create-shares-sync-task.ts --network sepolia",
+        "create-sync-task:ethereum": "npx hardhat run ./scripts/create-shares-sync-task.ts --network ethereum"
     },
     "license": "ISC",
     "devDependencies": {
