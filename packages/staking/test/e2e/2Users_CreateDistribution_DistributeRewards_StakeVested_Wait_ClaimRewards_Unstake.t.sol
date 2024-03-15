@@ -11,11 +11,12 @@ contract Staking_E2E_Test is StakingAssertions {
         /**
          * 1. Alice stakes to level 2 band
          * 2. Bob stakes to level 4 band
-         * 3. Distribution created
-         * 4. Distribute rewards
-         * 5. Both users wait
-         * 6. Both users claims rewards
-         * 7. Bob unstakes
+         * 3. Both users wait
+         * 4. Distribution created
+         * 5. Distribute rewards
+         * 6. Both users wait
+         * 7. Both users claims rewards
+         * 8. Bob unstakes
          */
         // ARRANGE + ACT
 
@@ -36,6 +37,8 @@ contract Staking_E2E_Test is StakingAssertions {
 
         assertStaked(alice, firstBandId, BAND_LEVEL_2, 1);
         assertStaked(bob, secondBandId, BAND_LEVEL_4, 1);
+
+        vm.warp(MONTH);
 
         uint256 adminBalanceBefore = usdtToken.balanceOf(admin);
         uint256 stakingBalanceBefore = usdtToken.balanceOf(address(staking));
@@ -69,12 +72,9 @@ contract Staking_E2E_Test is StakingAssertions {
         (uint256 bobClaimedRewards, uint256 bobUnclaimedRewards) = staking
             .getStakerReward(bob, usdtToken);
         uint256 alicePostClaimingBalance = wowToken.balanceOf(alice) +
-            BAND_2_PRICE -
-            aliceClaimedRewards;
+            BAND_2_PRICE;
         uint256 bobPostUnstakingBalance = wowToken.balanceOf(bob);
-        uint256 stakingPreClaimingBalance = BAND_2_PRICE -
-            aliceClaimedRewards -
-            bobClaimedRewards;
+        uint256 stakingPreClaimingBalance = BAND_2_PRICE;
         uint256 stakingPostClaimingBalance = wowToken.balanceOf(
             address(staking)
         );
@@ -92,5 +92,8 @@ contract Staking_E2E_Test is StakingAssertions {
         assertUnstaked(secondBandId);
         assertRewardData(alice, aliceClaimedRewards, aliceUnclaimedRewards);
         assertRewardData(bob, bobClaimedRewards, bobUnclaimedRewards);
+        assertStakerBandIds(alice, ALICE_BAND_IDS);
+        assertStakerBandIds(bob, EMPTY_STAKER_BAND_IDS);
+        assertStateVariables(staking.getNextBandId(), false);
     }
 }

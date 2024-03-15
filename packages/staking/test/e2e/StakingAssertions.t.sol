@@ -150,4 +150,59 @@ contract StakingAssertions is Base_Test {
             "Staker unclaimed reward amount mismatch"
         );
     }
+
+    function assertStakerBandIds(
+        address staker,
+        uint256[] memory stakerBandIds
+    ) internal {
+        uint256[] memory bandIds = staking.getStakerBandIds(staker);
+        assertEq(stakerBandIds, bandIds, "Staker band id missmatch");
+    }
+
+    function assertStateVariables(
+        uint256 nextBandId,
+        bool bandUpgradesEnabled
+    ) internal {
+        uint256 totalPools = staking.getTotalPools();
+        uint256 totalBandLevels = staking.getTotalBandLevels();
+        for (uint16 i = 1; i < totalBandLevels; i++) {
+            (uint256 price, uint16[] memory accessiblePools) = staking
+                .getBandLevel(i);
+
+            assertEq(price, BAND_PRICES[i - 1], "Band level price switched");
+            for (uint16 j = 0; j < accessiblePools.length; j++) {
+                assertEq(
+                    accessiblePools[j],
+                    BAND_ACCESSIBLE_POOLS[i][j],
+                    "Band level accessible pools switched"
+                );
+            }
+        }
+
+        assertEq(
+            staking.getNextBandId(),
+            nextBandId,
+            "Next band id faulty calculation"
+        );
+        assertEq(
+            staking.getNextBandId(),
+            nextBandId,
+            "Next band id faulty calculation"
+        );
+        assertEq(totalPools, TOTAL_POOLS, "Total pool number changed");
+        assertEq(
+            totalBandLevels,
+            TOTAL_BAND_LEVELS,
+            "Total band level number changed"
+        );
+        assertEq(
+            staking.areBandUpgradesEnabled(),
+            bandUpgradesEnabled,
+            "Band upgrade trigger changed"
+        );
+        assertFalse(
+            staking.isDistributionInProgress(),
+            "Distribution triggered"
+        );
+    }
 }

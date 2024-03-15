@@ -81,15 +81,9 @@ contract Staking_E2E_Test is StakingAssertions {
             .getStakerReward(bob, usdtToken);
 
         uint256 alicePostClaimingBalance = wowToken.balanceOf(alice) +
-            BAND_2_PRICE -
-            aliceClaimedRewards;
-        uint256 bobPostClaimingBalance = wowToken.balanceOf(bob) +
-            BAND_5_PRICE -
-            bobClaimedRewards;
-        uint256 stakingPreClaimingBalance = BAND_5_PRICE +
-            BAND_2_PRICE -
-            aliceClaimedRewards -
-            bobClaimedRewards;
+            BAND_2_PRICE;
+        uint256 bobPostClaimingBalance = wowToken.balanceOf(bob) + BAND_5_PRICE;
+        uint256 stakingPreClaimingBalance = BAND_5_PRICE + BAND_2_PRICE;
         uint256 stakingPostClaimingBalance = wowToken.balanceOf(
             address(staking)
         );
@@ -106,5 +100,8 @@ contract Staking_E2E_Test is StakingAssertions {
         assertStaked(bob, secondBandId, BAND_LEVEL_5, 1);
         assertRewardData(alice, aliceClaimedRewards, aliceUnclaimedRewards);
         assertRewardData(bob, bobClaimedRewards, bobUnclaimedRewards);
+        assertStakerBandIds(alice, ALICE_BAND_IDS);
+        assertStakerBandIds(bob, BOB_BAND_IDS);
+        assertStateVariables(staking.getNextBandId(), true);
     }
 }

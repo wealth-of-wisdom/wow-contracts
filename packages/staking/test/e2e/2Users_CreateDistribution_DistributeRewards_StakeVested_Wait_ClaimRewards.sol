@@ -11,10 +11,11 @@ contract Staking_E2E_Test is StakingAssertions {
         /**
          * 1. Alice stakes to level 2 band
          * 2. Bob stakes to level 4 band
-         * 3. Distribution created
-         * 4. Distribute rewards
-         * 5. Both users wait
-         * 6. Both users claims rewards
+         * 3. Both users wait
+         * 4. Distribution created
+         * 5. Distribute rewards
+         * 6. Both users wait
+         * 7. Both users claims rewards
          */
         // ARRANGE + ACT
 
@@ -38,6 +39,8 @@ contract Staking_E2E_Test is StakingAssertions {
         uint256 stakingPostStakingBalance = wowToken.balanceOf(
             address(staking)
         );
+
+        vm.warp(MONTH);
 
         uint256 adminBalanceBefore = usdtToken.balanceOf(admin);
         uint256 stakingBalanceBefore = usdtToken.balanceOf(address(staking));
@@ -69,15 +72,9 @@ contract Staking_E2E_Test is StakingAssertions {
             .getStakerReward(bob, usdtToken);
 
         uint256 alicePostClaimingBalance = wowToken.balanceOf(alice) +
-            BAND_2_PRICE -
-            aliceClaimedRewards;
-        uint256 bobPostClaimingBalance = wowToken.balanceOf(bob) +
-            BAND_4_PRICE -
-            bobClaimedRewards;
-        uint256 stakingPreClaimingBalance = BAND_4_PRICE +
-            BAND_2_PRICE -
-            aliceClaimedRewards -
-            bobClaimedRewards;
+            BAND_2_PRICE;
+        uint256 bobPostClaimingBalance = wowToken.balanceOf(bob) + BAND_4_PRICE;
+        uint256 stakingPreClaimingBalance = BAND_4_PRICE + BAND_2_PRICE;
         uint256 stakingPostClaimingBalance = wowToken.balanceOf(
             address(staking)
         );
@@ -95,5 +92,8 @@ contract Staking_E2E_Test is StakingAssertions {
         assertStaked(bob, secondBandId, BAND_LEVEL_4, 1);
         assertRewardData(alice, aliceClaimedRewards, aliceUnclaimedRewards);
         assertRewardData(bob, bobClaimedRewards, bobUnclaimedRewards);
+        assertStakerBandIds(alice, ALICE_BAND_IDS);
+        assertStakerBandIds(bob, BOB_BAND_IDS);
+        assertStateVariables(staking.getNextBandId(), false);
     }
 }

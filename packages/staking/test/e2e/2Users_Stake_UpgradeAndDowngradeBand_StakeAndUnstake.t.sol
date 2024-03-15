@@ -66,5 +66,8 @@ contract Staking_E2E_Test is StakingAssertions {
 
         assertUnstaked(firstBandId);
         assertStaked(bob, secondBandId, BAND_LEVEL_1, 1);
+        assertStakerBandIds(alice, EMPTY_STAKER_BAND_IDS);
+        assertStakerBandIds(bob, BOB_BAND_IDS);
+        assertStateVariables(staking.getNextBandId(), true);
     }
 }
