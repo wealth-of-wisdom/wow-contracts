@@ -57,14 +57,14 @@ contract StakingAssertions is Base_Test {
 
     function assertBalances(
         uint256 starterStakingBalance,
-        uint256 stakingBalance,
-        uint256 bobPostStakingBalance,
+        uint256 endStakingBalance,
         uint256 bobPreStakingBalance,
-        uint256 alicePostStakingBalance,
-        uint256 alicePreStakingBalance
+        uint256 bobPostStakingBalance,
+        uint256 alicePreStakingBalance,
+        uint256 alicePostStakingBalance
     ) internal {
         assertEq(
-            stakingBalance,
+            endStakingBalance,
             starterStakingBalance,
             "Staking balance incorrect"
         );
@@ -129,6 +129,25 @@ contract StakingAssertions is Base_Test {
         assertFalse(
             staking.isDistributionInProgress(),
             "Distribution status reset to in progress"
+        );
+    }
+
+    function assertRewardData(
+        address staker,
+        uint256 stakerClaimedAmount,
+        uint256 stakerUnclaimedAmount
+    ) internal {
+        (uint256 claimedAmount, uint256 unclaimedAmount) = staking
+            .getStakerReward(staker, usdtToken);
+        assertEq(
+            claimedAmount,
+            stakerClaimedAmount,
+            "Staker claimed reward amount mismatch"
+        );
+        assertEq(
+            unclaimedAmount,
+            stakerUnclaimedAmount,
+            "Staker unclaimed reward amount mismatch"
         );
     }
 }

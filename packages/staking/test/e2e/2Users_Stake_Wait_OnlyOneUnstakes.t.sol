@@ -36,20 +36,22 @@ contract Staking_E2E_Test is StakingAssertions {
         vm.prank(bob);
         staking.unstake(secondBandId);
 
-        uint256 alicePostStakingBalance = wowToken.balanceOf(alice);
+        uint256 alicePostStakingBalance = wowToken.balanceOf(alice) +
+            BAND_3_PRICE;
         uint256 bobPostUnstakingBalance = wowToken.balanceOf(bob);
+        uint256 stakingPreUnstakingBalance = BAND_3_PRICE;
         uint256 stakingPostUnstakingBalance = wowToken.balanceOf(
             address(staking)
         );
 
         // ASSERT
         assertBalances(
+            stakingPreUnstakingBalance,
             stakingPostUnstakingBalance,
-            BAND_3_PRICE,
-            bobPostUnstakingBalance,
             bobPreUnstakingBalance,
-            alicePostStakingBalance + BAND_3_PRICE,
-            alicePreStakingBalance
+            bobPostUnstakingBalance,
+            alicePreStakingBalance,
+            alicePostStakingBalance
         );
 
         assertStaked(alice, firstBandId, BAND_LEVEL_3, 1);

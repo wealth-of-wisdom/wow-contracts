@@ -9,29 +9,15 @@ contract Staking_E2E_Test is StakingAssertions {
         setBandLevelData
     {
         /**
-         * 1. Distribution created
-         * 2. Distribute rewards
-         * 3. Alice stakes to level 2 band
-         * 4. Bob stakes to level 4 band
+         * 1. Alice stakes to level 2 band
+         * 2. Bob stakes to level 4 band
+         * 3. Distribution created
+         * 4. Distribute rewards
          * 5. Both users wait
          * 6. Both users claims rewards
          * 7. Bob unstakes
          */
         // ARRANGE + ACT
-
-        uint256 adminBalanceBefore = usdtToken.balanceOf(admin);
-        uint256 stakingBalanceBefore = usdtToken.balanceOf(address(staking));
-
-        vm.startPrank(admin);
-        usdtToken.approve(address(staking), DISTRIBUTION_AMOUNT);
-        staking.createDistribution(usdtToken, DISTRIBUTION_AMOUNT);
-
-        assertDistributionCreated(adminBalanceBefore, stakingBalanceBefore);
-
-        staking.distributeRewards(usdtToken, MINIMAL_STAKERS, MINIMAL_REWARDS);
-
-        assertRewardsDistributed(MINIMAL_STAKERS, MINIMAL_REWARDS);
-        vm.stopPrank();
 
         uint256 alicePreStakingBalance = wowToken.balanceOf(alice);
         uint256 bobPreStakingBalance = wowToken.balanceOf(bob);
@@ -51,6 +37,20 @@ contract Staking_E2E_Test is StakingAssertions {
         assertStaked(alice, firstBandId, BAND_LEVEL_2, 1);
         assertStaked(bob, secondBandId, BAND_LEVEL_4, 1);
 
+        uint256 adminBalanceBefore = usdtToken.balanceOf(admin);
+        uint256 stakingBalanceBefore = usdtToken.balanceOf(address(staking));
+
+        vm.startPrank(admin);
+        usdtToken.approve(address(staking), DISTRIBUTION_AMOUNT);
+        staking.createDistribution(usdtToken, DISTRIBUTION_AMOUNT);
+
+        assertDistributionCreated(adminBalanceBefore, stakingBalanceBefore);
+
+        staking.distributeRewards(usdtToken, MINIMAL_STAKERS, MINIMAL_REWARDS);
+
+        assertRewardsDistributed(MINIMAL_STAKERS, MINIMAL_REWARDS);
+        vm.stopPrank();
+
         vm.warp(MONTH);
 
         vm.prank(alice);
@@ -64,29 +64,33 @@ contract Staking_E2E_Test is StakingAssertions {
         vm.prank(bob);
         staking.unstake(secondBandId);
 
-        (uint256 aliceClaimedRewards, ) = staking.getStakerReward(
-            alice,
-            usdtToken
-        );
-        (uint256 bobClaimedRewards, ) = staking.getStakerReward(
-            alice,
-            usdtToken
-        );
-
-        uint256 alicePostClaimingBalance = wowToken.balanceOf(alice);
+        (uint256 aliceClaimedRewards, uint256 aliceUnclaimedRewards) = staking
+            .getStakerReward(alice, usdtToken);
+        (uint256 bobClaimedRewards, uint256 bobUnclaimedRewards) = staking
+            .getStakerReward(bob, usdtToken);
+        uint256 alicePostClaimingBalance = wowToken.balanceOf(alice) +
+            BAND_2_PRICE -
+            aliceClaimedRewards;
         uint256 bobPostUnstakingBalance = wowToken.balanceOf(bob);
+        uint256 stakingPreClaimingBalance = BAND_2_PRICE -
+            aliceClaimedRewards -
+            bobClaimedRewards;
         uint256 stakingPostClaimingBalance = wowToken.balanceOf(
             address(staking)
         );
+
         assertBalances(
-            BAND_2_PRICE - aliceClaimedRewards - bobClaimedRewards,
+            stakingPreClaimingBalance,
             stakingPostClaimingBalance,
-            bobPostUnstakingBalance,
             bobPreStakingBalance,
-            alicePostClaimingBalance + BAND_2_PRICE - aliceClaimedRewards,
-            alicePreStakingBalance
+            bobPostUnstakingBalance,
+            alicePreStakingBalance,
+            alicePostClaimingBalance
         );
 
+        assertStaked(alice, firstBandId, BAND_LEVEL_2, 1);
         assertUnstaked(secondBandId);
+        assertRewardData(alice, aliceClaimedRewards, aliceUnclaimedRewards);
+        assertRewardData(bob, bobClaimedRewards, bobUnclaimedRewards);
     }
 }

@@ -60,10 +60,10 @@ contract Staking_E2E_Test is StakingAssertions {
         assertBalances(
             stakingPostUnstakingBalance,
             0,
-            bobPostUnstakingBalance,
             bobPreUnstakingBalance,
-            alicePostStakingBalance,
-            alicePreStakingBalance
+            bobPostUnstakingBalance,
+            alicePreStakingBalance,
+            alicePostStakingBalance
         );
 
         assertUnstaked(firstBandId);

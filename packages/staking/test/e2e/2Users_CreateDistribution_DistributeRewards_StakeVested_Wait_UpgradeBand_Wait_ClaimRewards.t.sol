@@ -4,7 +4,7 @@ pragma solidity 0.8.20;
 import {StakingAssertions} from "./StakingAssertions.t.sol";
 
 contract Staking_E2E_Test is StakingAssertions {
-    function test_With2Users_CreateDistribution_DistributeRewards_StakeVested_Wait_ClaimRewards()
+    function test_With2Users_CreateDistribution_DistributeRewards_StakeVested_Wait_UpgradeBand_Wait_ClaimRewards()
         external
         setBandLevelData
     {
@@ -12,9 +12,11 @@ contract Staking_E2E_Test is StakingAssertions {
          * 1. Alice stakes to level 2 band
          * 2. Bob stakes to level 4 band
          * 3. Distribution created
-         * 4. Distribute rewards
+         * 4. Bob upgrades band to level 5
          * 5. Both users wait
-         * 6. Both users claims rewards
+         * 6. Distribute rewards
+         * 7. Both users wait
+         * 8. Both users claim rewards
          */
         // ARRANGE + ACT
 
@@ -39,6 +41,18 @@ contract Staking_E2E_Test is StakingAssertions {
             address(staking)
         );
 
+        vm.prank(admin);
+        staking.setBandUpgradesEnabled(true);
+
+        vm.warp(MONTH);
+
+        vm.startPrank(bob);
+        wowToken.approve(address(staking), BAND_5_PRICE - BAND_4_PRICE);
+        staking.upgradeBand(secondBandId, BAND_LEVEL_5);
+        vm.stopPrank();
+
+        vm.warp(MONTH);
+
         uint256 adminBalanceBefore = usdtToken.balanceOf(admin);
         uint256 stakingBalanceBefore = usdtToken.balanceOf(address(staking));
 
@@ -52,8 +66,6 @@ contract Staking_E2E_Test is StakingAssertions {
 
         assertRewardsDistributed(MINIMAL_STAKERS, MINIMAL_REWARDS);
         vm.stopPrank();
-
-        vm.warp(MONTH);
 
         vm.prank(alice);
         staking.claimRewards(usdtToken);
@@ -72,9 +84,9 @@ contract Staking_E2E_Test is StakingAssertions {
             BAND_2_PRICE -
             aliceClaimedRewards;
         uint256 bobPostClaimingBalance = wowToken.balanceOf(bob) +
-            BAND_4_PRICE -
+            BAND_5_PRICE -
             bobClaimedRewards;
-        uint256 stakingPreClaimingBalance = BAND_4_PRICE +
+        uint256 stakingPreClaimingBalance = BAND_5_PRICE +
             BAND_2_PRICE -
             aliceClaimedRewards -
             bobClaimedRewards;
@@ -90,9 +102,8 @@ contract Staking_E2E_Test is StakingAssertions {
             alicePreStakingBalance,
             alicePostClaimingBalance
         );
-
         assertStaked(alice, firstBandId, BAND_LEVEL_2, 1);
-        assertStaked(bob, secondBandId, BAND_LEVEL_4, 1);
+        assertStaked(bob, secondBandId, BAND_LEVEL_5, 1);
         assertRewardData(alice, aliceClaimedRewards, aliceUnclaimedRewards);
         assertRewardData(bob, bobClaimedRewards, bobUnclaimedRewards);
     }
