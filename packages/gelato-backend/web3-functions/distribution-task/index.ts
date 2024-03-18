@@ -29,7 +29,7 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
         })
 
         // Query for the next distribution ID
-        const stakingContractsQuery = gql`
+        const stakingContractQuery = gql`
             query {
                 stakingContract(id: "0") {
                     stakingContractAddress
@@ -40,7 +40,7 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
 
         // Fetch the next distribution ID from the subgraph
         const stakingQueryResult = await client
-            .query(stakingContractsQuery, {})
+            .query(stakingContractQuery, {})
             .toPromise()
 
         // Get the staking data from the subgraph
