@@ -85,10 +85,6 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
         const timePassed: number = Math.floor(Date.now() / 1000) - lastSynced
 
         if (timePassed >= updateInterval) {
-            console.log(
-                `${updateInterval} seconds have passed since the last sync`,
-            )
-
             return {
                 canExec: true,
                 callData: [

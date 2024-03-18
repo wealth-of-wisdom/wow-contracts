@@ -127,8 +127,6 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
             const rewardsArray: BigNumber[] = fundsDistributionData.rewards
             const token = fundsDistributionData.token
 
-            console.log("Rewards retrieved successfully")
-
             return {
                 canExec: true,
                 callData: [
@@ -145,7 +143,7 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
 
         return {
             canExec: false,
-            message: `No new distribution added`,
+            message: `Next distribution ID in subgraph (${nextDistributionId}) is not greater than in gelato storage (${distributionId})`,
         }
     } catch (err) {
         return {
