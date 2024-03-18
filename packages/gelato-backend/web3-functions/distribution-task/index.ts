@@ -3,10 +3,34 @@ import { Interface } from "@ethersproject/abi"
 import {
     Web3Function,
     Web3FunctionEventContext,
+    Web3FunctionFailContext,
+    Web3FunctionSuccessContext,
 } from "@gelatonetwork/web3-functions-sdk"
 import { createClient, fetchExchange, cacheExchange, gql } from "@urql/core"
 import { stakingABI } from "../stakingABI"
 
+// Success callback
+Web3Function.onSuccess(async (context: Web3FunctionSuccessContext) => {
+    const { transactionHash } = context
+    console.log("onSuccess: txHash: ", transactionHash)
+})
+
+// Fail callback
+Web3Function.onFail(async (context: Web3FunctionFailContext) => {
+    const { reason } = context
+
+    if (reason === "ExecutionReverted") {
+        console.log(`onFail: ${reason} txHash: ${context.transactionHash}`)
+    } else if (reason === "SimulationFailed") {
+        console.log(
+            `onFail: ${reason} callData: ${JSON.stringify(context.callData)}`,
+        )
+    } else {
+        console.log(`onFail: ${reason}`)
+    }
+})
+
+// Main function which will be executed by the gelato
 Web3Function.onRun(async (context: Web3FunctionEventContext) => {
     // Get data from the context
     const { userArgs, storage, log } = context
