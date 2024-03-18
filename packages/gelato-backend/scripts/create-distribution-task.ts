@@ -6,8 +6,8 @@ import { Wallet } from "@ethersproject/wallet"
 import { stakingABI } from "../web3-functions/stakingABI"
 
 const main = async () => {
-    const eventListenerTask = w3f.get("distribution-task")
-    const userArgs = eventListenerTask.getUserArgs()
+    const distributionTask = w3f.get("distribution-task")
+    const userArgs = distributionTask.getUserArgs()
 
     const config = network.config as HttpNetworkConfig
     const chainId = config.chainId as number
@@ -19,17 +19,17 @@ const main = async () => {
 
     // Deploy Web3Function on IPFS
     console.log("Deploying Web3Function on IPFS...")
-    const cid = await eventListenerTask.deploy()
+    const cid = await distributionTask.deploy()
     if (!cid) throw new Error("IPFS deployment failed")
     console.log(`Web3Function IPFS CID: ${cid}`)
 
-    // Create task using automate sdk
-    console.log("Creating automate task...")
+    console.log("Creating task...")
 
     const stakingInterface = new ethers.utils.Interface(stakingABI)
 
+    // Create task using automate sdk
     const { taskId, tx } = await automate.createBatchExecTask({
-        name: "Web3Function - Event listener",
+        name: "Web3Function - Distribute rewards",
         web3FunctionHash: cid,
         web3FunctionArgs: {
             stakingAddress: userArgs.stakingAddress as string,
@@ -52,6 +52,7 @@ const main = async () => {
         },
     })
 
+    // Wait for the transaction to be mined
     await tx.wait()
     console.log(`Task created, taskId: ${taskId} (tx hash: ${tx.hash})`)
     console.log(

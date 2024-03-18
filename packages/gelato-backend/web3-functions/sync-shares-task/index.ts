@@ -9,7 +9,7 @@ import { stakingABI } from "../stakingABI"
 
 Web3Function.onRun(async (context: Web3FunctionContext) => {
     // Get data from the context
-    const { userArgs, storage } = context
+    const { userArgs } = context
     const stakingInterface = new Interface(stakingABI)
 
     try {
@@ -17,9 +17,8 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
         const stakingAddress: string = userArgs.stakingAddress as string
         const subgraphUrl: string = userArgs.subgraphUrl as string
 
-        // Get data from storage
-        const updateInterval: number =
-            Number(await storage.get("updateIntervalInSeconds")) ?? 0
+        // We will trigger the shares sync if 24 hours have passed since the last sync
+        const updateInterval: number = 86400 // 24 hours in seconds
 
         // Create a new client for querying the subgraph
         const client = createClient({
