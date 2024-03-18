@@ -60,9 +60,12 @@ abstract contract StakingConstants {
                                     TESTING VARS
     //////////////////////////////////////////////////////////////////////////*/
 
+    uint256 internal constant ALICE_REWARDS_2 =
+        (DISTRIBUTION_AMOUNT * 10) / 100; // 10%
+    uint256 internal constant BOB_REWARDS_2 = (DISTRIBUTION_AMOUNT * 90) / 100; // 90%
     uint256[] STAKER_BAND_IDS = [0];
     uint256[] EMPTY_STAKER_BAND_IDS;
-    uint256[] MINIMAL_REWARDS = [ALICE_REWARDS, BOB_REWARDS];
+    uint256[] MINIMAL_REWARDS = [ALICE_REWARDS_2, BOB_REWARDS_2];
     uint256[] ALICE_BAND_IDS = [BAND_ID_0];
     uint256[] BOB_BAND_IDS = [BAND_ID_1];
 
@@ -94,28 +97,28 @@ abstract contract StakingConstants {
     uint48[] internal SHARES_IN_MONTH = [
         SHARE,
         SHARE * 2,
+        (SHARE / 10) * 25,
         SHARE * 3,
+        (SHARE / 10) * 35,
         SHARE * 4,
+        (SHARE / 10) * 45,
         SHARE * 5,
+        (SHARE / 10) * 55,
         SHARE * 6,
-        SHARE * 7,
-        SHARE * 8,
+        (SHARE / 1000) * 6125,
+        (SHARE / 100) * 825,
+        (SHARE / 1000) * 8375,
+        (SHARE / 10) * 85,
+        (SHARE / 1000) * 8625,
+        (SHARE / 100) * 875,
+        (SHARE / 1000) * 8875,
         SHARE * 9,
-        SHARE * 10,
-        SHARE * 11,
-        SHARE * 12,
-        SHARE * 13,
-        SHARE * 14,
-        SHARE * 15,
-        SHARE * 16,
-        SHARE * 17,
-        SHARE * 18,
-        SHARE * 19,
-        SHARE * 20,
-        SHARE * 21,
-        SHARE * 22,
-        SHARE * 23,
-        SHARE * 24
+        (SHARE / 1000) * 9125,
+        (SHARE / 100) * 925,
+        (SHARE / 1000) * 9375,
+        (SHARE / 10) * 95,
+        (SHARE / 1000) * 9625,
+        SHARE * 12
     ];
 
     /*//////////////////////////////////////////////////////////////////////////

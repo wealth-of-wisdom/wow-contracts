@@ -25,19 +25,19 @@ contract Staking_E2E_Test is StakingAssertions {
 
         uint256 firstBandId = staking.getNextBandId();
         vm.startPrank(alice);
-        wowToken.approve(address(staking), BAND_3_PRICE);
-        staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_3, MONTH_0);
+        wowToken.approve(address(staking), BAND_2_PRICE);
+        staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_2, MONTH_0);
         vm.stopPrank();
 
         uint256 secondBandId = staking.getNextBandId();
         vm.startPrank(bob);
-        wowToken.approve(address(staking), BAND_6_PRICE);
-        staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_6, MONTH_0);
+        wowToken.approve(address(staking), BAND_4_PRICE);
+        staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0);
         vm.stopPrank();
 
         vm.startPrank(alice);
-        wowToken.approve(address(staking), BAND_8_PRICE - BAND_3_PRICE);
-        staking.upgradeBand(firstBandId, BAND_LEVEL_8);
+        wowToken.approve(address(staking), BAND_6_PRICE - BAND_2_PRICE);
+        staking.upgradeBand(firstBandId, BAND_LEVEL_6);
         vm.stopPrank();
 
         vm.prank(bob);
