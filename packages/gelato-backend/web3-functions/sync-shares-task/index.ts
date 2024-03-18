@@ -1,4 +1,3 @@
-import { BigNumber } from "ethers"
 import { Interface } from "@ethersproject/abi"
 import {
     Web3Function,
