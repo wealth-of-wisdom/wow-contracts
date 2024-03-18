@@ -1,4 +1,4 @@
-const { ethers, upgrades } = require("hardhat")
+const { ethers, upgrades, run } = require("hardhat")
 const poolData = require("./poolData.json")
 const sharesData = require("./sharesData.json")
 const bandLevelData = require("./bandLevelData.json")
@@ -20,7 +20,8 @@ async function main() {
         process.env.TOTAL_BAND_LEVELS,
     ])
     await staking.waitForDeployment()
-    console.log("Staking deployed to:", await staking.getAddress())
+    const stakingAddress = await staking.getAddress()
+    console.log("Staking deployed to: ", stakingAddress)
 
     /*//////////////////////////////////////////////////////////////////////////
                               SET POOLS
@@ -57,6 +58,15 @@ async function main() {
     const tx3 = await staking.setSharesInMonth(sharesArray)
     await tx3.wait()
     console.log(`Shares in month set`)
+
+    /*//////////////////////////////////////////////////////////////////////////
+                              VERIFY CONTRACTS
+    //////////////////////////////////////////////////////////////////////////*/
+
+    await run("verify:verify", {
+        address: stakingAddress,
+        contract: "contracts/Staking.sol:Staking",
+    })
 }
 
 main().catch((error) => {

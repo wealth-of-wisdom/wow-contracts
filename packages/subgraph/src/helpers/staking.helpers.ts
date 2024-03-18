@@ -33,6 +33,7 @@ export function getOrInitStakingContract(): StakingContract {
         stakingContract.totalBandLevels = 0;
         stakingContract.areUpgradesEnabled = true;
         stakingContract.stakers = [];
+        stakingContract.lastSharesSyncDate = BIGINT_ZERO;
 
         stakingContract.save();
     }
@@ -52,6 +53,7 @@ export function getOrInitPool(poolId: BigInt): Pool {
     if (!stakingPool) {
         stakingPool = new Pool(id);
         stakingPool.distributionPercentage = 0;
+        stakingPool.totalSharesAmount = BIGINT_ZERO;
 
         stakingPool.save();
     }
@@ -89,8 +91,11 @@ export function getOrInitStaker(stakerAddress: Address): Staker {
     let staker = Staker.load(id);
 
     if (!staker) {
+        const stakingContract = getOrInitStakingContract();
+
         staker = new Staker(id);
         staker.bands = [];
+        staker.sharesPerPool = new Array<BigInt>(stakingContract.totalPools).fill(BIGINT_ZERO);
 
         staker.save();
     }
@@ -134,11 +139,11 @@ export function getOrInitBand(bandId: BigInt): Band {
         band = new Band(id);
         band.owner = ADDRESS_ZERO.toHex();
         band.stakingStartDate = BIGINT_ZERO;
-        band.bandLevel = "0";
+        band.bandLevel = getOrInitBandLevel(BIGINT_ZERO).id;
         band.fixedMonths = 0;
         band.stakingType = stringifyStakingType(StakingType.FIX);
         band.areTokensVested = false;
-
+        band.sharesAmount = BIGINT_ZERO;
         band.save();
     }
 

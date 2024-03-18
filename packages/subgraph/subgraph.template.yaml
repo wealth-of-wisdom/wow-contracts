@@ -120,6 +120,8 @@ dataSources:
               handler: handleDistributionCreated
             - event: RewardsDistributed(address)
               handler: handleRewardsDistributed
+            - event: SharesSyncTriggered()
+              handler: handleSharesSyncTriggered
             - event: Staked(address,uint16,uint256,uint8,uint8,bool)
               handler: handleStaked
             - event: Unstaked(address,uint256,bool)

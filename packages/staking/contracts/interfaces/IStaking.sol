@@ -45,6 +45,8 @@ interface IStakingEvents {
 
     event RewardsDistributed(IERC20 token);
 
+    event SharesSyncTriggered();
+
     event Staked(
         address user,
         uint16 bandLevel,
@@ -159,6 +161,8 @@ interface IStaking is IStakingEvents {
         address[] memory stakers,
         uint256[] memory rewards
     ) external;
+
+    function triggerSharesSync() external;
 
     function stake(
         StakingTypes stakingType,
