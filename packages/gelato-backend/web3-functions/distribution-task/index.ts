@@ -3,10 +3,34 @@ import { Interface } from "@ethersproject/abi"
 import {
     Web3Function,
     Web3FunctionEventContext,
+    Web3FunctionFailContext,
+    Web3FunctionSuccessContext,
 } from "@gelatonetwork/web3-functions-sdk"
 import { createClient, fetchExchange, cacheExchange, gql } from "@urql/core"
-import { stakingABI } from "./stakingABI"
+import { stakingABI } from "../stakingABI"
 
+// Success callback
+Web3Function.onSuccess(async (context: Web3FunctionSuccessContext) => {
+    const { transactionHash } = context
+    console.log("onSuccess: txHash: ", transactionHash)
+})
+
+// Fail callback
+Web3Function.onFail(async (context: Web3FunctionFailContext) => {
+    const { reason } = context
+
+    if (reason === "ExecutionReverted") {
+        console.log(`onFail: ${reason} txHash: ${context.transactionHash}`)
+    } else if (reason === "SimulationFailed") {
+        console.log(
+            `onFail: ${reason} callData: ${JSON.stringify(context.callData)}`,
+        )
+    } else {
+        console.log(`onFail: ${reason}`)
+    }
+})
+
+// Main function which will be executed by the gelato
 Web3Function.onRun(async (context: Web3FunctionEventContext) => {
     // Get data from the context
     const { userArgs, storage, log } = context
@@ -29,7 +53,7 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
         })
 
         // Query for the next distribution ID
-        const stakingContractsQuery = gql`
+        const stakingContractQuery = gql`
             query {
                 stakingContract(id: "0") {
                     stakingContractAddress
@@ -40,7 +64,7 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
 
         // Fetch the next distribution ID from the subgraph
         const stakingQueryResult = await client
-            .query(stakingContractsQuery, {})
+            .query(stakingContractQuery, {})
             .toPromise()
 
         // Get the staking data from the subgraph
@@ -82,9 +106,7 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
                     fundsDistribution(id: $distributionId) {
                         token
                         rewards
-                        stakers {
-                            id
-                        }
+                        stakers
                     }
                 }
             `
@@ -101,13 +123,9 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
                 fundsDistributionQueryResult.data.fundsDistribution
 
             // Get data for the function call
-            const usersArray: string[] = fundsDistributionData.stakers.map(
-                (staker: any) => staker.id,
-            )
+            const usersArray: string[] = fundsDistributionData.stakers
             const rewardsArray: BigNumber[] = fundsDistributionData.rewards
             const token = fundsDistributionData.token
-
-            console.log("Rewards retrieved successfully")
 
             return {
                 canExec: true,
@@ -125,7 +143,7 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
 
         return {
             canExec: false,
-            message: `No new distribution added`,
+            message: `Next distribution ID in subgraph (${nextDistributionId}) is not greater than in gelato storage (${distributionId})`,
         }
     } catch (err) {
         return {
