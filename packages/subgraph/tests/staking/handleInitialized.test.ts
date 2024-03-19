@@ -1,4 +1,3 @@
-import { log } from "@graphprotocol/graph-ts";
 import { describe, test, beforeEach, clearStore, assert } from "matchstick-as/assembly/index";
 import { initialize } from "./helpers/helper";
 import {
@@ -12,7 +11,6 @@ import {
     initDate,
     zeroId,
 } from "../utils/constants";
-import { getOrInitStakingContract } from "../../src/helpers/staking.helpers";
 
 describe("handleInitialized() tests", () => {
     beforeEach(() => {
