@@ -38,7 +38,6 @@
         "packages": [
             "packages/nft",
             "packages/staking",
-            "packages/subgraph",
             "packages/token",
             "packages/vesting"
         ]

@@ -41,15 +41,15 @@ import {
     getOrInitFundsDistribution,
 } from "../helpers/staking.helpers";
 import { stringifyStakingType } from "../utils/utils";
-import { calculateRewards } from "../utils/rewardsCalculation";
+import { calculateRewards } from "../utils/staking/rewardsCalculation";
 import {
     syncAllSharesEvery12Hours,
     updateSharesForPoolsAndStakers,
     updateSharesWhenStaked,
     updateSharesWhenUnstaked,
     StakerAndPoolShares,
-} from "../utils/sharesSync";
-import { claimRewardsFromUnclaimedAmount } from "../utils/rewardsClaim";
+} from "../utils/staking/sharesSync";
+import { claimRewardsFromUnclaimedAmount } from "../utils/staking/rewardsClaim";
 import { BIGINT_ZERO, BIGINT_ONE } from "../utils/constants";
 
 export function handleInitialized(event: InitializedEvent): void {

@@ -1,14 +1,14 @@
 import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts";
-import { StakingContract, Band, BandLevel, Pool, Staker } from "../../generated/schema";
+import { StakingContract, Band, BandLevel, Pool, Staker } from "../../../generated/schema";
 import {
     getOrInitPool,
     getOrInitBandLevel,
     getOrInitStaker,
     getOrInitBand,
     getOrInitStakingContract,
-} from "../helpers/staking.helpers";
-import { stringifyStakingType } from "../utils/utils";
-import { BIGINT_ONE, BIGINT_ZERO, StakingType } from "../utils/constants";
+} from "../../helpers/staking.helpers";
+import { stringifyStakingType } from "../utils";
+import { BIGINT_ONE, BIGINT_ZERO, StakingType } from "../constants";
 
 /*//////////////////////////////////////////////////////////////////////////
                             CLASSES TO RETURN VALUES
