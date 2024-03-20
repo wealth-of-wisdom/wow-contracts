@@ -210,9 +210,6 @@ export function handleStaked(event: StakedEvent): void {
         stakingContract.stakers = stakerIds;
     }
 
-    stakingContract.nextBandId = stakingContract.nextBandId.plus(BIGINT_ONE);
-    stakingContract.save();
-
     const bandLevel: BandLevel = getOrInitBandLevel(BigInt.fromI32(event.params.bandLevel));
     const band: Band = getOrInitBand(event.params.bandId);
 
@@ -224,10 +221,19 @@ export function handleStaked(event: StakedEvent): void {
     band.areTokensVested = event.params.areTokensVested;
     band.save();
 
+    const totalStakedFromAllUsers = stakingContract.totalStakedFromAllUsers;
+    stakingContract.nextBandId = stakingContract.nextBandId.plus(BIGINT_ONE);
+    stakingContract.totalStakedFromAllUsers = totalStakedFromAllUsers.plus(bandLevel.price);
+    stakingContract.save();
+
     // Update staker bands
     const stakerBandIds = staker.bands;
     stakerBandIds.push(band.id);
     staker.bands = stakerBandIds;
+
+    // Update staker total staked
+    const stakerTotalStaked = staker.totalStaked;
+    staker.totalStaked = stakerTotalStaked.plus(bandLevel.price);
     staker.save();
 
     // Run full sync if 12 hours have passed since last sync
@@ -235,6 +241,7 @@ export function handleStaked(event: StakedEvent): void {
     updateSharesWhenStaked(
         staker,
         band,
+        bandLevel,
         stakingContract.sharesInMonths,
         bandLevel.accessiblePools,
         event.block.timestamp,
