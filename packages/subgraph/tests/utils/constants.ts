@@ -94,11 +94,11 @@ export const bandLevelAccessiblePools: BigInt[][] = createDoubleArray(BIGINT_ONE
                                 SHARES DETAILS
 //////////////////////////////////////////////////////////////////////////*/
 
-export const months: BigInt[] = createArray(BIGINT_ZERO, BigInt.fromI32(24));
+export const months: BigInt[] = createArray(BIGINT_ZERO, BigInt.fromI32(50));
 
 export const monthsInSeconds: BigInt[] = createArrayWithMultiplication(
     BIGINT_ZERO,
-    BigInt.fromI32(25),
+    BigInt.fromI32(50),
     BigInt.fromI32(30 * 24 * 60 * 60),
 );
 

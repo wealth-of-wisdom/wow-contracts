@@ -192,7 +192,7 @@ export function createTokensWithdrawnEvent(token: Address, receiver: Address, am
     return newEvent;
 }
 
-export function createDistributionCreatedEvent(token: Address, amount: BigInt): DistributionCreatedEvent {
+export function createDistributionCreatedEvent(token: Address, amount: BigInt, date: BigInt): DistributionCreatedEvent {
     // @ts-ignore
     const newEvent = changetype<DistributionCreatedEvent>(newMockEvent());
 
@@ -212,6 +212,8 @@ export function createDistributionCreatedEvent(token: Address, amount: BigInt): 
         ethereum.Value.fromUnsignedBigInt(BIGINT_ZERO),
     );
 
+    newEvent.block.timestamp = date;
+
     newEvent.parameters = new Array();
     newEvent.parameters.push(tokenParam);
     newEvent.parameters.push(amountParam);
@@ -219,15 +221,16 @@ export function createDistributionCreatedEvent(token: Address, amount: BigInt): 
     newEvent.parameters.push(totalBandLevelsParam);
     newEvent.parameters.push(totalStakersParam);
     newEvent.parameters.push(distributionTimestampParam);
-
     return newEvent;
 }
 
-export function createRewardsDistributedEvent(token: Address): RewardsDistributedEvent {
+export function createRewardsDistributedEvent(token: Address, date: BigInt): RewardsDistributedEvent {
     // @ts-ignore
     const newEvent = changetype<RewardsDistributedEvent>(newMockEvent());
 
     const tokenParam = new ethereum.EventParam("token", ethereum.Value.fromAddress(token));
+
+    newEvent.block.timestamp = date;
 
     newEvent.parameters = new Array();
     newEvent.parameters.push(tokenParam);
@@ -235,9 +238,11 @@ export function createRewardsDistributedEvent(token: Address): RewardsDistribute
     return newEvent;
 }
 
-export function createSharesSyncTriggeredEvent(): SharesSyncTriggeredEvent {
+export function createSharesSyncTriggeredEvent(date: BigInt): SharesSyncTriggeredEvent {
     // @ts-ignore
     const newEvent = changetype<SharesSyncTriggeredEvent>(newMockEvent());
+
+    newEvent.block.timestamp = date;
 
     return newEvent;
 }
@@ -249,6 +254,7 @@ export function createStakedEvent(
     fixedMonths: BigInt,
     stakingType: StakingType,
     areTokensVested: boolean,
+    date: BigInt,
 ): StakedEvent {
     // @ts-ignore
     const newEvent = changetype<StakedEvent>(newMockEvent());
@@ -263,6 +269,8 @@ export function createStakedEvent(
         ethereum.Value.fromBoolean(areTokensVested),
     );
 
+    newEvent.block.timestamp = date;
+
     newEvent.parameters = new Array();
     newEvent.parameters.push(stakerParam);
     newEvent.parameters.push(bandLevelParam);
@@ -274,7 +282,12 @@ export function createStakedEvent(
     return newEvent;
 }
 
-export function createUnstakedEvent(staker: Address, bandId: BigInt, areTokensVested: boolean): UnstakedEvent {
+export function createUnstakedEvent(
+    staker: Address,
+    bandId: BigInt,
+    areTokensVested: boolean,
+    date: BigInt,
+): UnstakedEvent {
     // @ts-ignore
     const newEvent = changetype<UnstakedEvent>(newMockEvent());
 
@@ -284,6 +297,8 @@ export function createUnstakedEvent(staker: Address, bandId: BigInt, areTokensVe
         "areTokensVested",
         ethereum.Value.fromBoolean(areTokensVested),
     );
+
+    newEvent.block.timestamp = date;
 
     newEvent.parameters = new Array();
     newEvent.parameters.push(stakerParam);
@@ -310,6 +325,7 @@ export function createBandUpgradedEvent(
     bandId: BigInt,
     oldBandLevel: BigInt,
     newBandLevel: BigInt,
+    date: BigInt,
 ): BandUpgradedEvent {
     // @ts-ignore
     const newEvent = changetype<BandUpgradedEvent>(newMockEvent());
@@ -318,6 +334,8 @@ export function createBandUpgradedEvent(
     const bandIdParam = new ethereum.EventParam("bandId", ethereum.Value.fromUnsignedBigInt(bandId));
     const oldBandLevelParam = new ethereum.EventParam("oldBandLevel", ethereum.Value.fromUnsignedBigInt(oldBandLevel));
     const newBandLevelParam = new ethereum.EventParam("newBandLevel", ethereum.Value.fromUnsignedBigInt(newBandLevel));
+
+    newEvent.block.timestamp = date;
 
     newEvent.parameters = new Array();
     newEvent.parameters.push(stakerParam);
@@ -333,6 +351,7 @@ export function createBandDowngradedEvent(
     bandId: BigInt,
     oldBandLevel: BigInt,
     newBandLevel: BigInt,
+    date: BigInt,
 ): BandDowngradedEvent {
     // @ts-ignore
     const newEvent = changetype<BandDowngradedEvent>(newMockEvent());
@@ -341,6 +360,8 @@ export function createBandDowngradedEvent(
     const bandIdParam = new ethereum.EventParam("bandId", ethereum.Value.fromUnsignedBigInt(bandId));
     const oldBandLevelParam = new ethereum.EventParam("oldBandLevel", ethereum.Value.fromUnsignedBigInt(oldBandLevel));
     const newBandLevelParam = new ethereum.EventParam("newBandLevel", ethereum.Value.fromUnsignedBigInt(newBandLevel));
+
+    newEvent.block.timestamp = date;
 
     newEvent.parameters = new Array();
     newEvent.parameters.push(stakerParam);
@@ -351,13 +372,20 @@ export function createBandDowngradedEvent(
     return newEvent;
 }
 
-export function createRewardsClaimedEvent(staker: Address, token: Address, amount: BigInt): RewardsClaimedEvent {
+export function createRewardsClaimedEvent(
+    staker: Address,
+    token: Address,
+    amount: BigInt,
+    date: BigInt,
+): RewardsClaimedEvent {
     // @ts-ignore
     const newEvent = changetype<RewardsClaimedEvent>(newMockEvent());
 
     const stakerParam = new ethereum.EventParam("user", ethereum.Value.fromAddress(staker));
     const tokenParam = new ethereum.EventParam("token", ethereum.Value.fromAddress(token));
     const amountParam = new ethereum.EventParam("totalRewards", ethereum.Value.fromUnsignedBigInt(amount));
+
+    newEvent.block.timestamp = date;
 
     newEvent.parameters = new Array();
     newEvent.parameters.push(stakerParam);

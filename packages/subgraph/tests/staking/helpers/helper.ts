@@ -95,16 +95,16 @@ export function withdrawTokens(token: Address, receiver: Address, amount: BigInt
     handleTokensWithdrawn(createTokensWithdrawnEvent(token, receiver, amount));
 }
 
-export function createDistribution(token: Address, amount: BigInt): void {
-    handleDistributionCreated(createDistributionCreatedEvent(token, amount));
+export function createDistribution(token: Address, amount: BigInt, date: BigInt): void {
+    handleDistributionCreated(createDistributionCreatedEvent(token, amount, date));
 }
 
-export function distributeRewards(token: Address): void {
-    handleRewardsDistributed(createRewardsDistributedEvent(token));
+export function distributeRewards(token: Address, date: BigInt): void {
+    handleRewardsDistributed(createRewardsDistributedEvent(token, date));
 }
 
-export function triggerSharesSync(): void {
-    handleSharesSyncTriggered(createSharesSyncTriggeredEvent());
+export function triggerSharesSync(date: BigInt): void {
+    handleSharesSyncTriggered(createSharesSyncTriggeredEvent(date));
 }
 
 export function stake(
@@ -114,50 +114,75 @@ export function stake(
     fixedMonths: BigInt,
     stakingType: StakingType,
     areTokensVested: boolean,
+    date: BigInt,
 ): void {
-    handleStaked(createStakedEvent(staker, bandLevel, bandId, fixedMonths, stakingType, areTokensVested));
+    handleStaked(createStakedEvent(staker, bandLevel, bandId, fixedMonths, stakingType, areTokensVested, date));
 }
 
-export function stakeStandardFlexi(staker: Address, bandLevel: BigInt, bandId: BigInt): void {
-    stake(staker, bandLevel, bandId, BIGINT_ZERO, StakingType.FLEXI, false);
+export function stakeStandardFlexi(staker: Address, bandLevel: BigInt, bandId: BigInt, date: BigInt): void {
+    stake(staker, bandLevel, bandId, BIGINT_ZERO, StakingType.FLEXI, false, date);
 }
 
-export function stakeStandardFixed(staker: Address, bandLevel: BigInt, bandId: BigInt, fixedMonths: BigInt): void {
-    stake(staker, bandLevel, bandId, fixedMonths, StakingType.FIX, false);
+export function stakeStandardFixed(
+    staker: Address,
+    bandLevel: BigInt,
+    bandId: BigInt,
+    fixedMonths: BigInt,
+    date: BigInt,
+): void {
+    stake(staker, bandLevel, bandId, fixedMonths, StakingType.FIX, false, date);
 }
 
-export function stakeVestedFlexi(staker: Address, bandLevel: BigInt, bandId: BigInt): void {
-    stake(staker, bandLevel, bandId, BIGINT_ZERO, StakingType.FLEXI, true);
+export function stakeVestedFlexi(staker: Address, bandLevel: BigInt, bandId: BigInt, date: BigInt): void {
+    stake(staker, bandLevel, bandId, BIGINT_ZERO, StakingType.FLEXI, true, date);
 }
 
-export function stakeVestedFixed(staker: Address, bandLevel: BigInt, bandId: BigInt, fixedMonths: BigInt): void {
-    stake(staker, bandLevel, bandId, fixedMonths, StakingType.FIX, true);
+export function stakeVestedFixed(
+    staker: Address,
+    bandLevel: BigInt,
+    bandId: BigInt,
+    fixedMonths: BigInt,
+    date: BigInt,
+): void {
+    stake(staker, bandLevel, bandId, fixedMonths, StakingType.FIX, true, date);
 }
 
-export function unstake(staker: Address, bandId: BigInt, areTokensVested: boolean): void {
-    handleUnstaked(createUnstakedEvent(staker, bandId, areTokensVested));
+export function unstake(staker: Address, bandId: BigInt, areTokensVested: boolean, date: BigInt): void {
+    handleUnstaked(createUnstakedEvent(staker, bandId, areTokensVested, date));
 }
 
-export function unstakeStandard(staker: Address, bandId: BigInt): void {
-    unstake(staker, bandId, false);
+export function unstakeStandard(staker: Address, bandId: BigInt, date: BigInt): void {
+    unstake(staker, bandId, false, date);
 }
 
-export function unstakeVested(staker: Address, bandId: BigInt): void {
-    unstake(staker, bandId, true);
+export function unstakeVested(staker: Address, bandId: BigInt, date: BigInt): void {
+    unstake(staker, bandId, true, date);
 }
 
 export function deleteVestingUser(staker: Address): void {
     handleVestingUserDeleted(createVestingUserDeletedEvent(staker));
 }
 
-export function upgradeBand(staker: Address, bandId: BigInt, oldBandLevel: BigInt, newBandLevel: BigInt): void {
-    handleBandUpgraded(createBandUpgradedEvent(staker, bandId, oldBandLevel, newBandLevel));
+export function upgradeBand(
+    staker: Address,
+    bandId: BigInt,
+    oldBandLevel: BigInt,
+    newBandLevel: BigInt,
+    date: BigInt,
+): void {
+    handleBandUpgraded(createBandUpgradedEvent(staker, bandId, oldBandLevel, newBandLevel, date));
 }
 
-export function downgradeBand(staker: Address, bandId: BigInt, oldBandLevel: BigInt, newBandLevel: BigInt): void {
-    handleBandDowngraded(createBandDowngradedEvent(staker, bandId, oldBandLevel, newBandLevel));
+export function downgradeBand(
+    staker: Address,
+    bandId: BigInt,
+    oldBandLevel: BigInt,
+    newBandLevel: BigInt,
+    date: BigInt,
+): void {
+    handleBandDowngraded(createBandDowngradedEvent(staker, bandId, oldBandLevel, newBandLevel, date));
 }
 
-export function claimRewards(staker: Address, token: Address, amount: BigInt): void {
-    handleRewardsClaimed(createRewardsClaimedEvent(staker, token, amount));
+export function claimRewards(staker: Address, token: Address, amount: BigInt, date: BigInt): void {
+    handleRewardsClaimed(createRewardsClaimedEvent(staker, token, amount, date));
 }
