@@ -87,9 +87,13 @@ dataSources:
           language: wasm/assemblyscript
           file: ./src/mappings/staking.ts
           entities:
+              - StakingContract
               - Pool
+              - BandLevel
+              - Staker
+              - StakerRewards
               - Band
-              - FundDistribution
+              - FundsDistribution
           abis:
             - name: Staking
               file: ./abis/Staking.json
@@ -114,6 +118,8 @@ dataSources:
               handler: handleTotalPoolAmountSet
             - event: BandUpgradeStatusSet(bool)
               handler: handleBandUpgradeStatusSet
+            - event: DistributionStatusSet(bool)
+              handler: handleDistributionStatusSet
             - event: TokensWithdrawn(address,address,uint256)
               handler: handleTokensWithdrawn
             - event: DistributionCreated(address,uint256,uint16,uint16,uint256,uint256)

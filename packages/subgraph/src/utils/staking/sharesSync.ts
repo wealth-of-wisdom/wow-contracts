@@ -1,4 +1,4 @@
-import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts";
+import { Address, BigInt, log } from "@graphprotocol/graph-ts";
 import { StakingContract, Band, BandLevel, Pool, Staker } from "../../../generated/schema";
 import {
     getOrInitPool,
