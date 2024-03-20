@@ -94,12 +94,10 @@ export function updateSharesWhenStaked(
         const stakerSharesPerPool = staker.sharesPerPool;
         const stakersharePercentagesPerPool = staker.sharePercentagesPerPool;
         let lastPoolShareAmount = BIGINT_ZERO;
-        // const poolSharesPercentages = band.poolSharesPercentages;
 
         // Get band shares that user will receive instantly
         const bandShares = sharesInMonths[band.fixedMonths - 1];
         const totalAccessiblePools = accessiblePools.length;
-
         for (let i = 0; i < totalAccessiblePools; i++) {
             // Update total pool shares
             const pool = getOrInitPool(BigInt.fromString(accessiblePools[i]));
@@ -115,13 +113,6 @@ export function updateSharesWhenStaked(
                 .div(pool.totalSharesAmount)
                 .toBigDecimal();
 
-            // // Your Share % in pool
-            // // Your shares (does not change e.g. 10) / Pool shares (changing)
-            // poolSharesPercentages[i] = stakerSharesPerPool[i]
-            //     .times(BIGINT_PERCENTAGE_MULTIPLIER)
-            //     .div(pool.totalSharesAmount)
-            //     .toBigDecimal();
-
             if (totalAccessiblePools - 1 == i) lastPoolShareAmount = pool.totalSharesAmount;
         }
 
@@ -136,7 +127,9 @@ export function updateSharesWhenStaked(
 
         // Update total band shares
         // Should be sum of shares from all users that have said band
-        const totalBandShares = bandLevel.totalBandShares.plus(bandShares);
+        const totalBandShares = bandLevel.totalBandShares.plus(
+            bandShares.times(BigInt.fromI32(accessiblePools.length - 1)),
+        );
         bandLevel.totalBandShares = totalBandShares;
         bandLevel.save();
 
