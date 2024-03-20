@@ -1,4 +1,4 @@
-import { Address, BigInt } from "@graphprotocol/graph-ts";
+import { Address, BigDecimal, BigInt } from "@graphprotocol/graph-ts";
 import {
     StakingContract,
     Pool,
@@ -9,7 +9,7 @@ import {
     FundsDistribution,
 } from "../../generated/schema";
 import { Staking } from "../../generated/Staking/Staking";
-import { ADDRESS_ZERO, BIGINT_ZERO, StakingType } from "../utils/constants";
+import { ADDRESS_ZERO, BIGINT_ZERO, BIGDECIMAL_ZERO, StakingType } from "../utils/constants";
 import { stringifyStakingType } from "../utils/utils";
 /**
  * Retrieves or initializes a StakingContract entity.
@@ -99,7 +99,7 @@ export function getOrInitStaker(stakerAddress: Address): Staker {
         staker = new Staker(id);
         staker.bands = [];
         staker.sharesPerPool = new Array<BigInt>(stakingContract.totalPools).fill(BIGINT_ZERO);
-        staker.sharesPerPoolPercentage = new Array<BigInt>(stakingContract.totalPools).fill(BIGINT_ZERO);
+        staker.sharePercentagesPerPool = new Array<BigDecimal>(stakingContract.totalPools).fill(BIGDECIMAL_ZERO);
         staker.totalStaked = BIGINT_ZERO;
 
         staker.save();
@@ -141,6 +141,7 @@ export function getOrInitBand(bandId: BigInt): Band {
     let band = Band.load(id);
 
     if (!band) {
+        const stakingContract = getOrInitStakingContract();
         band = new Band(id);
         band.owner = ADDRESS_ZERO.toHex();
         band.stakingStartDate = BIGINT_ZERO;
@@ -149,8 +150,8 @@ export function getOrInitBand(bandId: BigInt): Band {
         band.stakingType = stringifyStakingType(StakingType.FIX);
         band.areTokensVested = false;
         band.sharesAmount = BIGINT_ZERO;
-        band.bandSharesPercentage = BIGINT_ZERO;
-        band.poolSharesPercentage = BIGINT_ZERO;
+        band.bandSharesPercentage = BIGDECIMAL_ZERO;
+        band.poolSharesPercentages = new Array<BigDecimal>(stakingContract.totalPools).fill(BIGDECIMAL_ZERO);
         band.save();
     }
 

@@ -327,7 +327,7 @@ type Staker @entity {
 
     # Additional fields
     sharesPerPool: [BigInt!]! # 9 numbers for each pool
-    sharesPerPoolPercentage: [BigInt!]! # 9 share numbers for each pool
+    sharePercentagesPerPool: [BigDecimal!]! # 9 share percentages for each pool
     totalStaked: BigInt! # calculated in band prices
 }
 
@@ -358,8 +358,8 @@ type Band @entity {
 
     # Additional fields
     sharesAmount: BigInt! # This is the amount of shares staker owns in each accessible pool
-    bandSharesPercentage: BigInt! # shares percentage for this band
-    poolSharesPercentage: BigInt! # shares percentage for pool
+    bandSharesPercentage: BigDecimal! # shares percentage for this band
+    poolSharesPercentages: [BigDecimal!]! # 9 shares percentages for pool
 }
 
 type FundsDistribution @entity {
