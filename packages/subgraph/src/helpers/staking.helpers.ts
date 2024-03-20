@@ -151,7 +151,7 @@ export function getOrInitBand(bandId: BigInt): Band {
         band.areTokensVested = false;
         band.sharesAmount = BIGINT_ZERO;
         band.bandSharesPercentage = BIGDECIMAL_ZERO;
-        band.poolSharesPercentages = new Array<BigDecimal>(stakingContract.totalPools).fill(BIGDECIMAL_ZERO);
+        // band.poolSharesPercentages = new Array<BigDecimal>(stakingContract.totalPools).fill(BIGDECIMAL_ZERO);
         band.save();
     }
 

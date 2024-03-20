@@ -359,7 +359,7 @@ type Band @entity {
     # Additional fields
     sharesAmount: BigInt! # This is the amount of shares staker owns in each accessible pool
     bandSharesPercentage: BigDecimal! # shares percentage for this band
-    poolSharesPercentages: [BigDecimal!]! # 9 shares percentages for pool
+    #poolSharesPercentages: [BigDecimal!]! # 9 shares percentages for pool
 }
 
 type FundsDistribution @entity {

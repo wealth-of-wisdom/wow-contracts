@@ -93,7 +93,8 @@ export function updateSharesWhenStaked(
     if (!syncExecuted && band.fixedMonths > 0) {
         const stakerSharesPerPool = staker.sharesPerPool;
         const stakersharePercentagesPerPool = staker.sharePercentagesPerPool;
-        const poolSharesPercentages = band.poolSharesPercentages;
+        let lastPoolShareAmount = BIGINT_ZERO;
+        // const poolSharesPercentages = band.poolSharesPercentages;
 
         // Get band shares that user will receive instantly
         const bandShares = sharesInMonths[band.fixedMonths - 1];
@@ -106,18 +107,22 @@ export function updateSharesWhenStaked(
             pool.save();
 
             stakerSharesPerPool[i] = stakerSharesPerPool[i].plus(bandShares);
-            stakersharePercentagesPerPool[i] = stakerSharesPerPool[i]
-                .times(BIGINT_PERCENTAGE_MULTIPLIER)
-                .div(stakerSharesPerPool[i])
-                .toBigDecimal();
 
             // Your Share % in pool
-            // Your shares (does not change e.g. 10) / Pool shares  (changing)
-            // bandShares * 100% /
-            poolSharesPercentages[i] = stakerSharesPerPool[i]
+            // Your shares (does not change e.g. 10) / Pool shares (changing)
+            stakersharePercentagesPerPool[i] = stakerSharesPerPool[i]
                 .times(BIGINT_PERCENTAGE_MULTIPLIER)
                 .div(pool.totalSharesAmount)
                 .toBigDecimal();
+
+            // // Your Share % in pool
+            // // Your shares (does not change e.g. 10) / Pool shares (changing)
+            // poolSharesPercentages[i] = stakerSharesPerPool[i]
+            //     .times(BIGINT_PERCENTAGE_MULTIPLIER)
+            //     .div(pool.totalSharesAmount)
+            //     .toBigDecimal();
+
+            if (totalAccessiblePools - 1 == i) lastPoolShareAmount = pool.totalSharesAmount;
         }
 
         // Update staker shares and percentage
@@ -127,7 +132,7 @@ export function updateSharesWhenStaked(
 
         // Update total pool
         // Should be the highest share in last pool
-        bandLevel.totalPoolShares = stakerSharesPerPool[totalAccessiblePools - 1];
+        bandLevel.totalPoolShares = lastPoolShareAmount;
 
         // Update total band shares
         // Should be sum of shares from all users that have said band
@@ -143,7 +148,8 @@ export function updateSharesWhenStaked(
         const bandSharesPercentage = bandShares.times(BIGINT_PERCENTAGE_MULTIPLIER).div(bandLevel.totalBandShares);
         band.bandSharesPercentage = bandSharesPercentage.toBigDecimal();
 
-        band.poolSharesPercentages = poolSharesPercentages;
+        // // Update share % in pool
+        // band.poolSharesPercentages = poolSharesPercentages;
         band.save();
     }
 }
