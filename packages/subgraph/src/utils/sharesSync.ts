@@ -114,9 +114,9 @@ export function updateSharesWhenStaked(
             // Your Share % in pool
             // Your shares (does not change e.g. 10) / Pool shares  (changing)
             // bandShares * 100% /
-            poolSharesPercentages[i] = bandShares
+            poolSharesPercentages[i] = stakerSharesPerPool[i]
                 .times(BIGINT_PERCENTAGE_MULTIPLIER)
-                .div(stakerSharesPerPool[i])
+                .div(pool.totalSharesAmount)
                 .toBigDecimal();
         }
 
