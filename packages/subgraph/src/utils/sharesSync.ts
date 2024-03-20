@@ -141,8 +141,6 @@ export function updateSharesWhenStaked(
         const bandSharesPercentage = bandShares.times(BIGINT_PERCENTAGE_MULTIPLIER).div(bandLevel.totalBandShares);
         band.bandSharesPercentage = bandSharesPercentage.toBigDecimal();
 
-        // // Update share % in pool
-        // band.poolSharesPercentages = poolSharesPercentages;
         band.save();
     }
 }
