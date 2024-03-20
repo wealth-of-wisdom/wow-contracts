@@ -106,8 +106,8 @@ export function updateSharesWhenStaked(
             pool.save();
 
             stakerSharesPerPool[i] = stakerSharesPerPool[i].plus(bandShares);
-            stakerSharesPerPoolPercentage[i] = stakerSharesPerPool[i].div(pool.totalSharesAmount);
-            poolShareTotalFromAllPools = poolShareTotalFromAllPools.times(BIGINT_1e8).plus(pool.totalSharesAmount);
+            stakerSharesPerPoolPercentage[i] = stakerSharesPerPool[i].times(BIGINT_1e8).div(pool.totalSharesAmount);
+            poolShareTotalFromAllPools = poolShareTotalFromAllPools.plus(pool.totalSharesAmount);
         }
 
         // Update staker shares and percentage
