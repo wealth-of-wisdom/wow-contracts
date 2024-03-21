@@ -1,6 +1,6 @@
 import { Address } from "@graphprotocol/graph-ts";
-import { StakingContract, Staker, StakerRewards } from "../../generated/schema";
-import { getOrInitStakerRewards } from "../helpers/staking.helpers";
+import { StakingContract, Staker, StakerRewards } from "../../../generated/schema";
+import { getOrInitStakerRewards } from "../../helpers/staking.helpers";
 
 /*//////////////////////////////////////////////////////////////////////////
                                   MAIN FUNCTION
