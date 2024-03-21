@@ -1,14 +1,14 @@
-import { Address, BigInt, BigDecimal, Bytes } from "@graphprotocol/graph-ts";
-import { StakingContract, Band, BandLevel, Pool, Staker } from "../../generated/schema";
+import { Address, BigInt, log } from "@graphprotocol/graph-ts";
+import { StakingContract, Band, BandLevel, Pool, Staker } from "../../../generated/schema";
 import {
     getOrInitPool,
     getOrInitBandLevel,
     getOrInitStaker,
     getOrInitBand,
     getOrInitStakingContract,
-} from "../helpers/staking.helpers";
-import { stringifyStakingType } from "../utils/utils";
-import { BIGINT_ONE, BIGINT_ZERO, BIGINT_PERCENTAGE_MULTIPLIER, StakingType } from "../utils/constants";
+} from "../../helpers/staking.helpers";
+import { stringifyStakingType } from "../utils";
+import { BIGINT_ONE, BIGINT_ZERO, StakingType } from "../constants";
 
 /*//////////////////////////////////////////////////////////////////////////
                             CLASSES TO RETURN VALUES
@@ -81,7 +81,6 @@ export function updateSharesForPoolsAndStakers(
 export function updateSharesWhenStaked(
     staker: Staker,
     band: Band,
-    bandLevel: BandLevel,
     sharesInMonths: BigInt[],
     accessiblePools: string[],
     executionDate: BigInt,
@@ -92,11 +91,14 @@ export function updateSharesWhenStaked(
     // If full sync was not executed, update only the shares for the staker and the pools that changed
     if (!syncExecuted && band.fixedMonths > 0) {
         const stakerSharesPerPool = staker.sharesPerPool;
-        const stakersharePercentagesPerPool = staker.sharePercentagesPerPool;
-        let lastPoolShareAmount = BIGINT_ZERO;
 
         // Get band shares that user will receive instantly
         const bandShares = sharesInMonths[band.fixedMonths - 1];
+
+        // Update band shares
+        band.sharesAmount = bandShares;
+        band.save();
+
         const totalAccessiblePools = accessiblePools.length;
         for (let i = 0; i < totalAccessiblePools; i++) {
             // Update total pool shares
@@ -105,43 +107,11 @@ export function updateSharesWhenStaked(
             pool.save();
 
             stakerSharesPerPool[i] = stakerSharesPerPool[i].plus(bandShares);
-
-            // Your Share % in pool
-            // Your shares (does not change e.g. 10) / Pool shares (changing)
-            stakersharePercentagesPerPool[i] = stakerSharesPerPool[i]
-                .times(BIGINT_PERCENTAGE_MULTIPLIER)
-                .toBigDecimal()
-                .div(pool.totalSharesAmount.toBigDecimal());
-
-            if (totalAccessiblePools - 1 == i) lastPoolShareAmount = pool.totalSharesAmount;
         }
 
-        // Update staker shares and percentage
+        // Update staker shares
         staker.sharesPerPool = stakerSharesPerPool;
-        staker.sharePercentagesPerPool = stakersharePercentagesPerPool;
         staker.save();
-
-        // Update total pool
-        // Should be the highest share in last pool
-        bandLevel.totalPoolShares = lastPoolShareAmount;
-
-        // Update total band shares
-        // Should be sum of shares from all users that have said band
-        const totalBandShares = bandLevel.totalBandShares.plus(
-            bandShares.times(BigInt.fromI32(accessiblePools.length - 1)),
-        );
-        bandLevel.totalBandShares = totalBandShares;
-        bandLevel.save();
-
-        // Update band shares
-        band.sharesAmount = bandShares;
-
-        // Your Share % in band
-        // Your fixed shares (only in this stake) / Band shares
-        const bandSharesPercentage = bandShares.times(BIGINT_PERCENTAGE_MULTIPLIER).div(bandLevel.totalBandShares);
-        band.bandSharesPercentage = bandSharesPercentage.toBigDecimal();
-
-        band.save();
     }
 }
 
@@ -257,6 +227,7 @@ function addMultipleBandSharesToPools(
     // Loop through all bands that staker owns and set the amount of shares
     for (let bandIndex = 0; bandIndex < bandsAmount; bandIndex++) {
         const bandId: BigInt = BigInt.fromString(bandIds[bandIndex]);
+
         const band: Band = getOrInitBand(bandId);
         const bandShares: BigInt = calculateBandShares(band, distributionDate, sharesInMonth);
 
@@ -324,7 +295,14 @@ function calculateBandShares(band: Band, endDateInSeconds: BigInt, sharesInMonth
 
         // If at least 1 month passed, calculate shares based on months
         if (monthsPassed.gt(BIGINT_ZERO)) {
-            bandShares = sharesInMonth[monthsPassed.minus(BIGINT_ONE).toI32()];
+            const totalMonths = BigInt.fromI32(sharesInMonth.length);
+
+            // If more months passed than we have in the array, use the last month
+            if (monthsPassed.gt(totalMonths)) {
+                bandShares = sharesInMonth[totalMonths.minus(BIGINT_ONE).toI32()];
+            } else {
+                bandShares = sharesInMonth[monthsPassed.minus(BIGINT_ONE).toI32()];
+            }
         }
     }
     // Else type is FIX
