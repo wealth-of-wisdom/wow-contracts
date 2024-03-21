@@ -49,7 +49,6 @@ import {
     updateSharesWhenUnstaked,
     StakerAndPoolShares,
 } from "../utils/sharesSync";
-import { claimRewardsFromUnclaimedAmount } from "../utils/rewardsClaim";
 import { BIGINT_ZERO, BIGINT_ONE } from "../utils/constants";
 
 export function handleInitialized(event: InitializedEvent): void {
@@ -182,12 +181,15 @@ export function handleRewardsDistributed(event: RewardsDistributedEvent): void {
 
     // Loop through each staker and update their rewards for USDT/USDC tokens
     for (let i = 0; i < stakersAmount; i++) {
-        const staker: Staker = getOrInitStaker(Address.fromString(stakers[i]));
-        const rewardAmount: BigInt = distribution.rewards[i];
-        const stakerAddress: Address = Address.fromString(staker.id);
-        const stakerRewards: StakerRewards = getOrInitStakerRewards(stakerAddress, distributionToken);
+        const rewards: BigInt = distribution.rewards[i];
 
-        stakerRewards.unclaimedAmount = stakerRewards.unclaimedAmount.plus(rewardAmount);
+        const stakerAddress: Address = Address.fromString(stakers[i]);
+        const staker: Staker = getOrInitStaker(stakerAddress);
+        staker.totalUnclaimedRewards = staker.totalUnclaimedRewards.plus(rewards);
+        staker.save();
+
+        const stakerRewards: StakerRewards = getOrInitStakerRewards(stakerAddress, distributionToken);
+        stakerRewards.unclaimedAmount = stakerRewards.unclaimedAmount.plus(rewards);
         stakerRewards.save();
     }
 }
@@ -202,14 +204,6 @@ export function handleStaked(event: StakedEvent): void {
     const stakingContract: StakingContract = getOrInitStakingContract();
     const staker: Staker = getOrInitStaker(event.params.user);
 
-    // If staker has no bands, it means staker is not added to all stakers array
-    if (BigInt.fromI32(staker.bands.length).equals(BIGINT_ZERO)) {
-        // Add staker to all stakers array
-        const stakerIds = stakingContract.stakers;
-        stakerIds.push(staker.id);
-        stakingContract.stakers = stakerIds;
-    }
-
     const bandLevel: BandLevel = getOrInitBandLevel(BigInt.fromI32(event.params.bandLevel));
     const band: Band = getOrInitBand(event.params.bandId);
 
@@ -221,19 +215,25 @@ export function handleStaked(event: StakedEvent): void {
     band.areTokensVested = event.params.areTokensVested;
     band.save();
 
-    const totalStakedFromAllUsers = stakingContract.totalStakedFromAllUsers;
+    // If staker has no bands, it means staker is not added to all stakers array
+    if (BigInt.fromI32(staker.bands.length).equals(BIGINT_ZERO)) {
+        // Add staker to all stakers array
+        const stakerIds = stakingContract.stakers;
+        stakerIds.push(staker.id);
+
+        stakingContract.stakers = stakerIds;
+    }
+
     stakingContract.nextBandId = stakingContract.nextBandId.plus(BIGINT_ONE);
-    stakingContract.totalStakedFromAllUsers = totalStakedFromAllUsers.plus(bandLevel.price);
+    stakingContract.totalStakedAmount = stakingContract.totalStakedAmount.plus(bandLevel.price);
     stakingContract.save();
 
-    // Update staker bands
+    // Update staker data
     const stakerBandIds = staker.bands;
     stakerBandIds.push(band.id);
-    staker.bands = stakerBandIds;
 
-    // Update staker total staked
-    const stakerTotalStaked = staker.totalStaked;
-    staker.totalStaked = stakerTotalStaked.plus(bandLevel.price);
+    staker.bands = stakerBandIds;
+    staker.stakedAmount = staker.stakedAmount.plus(bandLevel.price);
     staker.save();
 
     // Run full sync if 12 hours have passed since last sync
@@ -241,7 +241,6 @@ export function handleStaked(event: StakedEvent): void {
     updateSharesWhenStaked(
         staker,
         band,
-        bandLevel,
         stakingContract.sharesInMonths,
         bandLevel.accessiblePools,
         event.block.timestamp,
@@ -250,6 +249,7 @@ export function handleStaked(event: StakedEvent): void {
 
 export function handleUnstaked(event: UnstakedEvent): void {
     const stakingContract: StakingContract = getOrInitStakingContract();
+
     const staker: Staker = getOrInitStaker(event.params.user);
 
     const band: Band = getOrInitBand(event.params.bandId);
@@ -257,49 +257,58 @@ export function handleUnstaked(event: UnstakedEvent): void {
 
     const bandLevel: BandLevel = getOrInitBandLevel(BigInt.fromString(band.bandLevel));
 
-    const bandsAmount: number = staker.bands.length;
-    for (let i = 0; i < bandsAmount; i++) {
-        if (staker.bands[i] == band.id) {
-            // Swap last element with the one to be removed
-            // And then remove the last element
-            const stakerBandIds: string[] = staker.bands;
-            stakerBandIds[i] = stakerBandIds[stakerBandIds.length - 1];
-            stakerBandIds.pop();
-            staker.bands = stakerBandIds;
-            staker.save();
+    // Update total staked amount in the contract
+    stakingContract.totalStakedAmount = stakingContract.totalStakedAmount.minus(bandLevel.price);
+    stakingContract.save();
 
-            // Remove band
-            store.remove("Band", band.id);
-            break;
-        }
-    }
+    const stakerBandIds: string[] = staker.bands;
+    const bandsAmount: number = stakerBandIds.length;
+    const isStakerRemoved: boolean = bandsAmount == 1;
 
-    const isStakerRemoved: boolean = BigInt.fromI32(staker.bands.length).equals(BIGINT_ZERO);
+    // If only one band is staked, remove the band and staker
     if (isStakerRemoved) {
-        const stakersAmount: number = stakingContract.stakers.length;
+        const stakersIds: string[] = stakingContract.stakers;
+        const stakersAmount: number = stakersIds.length;
 
         // Remove staker from all stakers array and staker itself
         for (let i = 0; i < stakersAmount; i++) {
-            if (stakingContract.stakers[i] == staker.id) {
+            if (stakersIds[i] == staker.id) {
                 // Swap last element with the one to be removed
                 // And then remove the last element
-                const stakersIds: string[] = stakingContract.stakers;
+                // Use stakersIds.length instead of stakersAmount to avoid type error
                 stakersIds[i] = stakersIds[stakersIds.length - 1];
                 stakersIds.pop();
+
                 stakingContract.stakers = stakersIds;
                 stakingContract.save();
 
-                // Remove staker
+                // Remove staker and band
                 store.remove("Staker", staker.id);
+                store.remove("Band", band.id);
                 break;
             }
         }
     }
+    // Else remove the band and update staker data
+    else {
+        for (let i = 0; i < bandsAmount; i++) {
+            if (stakerBandIds[i] == band.id) {
+                // Swap last element with the one to be removed
+                // And then remove the last element
+                // Use stakerBandIds.length instead of bandsAmount to avoid type error
+                stakerBandIds[i] = stakerBandIds[stakerBandIds.length - 1];
+                stakerBandIds.pop();
 
-    // Claim USDT and USDC rewards.
-    // Unclaimed amount will be added to claimed amount
-    // Unclaimed amount is reset to zero
-    claimRewardsFromUnclaimedAmount(stakingContract, staker);
+                staker.bands = stakerBandIds;
+                staker.stakedAmount = staker.stakedAmount.minus(bandLevel.price);
+                staker.save();
+
+                // Remove band
+                store.remove("Band", band.id);
+                break;
+            }
+        }
+    }
 
     // Run full sync if 12 hours have passed since last sync
     // Else, update shares for the staker and the pools that changed
@@ -374,11 +383,19 @@ export function handleRewardsClaimed(event: RewardsClaimedEvent): void {
     // Sync shares if needed
     syncAllSharesEvery12Hours(event.block.timestamp);
 
-    const staker: Staker = getOrInitStaker(event.params.user);
-    const stakerAddress: Address = Address.fromString(staker.id);
-    const rewardToken: Address = Address.fromBytes(event.params.token);
+    const rewards = event.params.totalRewards;
 
+    // Update staker rewards data
+    const stakerAddress: Address = event.params.user;
+    const staker: Staker = getOrInitStaker(stakerAddress);
+    staker.totalUnclaimedRewards = staker.totalUnclaimedRewards.minus(rewards);
+    staker.totalClaimedRewards = staker.totalClaimedRewards.plus(rewards);
+    staker.save();
+
+    // Update single token rewards data
+    const rewardToken: Address = Address.fromBytes(event.params.token);
     const tokenRewards: StakerRewards = getOrInitStakerRewards(stakerAddress, rewardToken);
-    tokenRewards.claimedAmount = event.params.totalRewards;
+    tokenRewards.unclaimedAmount = BIGINT_ZERO;
+    tokenRewards.claimedAmount = tokenRewards.claimedAmount.plus(rewards);
     tokenRewards.save();
 }

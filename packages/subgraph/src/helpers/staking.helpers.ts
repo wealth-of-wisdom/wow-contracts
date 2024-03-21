@@ -34,7 +34,7 @@ export function getOrInitStakingContract(): StakingContract {
         stakingContract.areUpgradesEnabled = true;
         stakingContract.stakers = [];
         stakingContract.lastSharesSyncDate = BIGINT_ZERO;
-        stakingContract.totalStakedFromAllUsers = BIGINT_ZERO;
+        stakingContract.totalStakedAmount = BIGINT_ZERO;
 
         stakingContract.save();
     }
@@ -55,6 +55,7 @@ export function getOrInitPool(poolId: BigInt): Pool {
         stakingPool = new Pool(id);
         stakingPool.distributionPercentage = 0;
         stakingPool.totalSharesAmount = BIGINT_ZERO;
+        stakingPool.isolatedSharesAmount = BIGINT_ZERO;
 
         stakingPool.save();
     }
@@ -75,8 +76,6 @@ export function getOrInitBandLevel(level: BigInt): BandLevel {
         bandLevel = new BandLevel(id);
         bandLevel.price = BIGINT_ZERO;
         bandLevel.accessiblePools = [];
-        bandLevel.totalPoolShares = BIGINT_ZERO;
-        bandLevel.totalBandShares = BIGINT_ZERO;
 
         bandLevel.save();
     }
@@ -98,9 +97,11 @@ export function getOrInitStaker(stakerAddress: Address): Staker {
 
         staker = new Staker(id);
         staker.bands = [];
+        staker.stakedAmount = BIGINT_ZERO;
         staker.sharesPerPool = new Array<BigInt>(stakingContract.totalPools).fill(BIGINT_ZERO);
-        staker.sharePercentagesPerPool = new Array<BigDecimal>(stakingContract.totalPools).fill(BIGDEC_ZERO);
-        staker.totalStaked = BIGINT_ZERO;
+        staker.isolatedSharesPerPool = new Array<BigInt>(stakingContract.totalPools).fill(BIGINT_ZERO);
+        staker.totalUnclaimedRewards = BIGINT_ZERO;
+        staker.totalClaimedRewards = BIGINT_ZERO;
 
         staker.save();
     }
@@ -141,7 +142,6 @@ export function getOrInitBand(bandId: BigInt): Band {
     let band = Band.load(id);
 
     if (!band) {
-        const stakingContract = getOrInitStakingContract();
         band = new Band(id);
         band.owner = ADDRESS_ZERO.toHex();
         band.stakingStartDate = BIGINT_ZERO;
@@ -150,8 +150,6 @@ export function getOrInitBand(bandId: BigInt): Band {
         band.stakingType = stringifyStakingType(StakingType.FIX);
         band.areTokensVested = false;
         band.sharesAmount = BIGINT_ZERO;
-        band.bandSharesPercentage = BIGDEC_ZERO;
-        // band.poolSharesPercentages = new Array<BigDecimal>(stakingContract.totalPools).fill(BIGDEC_ZERO);
         band.save();
     }
 

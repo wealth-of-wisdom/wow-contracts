@@ -283,8 +283,8 @@ type StakingContract @entity {
     stakers: [Staker!]!
 
     # Additional fields
+    totalStakedAmount: BigInt! # Amount of WOW in contract (added from band prices)
     lastSharesSyncDate: BigInt!
-    totalStakedFromAllUsers: BigInt! # calculated in band prices
 }
 
 type Pool @entity {
@@ -297,7 +297,8 @@ type Pool @entity {
     distributionPercentage: Int!
 
     # Additional fields
-    totalSharesAmount: BigInt!
+    totalSharesAmount: BigInt! # Total shares in pool from this pool and higher pools
+    isolatedSharesAmount: BigInt! # Shares from bands only from this pool (shares from higher pools are not included)
 }
 
 type BandLevel @entity {
@@ -309,10 +310,6 @@ type BandLevel @entity {
     # Contract fields
     price: BigInt!
     accessiblePools: [Pool!]!
-
-    # Additional fields
-    totalPoolShares: BigInt!
-    totalBandShares: BigInt!
 }
 
 type Staker @entity {
@@ -326,9 +323,11 @@ type Staker @entity {
     rewards: [StakerRewards!]! @derivedFrom(field: "staker")
 
     # Additional fields
+    stakedAmount: BigInt! # Amount of WOW staked
     sharesPerPool: [BigInt!]! # 9 numbers for each pool
-    sharePercentagesPerPool: [BigDecimal!]! # 9 share percentages for each pool
-    totalStaked: BigInt! # calculated in band prices
+    isolatedSharesPerPool: [BigInt!]! # 9 numbers for each pool
+    totalUnclaimedRewards: BigInt!
+    totalClaimedRewards: BigInt!
 }
 
 type StakerRewards @entity {
@@ -357,9 +356,7 @@ type Band @entity {
     vestingPool: VestingPool
 
     # Additional fields
-    sharesAmount: BigInt! # This is the amount of shares staker owns in each accessible pool
-    bandSharesPercentage: BigDecimal! # shares percentage for this band
-    #poolSharesPercentages: [BigDecimal!]! # 9 shares percentages for pool
+    sharesAmount: BigInt! # This is the amount of shares band owns in each accessible pool
 }
 
 type FundsDistribution @entity {

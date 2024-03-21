@@ -81,7 +81,6 @@ export function updateSharesForPoolsAndStakers(
 export function updateSharesWhenStaked(
     staker: Staker,
     band: Band,
-    bandLevel: BandLevel,
     sharesInMonths: BigInt[],
     accessiblePools: string[],
     executionDate: BigInt,
@@ -89,58 +88,39 @@ export function updateSharesWhenStaked(
     // Try to sync all stakers shares
     const syncExecuted: boolean = syncAllSharesEvery12Hours(executionDate);
 
-    // If full sync was not executed, update only the shares for the staker and the pools that changed
-    if (!syncExecuted && band.fixedMonths > 0) {
-        const stakerSharesPerPool = staker.sharesPerPool;
-        const stakersharePercentagesPerPool = staker.sharePercentagesPerPool;
-        let lastPoolShareAmount = BIGINT_ZERO;
+    // If full sync was not executed and band is FIX,
+    // update only the shares for the staker and the pools that changed
+    if (!syncExecuted && band.stakingType == stringifyStakingType(StakingType.FIX)) {
+        const stakerSharesPerPool: BigInt[] = staker.sharesPerPool;
+        const stakerIsolatedSharesPerPool: BigInt[] = staker.isolatedSharesPerPool;
 
         // Get band shares that user will receive instantly
-        const bandShares = sharesInMonths[band.fixedMonths - 1];
-        const totalAccessiblePools = accessiblePools.length;
+        const bandShares: BigInt = sharesInMonths[band.fixedMonths - 1];
+        const totalAccessiblePools: number = accessiblePools.length;
+
         for (let i = 0; i < totalAccessiblePools; i++) {
-            // Update total pool shares
-            const pool = getOrInitPool(BigInt.fromString(accessiblePools[i]));
+            const pool: Pool = getOrInitPool(BigInt.fromString(accessiblePools[i]));
+
+            // If last pool, add shares to isolated shares
+            if (i == totalAccessiblePools - 1) {
+                pool.isolatedSharesAmount = pool.isolatedSharesAmount.plus(bandShares);
+                stakerIsolatedSharesPerPool[i] = stakerIsolatedSharesPerPool[i].plus(bandShares);
+            }
+
+            // Update pool shares
             pool.totalSharesAmount = pool.totalSharesAmount.plus(bandShares);
             pool.save();
 
             stakerSharesPerPool[i] = stakerSharesPerPool[i].plus(bandShares);
-
-            // Your Share % in pool
-            // Your shares (does not change e.g. 10) / Pool shares (changing)
-            stakersharePercentagesPerPool[i] = stakerSharesPerPool[i]
-                .times(BIGINT_PERCENTAGE_MULTIPLIER)
-                .toBigDecimal()
-                .div(pool.totalSharesAmount.toBigDecimal());
-
-            if (totalAccessiblePools - 1 == i) lastPoolShareAmount = pool.totalSharesAmount;
         }
 
-        // Update staker shares and percentage
+        // Update staker shares
         staker.sharesPerPool = stakerSharesPerPool;
-        staker.sharePercentagesPerPool = stakersharePercentagesPerPool;
+        staker.isolatedSharesPerPool = stakerIsolatedSharesPerPool;
         staker.save();
-
-        // Update total pool
-        // Should be the highest share in last pool
-        bandLevel.totalPoolShares = lastPoolShareAmount;
-
-        // Update total band shares
-        // Should be sum of shares from all users that have said band
-        const totalBandShares = bandLevel.totalBandShares.plus(
-            bandShares.times(BigInt.fromI32(accessiblePools.length - 1)),
-        );
-        bandLevel.totalBandShares = totalBandShares;
-        bandLevel.save();
 
         // Update band shares
         band.sharesAmount = bandShares;
-
-        // Your Share % in band
-        // Your fixed shares (only in this stake) / Band shares
-        const bandSharesPercentage = bandShares.times(BIGINT_PERCENTAGE_MULTIPLIER).div(bandLevel.totalBandShares);
-        band.bandSharesPercentage = bandSharesPercentage.toBigDecimal();
-
         band.save();
     }
 }
@@ -159,6 +139,12 @@ export function updateSharesWhenUnstaked(
         // Update total shares for each pool
         for (let i = 0; i < totalAccessiblePools; i++) {
             const pool: Pool = getOrInitPool(BigInt.fromString(accessiblePools[i]));
+
+            // If last pool, remove shares from isolated shares
+            if (i == totalAccessiblePools - 1) {
+                pool.isolatedSharesAmount = pool.isolatedSharesAmount.minus(bandShares);
+            }
+
             pool.totalSharesAmount = pool.totalSharesAmount.minus(bandShares);
             pool.save();
         }
@@ -166,13 +152,20 @@ export function updateSharesWhenUnstaked(
         // If staker was not removed, update staker shares
         if (staker) {
             const stakerSharesPerPool: BigInt[] = staker.sharesPerPool;
+            const stakerIsolatedSharesPerPool: BigInt[] = staker.isolatedSharesPerPool;
 
             // Update staker shares for each accessible pool
             for (let i = 0; i < totalAccessiblePools; i++) {
+                // If last pool, remove shares from isolated shares
+                if (i == totalAccessiblePools - 1) {
+                    stakerIsolatedSharesPerPool[i] = stakerIsolatedSharesPerPool[i].minus(bandShares);
+                }
+
                 stakerSharesPerPool[i] = stakerSharesPerPool[i].minus(bandShares);
             }
 
             staker.sharesPerPool = stakerSharesPerPool;
+            staker.isolatedSharesPerPool = stakerIsolatedSharesPerPool;
             staker.save();
         }
     }
