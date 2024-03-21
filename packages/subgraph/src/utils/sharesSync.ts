@@ -110,8 +110,8 @@ export function updateSharesWhenStaked(
             // Your shares (does not change e.g. 10) / Pool shares (changing)
             stakersharePercentagesPerPool[i] = stakerSharesPerPool[i]
                 .times(BIGINT_PERCENTAGE_MULTIPLIER)
-                .div(pool.totalSharesAmount)
-                .toBigDecimal();
+                .toBigDecimal()
+                .div(pool.totalSharesAmount.toBigDecimal());
 
             if (totalAccessiblePools - 1 == i) lastPoolShareAmount = pool.totalSharesAmount;
         }
