@@ -1,4 +1,4 @@
-import { Address, BigInt, store } from "@graphprotocol/graph-ts";
+import { Address, BigInt, store, log } from "@graphprotocol/graph-ts";
 import {
     Initialized as InitializedEvent,
     PoolSet as PoolSetEvent,
@@ -10,6 +10,7 @@ import {
     TotalBandLevelsAmountSet as TotalBandLevelsAmountSetEvent,
     TotalPoolAmountSet as TotalPoolAmountSetEvent,
     BandUpgradeStatusSet as BandUpgradeStatusSetEvent,
+    DistributionStatusSet as DistributionStatusSetEvent,
     TokensWithdrawn as TokensWithdrawnEvent,
     DistributionCreated as DistributionCreatedEvent,
     RewardsDistributed as RewardsDistributedEvent,
@@ -41,15 +42,15 @@ import {
     getOrInitFundsDistribution,
 } from "../helpers/staking.helpers";
 import { stringifyStakingType } from "../utils/utils";
-import { calculateRewards } from "../utils/rewardsCalculation";
+import { calculateRewards } from "../utils/staking/rewardsCalculation";
 import {
     syncAllSharesEvery12Hours,
     updateSharesForPoolsAndStakers,
     updateSharesWhenStaked,
     updateSharesWhenUnstaked,
     StakerAndPoolShares,
-} from "../utils/sharesSync";
-import { claimRewardsFromUnclaimedAmount } from "../utils/rewardsClaim";
+} from "../utils/staking/sharesSync";
+import { claimRewardsFromUnclaimedAmount } from "../utils/staking/rewardsClaim";
 import { BIGINT_ZERO, BIGINT_ONE } from "../utils/constants";
 
 export function handleInitialized(event: InitializedEvent): void {
@@ -135,6 +136,13 @@ export function handleBandUpgradeStatusSet(event: BandUpgradeStatusSetEvent): vo
     const stakingContract: StakingContract = getOrInitStakingContract();
 
     stakingContract.areUpgradesEnabled = event.params.enabled;
+    stakingContract.save();
+}
+
+export function handleDistributionStatusSetEvent(event: DistributionStatusSetEvent): void {
+    const stakingContract: StakingContract = getOrInitStakingContract();
+
+    stakingContract.isDistributionInProgress = event.params.inProgress;
     stakingContract.save();
 }
 
