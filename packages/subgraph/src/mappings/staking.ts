@@ -1,4 +1,4 @@
-import { Address, BigInt, store } from "@graphprotocol/graph-ts";
+import { Address, BigInt, store, log } from "@graphprotocol/graph-ts";
 import {
     Initialized as InitializedEvent,
     PoolSet as PoolSetEvent,
@@ -39,15 +39,21 @@ import {
     getOrInitStakerRewards,
     getOrInitBand,
     getOrInitFundsDistribution,
+    addStakerToStakingContract,
+    removeStakerFromStakingContract,
+    addBandToStakerBands,
+    removeBandFromStakerBands,
+    removeAllBands,
+    removeAllStakerRewards,
 } from "../helpers/staking.helpers";
-import { stringifyStakingType } from "../utils/utils";
+import { stakingTypeFIX, stringifyStakingType, StakerAndPoolShares } from "../utils/utils";
 import { calculateRewards } from "../utils/rewardsCalculation";
 import {
-    syncAllSharesEvery12Hours,
-    updateSharesForPoolsAndStakers,
-    updateSharesWhenStaked,
-    updateSharesWhenUnstaked,
-    StakerAndPoolShares,
+    syncFlexiSharesEvery12Hours,
+    updateFlexiSharesDuringSync,
+    addFixedShares,
+    removeFixedShares,
+    removeFlexiShares,
 } from "../utils/sharesSync";
 import { BIGINT_ZERO, BIGINT_ONE } from "../utils/constants";
 
@@ -150,7 +156,7 @@ export function handleDistributionCreated(event: DistributionCreatedEvent): void
     stakingContract.save();
 
     // Update shares for stakers and pools
-    const sharesData: StakerAndPoolShares = updateSharesForPoolsAndStakers(stakingContract, event.block.timestamp);
+    const sharesData: StakerAndPoolShares = updateFlexiSharesDuringSync(stakingContract, event.block.timestamp);
 
     // Calculate rewards for stakers
     const stakerRewards: BigInt[] = calculateRewards(stakingContract, event.params.amount, sharesData);
@@ -197,10 +203,13 @@ export function handleRewardsDistributed(event: RewardsDistributedEvent): void {
 // Gelato will call triggerSharesSync() function
 // If more than 24 hours have passed since the last shares sync
 export function handleSharesSyncTriggered(event: SharesSyncTriggeredEvent): void {
-    syncAllSharesEvery12Hours(event.block.timestamp);
+    syncFlexiSharesEvery12Hours(event.block.timestamp);
 }
 
 export function handleStaked(event: StakedEvent): void {
+    // Sync shares if needed
+    syncFlexiSharesEvery12Hours(event.block.timestamp);
+
     const stakingContract: StakingContract = getOrInitStakingContract();
     const staker: Staker = getOrInitStaker(event.params.user);
 
@@ -215,155 +224,73 @@ export function handleStaked(event: StakedEvent): void {
     band.areTokensVested = event.params.areTokensVested;
     band.save();
 
-    // If staker has no bands, it means staker is not added to all stakers array
-    if (BigInt.fromI32(staker.bands.length).equals(BIGINT_ZERO)) {
-        // Add staker to all stakers array
-        const stakerIds = stakingContract.stakers;
-        stakerIds.push(staker.id);
-
-        stakingContract.stakers = stakerIds;
-    }
-
+    // Update staking contract data
+    addStakerToStakingContract(stakingContract, staker);
     stakingContract.nextBandId = stakingContract.nextBandId.plus(BIGINT_ONE);
     stakingContract.totalStakedAmount = stakingContract.totalStakedAmount.plus(bandLevel.price);
     stakingContract.save();
 
     // Update staker data
-    const stakerBandIds = staker.bands;
-    stakerBandIds.push(band.id);
-
-    staker.bands = stakerBandIds;
+    addBandToStakerBands(staker, band);
+    staker.bandsCount = staker.bandsCount + 1;
     staker.stakedAmount = staker.stakedAmount.plus(bandLevel.price);
     staker.save();
 
     // Run full sync if 12 hours have passed since last sync
     // Else, update shares for the staker and the pools that changed
-    updateSharesWhenStaked(
-        staker,
-        band,
-        stakingContract.sharesInMonths,
-        bandLevel.accessiblePools,
-        event.block.timestamp,
-    );
+    addFixedShares(staker, band, stakingContract.sharesInMonths, bandLevel.accessiblePools);
 }
 
 export function handleUnstaked(event: UnstakedEvent): void {
-    const stakingContract: StakingContract = getOrInitStakingContract();
-
     const staker: Staker = getOrInitStaker(event.params.user);
-
     const band: Band = getOrInitBand(event.params.bandId);
-    const bandShares: BigInt = band.sharesAmount;
-
     const bandLevel: BandLevel = getOrInitBandLevel(BigInt.fromString(band.bandLevel));
 
     // Update total staked amount in the contract
+    const stakingContract: StakingContract = getOrInitStakingContract();
     stakingContract.totalStakedAmount = stakingContract.totalStakedAmount.minus(bandLevel.price);
     stakingContract.save();
 
-    const stakerBandIds: string[] = staker.bands;
-    const bandsAmount: number = stakerBandIds.length;
-    const isStakerRemoved: boolean = bandsAmount == 1;
+    const isStakerRemoved: boolean = staker.bandsCount == 1;
 
     // If only one band is staked, remove the band and staker
     if (isStakerRemoved) {
-        const stakersIds: string[] = stakingContract.stakers;
-        const stakersAmount: number = stakersIds.length;
-
-        // Remove staker from all stakers array and staker itself
-        for (let i = 0; i < stakersAmount; i++) {
-            if (stakersIds[i] == staker.id) {
-                // Swap last element with the one to be removed
-                // And then remove the last element
-                // Use stakersIds.length instead of stakersAmount to avoid type error
-                stakersIds[i] = stakersIds[stakersIds.length - 1];
-                stakersIds.pop();
-
-                stakingContract.stakers = stakersIds;
-                stakingContract.save();
-
-                // Remove staker and band
-                store.remove("Staker", staker.id);
-                store.remove("Band", band.id);
-                break;
-            }
-        }
+        removeStakerFromStakingContract(stakingContract, staker);
     }
     // Else remove the band and update staker data
     else {
-        for (let i = 0; i < bandsAmount; i++) {
-            if (stakerBandIds[i] == band.id) {
-                // Swap last element with the one to be removed
-                // And then remove the last element
-                // Use stakerBandIds.length instead of bandsAmount to avoid type error
-                stakerBandIds[i] = stakerBandIds[stakerBandIds.length - 1];
-                stakerBandIds.pop();
-
-                staker.bands = stakerBandIds;
-                staker.stakedAmount = staker.stakedAmount.minus(bandLevel.price);
-                staker.save();
-
-                // Remove band
-                store.remove("Band", band.id);
-                break;
-            }
-        }
+        removeBandFromStakerBands(staker, band, bandLevel.price);
     }
 
+    // Remove band
+    store.remove("Band", band.id);
+
     // Run full sync if 12 hours have passed since last sync
-    // Else, update shares for the staker and the pools that changed
-    updateSharesWhenUnstaked(
-        isStakerRemoved ? null : staker,
-        bandShares,
-        bandLevel.accessiblePools,
-        event.block.timestamp,
-    );
+    // Else, update shares for the staker, band and the pools that changed
+    const syncExecuted: boolean = syncFlexiSharesEvery12Hours(event.block.timestamp);
+
+    if (band.stakingType == stakingTypeFIX) {
+        removeFixedShares(isStakerRemoved ? null : staker, band, bandLevel.accessiblePools);
+    } else if (!syncExecuted) {
+        removeFlexiShares(staker, band, bandLevel.accessiblePools);
+    }
 }
 
 export function handleVestingUserDeleted(event: VestingUserDeletedEvent): void {
     const stakingContract: StakingContract = getOrInitStakingContract();
     const staker: Staker = getOrInitStaker(event.params.user);
-    const stakerAddress: Address = Address.fromString(staker.id);
 
-    const usdcToken: Address = Address.fromBytes(stakingContract.usdcToken);
-    const usdcRewards: StakerRewards = getOrInitStakerRewards(stakerAddress, usdcToken);
+    // Remove staker from the contract
+    removeStakerFromStakingContract(stakingContract, staker);
 
-    const usdtToken: Address = Address.fromBytes(stakingContract.usdtToken);
-    const usdtRewards: StakerRewards = getOrInitStakerRewards(stakerAddress, usdtToken);
+    removeAllBands(staker);
 
-    const stakersAmount: number = stakingContract.stakers.length;
-    for (let i = 0; i < stakersAmount; i++) {
-        if (stakingContract.stakers[i] == staker.id) {
-            // Swap last element with the one to be removed
-            // And then remove the last element
-            const stakersIds: string[] = stakingContract.stakers;
-            stakersIds[i] = stakersIds[stakersIds.length - 1];
-            stakersIds.pop();
-            stakingContract.stakers = stakersIds;
-            stakingContract.save();
-
-            break;
-        }
-    }
-
-    const stakerBands: string[] = staker.bands;
-    const bandsAmount: number = stakerBands.length;
-
-    // Remove bands
-    for (let i = 0; i < bandsAmount; i++) {
-        const band: Band = getOrInitBand(BigInt.fromString(staker.bands[i]));
-        store.remove("Band", band.id);
-    }
-
-    // Remove staker and accumulated rewards
-    store.remove("StakerRewards", usdtRewards.id);
-    store.remove("StakerRewards", usdcRewards.id);
-    store.remove("Staker", staker.id);
+    removeAllStakerRewards(stakingContract, staker);
 }
 
 export function handleBandUpgraded(event: BandUpgradedEvent): void {
     // Sync shares if needed
-    syncAllSharesEvery12Hours(event.block.timestamp);
+    syncFlexiSharesEvery12Hours(event.block.timestamp);
 
     const band: Band = getOrInitBand(event.params.bandId);
     band.bandLevel = getOrInitBandLevel(BigInt.fromI32(event.params.newBandLevel)).id;
@@ -372,7 +299,7 @@ export function handleBandUpgraded(event: BandUpgradedEvent): void {
 
 export function handleBandDowngraded(event: BandDowngradedEvent): void {
     // Sync shares if needed
-    syncAllSharesEvery12Hours(event.block.timestamp);
+    syncFlexiSharesEvery12Hours(event.block.timestamp);
 
     const band: Band = getOrInitBand(event.params.bandId);
     band.bandLevel = getOrInitBandLevel(BigInt.fromI32(event.params.newBandLevel)).id;
@@ -381,7 +308,7 @@ export function handleBandDowngraded(event: BandDowngradedEvent): void {
 
 export function handleRewardsClaimed(event: RewardsClaimedEvent): void {
     // Sync shares if needed
-    syncAllSharesEvery12Hours(event.block.timestamp);
+    syncFlexiSharesEvery12Hours(event.block.timestamp);
 
     const rewards = event.params.totalRewards;
 

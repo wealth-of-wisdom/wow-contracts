@@ -1,13 +1,14 @@
 import { BigInt } from "@graphprotocol/graph-ts";
 import { StakingContract, Pool } from "../../generated/schema";
 import { getOrInitPool } from "../helpers/staking.helpers";
-import { StakerAndPoolShares } from "./sharesSync";
+import { StakerAndPoolShares } from "../utils/utils";
 import { BIGINT_ZERO } from "../utils/constants";
 
 /*//////////////////////////////////////////////////////////////////////////
                                   MAIN FUNCTION
 //////////////////////////////////////////////////////////////////////////*/
 
+// @todo add the FIX type shares
 export function calculateRewards(staking: StakingContract, amount: BigInt, sharesData: StakerAndPoolShares): BigInt[] {
     // Get amount of pools (cache value)
     const totalPools: BigInt = BigInt.fromI32(staking.totalPools);

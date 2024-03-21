@@ -297,8 +297,10 @@ type Pool @entity {
     distributionPercentage: Int!
 
     # Additional fields
-    totalSharesAmount: BigInt! # Total shares in pool from this pool and higher pools
-    isolatedSharesAmount: BigInt! # Shares from bands only from this pool (shares from higher pools are not included)
+    totalFixedSharesAmount: BigInt! # Total fixed shares in pool from this pool and higher pools
+    totalFlexiSharesAmount: BigInt! # Total flexi shares in pool from this pool and higher pools
+    isolatedFixedSharesAmount: BigInt! # Fixed shares from bands only from this pool (shares from higher pools are not included)
+    isolatedFlexiSharesAmount: BigInt! # Flexi shares from bands only from this pool (shares from higher pools are not included)
 }
 
 type BandLevel @entity {
@@ -319,13 +321,17 @@ type Staker @entity {
     id: ID!
 
     # Contract fields
-    bands: [Band!]!
+    fixedBands: [Band!]!
+    flexiBands: [Band!]!
+    bandsCount: Int!
     rewards: [StakerRewards!]! @derivedFrom(field: "staker")
 
     # Additional fields
     stakedAmount: BigInt! # Amount of WOW staked
-    sharesPerPool: [BigInt!]! # 9 numbers for each pool
-    isolatedSharesPerPool: [BigInt!]! # 9 numbers for each pool
+    fixedSharesPerPool: [BigInt!]! # 9 numbers for each pool
+    flexiSharesPerPool: [BigInt!]! # 9 numbers for each pool
+    isolatedFixedSharesPerPool: [BigInt!]! # 9 numbers for each pool
+    isolatedFlexiSharesPerPool: [BigInt!]! # 9 numbers for each pool
     totalUnclaimedRewards: BigInt!
     totalClaimedRewards: BigInt!
 }
@@ -339,6 +345,8 @@ type StakerRewards @entity {
     # Contract fields
     staker: Staker!
     token: Bytes!
+
+    # Additional fields
     unclaimedAmount: BigInt!
     claimedAmount: BigInt!
 }
