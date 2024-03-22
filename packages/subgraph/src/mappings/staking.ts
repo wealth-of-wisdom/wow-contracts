@@ -45,6 +45,7 @@ import {
     removeBandFromStakerBands,
     removeAllBands,
     removeAllStakerRewards,
+    changeBandLevel,
 } from "../helpers/staking.helpers";
 import { stakingTypeFIX, stringifyStakingType, StakerAndPoolShares } from "../utils/utils";
 import { calculateRewards } from "../utils/rewardsCalculation";
@@ -237,8 +238,9 @@ export function handleStaked(event: StakedEvent): void {
     staker.stakedAmount = staker.stakedAmount.plus(bandLevel.price);
     staker.save();
 
-    // Run full sync if 12 hours have passed since last sync
-    // Else, update shares for the staker and the pools that changed
+    // Recalculate fixed shares if band is with type FIX
+    // We don't need to update flexi shares because they are updated every 12-24 hours
+    // And the staker will have the same amount of shares as before because no months have passed
     addFixedShares(staker, band, stakingContract.sharesInMonths, bandLevel.accessiblePools);
 }
 
@@ -270,9 +272,12 @@ export function handleUnstaked(event: UnstakedEvent): void {
     // Else, update shares for the staker, band and the pools that changed
     const syncExecuted: boolean = syncFlexiSharesEvery12Hours(event.block.timestamp);
 
+    // If the removed band is with type FIX, remove the fixed shares
     if (band.stakingType == stakingTypeFIX) {
         removeFixedShares(isStakerRemoved ? null : staker, band, bandLevel.accessiblePools);
-    } else if (!syncExecuted) {
+    }
+    // Else if type is FLEXI and sync was not executed, update shares
+    else if (!syncExecuted) {
         removeFlexiShares(staker, band, bandLevel.accessiblePools);
     }
 }
@@ -293,24 +298,17 @@ export function handleBandUpgraded(event: BandUpgradedEvent): void {
     // Sync shares if needed
     syncFlexiSharesEvery12Hours(event.block.timestamp);
 
-    const band: Band = getOrInitBand(event.params.bandId);
-    band.bandLevel = getOrInitBandLevel(BigInt.fromI32(event.params.newBandLevel)).id;
-    band.save();
+    changeBandLevel(event.params.user, event.params.bandId, event.params.oldBandLevel, event.params.newBandLevel);
 }
 
 export function handleBandDowngraded(event: BandDowngradedEvent): void {
     // Sync shares if needed
     syncFlexiSharesEvery12Hours(event.block.timestamp);
 
-    const band: Band = getOrInitBand(event.params.bandId);
-    band.bandLevel = getOrInitBandLevel(BigInt.fromI32(event.params.newBandLevel)).id;
-    band.save();
+    changeBandLevel(event.params.user, event.params.bandId, event.params.oldBandLevel, event.params.newBandLevel);
 }
 
 export function handleRewardsClaimed(event: RewardsClaimedEvent): void {
-    // Sync shares if needed
-    syncFlexiSharesEvery12Hours(event.block.timestamp);
-
     const rewards = event.params.totalRewards;
 
     // Update staker rewards data

@@ -306,3 +306,24 @@ export function removeAllStakerRewards(stakingContract: StakingContract, staker:
     const usdcRewards: StakerRewards = getOrInitStakerRewards(stakerAddress, usdcToken);
     store.remove("StakerRewards", usdcRewards.id);
 }
+
+export function changeBandLevel(stakerAddress: Address, bandId: BigInt, oldBandLvl: number, newBandLvl: number): void {
+    const oldBandLevel: BandLevel = getOrInitBandLevel(BigInt.fromString(oldBandLvl.toString()));
+    const newBandLevel: BandLevel = getOrInitBandLevel(BigInt.fromString(newBandLvl.toString()));
+
+    // Update total staked amount in the contract
+    const stakingContract: StakingContract = getOrInitStakingContract();
+    stakingContract.totalStakedAmount = stakingContract.totalStakedAmount
+        .minus(oldBandLevel.price)
+        .plus(newBandLevel.price);
+    stakingContract.save();
+
+    // Update staker staked amount
+    const staker: Staker = getOrInitStaker(stakerAddress);
+    staker.stakedAmount = staker.stakedAmount.minus(oldBandLevel.price).plus(newBandLevel.price);
+    staker.save();
+
+    const band: Band = getOrInitBand(bandId);
+    band.bandLevel = newBandLevel.id;
+    band.save();
+}
