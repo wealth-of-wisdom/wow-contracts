@@ -51,6 +51,7 @@ import { calculateRewards } from "../utils/rewardsCalculation";
 import {
     syncFlexiSharesEvery12Hours,
     updateFlexiSharesDuringSync,
+    calculateAllShares,
     addFixedShares,
     removeFixedShares,
     removeFlexiShares,
@@ -156,7 +157,7 @@ export function handleDistributionCreated(event: DistributionCreatedEvent): void
     stakingContract.save();
 
     // Update shares for stakers and pools
-    const sharesData: StakerAndPoolShares = updateFlexiSharesDuringSync(stakingContract, event.block.timestamp);
+    const sharesData: StakerAndPoolShares = calculateAllShares(stakingContract, event.block.timestamp);
 
     // Calculate rewards for stakers
     const stakerRewards: BigInt[] = calculateRewards(stakingContract, event.params.amount, sharesData);

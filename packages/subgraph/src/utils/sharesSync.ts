@@ -177,6 +177,36 @@ export function syncFlexiSharesEvery12Hours(currentTime: BigInt): boolean {
     return false;
 }
 
+export function calculateAllShares(stakingContract: StakingContract, distributionDate: BigInt): StakerAndPoolShares {
+    // Update flexi shares for stakers, bands and pools
+    const sharesData: StakerAndPoolShares = updateFlexiSharesDuringSync(stakingContract, distributionDate);
+    const totalPools: number = stakingContract.totalPools;
+    const stakers: string[] = sharesData.stakers;
+    const stakersCount: number = stakers.length;
+    const sharesForStakers: BigInt[][] = sharesData.sharesForStakers;
+    const sharesForPools: BigInt[] = sharesData.sharesForPools;
+
+    // Loop through all stakers and pools to add fixed shares to the stakers
+    for (let stakerIndex = 0; stakerIndex < stakersCount; stakerIndex++) {
+        const staker: Staker = getOrInitStaker(Address.fromString(stakers[stakerIndex]));
+        const fixedSharesPerPool: BigInt[] = staker.fixedSharesPerPool;
+
+        for (let poolIndex = 0; poolIndex < totalPools; poolIndex++) {
+            sharesForStakers[stakerIndex][poolIndex] = sharesForStakers[stakerIndex][poolIndex].plus(
+                fixedSharesPerPool[poolIndex],
+            );
+        }
+    }
+
+    // Loop through all pools and add fixed shares to the pools
+    for (let poolIndex = 0; poolIndex < totalPools; poolIndex++) {
+        const pool: Pool = getOrInitPool(BigInt.fromI32(poolIndex + 1));
+        sharesForPools[poolIndex] = sharesForPools[poolIndex].plus(pool.totalFixedSharesAmount);
+    }
+
+    return new StakerAndPoolShares(stakers, sharesForStakers, sharesForPools);
+}
+
 // Update shares for pools and stakers when sync or distribution starts
 export function updateFlexiSharesDuringSync(staking: StakingContract, distributionDate: BigInt): StakerAndPoolShares {
     // Get shares for each month
