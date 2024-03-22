@@ -1,20 +1,14 @@
-import { Address, BigInt, BigDecimal, Bytes } from "@graphprotocol/graph-ts";
-import { StakingContract, Band, BandLevel, Pool, Staker } from "../../generated/schema";
+import { Address, BigInt, log } from "@graphprotocol/graph-ts";
+import { StakingContract, Band, BandLevel, Pool, Staker } from "../../../generated/schema";
 import {
     getOrInitPool,
     getOrInitBandLevel,
     getOrInitStaker,
     getOrInitBand,
     getOrInitStakingContract,
-} from "../helpers/staking.helpers";
-import {
-    stakingTypeFIX,
-    stakingTypeFLEXI,
-    stringifyStakingType,
-    StakerAndPoolShares,
-    StakerShares,
-} from "../utils/utils";
-import { BIGINT_ONE, BIGINT_ZERO, BIGINT_PERCENTAGE_MULTIPLIER, StakingType } from "../utils/constants";
+} from "../../helpers/staking.helpers";
+import { stringifyStakingType, stakingTypeFIX, StakerShares, StakerAndPoolShares } from "../utils";
+import { BIGINT_ONE, BIGINT_ZERO, StakingType } from "../constants";
 
 /*//////////////////////////////////////////////////////////////////////////
                             CALLED ON STAKE/UNSTAKE
@@ -314,6 +308,7 @@ function addMultipleBandSharesToPools(
     // Loop through all bands that staker owns and set the amount of shares
     for (let bandIndex = 0; bandIndex < bandsAmount; bandIndex++) {
         const bandId: BigInt = BigInt.fromString(bandIds[bandIndex]);
+
         const band: Band = getOrInitBand(bandId);
         const bandShares: BigInt = calculateBandShares(band, distributionDate, sharesInMonth);
 

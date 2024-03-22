@@ -36,7 +36,8 @@ export function getOrInitStakingContract(): StakingContract {
         stakingContract.percentagePrecision = 0;
         stakingContract.totalPools = 0;
         stakingContract.totalBandLevels = 0;
-        stakingContract.areUpgradesEnabled = true;
+        stakingContract.areUpgradesEnabled = false;
+        stakingContract.isDistributionInProgress = false;
         stakingContract.stakers = [];
         stakingContract.lastSharesSyncDate = BIGINT_ZERO;
         stakingContract.totalStakedAmount = BIGINT_ZERO;

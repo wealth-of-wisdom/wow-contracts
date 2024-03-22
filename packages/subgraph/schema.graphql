@@ -280,6 +280,7 @@ type StakingContract @entity {
     totalPools: Int!
     totalBandLevels: Int!
     areUpgradesEnabled: Boolean!
+    isDistributionInProgress: Boolean!
     stakers: [Staker!]!
 
     # Additional fields

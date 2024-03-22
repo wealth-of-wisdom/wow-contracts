@@ -1,8 +1,8 @@
 import { BigInt } from "@graphprotocol/graph-ts";
-import { StakingContract, Pool } from "../../generated/schema";
-import { getOrInitPool } from "../helpers/staking.helpers";
-import { StakerAndPoolShares } from "../utils/utils";
-import { BIGINT_ZERO } from "../utils/constants";
+import { StakingContract, Pool } from "../../../generated/schema";
+import { getOrInitPool } from "../../helpers/staking.helpers";
+import { StakerAndPoolShares } from "../utils";
+import { BIGINT_ZERO } from "../constants";
 
 /*//////////////////////////////////////////////////////////////////////////
                                   MAIN FUNCTION

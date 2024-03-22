@@ -10,6 +10,7 @@ import {
     TotalBandLevelsAmountSet as TotalBandLevelsAmountSetEvent,
     TotalPoolAmountSet as TotalPoolAmountSetEvent,
     BandUpgradeStatusSet as BandUpgradeStatusSetEvent,
+    DistributionStatusSet as DistributionStatusSetEvent,
     TokensWithdrawn as TokensWithdrawnEvent,
     DistributionCreated as DistributionCreatedEvent,
     RewardsDistributed as RewardsDistributedEvent,
@@ -48,15 +49,14 @@ import {
     changeBandLevel,
 } from "../helpers/staking.helpers";
 import { stakingTypeFIX, stringifyStakingType, StakerAndPoolShares } from "../utils/utils";
-import { calculateRewards } from "../utils/rewardsCalculation";
+import { calculateRewards } from "../utils/staking/rewardsCalculation";
 import {
     syncFlexiSharesEvery12Hours,
-    updateFlexiSharesDuringSync,
     calculateAllShares,
     addFixedShares,
     removeFixedShares,
     removeFlexiShares,
-} from "../utils/sharesSync";
+} from "../utils/staking/sharesSync";
 import { BIGINT_ZERO, BIGINT_ONE } from "../utils/constants";
 
 export function handleInitialized(event: InitializedEvent): void {
@@ -142,6 +142,13 @@ export function handleBandUpgradeStatusSet(event: BandUpgradeStatusSetEvent): vo
     const stakingContract: StakingContract = getOrInitStakingContract();
 
     stakingContract.areUpgradesEnabled = event.params.enabled;
+    stakingContract.save();
+}
+
+export function handleDistributionStatusSetEvent(event: DistributionStatusSetEvent): void {
+    const stakingContract: StakingContract = getOrInitStakingContract();
+
+    stakingContract.isDistributionInProgress = event.params.inProgress;
     stakingContract.save();
 }
 
