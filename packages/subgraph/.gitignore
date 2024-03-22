@@ -13,3 +13,4 @@ subgraph.yaml
 **/*.latest.json
 
 node_modules
+doc/

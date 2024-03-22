@@ -11,6 +11,7 @@ export const stakingAddress: Address = Address.fromString("0x1111111111111111111
 export const usdtToken: Address = Address.fromString("0x0000000000000000000000000000000000000010");
 export const usdcToken: Address = Address.fromString("0x0000000000000000000000000000000000000011");
 export const wowToken: Address = Address.fromString("0x0000000000000000000000000000000000000012");
+export const newToken: Address = Address.fromString("0x0000000000000000000000000000000000000013");
 
 export const alice: Address = Address.fromString("0x0000000000000000000000000000000000000100");
 export const bob: Address = Address.fromString("0x0000000000000000000000000000000000000101");
