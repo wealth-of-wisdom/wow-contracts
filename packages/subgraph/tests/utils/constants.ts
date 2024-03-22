@@ -31,6 +31,12 @@ export const wowDecimals: BigInt = BigInt.fromI32(18);
 export const wowDecimalsPrecision: BigInt = wowDecimals.pow(10);
 
 /*//////////////////////////////////////////////////////////////////////////
+                                ARRAYS
+//////////////////////////////////////////////////////////////////////////*/
+
+export const zeroSharesPerPool: BigInt[] = new Array<BigInt>(totalPools.toI32()).fill(BIGINT_ZERO);
+
+/*//////////////////////////////////////////////////////////////////////////
                                 AMOUNTS
 //////////////////////////////////////////////////////////////////////////*/
 
@@ -96,7 +102,7 @@ export const bandLevelAccessiblePools: BigInt[][] = createDoubleArray(BIGINT_ONE
 
 export const months: BigInt[] = createArray(BIGINT_ZERO, BigInt.fromI32(50));
 
-export const monthsInSeconds: BigInt[] = createArrayWithMultiplication(
+export const secondsInMonths: BigInt[] = createArrayWithMultiplication(
     BIGINT_ZERO,
     BigInt.fromI32(50),
     BigInt.fromI32(30 * 24 * 60 * 60),

@@ -9,7 +9,7 @@ import {
     clearStore,
     assert,
 } from "matchstick-as/assembly/index";
-import { StakerAndPoolShares, updateSharesForPoolsAndStakers } from "../../src/utils/staking/sharesSync";
+import { updateFlexiSharesDuringSync } from "../../src/utils/staking/sharesSync";
 import {
     initialize,
     setPool,
@@ -21,6 +21,7 @@ import {
     stakeVestedFlexi,
     createDistribution,
     distributeRewards,
+    initializeAndSetUp,
 } from "./helpers/helper";
 import {
     stakingAddress,
@@ -42,380 +43,118 @@ import {
     ids,
     bandIds,
     months,
-    monthsInSeconds,
+    secondsInMonths,
     sharesInMonths,
 } from "../utils/constants";
 import { getOrInitStakingContract } from "../../src/helpers/staking.helpers";
 import { BIGINT_ZERO } from "../../src/utils/constants";
-import { createArrayWithMultiplication, convertBigIntArrayToString } from "../utils/arrays";
+import { convertBigIntArrayToString, createEmptyArray } from "../utils/arrays";
 
-let level = 0;
-let month = 0;
-let testNum = 0;
-let shares: BigInt = BIGINT_ZERO;
-let stakerSharesPerPool: BigInt[] = [];
-let fixedMonths = [0];
-let fixedMonth = 0;
-let syncMonths = [0];
+let bandsCount = 0;
+let bandLevel = 0;
 let syncMonth = 0;
+let shares: BigInt = BIGINT_ZERO;
+let testBandsCount = [1, 2, 3];
+let bandsCountIndex = 0;
+let testBandLevels = [1, 5, 9];
+let bandLevelIndex = 0;
+let testSyncMonths = [0, 12, 25];
+let syncMonthIndex = 0;
 
-describe("updateSharesForPoolsAndStakers() tests", () => {
+describe("updateFlexiSharesDuringSync() tests", () => {
     beforeEach(() => {
         clearStore();
 
-        initialize();
-
-        for (let i = 0; i < totalPools.toI32(); i++) {
-            const poolId: BigInt = BigInt.fromI32(i + 1);
-            setPool(poolId, poolDistributionPercentages[i]);
-        }
-
-        for (let i = 0; i < totalBandLevels.toI32(); i++) {
-            const bandLevel: BigInt = BigInt.fromI32(i + 1);
-            setBandLevel(bandLevel, bandLevelPrices[i], bandLevelAccessiblePools[i]);
-        }
-
-        setSharesInMonth(sharesInMonths);
+        initializeAndSetUp();
     });
 
     describe("1 Staker", () => {
         describe("1 Band level", () => {
-            describe("1 FIXED band", () => {
-                describe("Standard staking", () => {
-                    // This is the full test template
-                    // test() functions are only used to set different values for the variables
-                    afterEach(() => {
-                        // ARRANGE
-                        shares = sharesInMonths[fixedMonth - 1];
+            describe("Standard staking", () => {
+                // This is the full test template
+                // test() functions are only used to set different values for the variables
+                afterEach(() => {
+                    // ARRANGE
+                    if (syncMonth == 0) {
+                        shares = BIGINT_ZERO;
+                    } else if (syncMonth <= 24) {
+                        shares = sharesInMonths[syncMonth - 1];
+                    } else {
+                        shares = sharesInMonths[sharesInMonths.length - 1];
+                    }
 
-                        // Staker should have the same amount of shares in all accessible pools
-                        // Example: [100, 100, 100, 0, 0, 0, 0, 0, 0]
-                        stakerSharesPerPool = new Array<BigInt>(totalPools.toI32())
-                            .fill(shares)
-                            .fill(BIGINT_ZERO, level);
+                    const totalShares = shares.times(BigInt.fromI32(bandsCount));
 
-                        // Staker stakes in the accessible pool of the band level
-                        stakeStandardFixed(alice, bandLevels[level - 1], bandIds[0], months[fixedMonth], initDate);
+                    // Staker should have the same amount of shares in all accessible pools
+                    // Example: band level -> 3, shares per pool -> [100, 100, 100, 0, 0, 0, 0, 0, 0]
+                    const flexiStakerShares: BigInt[] = createEmptyArray(totalPools).fill(totalShares, 0, bandLevel);
 
-                        // ACT
-                        const stakingContract = getOrInitStakingContract();
+                    // Only the highest accessible pool should have shares
+                    // Example: band level -> 3, shares per pool -> [0, 0, 100, 0, 0, 0, 0, 0, 0]
+                    const isolatedFlexiStakerShares: BigInt[] = createEmptyArray(totalPools);
+                    isolatedFlexiStakerShares[bandLevel - 1] = totalShares;
 
-                        // Try to sync and update the shares
-                        updateSharesForPoolsAndStakers(stakingContract, initDate.plus(monthsInSeconds[syncMonth]));
+                    // Staker stakes in the accessible pool of the band level
+                    for (let i = 0; i < bandsCount; i++) {
+                        stakeStandardFlexi(alice, bandLevels[bandLevel - 1], bandIds[i], initDate);
+                    }
 
-                        // ASSERT band
-                        assert.fieldEquals("Band", ids[0], "sharesAmount", shares.toString());
+                    // ACT
+                    const stakingContract = getOrInitStakingContract();
 
-                        // ASSERT staker
-                        assert.fieldEquals(
-                            "Staker",
-                            alice.toHex(),
-                            "sharesPerPool",
-                            convertBigIntArrayToString(stakerSharesPerPool),
-                        );
+                    // Try to sync and update the shares
+                    updateFlexiSharesDuringSync(stakingContract, initDate.plus(secondsInMonths[syncMonth]));
 
-                        // ASSERT pools
-                        for (let i = 0; i <= level; i++) {
-                            assert.fieldEquals("Pool", ids[1], "totalSharesAmount", shares.toString());
-                        }
-                        for (let i = level + 1; i < totalPools.toI32(); i++) {
-                            assert.fieldEquals("Pool", ids[i], "totalSharesAmount", zeroStr);
-                        }
-                    });
+                    // ASSERT band
+                    for (let i = 0; i < bandsCount; i++) {
+                        assert.fieldEquals("Band", ids[i], "sharesAmount", shares.toString());
+                    }
 
-                    describe("Band level 1", () => {
-                        beforeAll(() => {
-                            level = 1;
-                        });
+                    // ASSERT staker
+                    assert.fieldEquals(
+                        "Staker",
+                        alice.toHex(),
+                        "flexiSharesPerPool",
+                        convertBigIntArrayToString(flexiStakerShares),
+                    );
+                    assert.fieldEquals(
+                        "Staker",
+                        alice.toHex(),
+                        "isolatedFlexiSharesPerPool",
+                        convertBigIntArrayToString(isolatedFlexiStakerShares),
+                    );
 
-                        describe("Fixed for 1 month", () => {
-                            beforeAll(() => {
-                                fixedMonth = 1;
-                            });
+                    // ASSERT pools
+                    for (let i = 1; i <= totalPools.toI32(); i++) {
+                        let flexiPoolShares = i <= bandLevel ? totalShares.toString() : zeroStr;
+                        assert.fieldEquals("Pool", ids[i], "totalFlexiSharesAmount", flexiPoolShares);
 
-                            test("Synced after 0 months", () => {
-                                syncMonth = 0;
-                            });
-
-                            test("Synced after 12 month", () => {
-                                syncMonth = 12;
-                            });
-
-                            test("Synced after 25 months", () => {
-                                syncMonth = 25;
-                            });
-                        });
-
-                        describe("Fixed for 12 month", () => {
-                            beforeAll(() => {
-                                fixedMonth = 12;
-                            });
-
-                            test("Synced after 0 months", () => {
-                                syncMonth = 0;
-                            });
-
-                            test("Synced after 12 month", () => {
-                                syncMonth = 12;
-                            });
-
-                            test("Synced after 25 months", () => {
-                                syncMonth = 25;
-                            });
-                        });
-
-                        describe("Fixed for 24 month", () => {
-                            beforeAll(() => {
-                                fixedMonth = 24;
-                            });
-
-                            test("Synced after 0 months", () => {
-                                syncMonth = 0;
-                            });
-
-                            test("Synced after 12 month", () => {
-                                syncMonth = 12;
-                            });
-
-                            test("Synced after 25 months", () => {
-                                syncMonth = 25;
-                            });
-                        });
-                    });
-
-                    describe("Band level 5", () => {
-                        beforeAll(() => {
-                            level = 5;
-                        });
-
-                        describe("Fixed for 1 month", () => {
-                            beforeAll(() => {
-                                fixedMonth = 1;
-                            });
-
-                            test("Synced after 0 months", () => {
-                                syncMonth = 0;
-                            });
-
-                            test("Synced after 12 month", () => {
-                                syncMonth = 12;
-                            });
-
-                            test("Synced after 25 months", () => {
-                                syncMonth = 25;
-                            });
-                        });
-
-                        describe("Fixed for 12 month", () => {
-                            beforeAll(() => {
-                                fixedMonth = 12;
-                            });
-
-                            test("Synced after 0 months", () => {
-                                syncMonth = 0;
-                            });
-
-                            test("Synced after 12 month", () => {
-                                syncMonth = 12;
-                            });
-
-                            test("Synced after 25 months", () => {
-                                syncMonth = 25;
-                            });
-                        });
-
-                        describe("Fixed for 24 month", () => {
-                            beforeAll(() => {
-                                fixedMonth = 24;
-                            });
-
-                            test("Synced after 0 months", () => {
-                                syncMonth = 0;
-                            });
-
-                            test("Synced after 12 month", () => {
-                                syncMonth = 12;
-                            });
-
-                            test("Synced after 25 months", () => {
-                                syncMonth = 25;
-                            });
-                        });
-                    });
-
-                    describe("Band level 9", () => {
-                        beforeAll(() => {
-                            level = 9;
-                        });
-
-                        describe("Fixed for 1 month", () => {
-                            beforeAll(() => {
-                                fixedMonth = 1;
-                            });
-
-                            test("Synced after 0 months", () => {
-                                syncMonth = 0;
-                            });
-
-                            test("Synced after 12 month", () => {
-                                syncMonth = 12;
-                            });
-
-                            test("Synced after 25 months", () => {
-                                syncMonth = 25;
-                            });
-                        });
-
-                        describe("Fixed for 12 month", () => {
-                            beforeAll(() => {
-                                fixedMonth = 12;
-                            });
-
-                            test("Synced after 0 months", () => {
-                                syncMonth = 0;
-                            });
-
-                            test("Synced after 12 month", () => {
-                                syncMonth = 12;
-                            });
-
-                            test("Synced after 25 months", () => {
-                                syncMonth = 25;
-                            });
-                        });
-
-                        describe("Fixed for 24 month", () => {
-                            beforeAll(() => {
-                                fixedMonth = 24;
-                            });
-
-                            test("Synced after 0 months", () => {
-                                syncMonth = 0;
-                            });
-
-                            test("Synced after 12 month", () => {
-                                syncMonth = 12;
-                            });
-
-                            test("Synced after 25 months", () => {
-                                syncMonth = 25;
-                            });
-                        });
-                    });
+                        let isolatedFlexiPoolShares = i == bandLevel ? totalShares.toString() : zeroStr;
+                        assert.fieldEquals("Pool", ids[i], "isolatedFlexiSharesAmount", isolatedFlexiPoolShares);
+                    }
                 });
 
-                describe("Vested staking", () => {
-                    // @todo
-                });
-            });
+                for (bandsCountIndex = 0; bandsCountIndex < testBandsCount.length; bandsCountIndex++) {
+                    describe(`${testBandsCount[bandsCountIndex]} FLEXI bands`, () => {
+                        beforeAll(() => {
+                            bandsCount = testBandsCount[bandsCountIndex];
+                        });
 
-            describe("1 FLEXI band", () => {
-                describe("Standard staking", () => {
-                    // This is the full test template
-                    // test() functions are only used to set different values for the variables
-                    afterEach(() => {
-                        // ARRANGE
-                        if (syncMonth == 0) {
-                            shares = BIGINT_ZERO;
-                        } else if (syncMonth >= 1 && syncMonth <= 24) {
-                            shares = sharesInMonths[syncMonth - 1];
-                        } else {
-                            shares = sharesInMonths[sharesInMonths.length - 1];
-                        }
+                        for (bandLevelIndex = 0; bandLevelIndex < testBandLevels.length; bandLevelIndex++) {
+                            describe(`Band level ${testBandLevels[bandLevelIndex]}`, () => {
+                                beforeAll(() => {
+                                    bandLevel = testBandLevels[bandLevelIndex];
+                                });
 
-                        // Staker should have the same amount of shares in all accessible pools
-                        // Example: [100, 100, 100, 0, 0, 0, 0, 0, 0]
-                        stakerSharesPerPool = new Array<BigInt>(totalPools.toI32())
-                            .fill(shares)
-                            .fill(BIGINT_ZERO, level);
-
-                        // Staker stakes in the accessible pool of the band level
-                        stakeStandardFlexi(alice, bandLevels[level - 1], bandIds[0], initDate);
-
-                        // ACT
-                        const stakingContract = getOrInitStakingContract();
-
-                        // Try to sync and update the shares
-                        updateSharesForPoolsAndStakers(stakingContract, initDate.plus(monthsInSeconds[syncMonth]));
-
-                        // ASSERT band
-                        assert.fieldEquals("Band", ids[0], "sharesAmount", shares.toString());
-
-                        // ASSERT staker
-                        assert.fieldEquals(
-                            "Staker",
-                            alice.toHex(),
-                            "sharesPerPool",
-                            convertBigIntArrayToString(stakerSharesPerPool),
-                        );
-
-                        // ASSERT pools
-                        for (let i = 0; i <= level; i++) {
-                            assert.fieldEquals("Pool", ids[1], "totalSharesAmount", shares.toString());
-                        }
-                        for (let i = level + 1; i < totalPools.toI32(); i++) {
-                            assert.fieldEquals("Pool", ids[i], "totalSharesAmount", zeroStr);
+                                for (syncMonthIndex = 0; syncMonthIndex < testSyncMonths.length; syncMonthIndex++) {
+                                    test(`Synced after ${testSyncMonths[syncMonthIndex]} months`, () => {
+                                        syncMonth = testSyncMonths[syncMonthIndex];
+                                    });
+                                }
+                            });
                         }
                     });
-
-                    describe("Band level 1", () => {
-                        beforeAll(() => {
-                            level = 1;
-                        });
-
-                        test("Synced after 0 months", () => {
-                            syncMonth = 0;
-                        });
-
-                        test("Synced after 12 month", () => {
-                            syncMonth = 12;
-                        });
-
-                        test("Synced after 25 months", () => {
-                            syncMonth = 25;
-                        });
-                    });
-
-                    describe("Band level 5", () => {
-                        beforeAll(() => {
-                            level = 5;
-                        });
-
-                        test("Synced after 0 months", () => {
-                            syncMonth = 0;
-                        });
-
-                        test("Synced after 12 month", () => {
-                            syncMonth = 12;
-                        });
-
-                        test("Synced after 25 months", () => {
-                            syncMonth = 25;
-                        });
-                    });
-
-                    describe("Band level 9", () => {
-                        beforeAll(() => {
-                            level = 9;
-                        });
-
-                        test("Synced after 0 months", () => {
-                            syncMonth = 0;
-                        });
-
-                        test("Synced after 12 month", () => {
-                            syncMonth = 12;
-                        });
-
-                        test("Synced after 25 months", () => {
-                            syncMonth = 25;
-                        });
-                    });
-                });
-
-                describe("Vested staking", () => {
-                    // @todo
-                });
+                }
             });
         });
     });

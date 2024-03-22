@@ -1,4 +1,4 @@
-import { Address, BigInt, store, log } from "@graphprotocol/graph-ts";
+import { Address, BigInt, store } from "@graphprotocol/graph-ts";
 import {
     Initialized as InitializedEvent,
     PoolSet as PoolSetEvent,
@@ -52,7 +52,7 @@ import { stakingTypeFIX, stringifyStakingType, StakerAndPoolShares } from "../ut
 import { calculateRewards } from "../utils/staking/rewardsCalculation";
 import {
     syncFlexiSharesEvery12Hours,
-    calculateAllShares,
+    syncAndCalculateAllShares,
     addFixedShares,
     removeFixedShares,
     removeFlexiShares,
@@ -165,7 +165,7 @@ export function handleDistributionCreated(event: DistributionCreatedEvent): void
     stakingContract.save();
 
     // Update shares for stakers and pools
-    const sharesData: StakerAndPoolShares = calculateAllShares(stakingContract, event.block.timestamp);
+    const sharesData: StakerAndPoolShares = syncAndCalculateAllShares(stakingContract, event.block.timestamp);
 
     // Calculate rewards for stakers
     const stakerRewards: BigInt[] = calculateRewards(stakingContract, event.params.amount, sharesData);
@@ -305,14 +305,24 @@ export function handleBandUpgraded(event: BandUpgradedEvent): void {
     // Sync shares if needed
     syncFlexiSharesEvery12Hours(event.block.timestamp);
 
-    changeBandLevel(event.params.user, event.params.bandId, event.params.oldBandLevel, event.params.newBandLevel);
+    changeBandLevel(
+        event.params.user,
+        event.params.bandId,
+        BigInt.fromI32(event.params.oldBandLevel),
+        BigInt.fromI32(event.params.newBandLevel),
+    );
 }
 
 export function handleBandDowngraded(event: BandDowngradedEvent): void {
     // Sync shares if needed
     syncFlexiSharesEvery12Hours(event.block.timestamp);
 
-    changeBandLevel(event.params.user, event.params.bandId, event.params.oldBandLevel, event.params.newBandLevel);
+    changeBandLevel(
+        event.params.user,
+        event.params.bandId,
+        BigInt.fromI32(event.params.oldBandLevel),
+        BigInt.fromI32(event.params.newBandLevel),
+    );
 }
 
 export function handleRewardsClaimed(event: RewardsClaimedEvent): void {
