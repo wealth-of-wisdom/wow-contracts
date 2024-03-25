@@ -284,6 +284,7 @@ type StakingContract @entity {
     stakers: [Staker!]!
 
     # Additional fields
+    totalStakedAmount: BigInt! # Amount of WOW in contract (added from band prices)
     lastSharesSyncDate: BigInt!
 }
 
@@ -297,7 +298,10 @@ type Pool @entity {
     distributionPercentage: Int!
 
     # Additional fields
-    totalSharesAmount: BigInt!
+    totalFixedSharesAmount: BigInt! # Total fixed shares in pool from this pool and higher pools
+    totalFlexiSharesAmount: BigInt! # Total flexi shares in pool from this pool and higher pools
+    isolatedFixedSharesAmount: BigInt! # Fixed shares from bands only from this pool (shares from higher pools are not included)
+    isolatedFlexiSharesAmount: BigInt! # Flexi shares from bands only from this pool (shares from higher pools are not included)
 }
 
 type BandLevel @entity {
@@ -318,11 +322,19 @@ type Staker @entity {
     id: ID!
 
     # Contract fields
-    bands: [Band!]!
+    fixedBands: [Band!]!
+    flexiBands: [Band!]!
+    bandsCount: Int!
     rewards: [StakerRewards!]! @derivedFrom(field: "staker")
 
     # Additional fields
-    sharesPerPool: [BigInt!]! # 9 numbers for each poool
+    stakedAmount: BigInt! # Amount of WOW staked
+    fixedSharesPerPool: [BigInt!]! # 9 numbers for each pool
+    flexiSharesPerPool: [BigInt!]! # 9 numbers for each pool
+    isolatedFixedSharesPerPool: [BigInt!]! # 9 numbers for each pool
+    isolatedFlexiSharesPerPool: [BigInt!]! # 9 numbers for each pool
+    totalUnclaimedRewards: BigInt!
+    totalClaimedRewards: BigInt!
 }
 
 type StakerRewards @entity {
@@ -334,6 +346,8 @@ type StakerRewards @entity {
     # Contract fields
     staker: Staker!
     token: Bytes!
+
+    # Additional fields
     unclaimedAmount: BigInt!
     claimedAmount: BigInt!
 }
@@ -351,7 +365,7 @@ type Band @entity {
     vestingPool: VestingPool
 
     # Additional fields
-    sharesAmount: BigInt! # This is the amount of shares staker owns in each accessible pool
+    sharesAmount: BigInt! # This is the amount of shares band owns in each accessible pool
 }
 
 type FundsDistribution @entity {

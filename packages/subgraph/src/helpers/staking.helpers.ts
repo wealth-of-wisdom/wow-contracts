@@ -1,4 +1,4 @@
-import { Address, BigInt } from "@graphprotocol/graph-ts";
+import { Address, BigDecimal, BigInt, store } from "@graphprotocol/graph-ts";
 import {
     StakingContract,
     Pool,
@@ -9,8 +9,13 @@ import {
     FundsDistribution,
 } from "../../generated/schema";
 import { Staking } from "../../generated/Staking/Staking";
-import { ADDRESS_ZERO, BIGINT_ZERO, StakingType } from "../utils/constants";
-import { stringifyStakingType } from "../utils/utils";
+import { ADDRESS_ZERO, BIGINT_ZERO, BIGDEC_ZERO, StakingType } from "../utils/constants";
+import { stakingTypeFIX, stringifyStakingType } from "../utils/utils";
+
+/*//////////////////////////////////////////////////////////////////////////
+                            GET OR INIT FUNCTIONS
+//////////////////////////////////////////////////////////////////////////*/
+
 /**
  * Retrieves or initializes a StakingContract entity.
  * @returns The StakingContract entity.
@@ -35,6 +40,7 @@ export function getOrInitStakingContract(): StakingContract {
         stakingContract.isDistributionInProgress = false;
         stakingContract.stakers = [];
         stakingContract.lastSharesSyncDate = BIGINT_ZERO;
+        stakingContract.totalStakedAmount = BIGINT_ZERO;
 
         stakingContract.save();
     }
@@ -54,7 +60,10 @@ export function getOrInitPool(poolId: BigInt): Pool {
     if (!stakingPool) {
         stakingPool = new Pool(id);
         stakingPool.distributionPercentage = 0;
-        stakingPool.totalSharesAmount = BIGINT_ZERO;
+        stakingPool.totalFixedSharesAmount = BIGINT_ZERO;
+        stakingPool.totalFlexiSharesAmount = BIGINT_ZERO;
+        stakingPool.isolatedFixedSharesAmount = BIGINT_ZERO;
+        stakingPool.isolatedFlexiSharesAmount = BIGINT_ZERO;
 
         stakingPool.save();
     }
@@ -95,8 +104,16 @@ export function getOrInitStaker(stakerAddress: Address): Staker {
         const stakingContract = getOrInitStakingContract();
 
         staker = new Staker(id);
-        staker.bands = [];
-        staker.sharesPerPool = new Array<BigInt>(stakingContract.totalPools).fill(BIGINT_ZERO);
+        staker.fixedBands = [];
+        staker.flexiBands = [];
+        staker.bandsCount = 0;
+        staker.stakedAmount = BIGINT_ZERO;
+        staker.fixedSharesPerPool = new Array<BigInt>(stakingContract.totalPools).fill(BIGINT_ZERO);
+        staker.flexiSharesPerPool = new Array<BigInt>(stakingContract.totalPools).fill(BIGINT_ZERO);
+        staker.isolatedFixedSharesPerPool = new Array<BigInt>(stakingContract.totalPools).fill(BIGINT_ZERO);
+        staker.isolatedFlexiSharesPerPool = new Array<BigInt>(stakingContract.totalPools).fill(BIGINT_ZERO);
+        staker.totalUnclaimedRewards = BIGINT_ZERO;
+        staker.totalClaimedRewards = BIGINT_ZERO;
 
         staker.save();
     }
@@ -142,7 +159,7 @@ export function getOrInitBand(bandId: BigInt): Band {
         band.stakingStartDate = BIGINT_ZERO;
         band.bandLevel = getOrInitBandLevel(BIGINT_ZERO).id;
         band.fixedMonths = 0;
-        band.stakingType = stringifyStakingType(StakingType.FIX);
+        band.stakingType = stakingTypeFIX;
         band.areTokensVested = false;
         band.sharesAmount = BIGINT_ZERO;
         band.save();
@@ -173,4 +190,141 @@ export function getOrInitFundsDistribution(distributionId: BigInt): FundsDistrib
     }
 
     return fundsDistribution;
+}
+
+/*//////////////////////////////////////////////////////////////////////////
+                                OTHER FUNCTIONS
+//////////////////////////////////////////////////////////////////////////*/
+
+/// @notice This function does not save the stakingContract entity.
+export function addStakerToStakingContract(stakingContract: StakingContract, staker: Staker): void {
+    // If staker has no bands, it means staker is not added to all stakers array
+    if (staker.bandsCount == 0) {
+        // Add staker to all stakers array
+        const stakerIds = stakingContract.stakers;
+        stakerIds.push(staker.id);
+
+        stakingContract.stakers = stakerIds;
+    }
+}
+
+export function removeStakerFromStakingContract(stakingContract: StakingContract, staker: Staker): void {
+    const stakersIds: string[] = stakingContract.stakers;
+    const stakersAmount = stakersIds.length;
+
+    // Remove staker from all stakers array and staker itself
+    for (let i = 0; i < stakersAmount; i++) {
+        if (stakersIds[i] == staker.id) {
+            // Swap last element with the one to be removed
+            // And then remove the last element
+            stakersIds[i] = stakersIds[stakersAmount - 1];
+            stakersIds.pop();
+
+            // Update stakers array in staking contract
+            stakingContract.stakers = stakersIds;
+            stakingContract.save();
+
+            // Remove staker and band
+            store.remove("Staker", staker.id);
+
+            break;
+        }
+    }
+}
+
+/// @notice This function does not save the staker entity.
+export function addBandToStakerBands(staker: Staker, band: Band): void {
+    // Update array corresponding to the staking type of the band
+    if (band.stakingType == stakingTypeFIX) {
+        const fixedBands = staker.fixedBands;
+        fixedBands.push(band.id);
+
+        staker.fixedBands = fixedBands;
+    } else {
+        const flexiBands = staker.flexiBands;
+        flexiBands.push(band.id);
+
+        staker.flexiBands = flexiBands;
+    }
+}
+
+export function removeBandFromStakerBands(staker: Staker, band: Band, stakedAmount: BigInt): void {
+    const stakerBandIds: string[] = band.stakingType == stakingTypeFIX ? staker.fixedBands : staker.flexiBands;
+    const bandsCount = stakerBandIds.length;
+
+    for (let i = 0; i < bandsCount; i++) {
+        if (stakerBandIds[i] == band.id) {
+            // Swap last element with the one to be removed
+            // And then remove the last element
+            // Use stakerBandIds.length instead of bandsAmount to avoid type error
+            stakerBandIds[i] = stakerBandIds[bandsCount - 1];
+            stakerBandIds.pop();
+
+            if (band.stakingType == stakingTypeFIX) {
+                staker.fixedBands = stakerBandIds;
+            } else {
+                staker.flexiBands = stakerBandIds;
+            }
+
+            staker.stakedAmount = staker.stakedAmount.minus(stakedAmount);
+            staker.save();
+
+            break;
+        }
+    }
+}
+
+export function removeAllBands(staker: Staker): void {
+    const fixedBands: string[] = staker.fixedBands;
+    const fixedBandsCount: number = fixedBands.length;
+
+    // Remove fixed bands
+    for (let i = 0; i < fixedBandsCount; i++) {
+        const band: Band = getOrInitBand(BigInt.fromString(fixedBands[i]));
+        store.remove("Band", band.id);
+    }
+
+    const flexiBands: string[] = staker.flexiBands;
+    const flexiBandsCount: number = flexiBands.length;
+
+    // Remove flexi bands
+    for (let i = 0; i < flexiBandsCount; i++) {
+        const band: Band = getOrInitBand(BigInt.fromString(flexiBands[i]));
+        store.remove("Band", band.id);
+    }
+}
+
+export function removeAllStakerRewards(stakingContract: StakingContract, staker: Staker): void {
+    const stakerAddress: Address = Address.fromString(staker.id);
+
+    // Remove USDT rewards
+    const usdtToken: Address = Address.fromBytes(stakingContract.usdtToken);
+    const usdtRewards: StakerRewards = getOrInitStakerRewards(stakerAddress, usdtToken);
+    store.remove("StakerRewards", usdtRewards.id);
+
+    // Remove USDC rewards
+    const usdcToken: Address = Address.fromBytes(stakingContract.usdcToken);
+    const usdcRewards: StakerRewards = getOrInitStakerRewards(stakerAddress, usdcToken);
+    store.remove("StakerRewards", usdcRewards.id);
+}
+
+export function changeBandLevel(stakerAddress: Address, bandId: BigInt, oldBandLvl: number, newBandLvl: number): void {
+    const oldBandLevel: BandLevel = getOrInitBandLevel(BigInt.fromString(oldBandLvl.toString()));
+    const newBandLevel: BandLevel = getOrInitBandLevel(BigInt.fromString(newBandLvl.toString()));
+
+    // Update total staked amount in the contract
+    const stakingContract: StakingContract = getOrInitStakingContract();
+    stakingContract.totalStakedAmount = stakingContract.totalStakedAmount
+        .minus(oldBandLevel.price)
+        .plus(newBandLevel.price);
+    stakingContract.save();
+
+    // Update staker staked amount
+    const staker: Staker = getOrInitStaker(stakerAddress);
+    staker.stakedAmount = staker.stakedAmount.minus(oldBandLevel.price).plus(newBandLevel.price);
+    staker.save();
+
+    const band: Band = getOrInitBand(bandId);
+    band.bandLevel = newBandLevel.id;
+    band.save();
 }
