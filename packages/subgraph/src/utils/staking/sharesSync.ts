@@ -7,8 +7,8 @@ import {
     getOrInitBand,
     getOrInitStakingContract,
 } from "../../helpers/staking.helpers";
-import { stringifyStakingType, stakingTypeFIX, StakerShares, StakerAndPoolShares } from "../utils";
-import { BIGINT_ONE, BIGINT_ZERO, StakingType } from "../constants";
+import { stakingTypeFIX, StakerShares, StakerAndPoolShares } from "../utils";
+import { BIGINT_ZERO } from "../constants";
 
 /*//////////////////////////////////////////////////////////////////////////
                             CALLED ON STAKE/UNSTAKE
@@ -55,7 +55,7 @@ export function addFixedShares(staker: Staker, band: Band, sharesInMonths: BigIn
 
 export function removeFixedShares(staker: Staker | null, band: Band, accessiblePools: string[]): void {
     if (band.stakingType == stakingTypeFIX) {
-        const totalAccessiblePools: number = accessiblePools.length;
+        const totalAccessiblePools = accessiblePools.length;
         const bandShares: BigInt = band.sharesAmount;
 
         // Update total shares for each pool
@@ -80,7 +80,7 @@ export function removeFixedShares(staker: Staker | null, band: Band, accessibleP
                 stakerShares,
                 stakerIsolatedShares,
                 bandShares,
-                totalAccessiblePools,
+                BigInt.fromI32(totalAccessiblePools),
             );
 
             staker.fixedSharesPerPool = shares.sharesPerPool;
@@ -92,7 +92,7 @@ export function removeFixedShares(staker: Staker | null, band: Band, accessibleP
 
 export function removeFlexiShares(staker: Staker | null, band: Band, accessiblePools: string[]): void {
     if (band.stakingType == stakingTypeFIX) {
-        const totalAccessiblePools: number = accessiblePools.length;
+        const totalAccessiblePools = accessiblePools.length;
         const bandShares: BigInt = band.sharesAmount;
 
         // Update total shares for each pool
@@ -117,7 +117,7 @@ export function removeFlexiShares(staker: Staker | null, band: Band, accessibleP
                 stakerShares,
                 stakerIsolatedShares,
                 bandShares,
-                totalAccessiblePools,
+                BigInt.fromI32(totalAccessiblePools),
             );
 
             staker.flexiSharesPerPool = shares.sharesPerPool;
@@ -131,15 +131,15 @@ function reduceSharesForStaker(
     stakerShares: BigInt[],
     stakerIsolatedShares: BigInt[],
     bandShares: BigInt,
-    totalAccessiblePools: number,
+    totalAccessiblePools: BigInt,
 ): StakerShares {
     // Update staker shares for each accessible pool
-    for (let i = 0; i < totalAccessiblePools; i++) {
+    for (let i = 0; i < totalAccessiblePools.toI32(); i++) {
         stakerShares[i] = stakerShares[i].minus(bandShares);
     }
 
     // Type cast to BigInt to avoid TS error
-    const lastPoolIndex = BigInt.fromString(totalAccessiblePools.toString()).toI32() - 1;
+    const lastPoolIndex = totalAccessiblePools.toI32() - 1;
     stakerIsolatedShares[lastPoolIndex] = stakerIsolatedShares[lastPoolIndex].minus(bandShares);
 
     return new StakerShares(stakerShares, stakerIsolatedShares);
@@ -171,7 +171,10 @@ export function syncFlexiSharesEvery12Hours(currentTime: BigInt): boolean {
     return false;
 }
 
-export function calculateAllShares(stakingContract: StakingContract, distributionDate: BigInt): StakerAndPoolShares {
+export function syncAndCalculateAllShares(
+    stakingContract: StakingContract,
+    distributionDate: BigInt,
+): StakerAndPoolShares {
     // Update flexi shares for stakers, bands and pools
     const sharesData: StakerAndPoolShares = updateFlexiSharesDuringSync(stakingContract, distributionDate);
     const totalPools: number = stakingContract.totalPools;
@@ -336,7 +339,7 @@ function addMultipleBandSharesToPools(
         isolatedStakerSharesPerPool[lastPoolIndex] = isolatedStakerSharesPerPool[lastPoolIndex].plus(bandShares);
     }
 
-    return new StakerShares(isolatedStakerSharesPerPool, stakerSharesPerPool);
+    return new StakerShares(stakerSharesPerPool, isolatedStakerSharesPerPool);
 }
 
 function getBandLevelPoolIds(totalBandLevels: number): BigInt[][] {

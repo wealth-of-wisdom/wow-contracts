@@ -1,5 +1,5 @@
 import { BigInt } from "@graphprotocol/graph-ts";
-import { BIGINT_ONE } from "../../src/utils/constants";
+import { BIGINT_ONE, BIGINT_ZERO } from "../../src/utils/constants";
 
 /*//////////////////////////////////////////////////////////////////////////
                             HELPER FUNCTIONS
@@ -23,7 +23,7 @@ export function createArrayWithMultiplication(start: BigInt, end: BigInt, multip
     const arr = new Array<BigInt>(size.toI32());
 
     for (let i = 0; i < size.toI32(); i++) {
-        arr[i] = start.plus(BigInt.fromI32(i)).times(multiplier);
+        arr[i] = start.plus(BigInt.fromI32(i).times(multiplier));
     }
 
     return arr;
@@ -54,4 +54,8 @@ export function createStringifiedArray(start: BigInt, end: BigInt): string[] {
 export function convertBigIntArrayToString(arr: BigInt[]): string {
     let numbers = arr.toString().split(",").join(", ");
     return `[${numbers}]`;
+}
+
+export function createEmptyArray(size: BigInt): BigInt[] {
+    return new Array<BigInt>(size.toI32()).fill(BIGINT_ZERO);
 }

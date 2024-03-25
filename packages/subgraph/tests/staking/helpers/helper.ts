@@ -46,6 +46,14 @@ import {
     createRewardsClaimedEvent,
 } from "../helpers/createEvents";
 import { BIGINT_ZERO, StakingType } from "../../../src/utils/constants";
+import {
+    totalPools,
+    totalBandLevels,
+    poolDistributionPercentages,
+    bandLevelPrices,
+    bandLevelAccessiblePools,
+    sharesInMonths,
+} from "../../utils/constants";
 
 export function initialize(): void {
     handleInitialized(createInitializedEvent());
@@ -61,6 +69,22 @@ export function setBandLevel(bandLevel: BigInt, price: BigInt, pools: BigInt[]):
 
 export function setSharesInMonth(totalSharesInMonths: BigInt[]): void {
     handleSharesInMonthSet(createSharesInMonthSetEvent(totalSharesInMonths));
+}
+
+export function initializeAndSetUp(): void {
+    initialize();
+
+    for (let i = 0; i < totalPools.toI32(); i++) {
+        const poolId: BigInt = BigInt.fromI32(i + 1);
+        setPool(poolId, poolDistributionPercentages[i]);
+    }
+
+    for (let i = 0; i < totalBandLevels.toI32(); i++) {
+        const bandLevel: BigInt = BigInt.fromI32(i + 1);
+        setBandLevel(bandLevel, bandLevelPrices[i], bandLevelAccessiblePools[i]);
+    }
+
+    setSharesInMonth(sharesInMonths);
 }
 
 export function setUsdtTokenAddress(token: Address): void {

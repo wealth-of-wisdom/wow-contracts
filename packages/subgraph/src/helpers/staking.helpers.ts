@@ -1,4 +1,4 @@
-import { Address, BigDecimal, BigInt, store } from "@graphprotocol/graph-ts";
+import { Address, BigInt, store } from "@graphprotocol/graph-ts";
 import {
     StakingContract,
     Pool,
@@ -8,9 +8,8 @@ import {
     Band,
     FundsDistribution,
 } from "../../generated/schema";
-import { Staking } from "../../generated/Staking/Staking";
-import { ADDRESS_ZERO, BIGINT_ZERO, BIGDEC_ZERO, StakingType } from "../utils/constants";
-import { stakingTypeFIX, stringifyStakingType } from "../utils/utils";
+import { ADDRESS_ZERO, BIGINT_ZERO } from "../utils/constants";
+import { stakingTypeFIX } from "../utils/utils";
 
 /*//////////////////////////////////////////////////////////////////////////
                             GET OR INIT FUNCTIONS
@@ -308,9 +307,9 @@ export function removeAllStakerRewards(stakingContract: StakingContract, staker:
     store.remove("StakerRewards", usdcRewards.id);
 }
 
-export function changeBandLevel(stakerAddress: Address, bandId: BigInt, oldBandLvl: number, newBandLvl: number): void {
-    const oldBandLevel: BandLevel = getOrInitBandLevel(BigInt.fromString(oldBandLvl.toString()));
-    const newBandLevel: BandLevel = getOrInitBandLevel(BigInt.fromString(newBandLvl.toString()));
+export function changeBandLevel(stakerAddress: Address, bandId: BigInt, oldBandLvl: BigInt, newBandLvl: BigInt): void {
+    const oldBandLevel: BandLevel = getOrInitBandLevel(oldBandLvl);
+    const newBandLevel: BandLevel = getOrInitBandLevel(newBandLvl);
 
     // Update total staked amount in the contract
     const stakingContract: StakingContract = getOrInitStakingContract();
