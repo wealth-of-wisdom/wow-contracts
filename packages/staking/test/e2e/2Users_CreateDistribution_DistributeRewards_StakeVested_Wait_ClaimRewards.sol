@@ -48,12 +48,14 @@ contract Staking_E2E_Test is StakingAssertions {
         vm.startPrank(admin);
         usdtToken.approve(address(staking), DISTRIBUTION_AMOUNT);
         staking.createDistribution(usdtToken, DISTRIBUTION_AMOUNT);
-
-        assertDistributionCreated(adminBalanceBefore, stakingBalanceBefore);
+        {
+            assertDistributionCreated(adminBalanceBefore, stakingBalanceBefore);
+        }
 
         staking.distributeRewards(usdtToken, MINIMAL_STAKERS, MINIMAL_REWARDS);
-
-        assertRewardsDistributed(MINIMAL_STAKERS, MINIMAL_REWARDS);
+        {
+            assertRewardsDistributed(MINIMAL_STAKERS, MINIMAL_REWARDS);
+        }
         vm.stopPrank();
 
         vm.warp(MONTH);
@@ -87,7 +89,6 @@ contract Staking_E2E_Test is StakingAssertions {
             alicePreStakingBalance,
             alicePostClaimingBalance
         );
-
         assertStaked(alice, firstBandId, BAND_LEVEL_2, 1);
         assertStaked(bob, secondBandId, BAND_LEVEL_4, 1);
         assertRewardData(alice, aliceClaimedRewards, aliceUnclaimedRewards);

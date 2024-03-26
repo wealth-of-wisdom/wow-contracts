@@ -808,6 +808,10 @@ contract Staking is
         _claimRewards(msg.sender, token, true);
     }
 
+    function claimAllRewards() external mDistributionNotInProgress {
+        _claimAllRewards(msg.sender);
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                             EXTERNAL VIEW/PURE FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
