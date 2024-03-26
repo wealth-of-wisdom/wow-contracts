@@ -210,3 +210,7 @@ export function downgradeBand(
 export function claimRewards(staker: Address, token: Address, amount: BigInt, date: BigInt): void {
     handleRewardsClaimed(createRewardsClaimedEvent(staker, token, amount, date));
 }
+
+export function concatAndNormalizeToArray(value: string): string {
+    return "[".concat(value).concat("]").replaceAll(",", ", ");
+}

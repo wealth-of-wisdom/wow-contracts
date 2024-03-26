@@ -26,7 +26,7 @@ describe("handlePoolSet() tests", () => {
                 const poolId: BigInt = BigInt.fromI32(i + 1);
                 assert.fieldEquals("Pool", ids[i + 1], "id", poolId.toString());
             }
-            assert.entityCount("Pool", totalPools);
+            assert.entityCount("Pool", totalPools.toI32());
         });
 
         test("Should set pool values correctly", () => {

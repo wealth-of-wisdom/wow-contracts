@@ -14,14 +14,14 @@ describe("handleUsdcTokenSet() tests", () => {
         });
 
         test("Should set USDC token address correctly", () => {
-            assert.fieldEquals("StakingContract", ids[0], "usdcToken", usdcToken.toString());
+            assert.fieldEquals("StakingContract", ids[0], "usdcToken", usdcToken.toHex());
         });
 
         test("Should set new USDC token address correctly", () => {
             const newUsdcToken = newToken;
             setUsdcTokenAddress(newUsdcToken);
 
-            assert.fieldEquals("StakingContract", ids[0], "usdcToken", newUsdcToken.toString());
+            assert.fieldEquals("StakingContract", ids[0], "usdcToken", newUsdcToken.toHex());
         });
     });
 });

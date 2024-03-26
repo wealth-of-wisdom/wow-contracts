@@ -1,6 +1,6 @@
 import { BigInt } from "@graphprotocol/graph-ts";
 import { describe, test, beforeEach, clearStore, assert } from "matchstick-as/assembly/index";
-import { initialize, setBandLevel } from "./helpers/helper";
+import { initialize, setBandLevel, concatAndNormalizeToArray } from "./helpers/helper";
 import { totalBandLevels, bandLevelPrices, bandLevelAccessiblePools, ids } from "../utils/constants";
 import { BIGINT_ONE, BIGINT_ZERO } from "../../src/utils/constants";
 
@@ -24,13 +24,18 @@ describe("handleBandLevelSet() tests", () => {
                 const bandLevel: BigInt = BigInt.fromI32(i + 1);
                 assert.fieldEquals("BandLevel", ids[i + 1], "id", bandLevel.toString());
             }
-            assert.entityCount("BandLevel", totalBandLevels);
+            assert.entityCount("BandLevel", totalBandLevels.toI32());
         });
 
         test("Should set band level values correctly", () => {
             for (let i = 0; i < totalBandLevels.toI32(); i++) {
                 assert.fieldEquals("BandLevel", ids[i + 1], "price", bandLevelPrices[i].toString());
-                assert.fieldEquals("BandLevel", ids[i + 1], "accessiblePools", bandLevelAccessiblePools[i].toString());
+                assert.fieldEquals(
+                    "BandLevel",
+                    ids[i + 1],
+                    "accessiblePools",
+                    concatAndNormalizeToArray(bandLevelAccessiblePools[i].toString()),
+                );
             }
         });
 
@@ -43,15 +48,20 @@ describe("handleBandLevelSet() tests", () => {
 
             for (let i = 0; i < totalBandLevels.toI32(); i++) {
                 assert.fieldEquals("BandLevel", ids[i + 1], "price", bandLevelPrices[i].toString());
-                assert.fieldEquals("BandLevel", ids[i + 1], "accessiblePools", bandLevelAccessiblePools[i].toString());
+                assert.fieldEquals(
+                    "BandLevel",
+                    ids[i + 1],
+                    "accessiblePools",
+                    concatAndNormalizeToArray(bandLevelAccessiblePools[i].toString()),
+                );
             }
 
-            assert.fieldEquals("BandLevel", ids[totalBandLevels.toI32()], "price", newPrice.toString());
+            assert.fieldEquals("BandLevel", ids[newBandLevel.toI32()], "price", newPrice.toString());
             assert.fieldEquals(
                 "BandLevel",
-                ids[totalBandLevels.toI32()],
+                ids[newBandLevel.toI32()],
                 "accessiblePools",
-                newBandLevelAccessiblePools.toString(),
+                concatAndNormalizeToArray(newBandLevelAccessiblePools.toString()),
             );
         });
     });
