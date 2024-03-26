@@ -4,10 +4,6 @@ import { sharesInMonths, ids } from "../utils/constants";
 import { BIGINT_ZERO } from "../../src/utils/constants";
 
 describe("handleInitialized() tests", () => {
-    beforeEach(() => {
-        clearStore();
-    });
-
     describe("Create StakingContract and Set shares in month", () => {
         beforeEach(() => {
             initialize();

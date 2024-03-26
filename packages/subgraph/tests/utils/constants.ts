@@ -55,6 +55,8 @@ export const initDate: BigInt = BigInt.fromI32(1710000000); // Sat Mar 09 2024 1
 
 export const zeroStr: string = "0";
 
+export const oneStr: string = "1";
+
 export const ids: string[] = createStringifiedArray(BIGINT_ZERO, BigInt.fromI32(100));
 
 export const bandIds: BigInt[] = createArray(BIGINT_ZERO, BigInt.fromI32(100));

@@ -4,10 +4,6 @@ import { totalPools, ids } from "../utils/constants";
 import { BIGINT_ONE } from "../../src/utils/constants";
 
 describe("handleTotalPoolAmountSet() tests", () => {
-    beforeEach(() => {
-        clearStore();
-    });
-
     describe("Create StakingContract and Set total pools", () => {
         beforeEach(() => {
             initialize();

@@ -4,10 +4,6 @@ import { totalBandLevels, ids } from "../utils/constants";
 import { BIGINT_ONE } from "../../src/utils/constants";
 
 describe("handleTotalBandLevelsAmountSet() tests", () => {
-    beforeEach(() => {
-        clearStore();
-    });
-
     describe("Create StakingContract and Set total band levels", () => {
         beforeEach(() => {
             initialize();

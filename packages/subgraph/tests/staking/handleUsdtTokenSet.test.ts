@@ -3,10 +3,6 @@ import { initialize, setUsdtTokenAddress } from "./helpers/helper";
 import { usdtToken, ids, newToken } from "../utils/constants";
 
 describe("handleUsdtTokenSet() tests", () => {
-    beforeEach(() => {
-        clearStore();
-    });
-
     describe("Create StakingContract and Set USDT token", () => {
         beforeEach(() => {
             initialize();

@@ -3,10 +3,6 @@ import { initialize, setDistributionInProgress } from "./helpers/helper";
 import { ids } from "../utils/constants";
 
 describe("handleDistributionStatusSetEvent() tests", () => {
-    beforeEach(() => {
-        clearStore();
-    });
-
     describe("Create StakingContract and enable distribution", () => {
         beforeEach(() => {
             initialize();

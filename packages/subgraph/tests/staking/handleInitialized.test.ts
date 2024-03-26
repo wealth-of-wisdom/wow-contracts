@@ -14,10 +14,6 @@ import {
 } from "../utils/constants";
 
 describe("handleInitialized() tests", () => {
-    beforeEach(() => {
-        clearStore();
-    });
-
     describe("Create StakingContract entity", () => {
         beforeEach(() => {
             initialize();

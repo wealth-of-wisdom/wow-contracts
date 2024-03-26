@@ -1,6 +1,13 @@
 import { BigInt } from "@graphprotocol/graph-ts";
 import { describe, test, beforeEach, clearStore, assert } from "matchstick-as/assembly/index";
-import { initialize, setPool, setBandLevel, setSharesInMonth, stakeStandardFlexi, upgradeBand } from "./helpers/helper";
+import {
+    initialize,
+    setPool,
+    setBandLevel,
+    setSharesInMonth,
+    stakeStandardFlexi,
+    downgradeBand,
+} from "./helpers/helper";
 import {
     alice,
     totalPools,
@@ -13,16 +20,15 @@ import {
     ids,
     bandIds,
     sharesInMonths,
-    zeroStr,
 } from "../utils/constants";
 
-const starterLevel = 1;
-const firstUpgradeLevel = 2;
-const secondUpgradeLevel = 4;
+const starterLevel = 5;
+const firstDowngradeLevel = 3;
+const secondDowngradeLevel = 1;
 
-describe("handleBandUpgraded() tests", () => {
-    //NOTE: share functionality for upgrade bands - incomplete
-    describe("Create StakingContract, stake and upgrade band", () => {
+describe("handleBandDowngraded() tests", () => {
+    //NOTE: share functionality for downgrade bands - incomplete
+    describe("Create StakingContract, stake and downgrade band", () => {
         beforeEach(() => {
             clearStore();
             initialize();
@@ -39,54 +45,54 @@ describe("handleBandUpgraded() tests", () => {
 
             setSharesInMonth(sharesInMonths);
             stakeStandardFlexi(alice, bandLevels[starterLevel - 1], bandIds[0], initDate);
-            upgradeBand(
+            downgradeBand(
                 alice,
                 BigInt.fromString(ids[0]),
                 BigInt.fromI32(starterLevel),
-                BigInt.fromI32(firstUpgradeLevel),
+                BigInt.fromI32(firstDowngradeLevel),
                 initDate,
             );
         });
 
-        test("Should upgrade band and change band level", () => {
+        test("Should downgrade band and change band level", () => {
             //Assert changed field
-            assert.fieldEquals("Band", ids[0], "bandLevel", firstUpgradeLevel.toString());
+            assert.fieldEquals("Band", ids[0], "bandLevel", firstDowngradeLevel.toString());
             assert.fieldEquals(
                 "StakingContract",
                 ids[0],
                 "totalStakedAmount",
-                bandLevelPrices[firstUpgradeLevel - 1].toString(),
+                bandLevelPrices[firstDowngradeLevel - 1].toString(),
             );
             assert.fieldEquals(
                 "Staker",
                 alice.toHex(),
                 "stakedAmount",
-                bandLevelPrices[firstUpgradeLevel - 1].toString(),
+                bandLevelPrices[firstDowngradeLevel - 1].toString(),
             );
         });
 
-        test("Should allow another upgrade and change band level", () => {
-            upgradeBand(
+        test("Should allow another downgrade and change band level", () => {
+            downgradeBand(
                 alice,
                 BigInt.fromString(ids[0]),
-                BigInt.fromI32(firstUpgradeLevel),
-                BigInt.fromI32(secondUpgradeLevel),
+                BigInt.fromI32(firstDowngradeLevel),
+                BigInt.fromI32(secondDowngradeLevel),
                 initDate,
             );
 
             //Assert changed field
-            assert.fieldEquals("Band", ids[0], "bandLevel", secondUpgradeLevel.toString());
+            assert.fieldEquals("Band", ids[0], "bandLevel", secondDowngradeLevel.toString());
             assert.fieldEquals(
                 "StakingContract",
                 ids[0],
                 "totalStakedAmount",
-                bandLevelPrices[secondUpgradeLevel - 1].toString(),
+                bandLevelPrices[secondDowngradeLevel - 1].toString(),
             );
             assert.fieldEquals(
                 "Staker",
                 alice.toHex(),
                 "stakedAmount",
-                bandLevelPrices[secondUpgradeLevel - 1].toString(),
+                bandLevelPrices[secondDowngradeLevel - 1].toString(),
             );
         });
     });

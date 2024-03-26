@@ -7,10 +7,6 @@ import { BIGINT_ZERO, BIGINT_ONE } from "../../src/utils/constants";
 let totalShares: BigInt = BIGINT_ZERO;
 
 describe("handlePoolSet() tests", () => {
-    beforeEach(() => {
-        clearStore();
-    });
-
     describe("Create StakingContract and Set Pools", () => {
         beforeEach(() => {
             initialize();
