@@ -22,6 +22,8 @@ export const charlie: Address = Address.fromString("0x00000000000000000000000000
 //////////////////////////////////////////////////////////////////////////*/
 
 export const percentagePrecision: BigInt = BigInt.fromI32(100_000_000); // 1e8
+export const sharePrecision: BigInt = BigInt.fromI32(1_000_000); // 1e6
+
 export const totalPools: BigInt = BigInt.fromI32(9);
 export const totalBandLevels: BigInt = BigInt.fromI32(9);
 
