@@ -4,10 +4,11 @@ import { HttpNetworkConfig } from "hardhat/types"
 import { JsonRpcProvider } from "@ethersproject/providers"
 import { Wallet } from "@ethersproject/wallet"
 import { stakingABI } from "../web3-functions/stakingABI"
+import { getUserArgs } from "./getUserArgs"
 
 const main = async () => {
     const distributionTask = w3f.get("distribution-task")
-    const userArgs = distributionTask.getUserArgs()
+    const userArgs = await getUserArgs()
 
     const config = network.config as HttpNetworkConfig
     const chainId = config.chainId as number
@@ -34,7 +35,7 @@ const main = async () => {
         web3FunctionArgs: {
             stakingAddress: userArgs.stakingAddress as string,
             subgraphUrl: userArgs.subgraphUrl as string,
-            eventTopic: userArgs.eventTopic as string,
+            distributionEventTopic: userArgs.distributionEventTopic as string,
         },
         trigger: {
             type: TriggerType.EVENT,
@@ -43,7 +44,7 @@ const main = async () => {
                 topics: [
                     [
                         stakingInterface.getEventTopic(
-                            userArgs.eventTopic as string,
+                            userArgs.distributionEventTopic as string,
                         ),
                     ],
                 ],
