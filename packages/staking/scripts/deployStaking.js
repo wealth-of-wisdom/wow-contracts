@@ -1,10 +1,7 @@
-const { ethers, upgrades, run } = require("hardhat")
-const poolData = require("./poolData.json")
-const sharesData = require("./sharesData.json")
-const bandLevelData = require("./bandLevelData.json")
+const { ethers, upgrades } = require("hardhat")
 require("dotenv").config()
 
-async function main() {
+async function deployStaking() {
     /*//////////////////////////////////////////////////////////////////////////
                                   DEPLOY STAKING
     //////////////////////////////////////////////////////////////////////////*/
@@ -20,56 +17,11 @@ async function main() {
         process.env.TOTAL_BAND_LEVELS,
     ])
     await staking.waitForDeployment()
+
     const stakingAddress = await staking.getAddress()
     console.log("Staking deployed to: ", stakingAddress)
 
-    /*//////////////////////////////////////////////////////////////////////////
-                              SET POOLS
-    //////////////////////////////////////////////////////////////////////////*/
-    for (let i = 0; i < poolData.length; i++) {
-        const data = poolData[i]
-        const tx1 = await staking.setPool(data.id, data.distributionPercentage)
-        await tx1.wait()
-        console.log(`Pool ${data.id} data set`)
-    }
-
-    /*//////////////////////////////////////////////////////////////////////////
-                              SET BAND LEVEL DATA
-    //////////////////////////////////////////////////////////////////////////*/
-    const WOW_DECIMALS = 1e18
-    for (let i = 0; i < bandLevelData.length; i++) {
-        const data = bandLevelData[i]
-        const bandLevelPriceInWoWTokens =
-            BigInt(bandLevelData[i].price) * BigInt(WOW_DECIMALS)
-
-        const tx2 = await staking.setBandLevel(
-            data.level,
-            bandLevelPriceInWoWTokens,
-            data.accessiblePools,
-        )
-        await tx2.wait()
-        console.log(`Band level ${data.level} data set`)
-    }
-
-    /*//////////////////////////////////////////////////////////////////////////
-                              SET SHARES IN MONTH
-    //////////////////////////////////////////////////////////////////////////*/
-    const sharesArray = sharesData[0].shares
-    const tx3 = await staking.setSharesInMonth(sharesArray)
-    await tx3.wait()
-    console.log(`Shares in month set`)
-
-    /*//////////////////////////////////////////////////////////////////////////
-                              VERIFY CONTRACTS
-    //////////////////////////////////////////////////////////////////////////*/
-
-    await run("verify:verify", {
-        address: stakingAddress,
-        contract: "contracts/Staking.sol:Staking",
-    })
+    return staking
 }
 
-main().catch((error) => {
-    console.error(error)
-    process.exitCode = 1
-})
+module.exports = deployStaking

@@ -5,7 +5,6 @@
     "timeout": 30,
     "userArgs": {
         "stakingAddress": "string",
-        "subgraphUrl": "string",
-        "eventTopic": "string"
+        "subgraphUrl": "string"
     }
 }

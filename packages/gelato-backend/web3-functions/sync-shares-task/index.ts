@@ -40,8 +40,12 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
         const stakingAddress: string = userArgs.stakingAddress as string
         const subgraphUrl: string = userArgs.subgraphUrl as string
 
-        // We will trigger the shares sync if 24 hours have passed since the last sync
-        const updateInterval: number = 86400 // 24 hours in seconds
+        // We will trigger the shares sync if ~24 hours have passed since the last sync
+        // Update interval is not exactly 24 hours
+        // That's because if we set it to 24 hours and no events are executed in SC
+        // Automation will try to execute it each hour, but it will return false if few seconds are left
+        // This would cause the automation to execute the function every 25 hours and not 24
+        const updateInterval: number = 85800 // (23 hours) + (50 minutes)
 
         // Create a new client for querying the subgraph
         const client = createClient({

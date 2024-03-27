@@ -16,6 +16,8 @@ dotenv.config({ path: __dirname + "/.env" })
 const PRIVATE_KEY = process.env.PRIVATE_KEY as string
 const ETHEREUM_RPC_URL = process.env.ETHEREUM_RPC_URL as string
 const SEPOLIA_RPC_URL = process.env.SEPOLIA_RPC_URL as string
+const ARBITURM_ONE_RPC_URL = process.env.ARBITURM_ONE_RPC_URL as string
+const ARBITRUM_SEPOLIA_RPC_URL = process.env.ARBITRUM_SEPOLIA_RPC_URL as string
 
 /*//////////////////////////////////////////////////////////////////////////
                                 CONFIG
@@ -25,7 +27,13 @@ const config: HardhatUserConfig = {
     w3f: {
         rootDir: "./web3-functions",
         debug: false,
-        networks: ["hardhat", "sepolia", "ethereum"], // (multiChainProvider) injects provider for these networks
+        networks: [
+            "hardhat",
+            "sepolia",
+            "ethereum",
+            "arbitrumSepolia",
+            "arbitrumOne",
+        ], // (multiChainProvider) injects provider for these networks
     },
 
     namedAccounts: {
@@ -43,18 +51,24 @@ const config: HardhatUserConfig = {
                 url: SEPOLIA_RPC_URL,
             },
         },
-
-        // Prod
         ethereum: {
             chainId: 1,
             url: ETHEREUM_RPC_URL,
             accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
         },
-
-        // Staging
         sepolia: {
             chainId: 11155111,
             url: SEPOLIA_RPC_URL,
+            accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
+        },
+        arbitrumSepolia: {
+            chainId: 421614,
+            url: process.env.ARBITRUM_SEPOLIA_HOST,
+            accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
+        },
+        arbitrumOne: {
+            chainId: 42161,
+            url: process.env.ARBITRUM_ONE_HOST,
             accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
         },
     },
