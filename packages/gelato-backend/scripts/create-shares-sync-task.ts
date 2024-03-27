@@ -3,10 +3,11 @@ import { w3f, network } from "hardhat"
 import { HttpNetworkConfig } from "hardhat/types"
 import { JsonRpcProvider } from "@ethersproject/providers"
 import { Wallet } from "@ethersproject/wallet"
+import { getUserArgs } from "./getUserArgs"
 
 const main = async () => {
     const syncSharesTask = w3f.get("sync-shares-task")
-    const userArgs = syncSharesTask.getUserArgs()
+    const userArgs = await getUserArgs()
 
     const config = network.config as HttpNetworkConfig
     const chainId = config.chainId as number

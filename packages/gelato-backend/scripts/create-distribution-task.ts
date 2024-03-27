@@ -35,18 +35,13 @@ const main = async () => {
         web3FunctionArgs: {
             stakingAddress: userArgs.stakingAddress as string,
             subgraphUrl: userArgs.subgraphUrl as string,
-            distributionEventTopic: userArgs.distributionEventTopic as string,
         },
         trigger: {
             type: TriggerType.EVENT,
             filter: {
                 address: userArgs.stakingAddress as string,
                 topics: [
-                    [
-                        stakingInterface.getEventTopic(
-                            userArgs.distributionEventTopic as string,
-                        ),
-                    ],
+                    [stakingInterface.getEventTopic("DistributionCreated")],
                 ],
             },
             blockConfirmations: 0,

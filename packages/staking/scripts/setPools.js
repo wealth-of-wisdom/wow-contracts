@@ -1,4 +1,4 @@
-const poolData = require("../poolData.json")
+const poolData = require("./data/poolData.json")
 require("dotenv").config()
 
 async function setPools(staking) {

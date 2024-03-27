@@ -4,7 +4,6 @@ import config from "./config.json"
 type UserArgs = {
     stakingAddress: string
     subgraphUrl: string
-    distributionEventTopic: string
 }
 
 type NetworkConfig = {

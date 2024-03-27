@@ -1,4 +1,4 @@
-const sharesData = require("../sharesData.json")
+const sharesData = require("./data/sharesData.json")
 
 async function setShares(staking) {
     /*//////////////////////////////////////////////////////////////////////////

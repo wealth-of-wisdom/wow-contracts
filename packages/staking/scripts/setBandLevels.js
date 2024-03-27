@@ -1,4 +1,4 @@
-const bandLevelData = require("../bandLevelData.json")
+const bandLevelData = require("./data/bandLevelData.json")
 require("dotenv").config()
 
 async function setBandLevels(staking) {
