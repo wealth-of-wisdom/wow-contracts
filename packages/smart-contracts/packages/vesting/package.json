@@ -1,0 +1,20 @@
+{
+    "name": "@wealth-of-wisdom/vesting",
+    "version": "1.0.0",
+    "main": "hardhat.config.js",
+    "license": "MIT",
+    "scripts": {
+        "test": "forge test",
+        "build": "forge build",
+        "coverage": "forge coverage",
+        "coverage:lcov": "forge coverage --report lcov && genhtml -o report --branch-coverage lcov.info",
+        "deploy:ethereum": "npx hardhat run scripts/deployVesting.js --network mainnet",
+        "deploy:sepolia": "npx hardhat run scripts/deployVesting.js --network sepolia",
+        "addPools:ethereum": "npx hardhat run scripts/addVestingPools.js --network mainnet",
+        "addPools:sepolia": "npx hardhat run scripts/addVestingPools.js --network sepolia"
+    },
+    "dependencies": {
+        "@wealth-of-wisdom/staking": "1.0.0"
+    },
+    "devDependencies": {}
+}

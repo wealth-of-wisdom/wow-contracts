@@ -2,7 +2,6 @@
     "name": "@wealth-of-wisdom/monorepo",
     "version": "1.0.0",
     "description": "Smart contracts of Wealth of Wisdom",
-    "private": true,
     "npmClient": "yarn",
     "license": "MIT",
     "scripts": {
@@ -13,6 +12,12 @@
         "pre-commit": "npx lint-staged",
         "create-hooks": "npx husky set .husky/pre-commit \"npm run pre-commit\""
     },
+    "dependencies": {},
+    "devDependencies": {
+        "husky": "^8.0.3",
+        "lint-staged": "^15.2.0",
+        "prettier": "^3.1.1"
+    },
     "lint-staged": {
         "packages/**/contracts/**/*.sol": [
             "yarn prettier --write",
@@ -20,26 +25,18 @@
         ]
     },
     "repository": "git+https://github.com/wealth-of-wisdom/wow-contracts.git",
-    "author": "Alina <alina.d@superhow.org>",
+    "authors": [
+        {
+            "name": "Alina",
+            "email": "alina.d@superhow.org"
+        },
+        {
+            "name": "Benas",
+            "email": "benas.v@superhow.com"
+        }
+    ],
     "bugs": {
         "url": "https://github.com/wealth-of-wisdom/wow-contracts/issues"
     },
-    "homepage": "https://github.com/wealth-of-wisdom/wow-contracts#readme",
-    "dependencies": {},
-    "devDependencies": {
-        "husky": "^8.0.3",
-        "lint-staged": "^15.2.0",
-        "prettier": "^3.1.1",
-        "prettier-plugin-solidity": "^1.3.1",
-        "solhint": "^4.0.0",
-        "solhint-plugin-prettier": "^0.1.0"
-    },
-    "workspaces": {
-        "packages": [
-            "packages/nft",
-            "packages/staking",
-            "packages/token",
-            "packages/vesting"
-        ]
-    }
+    "homepage": "https://github.com/wealth-of-wisdom/wow-contracts#readme"
 }

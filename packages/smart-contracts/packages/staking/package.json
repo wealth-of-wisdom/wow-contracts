@@ -1,0 +1,19 @@
+{
+    "name": "@wealth-of-wisdom/staking",
+    "version": "1.0.0",
+    "main": "hardhat.config.js",
+    "license": "MIT",
+    "scripts": {
+        "test": "forge test",
+        "build": "forge build",
+        "coverage": "forge coverage",
+        "coverage:lcov": "forge coverage --report lcov && genhtml -o report --branch-coverage lcov.info",
+        "deploy:ethereum": "npx hardhat run scripts/deployAndSetup.js --network ethereum",
+        "deploy:sepolia": "npx hardhat run scripts/deployAndSetup.js --network sepolia",
+        "deploy:arbitrum-one": "npx hardhat run scripts/deployAndSetup.js --network arbitrumOne",
+        "deploy:arbitrum-sepolia": "npx hardhat run scripts/deployAndSetup.js --network arbitrumSepolia",
+        "deploy:hardhat": "npx hardhat run scripts/deployAndSetup.js --network hardhat"
+    },
+    "dependencies": {},
+    "devDependencies": {}
+}

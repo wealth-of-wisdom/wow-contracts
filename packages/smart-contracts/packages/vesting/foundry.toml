@@ -1,0 +1,14 @@
+[profile.default]
+src = "contracts"
+out = "build"
+allow_paths = ["../.."]
+libs = ["../../node_modules", "../../lib"]
+remappings = [
+    "@wealth-of-wisdom/staking=../packages/staking",
+    "@wealth-of-wisdom/nft=../packages/nft",
+    "@wealth-of-wisdom/vesting=../../packages/vesting",
+    "@openzeppelin/=../../node_modules/@openzeppelin/",
+]
+gas_reports = ["*"]
+
+# See more config options https://github.com/foundry-rs/foundry/tree/master/config
