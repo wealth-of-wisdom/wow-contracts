@@ -269,22 +269,88 @@ type StakingContract @entity {
     id: ID!
 
     # Contract fields
+    """
+    Staking contract address
+    """
     stakingContractAddress: Bytes!
+
+    """
+    USDT token address used for rewards
+    """
     usdtToken: Bytes!
+
+    """
+    USDC token address used for rewards
+    """
     usdcToken: Bytes!
+
+    """
+    WOW token address used for buying bands (staking)
+    """
     wowToken: Bytes!
-    sharesInMonths: [BigInt!]!
+
+    """
+    Array of 24 elements representing the amount of shares staker in total will own
+    """
+    sharesInMonths: [BigInt!]! # Total shares amount in specific month
+    """
+    Array of 24 elements representing the amount of shares staker will get after month
+    """
+    sharesChangeInMonths: [BigInt!]! # Additional shares amount which is added after each month
+    """
+    Next band id which will be used for the next band entity
+    """
     nextBandId: BigInt!
+
+    """
+    Next distribution id which will be used for the next distribution entity
+    """
     nextDistributionId: BigInt!
+
+    """
+    Percentage precision for the distribution percentages
+    """
     percentagePrecision: Int!
+
+    """
+    Share precision used to format shares in FE
+    """
+    sharePrecision: Int!
+
+    """
+    Number of total pools
+    """
     totalPools: Int!
+
+    """
+    Number of total band levels
+    """
     totalBandLevels: Int!
+
+    """
+    Flag which determines if upgrades and downgrades are allowed
+    """
     areUpgradesEnabled: Boolean!
+
+    """
+    Flag which determines if currently gelato is distributing rewards
+    """
     isDistributionInProgress: Boolean!
+
+    """
+    Stakers who are currently staking
+    """
     stakers: [Staker!]!
 
     # Additional fields
-    totalStakedAmount: BigInt! # Amount of WOW in contract (added from band prices)
+    """
+    Total amount of WOW staked in contract
+    """
+    totalStakedAmount: BigInt!
+
+    """
+    The last time when shares were synced by gelato or event
+    """
     lastSharesSyncDate: BigInt!
 }
 
@@ -295,13 +361,38 @@ type Pool @entity {
     id: ID!
 
     # Contract fields
+    """
+    Percentage of distribution for this pool (all pools must sum to 100%)
+    """
     distributionPercentage: Int!
 
     # Additional fields
+    """
+    Total fixed shares in pool from this pool and higher pools
+    If band level 1, 2 and 3 are staked and pool id is 2,
+    this field will return total fixed shares from band level 2 and 3
+    """
     totalFixedSharesAmount: BigInt! # Total fixed shares in pool from this pool and higher pools
-    totalFlexiSharesAmount: BigInt! # Total flexi shares in pool from this pool and higher pools
-    isolatedFixedSharesAmount: BigInt! # Fixed shares from bands only from this pool (shares from higher pools are not included)
-    isolatedFlexiSharesAmount: BigInt! # Flexi shares from bands only from this pool (shares from higher pools are not included)
+    """
+    Total flexi shares in pool from this pool and higher pools
+    If band level 1, 2 and 3 are staked and pool id is 2,
+    this field will return total flexi shares from band level 2 and 3
+    """
+    totalFlexiSharesAmount: BigInt!
+
+    """
+    Isolated fixed shares from bands only from this pool (shares from higher pools are not included)
+    If band level 1, 2 and 3 are staked and pool id is 2,
+    this field will return isolated fixed shares from band level 2
+    """
+    isolatedFixedSharesAmount: BigInt!
+
+    """
+    Isolated flexi shares from bands only from this pool (shares from higher pools are not included)
+    If band level 1, 2 and 3 are staked and pool id is 2,
+    this field will return isolated flexi shares from band level 2
+    """
+    isolatedFlexiSharesAmount: BigInt!
 }
 
 type BandLevel @entity {
@@ -311,7 +402,14 @@ type BandLevel @entity {
     id: ID!
 
     # Contract fields
+    """
+    Band level price in USD (USDT or USDC)
+    """
     price: BigInt!
+
+    """
+    Pools that are accessible for this band level
+    """
     accessiblePools: [Pool!]!
 }
 
@@ -322,18 +420,72 @@ type Staker @entity {
     id: ID!
 
     # Contract fields
+    """
+    Fixed bands are bands that are locked for a specific amount of months
+    This array is holding all fixed bands that staker has
+    """
     fixedBands: [Band!]!
+
+    """
+    Flexi bands are bands that are not locked and can be unstaked at any time
+    This array is holding all flexi bands that staker has
+    """
     flexiBands: [Band!]!
+
+    """
+    Total amount of bands purchased by staker (fixed + flexi bands)
+    """
     bandsCount: Int!
+
+    """
+    Staker rewards for USDT and USDC tokens
+    """
     rewards: [StakerRewards!]! @derivedFrom(field: "staker")
 
     # Additional fields
+    """
+    Total amount of WOW staked (fixed + flexi bands)
+    Amount added from active band prices
+    """
     stakedAmount: BigInt! # Amount of WOW staked
-    fixedSharesPerPool: [BigInt!]! # 9 numbers for each pool
-    flexiSharesPerPool: [BigInt!]! # 9 numbers for each pool
-    isolatedFixedSharesPerPool: [BigInt!]! # 9 numbers for each pool
-    isolatedFlexiSharesPerPool: [BigInt!]! # 9 numbers for each pool
+    """
+    Fixed shares per pool from all band levels (stakes)
+    9 numbers for each pool (starting from pool 1 and ending with pool 9)
+    Example: [6000000, 4000000, 4000000, 4000000, 2000000, 2000000, 2000000, 0, 0]
+    """
+    fixedSharesPerPool: [BigInt!]!
+
+    """
+    Flexi shares per pool from all band levels (stakes)
+    9 numbers for each pool (starting from pool 1 and ending with pool 9)
+    Example: [3000000, 2000000, 2000000, 2000000, 1000000, 1000000, 1000000, 0, 0]
+    """
+    flexiSharesPerPool: [BigInt!]!
+
+    """
+    Isolated fixed shares per pool from bands only from this band level (stake)
+    Shares from other stakers or other band levels are not included
+    9 numbers for each pool (starting from pool 1 and ending with pool 9)
+    Example: [2000000, 0, 0, 2000000, 0, 0, 2000000, 0, 0]
+    """
+    isolatedFixedSharesPerPool: [BigInt!]!
+
+    """
+    Isolated flexi shares per pool from bands only from this band level (stake)
+    Shares from other stakers or other band levels are not included
+    9 numbers for each pool (starting from pool 1 and ending with pool 9)
+    Example: [1000000, 0, 0, 1000000, 0, 0, 1000000, 0, 0]
+    """
+    isolatedFlexiSharesPerPool: [BigInt!]!
+
+    """
+    Total unclaimed rewards for USDT and USDC tokens combined (USD)
+    """
     totalUnclaimedRewards: BigInt!
+
+    """
+    Total claimed rewards for USDT and USDC tokens combined (USD)
+    """
     totalClaimedRewards: BigInt!
 }
 
@@ -344,28 +496,83 @@ type StakerRewards @entity {
     id: ID!
 
     # Contract fields
+    """
+    Staker address who owns the rewards
+    """
     staker: Staker!
+
+    """
+    Token address
+    """
     token: Bytes!
 
     # Additional fields
+    """
+    Amount of unclaimed rewards that staker has
+    It will become 0 after claiming and will be added to claimedAmount
+    """
     unclaimedAmount: BigInt!
+
+    """
+    Amount of claimed rewards
+    """
     claimedAmount: BigInt!
 }
 
 type Band @entity {
+    """
+    ID incremented by 1 for each new band (like NFT ID)
+    """
     id: ID!
 
     # Contract fields
+    """
+    Staker address who owns the band
+    """
     owner: Staker!
+
+    """
+    Date when the band was purchased
+    """
     stakingStartDate: BigInt!
+
+    """
+    Band level from 1 to 9
+    """
     bandLevel: BandLevel!
+
+    """
+    If user has staked with type FLEXI, this field will be set to 0
+    If user has staked with type FIX, this field will be set to
+    the number of months the band is fixed (locked) for.
+    It can be a number from 1 to 24.
+    """
     fixedMonths: Int!
+
+    """
+    Staking type for the band (FIX or FLEXI)
+    """
     stakingType: StakingType!
+
+    """
+    Determines if the band is purchased by staking vested WOW tokens from Vesting contract or not
+    """
     areTokensVested: Boolean!
+
+    """
+    If band is purchased by staking vested WOW tokens from Vesting contract
+    this field will be set to pool id in Vesting contract.
+    If band is purchased by staking WOW tokens from Staking contract
+    this field will not be set and will be null.
+    """
     vestingPool: VestingPool
 
     # Additional fields
-    sharesAmount: BigInt! # This is the amount of shares band owns in each accessible pool
+    """
+    This is the amount of shares band owns in each accessible pool
+    For non accessible pools, the band has 0 shares
+    """
+    sharesAmount: BigInt!
 }
 
 type FundsDistribution @entity {
@@ -375,10 +582,39 @@ type FundsDistribution @entity {
     id: ID!
 
     # Contract fields
+    """
+    Token address
+    """
     token: Bytes!
+
+    """
+    Amount of tokens to distribute to all stakers
+    """
     amount: BigInt!
+
+    """
+    Date when the distribution was created by admin
+    Returned in unix timestamp
+    """
     createdAt: BigInt!
+
+    """
+    Date when the distribution was executed by gelato
+    Returned in unix timestamp
+    """
     distributedAt: BigInt!
-    stakers: [String!]! # Store as string as this
+
+    """
+    List of stakers who received the distribution
+    This array is in string format because this array is going to be used
+    as parameter for the SC function call
+    """
+    stakers: [String!]!
+
+    """
+    List of amounts each staker received
+    This array needs to be the same length as the stakers array
+    and the amounts need to be in the same order as the stakers
+    """
     rewards: [BigInt!]!
 }

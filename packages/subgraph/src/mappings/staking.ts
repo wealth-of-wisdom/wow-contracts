@@ -68,6 +68,7 @@ export function handleInitialized(event: InitializedEvent): void {
     stakingContract.usdcToken = staking.getTokenUSDC();
     stakingContract.wowToken = staking.getTokenWOW();
     stakingContract.percentagePrecision = staking.PERCENTAGE_PRECISION().toI32();
+    stakingContract.sharePrecision = staking.SHARE().toI32();
     stakingContract.totalPools = staking.getTotalPools();
     stakingContract.totalBandLevels = staking.getTotalBandLevels();
     stakingContract.lastSharesSyncDate = event.block.timestamp;
@@ -99,7 +100,19 @@ export function handleBandLevelSet(event: BandLevelSetEvent): void {
 export function handleSharesInMonthSet(event: SharesInMonthSetEvent): void {
     const stakingContract: StakingContract = getOrInitStakingContract();
 
+    const sharesInMonth = event.params.totalSharesInMonth;
+    const monthsCount = sharesInMonth.length;
+    const sharesChangeInMonths: BigInt[] = [];
+
+    // Calculate each month shares difference
+    for (let i = 0; i < monthsCount; i++) {
+        const previousMonthShares: BigInt = i == 0 ? BIGINT_ZERO : sharesInMonth[i - 1];
+        const sharesDifference: BigInt = sharesInMonth[i].minus(previousMonthShares);
+        sharesChangeInMonths.push(sharesDifference);
+    }
+
     stakingContract.sharesInMonths = event.params.totalSharesInMonth;
+    stakingContract.sharesChangeInMonths = sharesChangeInMonths;
     stakingContract.save();
 }
 

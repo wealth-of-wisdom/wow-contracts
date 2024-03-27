@@ -6,6 +6,7 @@ import {
     usdcToken,
     wowToken,
     percentagePrecision,
+    sharePrecision,
     totalPools,
     totalBandLevels,
 } from "../../utils/constants";
@@ -15,6 +16,7 @@ export function createMockedFunctions(): void {
     createMockedFunction_getTokenUSDC();
     createMockedFunction_getTokenWOW();
     createMockedFunction_PERCENTAGE_PRECISION();
+    createMockedFunction_SHARE();
     createMockedFunction_getTotalPools();
     createMockedFunction_getTotalBandLevels();
 }
@@ -41,6 +43,12 @@ export function createMockedFunction_PERCENTAGE_PRECISION(): void {
     createMockedFunction(stakingAddress, "PERCENTAGE_PRECISION", "PERCENTAGE_PRECISION():(uint48)")
         .withArgs([])
         .returns([ethereum.Value.fromUnsignedBigInt(percentagePrecision)]);
+}
+
+export function createMockedFunction_SHARE(): void {
+    createMockedFunction(stakingAddress, "SHARE", "SHARE():(uint48)")
+        .withArgs([])
+        .returns([ethereum.Value.fromUnsignedBigInt(sharePrecision)]);
 }
 
 export function createMockedFunction_getTotalPools(): void {
