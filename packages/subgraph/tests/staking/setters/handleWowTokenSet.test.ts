@@ -1,8 +1,11 @@
-import { describe, test, beforeEach, assert } from "matchstick-as/assembly/index";
+import { describe, test, beforeEach, assert, clearStore } from "matchstick-as/assembly/index";
 import { initialize, setWowTokenAddress } from "../helpers/helper";
 import { wowToken, ids, newToken } from "../../utils/constants";
 
 describe("handleWowTokenSet() tests", () => {
+    beforeEach(() => {
+        clearStore();
+    });
     describe("Create StakingContract and Set WOW token", () => {
         beforeEach(() => {
             initialize();

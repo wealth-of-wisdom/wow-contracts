@@ -1,8 +1,11 @@
-import { describe, test, beforeEach, assert } from "matchstick-as/assembly/index";
+import { describe, test, beforeEach, assert, clearStore } from "matchstick-as/assembly/index";
 import { initialize, deleteVestingUser, stakeVestedFlexi } from "./helpers/helper";
 import { ids, alice, bandLevels, bandIds, initDate, usdcToken } from "../utils/constants";
 
 describe("handleVestingUserMultiStakeDelete tests", () => {
+    beforeEach(() => {
+        clearStore();
+    });
     describe("Create StakingContract and multi stake", () => {
         beforeEach(() => {
             initialize();

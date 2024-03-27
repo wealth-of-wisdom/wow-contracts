@@ -1,8 +1,11 @@
-import { describe, test, beforeEach, assert } from "matchstick-as/assembly/index";
+import { describe, test, beforeEach, assert, clearStore } from "matchstick-as/assembly/index";
 import { initialize, createDistribution } from "./helpers/helper";
 import { ids, usdtToken, usd100k, oneInt, initDate, usdcToken, preInitDate, zeroStr } from "../utils/constants";
 
 describe("handleMultiDistributionCreations() tests", () => {
+    beforeEach(() => {
+        clearStore();
+    });
     describe("Create StakingContract and create reward distribution", () => {
         beforeEach(() => {
             initialize();

@@ -7,6 +7,9 @@ const starterLevel = 5;
 const firstDowngradeLevel = 3;
 
 describe("handleBandDowngraded() tests", () => {
+    beforeEach(() => {
+        clearStore();
+    });
     //NOTE: share functionality for downgrade bands - incomplete
     describe("Create StakingContract, stake and downgrade band", () => {
         beforeEach(() => {

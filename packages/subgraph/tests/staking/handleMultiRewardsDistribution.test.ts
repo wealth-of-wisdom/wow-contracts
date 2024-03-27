@@ -1,4 +1,4 @@
-import { describe, test, beforeEach, assert } from "matchstick-as/assembly/index";
+import { describe, test, beforeEach, assert, clearStore } from "matchstick-as/assembly/index";
 import { initialize, stakeStandardFlexi, createDistribution, distributeRewards } from "./helpers/helper";
 import { convertStringToWrappedArray } from "../utils/arrays";
 import {
@@ -14,6 +14,9 @@ import {
 } from "../utils/constants";
 
 describe("handleMultiRewardsDistribution tests", () => {
+    beforeEach(() => {
+        clearStore();
+    });
     describe("Create StakingContract, create reward distributions and distribute rewards", () => {
         beforeEach(() => {
             initialize();

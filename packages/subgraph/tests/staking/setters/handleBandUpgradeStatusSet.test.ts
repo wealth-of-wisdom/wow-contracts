@@ -1,8 +1,11 @@
-import { describe, test, beforeEach, assert } from "matchstick-as/assembly/index";
+import { describe, test, beforeEach, assert, clearStore } from "matchstick-as/assembly/index";
 import { initialize, setBandUpgradesEnabled } from "../helpers/helper";
 import { ids } from "../../utils/constants";
 
 describe("handleBandUpgradeStatusSet() tests", () => {
+    beforeEach(() => {
+        clearStore();
+    });
     describe("Create StakingContract and band upgrade status", () => {
         beforeEach(() => {
             initialize();

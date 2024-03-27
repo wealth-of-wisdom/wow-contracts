@@ -1,4 +1,4 @@
-import { describe, test, beforeEach, assert } from "matchstick-as/assembly/index";
+import { describe, test, beforeEach, assert, clearStore } from "matchstick-as/assembly/index";
 import { initialize } from "./helpers/helper";
 import {
     stakingAddress,
@@ -14,6 +14,9 @@ import {
 } from "../utils/constants";
 
 describe("handleInitialized() tests", () => {
+    beforeEach(() => {
+        clearStore();
+    });
     describe("Create StakingContract entity", () => {
         beforeEach(() => {
             initialize();

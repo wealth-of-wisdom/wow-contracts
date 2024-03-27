@@ -1,9 +1,12 @@
-import { describe, test, beforeEach, assert } from "matchstick-as/assembly/index";
+import { describe, test, beforeEach, assert, clearStore } from "matchstick-as/assembly/index";
 import { initialize, setTotalPools } from "../helpers/helper";
 import { totalPools, ids } from "../../utils/constants";
 import { BIGINT_ONE } from "../../../src/utils/constants";
 
 describe("handleTotalPoolAmountSet() tests", () => {
+    beforeEach(() => {
+        clearStore();
+    });
     describe("Create StakingContract and Set total pools", () => {
         beforeEach(() => {
             initialize();

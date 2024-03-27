@@ -1,10 +1,13 @@
-import { describe, test, beforeEach, assert } from "matchstick-as/assembly/index";
+import { describe, test, beforeEach, assert, clearStore } from "matchstick-as/assembly/index";
 import { initialize, setSharesInMonth } from "../helpers/helper";
 import { convertBigIntArrayToString } from "../../utils/arrays";
 import { sharesInMonths, ids } from "../../utils/constants";
 import { BIGINT_ZERO } from "../../../src/utils/constants";
 
 describe("handleInitialized() tests", () => {
+    beforeEach(() => {
+        clearStore();
+    });
     describe("Create StakingContract and Set shares in month", () => {
         beforeEach(() => {
             initialize();
