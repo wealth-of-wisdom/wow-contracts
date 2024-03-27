@@ -18,8 +18,10 @@ export function getOrInitVestingContract(vestingContractAddress: Address): Vesti
 
         // set default Vesting contract entity values
         vestingContract.vestingContractAddress = vestingContractAddress;
-        vestingContract.stakingContractAddress = Address.empty();
+        vestingContract.stakingContractAddress = Address.zero();
+        vestingContract.tokenContractAddress = Address.zero();
         vestingContract.listingDate = BIGINT_ZERO;
+        vestingContract.totalAmountOfPools = 0;
 
         vestingContract.save();
     }
