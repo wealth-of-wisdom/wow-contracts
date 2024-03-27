@@ -1,8 +1,8 @@
 import { BigInt } from "@graphprotocol/graph-ts";
-import { describe, test, beforeEach, clearStore, assert } from "matchstick-as/assembly/index";
-import { initialize, setPool } from "./helpers/helper";
-import { poolDistributionPercentages, totalPools, ids } from "../utils/constants";
-import { BIGINT_ZERO, BIGINT_ONE } from "../../src/utils/constants";
+import { describe, test, beforeEach, assert } from "matchstick-as/assembly/index";
+import { initialize, setPool } from "../helpers/helper";
+import { poolDistributionPercentages, totalPools, ids } from "../../utils/constants";
+import { BIGINT_ZERO, BIGINT_ONE } from "../../../src/utils/constants";
 
 let totalShares: BigInt = BIGINT_ZERO;
 

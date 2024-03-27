@@ -1,8 +1,9 @@
 import { BigInt } from "@graphprotocol/graph-ts";
 import { describe, test, beforeEach, clearStore, assert } from "matchstick-as/assembly/index";
-import { initialize, setBandLevel, concatAndNormalizeToArray } from "./helpers/helper";
-import { totalBandLevels, bandLevelPrices, bandLevelAccessiblePools, ids } from "../utils/constants";
-import { BIGINT_ONE, BIGINT_ZERO } from "../../src/utils/constants";
+import { initialize, setBandLevel } from "../helpers/helper";
+import { convertBigIntArrayToString } from "../../utils/arrays";
+import { totalBandLevels, bandLevelPrices, bandLevelAccessiblePools, ids, bandLevels } from "../../utils/constants";
+import { BIGINT_ONE } from "../../../src/utils/constants";
 
 describe("handleBandLevelSet() tests", () => {
     beforeEach(() => {
@@ -34,7 +35,7 @@ describe("handleBandLevelSet() tests", () => {
                     "BandLevel",
                     ids[i + 1],
                     "accessiblePools",
-                    concatAndNormalizeToArray(bandLevelAccessiblePools[i].toString()),
+                    convertBigIntArrayToString(bandLevelAccessiblePools[i]),
                 );
             }
         });
@@ -52,7 +53,7 @@ describe("handleBandLevelSet() tests", () => {
                     "BandLevel",
                     ids[i + 1],
                     "accessiblePools",
-                    concatAndNormalizeToArray(bandLevelAccessiblePools[i].toString()),
+                    convertBigIntArrayToString(bandLevelAccessiblePools[i]),
                 );
             }
 
@@ -61,7 +62,23 @@ describe("handleBandLevelSet() tests", () => {
                 "BandLevel",
                 ids[newBandLevel.toI32()],
                 "accessiblePools",
-                concatAndNormalizeToArray(newBandLevelAccessiblePools.toString()),
+                convertBigIntArrayToString(newBandLevelAccessiblePools),
+            );
+        });
+
+        test("Should update existing band level", () => {
+            const changedBandLevel = bandLevels[2];
+            const newPrice = bandLevelPrices[3];
+            const newBandLevelAccessiblePools = bandLevelAccessiblePools[3];
+
+            setBandLevel(changedBandLevel, newPrice, newBandLevelAccessiblePools);
+
+            assert.fieldEquals("BandLevel", changedBandLevel.toString(), "price", newPrice.toString());
+            assert.fieldEquals(
+                "BandLevel",
+                changedBandLevel.toString(),
+                "accessiblePools",
+                convertBigIntArrayToString(newBandLevelAccessiblePools),
             );
         });
     });

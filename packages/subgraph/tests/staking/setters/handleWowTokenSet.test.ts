@@ -1,6 +1,6 @@
-import { describe, test, beforeEach, clearStore, assert } from "matchstick-as/assembly/index";
-import { initialize, setWowTokenAddress } from "./helpers/helper";
-import { wowToken, ids, newToken } from "../utils/constants";
+import { describe, test, beforeEach, assert } from "matchstick-as/assembly/index";
+import { initialize, setWowTokenAddress } from "../helpers/helper";
+import { wowToken, ids, newToken } from "../../utils/constants";
 
 describe("handleWowTokenSet() tests", () => {
     describe("Create StakingContract and Set WOW token", () => {

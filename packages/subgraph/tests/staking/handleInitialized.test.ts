@@ -1,4 +1,4 @@
-import { describe, test, beforeEach, clearStore, assert } from "matchstick-as/assembly/index";
+import { describe, test, beforeEach, assert } from "matchstick-as/assembly/index";
 import { initialize } from "./helpers/helper";
 import {
     stakingAddress,

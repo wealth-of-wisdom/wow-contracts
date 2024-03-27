@@ -88,7 +88,7 @@ export function handleBandLevelSet(event: BandLevelSetEvent): void {
     const poolsAmount: number = event.params.accessiblePools.length;
     for (let i = 0; i < poolsAmount; i++) {
         const pool: Pool = getOrInitPool(BigInt.fromI32(event.params.accessiblePools[i]));
-        bandPoolIds.push(pool.id);
+        bandPoolIds[i] = pool.id;
     }
 
     bandLevel.accessiblePools = bandPoolIds;
@@ -145,7 +145,7 @@ export function handleBandUpgradeStatusSet(event: BandUpgradeStatusSetEvent): vo
     stakingContract.save();
 }
 
-export function handleDistributionStatusSetEvent(event: DistributionStatusSetEvent): void {
+export function handleDistributionStatusSet(event: DistributionStatusSetEvent): void {
     const stakingContract: StakingContract = getOrInitStakingContract();
 
     stakingContract.isDistributionInProgress = event.params.inProgress;

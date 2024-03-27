@@ -1,7 +1,8 @@
-import { describe, test, beforeEach, clearStore, assert } from "matchstick-as/assembly/index";
-import { initialize, setSharesInMonth, concatAndNormalizeToArray } from "./helpers/helper";
-import { sharesInMonths, ids } from "../utils/constants";
-import { BIGINT_ZERO } from "../../src/utils/constants";
+import { describe, test, beforeEach, assert } from "matchstick-as/assembly/index";
+import { initialize, setSharesInMonth } from "../helpers/helper";
+import { convertBigIntArrayToString } from "../../utils/arrays";
+import { sharesInMonths, ids } from "../../utils/constants";
+import { BIGINT_ZERO } from "../../../src/utils/constants";
 
 describe("handleInitialized() tests", () => {
     describe("Create StakingContract and Set shares in month", () => {
@@ -11,12 +12,7 @@ describe("handleInitialized() tests", () => {
         });
 
         test("Should set shares in month array correctly", () => {
-            assert.fieldEquals(
-                "StakingContract",
-                ids[0],
-                "sharesInMonths",
-                concatAndNormalizeToArray(sharesInMonths.toString()),
-            );
+            assert.fieldEquals("StakingContract", ids[0], "sharesInMonths", convertBigIntArrayToString(sharesInMonths));
         });
 
         test("Should set new shares correctly", () => {
@@ -27,7 +23,7 @@ describe("handleInitialized() tests", () => {
                 "StakingContract",
                 ids[0],
                 "sharesInMonths",
-                concatAndNormalizeToArray(newSharesInMonth.toString()),
+                convertBigIntArrayToString(newSharesInMonth),
             );
         });
     });

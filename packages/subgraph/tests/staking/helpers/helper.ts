@@ -10,7 +10,7 @@ import {
     handleTotalBandLevelsAmountSet,
     handleTotalPoolAmountSet,
     handleBandUpgradeStatusSet,
-    handleDistributionStatusSetEvent,
+    handleDistributionStatusSet,
     handleTokensWithdrawn,
     handleDistributionCreated,
     handleRewardsDistributed,
@@ -112,7 +112,7 @@ export function setBandUpgradesEnabled(status: boolean): void {
 }
 
 export function setDistributionInProgress(status: boolean): void {
-    handleDistributionStatusSetEvent(createDistributionStatusSetEvent(status));
+    handleDistributionStatusSet(createDistributionStatusSetEvent(status));
 }
 
 export function withdrawTokens(token: Address, receiver: Address, amount: BigInt): void {
@@ -209,8 +209,4 @@ export function downgradeBand(
 
 export function claimRewards(staker: Address, token: Address, amount: BigInt, date: BigInt): void {
     handleRewardsClaimed(createRewardsClaimedEvent(staker, token, amount, date));
-}
-
-export function concatAndNormalizeToArray(value: string): string {
-    return "[".concat(value).concat("]").replaceAll(",", ", ");
 }

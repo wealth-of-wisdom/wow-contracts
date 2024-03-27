@@ -1,6 +1,6 @@
-import { describe, test, beforeEach, clearStore, assert } from "matchstick-as/assembly/index";
-import { initialize, setUsdcTokenAddress } from "./helpers/helper";
-import { usdcToken, ids, newToken } from "../utils/constants";
+import { describe, test, beforeEach, assert } from "matchstick-as/assembly/index";
+import { initialize, setUsdcTokenAddress } from "../helpers/helper";
+import { usdcToken, ids, newToken } from "../../utils/constants";
 
 describe("handleUsdcTokenSet() tests", () => {
     describe("Create StakingContract and Set USDC token", () => {

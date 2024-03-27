@@ -1,20 +1,19 @@
 import { describe, test, beforeEach, assert } from "matchstick-as/assembly/index";
-import { initialize, createDistribution, distributeRewards } from "./helpers/helper";
-import { ids, preInitDate, usdtToken, usd100k, oneInt } from "../utils/constants";
+import { initialize, createDistribution } from "./helpers/helper";
+import { ids, usdtToken, usd100k, oneInt, initDate, zeroStr } from "../utils/constants";
 
-describe("handleRewardsDistributed() tests", () => {
-    describe("Create StakingContract, create reward distributions and distribute rewards", () => {
+describe("handleDistributionCreated() tests", () => {
+    describe("Create StakingContract and create reward distribution", () => {
         beforeEach(() => {
             initialize();
-            createDistribution(usdtToken, usd100k, preInitDate);
-            distributeRewards(usdtToken, preInitDate);
+            createDistribution(usdtToken, usd100k, initDate);
         });
 
-        test("Should have rewards distributed", () => {
+        test("Should have created distribution", () => {
             assert.fieldEquals("FundsDistribution", ids[0], "token", usdtToken.toHex());
             assert.fieldEquals("FundsDistribution", ids[0], "amount", usd100k.toString());
-            assert.fieldEquals("FundsDistribution", ids[0], "createdAt", preInitDate.toString());
-            assert.fieldEquals("FundsDistribution", ids[0], "distributedAt", preInitDate.toString());
+            assert.fieldEquals("FundsDistribution", ids[0], "createdAt", initDate.toString());
+            assert.fieldEquals("FundsDistribution", ids[0], "distributedAt", zeroStr);
             assert.fieldEquals("FundsDistribution", ids[0], "stakers", "[]");
             assert.fieldEquals("FundsDistribution", ids[0], "rewards", "[]");
 
