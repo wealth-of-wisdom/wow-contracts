@@ -1,47 +1,47 @@
 [
     {
         "level": 1,
-        "price": 1000,
-        "accessiblePools": [1]
+        "band_price_in_eth": "1000",
+        "accessible_pools": [1]
     },
     {
         "level": 2,
-        "price": 3000,
-        "accessiblePools": [1, 2]
+        "band_price_in_eth": "3000",
+        "accessible_pools": [1, 2]
     },
     {
         "level": 3,
-        "price": 10000,
-        "accessiblePools": [1, 2, 3]
+        "band_price_in_eth": "10000",
+        "accessible_pools": [1, 2, 3]
     },
     {
         "level": 4,
-        "price": 30000,
-        "accessiblePools": [1, 2, 3, 4]
+        "band_price_in_eth": "30000",
+        "accessible_pools": [1, 2, 3, 4]
     },
     {
         "level": 5,
-        "price": 100000,
-        "accessiblePools": [1, 2, 3, 4, 5]
+        "band_price_in_eth": "100000",
+        "accessible_pools": [1, 2, 3, 4, 5]
     },
     {
         "level": 6,
-        "price": 200000,
-        "accessiblePools": [1, 2, 3, 4, 5, 6]
+        "band_price_in_eth": "200000",
+        "accessible_pools": [1, 2, 3, 4, 5, 6]
     },
     {
         "level": 7,
-        "price": 500000,
-        "accessiblePools": [1, 2, 3, 4, 5, 6, 7]
+        "band_price_in_eth": "500000",
+        "accessible_pools": [1, 2, 3, 4, 5, 6, 7]
     },
     {
         "level": 8,
-        "price": 1000000,
-        "accessiblePools": [1, 2, 3, 4, 5, 6, 7, 8]
+        "band_price_in_eth": "1000000",
+        "accessible_pools": [1, 2, 3, 4, 5, 6, 7, 8]
     },
     {
         "level": 9,
-        "price": 2000000,
-        "accessiblePools": [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        "band_price_in_eth": "2000000",
+        "accessible_pools": [1, 2, 3, 4, 5, 6, 7, 8, 9]
     }
 ]

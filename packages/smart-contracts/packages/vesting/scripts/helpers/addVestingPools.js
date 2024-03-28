@@ -4,7 +4,7 @@ const poolsData = require("../data/vestingPools.json")
 async function addVestingPools(vestingToken, vestingContract, totalTokens) {
     if (!vestingToken || !vestingContract || !totalTokens) {
         throw new Error(
-            "Please provide VESTING_TOKEN, VESTING_CONTRACT and FULL_POOL_TOKEN_AMOUNT in .env",
+            "Please provide parameters: vestingToken, vestingContract, totalTokens",
         )
     }
 

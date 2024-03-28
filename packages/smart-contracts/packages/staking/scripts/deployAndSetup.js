@@ -1,18 +1,39 @@
-const deployStaking = require("./deployStaking")
-const setPools = require("./setPools")
-const setBandLevels = require("./setBandLevels")
-const setShares = require("./setShares")
-const verifyStaking = require("./verifyStaking")
-require("dotenv").config()
+const deployStaking = require("./helpers/deployStaking")
+const setPools = require("./helpers/setPools")
+const setBandLevels = require("./helpers/setBandLevels")
+const setShares = require("./helpers/setShares")
+const verifyStaking = require("./helpers/verifyStaking")
 
 async function main() {
-    const staking = await deployStaking()
+    /*//////////////////////////////////////////////////////////////////////////
+                                    DEPLOY STAKING
+    //////////////////////////////////////////////////////////////////////////*/
 
-    await setPools(staking)
-    await setBandLevels(staking)
-    await setShares(staking)
+    const stakingAddress = await deployStaking()
 
-    await verifyStaking(staking)
+    /*//////////////////////////////////////////////////////////////////////////
+                                      SET POOLS
+    //////////////////////////////////////////////////////////////////////////*/
+
+    await setPools(stakingAddress)
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                    SET BAND LEVELS
+    //////////////////////////////////////////////////////////////////////////*/
+
+    await setBandLevels(stakingAddress)
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                SET SHARES PER MONTH
+    //////////////////////////////////////////////////////////////////////////*/
+
+    await setShares(stakingAddress)
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                    VERIFY STAKING
+    //////////////////////////////////////////////////////////////////////////*/
+
+    await verifyStaking(stakingAddress)
 }
 
 main().catch((error) => {
