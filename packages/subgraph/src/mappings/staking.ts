@@ -83,12 +83,12 @@ export function handlePoolSet(event: PoolSetEvent): void {
 
 export function handleBandLevelSet(event: BandLevelSetEvent): void {
     const bandLevel: BandLevel = getOrInitBandLevel(BigInt.fromI32(event.params.bandLevel));
-    const bandPoolIds = bandLevel.accessiblePools;
+    let bandPoolIds: string[] = [];
 
     const poolsAmount: number = event.params.accessiblePools.length;
     for (let i = 0; i < poolsAmount; i++) {
         const pool: Pool = getOrInitPool(BigInt.fromI32(event.params.accessiblePools[i]));
-        bandPoolIds[i] = pool.id;
+        bandPoolIds.push(pool.id.toString());
     }
 
     bandLevel.accessiblePools = bandPoolIds;
