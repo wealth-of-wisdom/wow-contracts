@@ -35,7 +35,7 @@ async function addVestingPools(vestingToken, vestingContract, totalTokens) {
 
     for (let pool of poolsData) {
         const tokenAmountInWei = ethers.parseUnits(
-            pool.tokens_amount_in_eth,
+            pool.tokens_amount_in_wow,
             tokenDecimals,
         )
 

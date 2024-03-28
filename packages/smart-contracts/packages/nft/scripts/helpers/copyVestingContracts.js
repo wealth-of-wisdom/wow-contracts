@@ -20,9 +20,9 @@ async function copyDirectory(src, dest) {
     console.log("Token contracts have been copied successfully.")
 }
 
-async function copyTokenContracts() {
-    const sourceDir = "../token/contracts"
-    const destinationDir = "./contracts/temp/token-contracts"
+async function copyVestingContracts() {
+    const sourceDir = "../vesting/contracts"
+    const destinationDir = "./contracts/temp/vesting-contracts"
 
     // Get the token contract
     await copyDirectory(sourceDir, destinationDir)
@@ -31,4 +31,4 @@ async function copyTokenContracts() {
     await run("compile")
 }
 
-module.exports = copyTokenContracts
+module.exports = copyVestingContracts

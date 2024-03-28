@@ -17,7 +17,7 @@ async function setBandLevels(stakingAddress) {
 
     for (let band of bandLevelData) {
         const priceInWoWTokens = ethers.parseUnits(
-            band.band_price_in_eth,
+            band.price_in_wow,
             WOW_DECIMALS,
         )
 

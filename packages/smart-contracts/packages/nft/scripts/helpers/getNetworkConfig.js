@@ -11,16 +11,18 @@ async function getNetworkConfig() {
 
     const usdtToken = config.usdt_token
     const usdcToken = config.usdc_token
-    const wowToken = config.wow_token
-    const totalPools = config.total_pools
-    const totalBandLevels = config.total_band_levels
+    const nftName = config.nft_name
+    const nftSymbol = config.nft_symbol
+    const maxLevel = config.max_level
+    const totalProjectTypes = config.total_project_types
 
     if (
         !usdtToken ||
         !usdcToken ||
-        !wowToken ||
-        !totalPools ||
-        !totalBandLevels
+        !nftName ||
+        !nftSymbol ||
+        !maxLevel ||
+        !totalProjectTypes
     ) {
         throw new Error("ERROR: Invalid config")
     }
@@ -29,18 +31,17 @@ async function getNetworkConfig() {
     // use a dummy address which will be replaced later
     const vestingContract =
         config.vesting_contract || "0x0000000000000000000000000000000000000001"
-    const gelatoAddress =
-        process.env.GELATO_ADDRESS ||
-        "0x0000000000000000000000000000000000000001"
+    const vestingPoolId = config.vesting_pool_id // Pool id can be zero
 
     return {
         usdtToken,
         usdcToken,
-        wowToken,
+        nftName,
+        nftSymbol,
         vestingContract,
-        gelatoAddress,
-        totalPools,
-        totalBandLevels,
+        vestingPoolId,
+        maxLevel,
+        totalProjectTypes,
     }
 }
 
