@@ -157,3 +157,5 @@ lcov.info
 .gas-snapshot2
 
 debug.txt
+
+packages/**/contracts/temp/
