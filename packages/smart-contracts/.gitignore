@@ -130,3 +130,30 @@ dist
 .pnp.*
 
 packages/packages
+
+
+coverage
+coverage.json
+typechain
+typechain-types
+
+#Hardhat files
+cache/
+artifacts/
+
+
+#Forge files
+build/
+
+#Coverage
+report/
+lcov.info
+
+#OpenZeppelin
+.openzeppelin/
+
+#Gas report
+.gas-snapshot
+.gas-snapshot2
+
+debug.txt
