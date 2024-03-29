@@ -1,13 +1,12 @@
-import { describe, test, beforeEach, clearStore, assert } from "matchstick-as/assembly/index";
-import { initialize, setTotalBandLevels } from "./helpers/helper";
-import { totalBandLevels, ids } from "../utils/constants";
-import { BIGINT_ONE } from "../../src/utils/constants";
+import { describe, test, beforeEach, assert, clearStore } from "matchstick-as/assembly/index";
+import { initialize, setTotalBandLevels } from "../helpers/helper";
+import { totalBandLevels, ids } from "../../utils/constants";
+import { BIGINT_ONE } from "../../../src/utils/constants";
 
 describe("handleTotalBandLevelsAmountSet() tests", () => {
     beforeEach(() => {
         clearStore();
     });
-
     describe("Create StakingContract and Set total band levels", () => {
         beforeEach(() => {
             initialize();
