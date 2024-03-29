@@ -89,7 +89,7 @@ describe("Create StakingContract, stake and upgrade band two times", () => {
                 bandLevelPrices[secondUpgradeLevel - 1].toString(),
             );
             assert.entityCount("Band", 1);
-            assert.entityCount("Staker", BIGINT_ONE.toI32());
+            assert.entityCount("Staker", 1);
         });
     });
 });
