@@ -16,8 +16,6 @@ async function copyDirectory(src, dest) {
             await fs.copyFile(srcPath, destPath)
         }
     }
-
-    console.log("Token contracts have been copied successfully.")
 }
 
 async function copyTokenContracts() {
@@ -26,6 +24,7 @@ async function copyTokenContracts() {
 
     // Get the token contract
     await copyDirectory(sourceDir, destinationDir)
+    console.log("Token contracts have been copied successfully.")
 
     // Compile the token contract
     await run("compile")

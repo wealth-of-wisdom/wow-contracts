@@ -1,17 +1,14 @@
 const { ethers, upgrades } = require("hardhat")
-const getNetworkConfig = require("./getNetworkConfig.js")
 
-async function deployStaking() {
-    const {
-        usdtToken,
-        usdcToken,
-        wowToken,
-        vestingContract,
-        gelatoAddress,
-        totalPools,
-        totalBandLevels,
-    } = await getNetworkConfig()
-
+async function deployStaking(
+    usdtToken,
+    usdcToken,
+    wowToken,
+    vestingContract,
+    gelatoAddress,
+    totalPools,
+    totalBandLevels,
+) {
     /*//////////////////////////////////////////////////////////////////////////
                                   DEPLOY STAKING
     //////////////////////////////////////////////////////////////////////////*/

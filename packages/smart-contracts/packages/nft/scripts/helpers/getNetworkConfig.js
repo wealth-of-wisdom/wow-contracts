@@ -32,6 +32,7 @@ async function getNetworkConfig() {
     const vestingContract =
         config.vesting_contract || "0x0000000000000000000000000000000000000001"
     const vestingPoolId = config.vesting_pool_id // Pool id can be zero
+    const shouldSetProjectQuantities = config.set_project_quantities
 
     return {
         usdtToken,
@@ -42,6 +43,7 @@ async function getNetworkConfig() {
         vestingPoolId,
         maxLevel,
         totalProjectTypes,
+        shouldSetProjectQuantities,
     }
 }
 

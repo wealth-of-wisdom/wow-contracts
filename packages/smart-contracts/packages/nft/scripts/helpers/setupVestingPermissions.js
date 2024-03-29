@@ -1,9 +1,6 @@
 const { ethers } = require("hardhat")
-const getNetworkConfig = require("./getNetworkConfig.js")
 
-async function setupVestingPermissions(nftSaleAddress) {
-    const { vestingContract } = await getNetworkConfig()
-
+async function setupVestingPermissions(nftSaleAddress, vestingContract) {
     if (vestingContract === "0x0000000000000000000000000000000000000001") {
         console.log("No vesting contract provided. Skipping vesting setup.")
         return

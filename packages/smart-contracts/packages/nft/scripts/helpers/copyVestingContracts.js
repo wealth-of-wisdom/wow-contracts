@@ -16,18 +16,17 @@ async function copyDirectory(src, dest) {
             await fs.copyFile(srcPath, destPath)
         }
     }
-
-    console.log("Token contracts have been copied successfully.")
 }
 
 async function copyVestingContracts() {
     const sourceDir = "../vesting/contracts"
     const destinationDir = "./contracts/temp/vesting-contracts"
 
-    // Get the token contract
+    // Get the vesting contract
     await copyDirectory(sourceDir, destinationDir)
+    console.log("Vesting contracts have been copied successfully.")
 
-    // Compile the token contract
+    // Compile the vesting contract
     await run("compile")
 }
 

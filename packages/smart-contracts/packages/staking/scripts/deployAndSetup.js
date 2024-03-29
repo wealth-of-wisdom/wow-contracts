@@ -5,11 +5,29 @@ const setShares = require("./helpers/setShares")
 const verifyStaking = require("./helpers/verifyStaking")
 
 async function main() {
+    const {
+        usdtToken,
+        usdcToken,
+        wowToken,
+        vestingContract,
+        gelatoAddress,
+        totalPools,
+        totalBandLevels,
+    } = await getNetworkConfig()
+
     /*//////////////////////////////////////////////////////////////////////////
                                     DEPLOY STAKING
     //////////////////////////////////////////////////////////////////////////*/
 
-    const stakingAddress = await deployStaking()
+    const stakingAddress = await deployStaking(
+        usdtToken,
+        usdcToken,
+        wowToken,
+        vestingContract,
+        gelatoAddress,
+        totalPools,
+        totalBandLevels,
+    )
 
     /*//////////////////////////////////////////////////////////////////////////
                                       SET POOLS

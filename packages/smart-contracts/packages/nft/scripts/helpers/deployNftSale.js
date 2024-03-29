@@ -1,9 +1,6 @@
 const { ethers, upgrades } = require("hardhat")
-const getNetworkConfig = require("./getNetworkConfig.js")
 
-async function deployNftSale(nftContractAddress) {
-    const { usdtToken, usdcToken } = await getNetworkConfig()
-
+async function deployNftSale(nftContractAddress, usdtToken, usdcToken) {
     /*//////////////////////////////////////////////////////////////////////////
                                   DEPLOY NFT SALE
     //////////////////////////////////////////////////////////////////////////*/
@@ -16,7 +13,7 @@ async function deployNftSale(nftContractAddress) {
     ])
     await nftSale.waitForDeployment()
 
-    const nftSaleAddress = await sale.getAddress()
+    const nftSaleAddress = await nftSale.getAddress()
     console.log("NFT Sale deployed to:", nftSaleAddress)
 
     return nftSaleAddress

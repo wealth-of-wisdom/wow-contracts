@@ -1,9 +1,7 @@
 const { ethers, upgrades } = require("hardhat")
 require("dotenv").config()
 
-async function upgradeNftSale() {
-    const nftSaleProxyAddress = process.env.NFT_SALE_PROXY
-
+async function upgradeNftSale(nftSaleProxyAddress) {
     if (!nftSaleProxyAddress) {
         throw new Error("ERROR: NFT Sale proxy address not found")
     }

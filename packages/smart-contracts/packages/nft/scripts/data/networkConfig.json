@@ -7,7 +7,8 @@
         "vesting_contract": "",
         "vesting_pool_id": 0,
         "max_level": 5,
-        "total_project_types": 3
+        "total_project_types": 3,
+        "set_project_quantities": false
     },
     "sepolia": {
         "usdt_token": "0x4123AB83f7848fe4F901700097B3e79D22e6796F",
@@ -17,7 +18,8 @@
         "vesting_contract": "",
         "vesting_pool_id": 0,
         "max_level": 5,
-        "total_project_types": 3
+        "total_project_types": 3,
+        "set_project_quantities": true
     },
     "arbitrumOne": {
         "usdt_token": "",
@@ -27,7 +29,8 @@
         "vesting_contract": "",
         "vesting_pool_id": 0,
         "max_level": 5,
-        "total_project_types": 3
+        "total_project_types": 3,
+        "set_project_quantities": false
     },
     "arbitrumSepolia": {
         "usdt_token": "0x0F7f537BF7115Bf7B8D583fFa284Db56F62C2fC7",
@@ -37,6 +40,7 @@
         "vesting_contract": "",
         "vesting_pool_id": 0,
         "max_level": 5,
-        "total_project_types": 3
+        "total_project_types": 3,
+        "set_project_quantities": true
     }
 }

@@ -1,16 +1,13 @@
 const { ethers, upgrades } = require("hardhat")
-const getNetworkConfig = require("./getNetworkConfig.js")
 
-async function deployNft() {
-    const {
-        nftName,
-        nftSymbol,
-        vestingContract,
-        vestingPoolId,
-        maxLevel,
-        totalProjectTypes,
-    } = await getNetworkConfig()
-
+async function deployNft(
+    nftName,
+    nftSymbol,
+    vestingContract,
+    vestingPoolId,
+    maxLevel,
+    totalProjectTypes,
+) {
     /*//////////////////////////////////////////////////////////////////////////
                                     DEPLOY NFT
     //////////////////////////////////////////////////////////////////////////*/
