@@ -1,5 +1,4 @@
 const { ethers } = require("hardhat")
-const levelsData = require("./levelsDataTest.json")
 const deployNft = require("./helpers/deployNft.js")
 const deployNftSale = require("./helpers/deployNftSale.js")
 const setupVestingPermissions = require("./helpers/setupVestingPermissions.js")
@@ -20,25 +19,24 @@ async function main() {
     const nftSaleAddress = await deployNftSale(nftAddress)
 
     /*//////////////////////////////////////////////////////////////////////////
-                                  SETUP VESTING
+                            GRANT PERMISSIONS IN VESTING
     //////////////////////////////////////////////////////////////////////////*/
 
     await setupVestingPermissions(nftSaleAddress)
 
     /*//////////////////////////////////////////////////////////////////////////
-                                GRANT PERMISSIONS
+                              GRANT PERMISSIONS IN NFT
     //////////////////////////////////////////////////////////////////////////*/
 
     await setupNftPermissions(nftAddress, nftSaleAddress)
 
+    /*//////////////////////////////////////////////////////////////////////////
+                                    SET LEVELS
+    //////////////////////////////////////////////////////////////////////////*/
+
     // levelsData.json contains some numbers that are -1, which means that the
     // value is infinite. In order to set the data in the contract, we need to
-    // convert those numbers to max uint256 or uint16, which is the maximum value that
-    // can be stored in a smart contract.
-
-    /*//////////////////////////////////////////////////////////////////////////
-                              SET LEVELS
-    //////////////////////////////////////////////////////////////////////////*/
+    // convert those numbers to very high values.
 
     const USD_DECIMALS = 6
     const SECONDS_IN_MONTH = 30 * 24 * 60 * 60

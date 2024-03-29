@@ -1,12 +1,15 @@
 [profile.default]
+solc-version = "0.8.20"
+via_ir = true
 src = "contracts"
 out = "build"
 allow_paths = ["../.."]
 libs = ["../../node_modules", "../../lib"]
 remappings = [
     "@openzeppelin/=../../node_modules/@openzeppelin/",
-    "@wealth-of-wisdom/vesting=../../packages/vesting",
-    "@wealth-of-wisdom/staking=../../packages/staking",
+    "@wealth-of-wisdom/staking/=./",
+    "@wealth-of-wisdom/vesting/=../vesting/",
+
 ]
 gas_reports = ["*"]
 
