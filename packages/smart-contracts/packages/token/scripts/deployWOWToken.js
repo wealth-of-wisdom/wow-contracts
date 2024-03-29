@@ -1,22 +1,27 @@
-const { ethers, upgrades } = require("hardhat")
-
-async function deployWOWToken(name, symbol, initialAmount) {
-    const WOWToken = await ethers.getContractFactory("WOWToken")
-    const token = await upgrades.deployProxy(WOWToken, [
-        name,
-        symbol,
-        initialAmount,
-    ])
-    await token.waitForDeployment()
-
-    const tokenAddress = await token.getAddress()
-    console.log("WOWToken deployed to: ", tokenAddress)
-
-    return tokenAddress
-}
+const deployWOWToken = require("./helpers/deployWOWToken")
+const verifyToken = require("./helpers/verifyToken")
+const config = require("./data/config")
 
 async function main() {
-    await deployWOWToken("Wealth-Of-Wisdom", "WOW", 2_100_000_000)
+    if (!config.name || !config.symbol || !config.initial_token_amount_in_eth) {
+        throw new Error("Please provide config in data/config.json")
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                  DEPLOY TOKEN
+    //////////////////////////////////////////////////////////////////////////*/
+
+    const tokenAddress = await deployWOWToken(
+        config.name,
+        config.symbol,
+        config.initial_token_amount_in_eth,
+    )
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                  VERIFY TOKEN
+    //////////////////////////////////////////////////////////////////////////*/
+
+    await verifyToken(tokenAddress)
 }
 
 main().catch((error) => {
@@ -24,6 +29,4 @@ main().catch((error) => {
     process.exitCode = 1
 })
 
-module.exports = {
-    deployWOWToken: deployWOWToken,
-}
+module.exports = deployWOWToken

@@ -1,6 +1,6 @@
 const { run, network } = require("hardhat")
 
-async function verifyStaking(staking) {
+async function verifyToken(tokenAddress) {
     if (network.name === "hardhat") {
         console.log("Skipping contract verification on local node")
         return
@@ -10,12 +10,10 @@ async function verifyStaking(staking) {
                                   VERIFY CONTRACT
     //////////////////////////////////////////////////////////////////////////*/
 
-    const stakingAddress = await staking.getAddress()
-
     await run("verify:verify", {
-        address: stakingAddress,
-        contract: "contracts/Staking.sol:Staking",
+        address: tokenAddress,
+        contract: "contracts/WOWToken.sol:WOWToken",
     })
 }
 
-module.exports = verifyStaking
+module.exports = verifyToken

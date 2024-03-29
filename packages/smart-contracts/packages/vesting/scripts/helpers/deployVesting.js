@@ -1,7 +1,16 @@
 const { ethers, upgrades } = require("hardhat")
-require("dotenv").config()
 
 async function deployVesting(vestingToken, stakingContract, listingDate) {
+    if (!vestingToken || !stakingContract || !listingDate) {
+        throw new Error(
+            "Please provide parameters: vestingToken, stakingContract, listingDate",
+        )
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                  DEPLOY VESTING
+    //////////////////////////////////////////////////////////////////////////*/
+
     const Vesting = await ethers.getContractFactory("Vesting")
     const vesting = await upgrades.deployProxy(Vesting, [
         vestingToken,
@@ -16,19 +25,4 @@ async function deployVesting(vestingToken, stakingContract, listingDate) {
     return vestingAddress
 }
 
-async function main() {
-    await deployVesting(
-        process.env.VESTING_TOKEN,
-        process.env.STAKING_CONTRACT,
-        process.env.LISTING_DATE,
-    )
-}
-
-main().catch((error) => {
-    console.error(error)
-    process.exitCode = 1
-})
-
-module.exports = {
-    deployVesting: deployVesting,
-}
+module.exports = deployVesting
