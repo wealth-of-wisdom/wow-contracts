@@ -1,4 +1,4 @@
-import { BigInt } from "@graphprotocol/graph-ts";
+import { Address, BigInt } from "@graphprotocol/graph-ts";
 import { BIGINT_ONE, BIGINT_ZERO } from "../../src/utils/constants";
 
 /*//////////////////////////////////////////////////////////////////////////
@@ -54,6 +54,10 @@ export function createStringifiedArray(start: BigInt, end: BigInt): string[] {
 export function convertBigIntArrayToString(arr: BigInt[]): string {
     let numbers = arr.toString().split(",").join(", ");
     return `[${numbers}]`;
+}
+
+export function convertStringToWrappedArray(addr: string): string {
+    return "[".concat(addr).concat("]").replaceAll(",", ", ");
 }
 
 export function createEmptyArray(size: BigInt): BigInt[] {

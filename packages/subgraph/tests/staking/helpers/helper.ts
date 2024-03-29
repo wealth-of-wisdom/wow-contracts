@@ -10,7 +10,7 @@ import {
     handleTotalBandLevelsAmountSet,
     handleTotalPoolAmountSet,
     handleBandUpgradeStatusSet,
-    handleDistributionStatusSetEvent,
+    handleDistributionStatusSet,
     handleTokensWithdrawn,
     handleDistributionCreated,
     handleRewardsDistributed,
@@ -112,7 +112,7 @@ export function setBandUpgradesEnabled(status: boolean): void {
 }
 
 export function setDistributionInProgress(status: boolean): void {
-    handleDistributionStatusSetEvent(createDistributionStatusSetEvent(status));
+    handleDistributionStatusSet(createDistributionStatusSetEvent(status));
 }
 
 export function withdrawTokens(token: Address, receiver: Address, amount: BigInt): void {
