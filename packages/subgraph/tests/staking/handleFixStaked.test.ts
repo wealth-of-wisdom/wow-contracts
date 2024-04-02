@@ -79,6 +79,11 @@ describe("handleStaked() FIX tests", () => {
                 for (let i = 0; i < bandsCount; i++) {
                     stakeStandardFixed(alice, bandLevels[bandLevel - 1], bandIds[i], fixedMonths, initDate);
                 }
+                log.debug("Band Count: {}, Band Level: {}, Total Shares: {}", [
+                    bandsCount.toString(),
+                    bandLevel.toString(),
+                    totalShares.toString(),
+                ]);
             });
 
             describe("1 FIX band", () => {
@@ -195,6 +200,11 @@ describe("handleStaked() FIX tests", () => {
                         );
                     }
                 }
+                log.debug("Band Count: {}, Band Level: {}, Total Shares: {}", [
+                    bandsCount.toString(),
+                    bandLevel.toString(),
+                    totalShares.toString(),
+                ]);
             });
 
             describe("1 FIX band", () => {
