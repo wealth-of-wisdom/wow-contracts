@@ -11,6 +11,7 @@ subgraph.yaml
 # Matchstick generated files
 **/*.wasm
 **/*.latest.json
+.bin/
 
 node_modules
 doc/
