@@ -8,7 +8,6 @@ const setLevelsData = require("./helpers/setLevelsData.js")
 const setProjectQuantities = require("./helpers/setProjectQuantities.js")
 const verifyContracts = require("./helpers/verifyContracts.js")
 const getNetworkConfig = require("./helpers/getNetworkConfig.js")
-require("dotenv").config()
 
 async function main() {
     const {

@@ -3,6 +3,7 @@ const setPools = require("./helpers/setPools")
 const setBandLevels = require("./helpers/setBandLevels")
 const setShares = require("./helpers/setShares")
 const verifyStaking = require("./helpers/verifyStaking")
+const getNetworkConfig = require("./helpers/getNetworkConfig")
 
 async function main() {
     const {
