@@ -1,5 +1,6 @@
 import { network } from "hardhat"
-import config from "./config.json"
+import config from "../config.json"
+import { validateUserArgs } from "./validateUserArgs"
 
 type UserArgs = {
     stakingAddress: string
@@ -32,6 +33,8 @@ export const getUserArgs = async () => {
             `getUserArgs ERROR: No subgraphUrl found for network: ${network.name}`,
         )
     }
+
+    await validateUserArgs(args.subgraphUrl, args.stakingAddress)
 
     return args
 }
