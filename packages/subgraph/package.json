@@ -8,12 +8,13 @@
         "test": "graph test -d",
         "gen-manifests": "npx ts-node ./scripts/generate-manifests.ts",
         "prepare": "npm run gen-manifests && npm run codegen && npm run build",
-        "deploy": "graph deploy --node https://api.thegraph.com/deploy/ wealth-of-wisdom/vesting-eth",
         "create-local": "graph create --node http://localhost:8020/ wealth-of-wisdom/vesting",
         "remove-local": "graph remove --node http://localhost:8020/ wealth-of-wisdom/vesting",
-        "deploy-local": "graph deploy wow/subgraph --node https://deploy.stream.superhow.net --ipfs https://ipfs.stream.superhow.net --version-label 0.0.1 ./sepolia.subgraph.yaml",
-        "deploy-sepolia": "graph deploy --product hosted-service matasvosylius/vesting-subgraph ./sepolia.subgraph.yaml",
-        "deploy-mainnet": "graph deploy --product hosted-service wealth-of-wisdom/subgraph-eth ./subgraph.yaml"
+        "deploy-local": "graph deploy wow/subgraph --node https://deploy.stream.superhow.net --ipfs https://ipfs.stream.superhow.net --version-label 0.0.1 sepolia.subgraph.yaml",
+        "deploy:sepolia": "graph deploy --product hosted-service wealth-of-wisdom/subgraph-sepolia sepolia.subgraph.yaml",
+        "deploy:mainnet": "graph deploy --product hosted-service wealth-of-wisdom/subgraph-eth mainnet.subgraph.yaml",
+        "deploy:arbitrum-sepolia": "graph deploy --product hosted-service wealth-of-wisdom/subgraph-arbitrum-sepolia arbitrum-sepolia.subgraph.yaml",
+        "deploy:arbitrum-one": "graph deploy --product hosted-service wealth-of-wisdom/subgraph-arbitrum-one arbitrum-one.subgraph.yaml"
     },
     "devDependencies": {
         "@graphprotocol/graph-cli": "^0.56.0",

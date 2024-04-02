@@ -63,12 +63,12 @@ const config: HardhatUserConfig = {
         },
         arbitrumSepolia: {
             chainId: 421614,
-            url: process.env.ARBITRUM_SEPOLIA_HOST,
+            url: process.env.ARBITRUM_SEPOLIA_RPC_URL,
             accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
         },
         arbitrumOne: {
             chainId: 42161,
-            url: process.env.ARBITRUM_ONE_HOST,
+            url: process.env.ARBITRUM_ONE_RPC_URL,
             accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
         },
     },
