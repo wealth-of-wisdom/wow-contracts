@@ -1,15 +1,15 @@
 {
     "sepolia": {
         "stakingAddress": "0x8fcfdeca638b2dc52e051788ebcb1e1cacdd5b7a",
-        "subgraphUrl": "https://api.thegraph.com/subgraphs/name/benasvolkovas/wow-subgraph"
+        "subgraphUrl": "https://api.thegraph.com/subgraphs/name/wealth-of-wisdom/subgraph-sepolia"
     },
     "ethereum": {
         "stakingAddress": "",
         "subgraphUrl": ""
     },
     "arbitrumSepolia": {
-        "stakingAddress": "",
-        "subgraphUrl": ""
+        "stakingAddress": "0x6b714D20768cdDbd991BFc9e485274F887626919",
+        "subgraphUrl": "https://api.thegraph.com/subgraphs/name/wealth-of-wisdom/subgraph-arbitrum-sepolia"
     },
     "arbitrumOne": {
         "stakingAddress": "",

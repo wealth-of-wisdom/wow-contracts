@@ -20,7 +20,7 @@ const generateManifests = () => {
                 fs.writeFileSync(outputFile, contents);
             }
 
-            const outputFile = `./manifests/${filename}.subgraph.yaml`;
+            const outputFile = `${filename}.subgraph.yaml`;
             console.info(`✅ Rendering into ${outputFile} done.`);
             fs.writeFileSync(outputFile, contents);
         });

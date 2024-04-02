@@ -21,5 +21,17 @@ export const getUserArgs = async () => {
         )
     }
 
+    if (!args.stakingAddress) {
+        throw new Error(
+            `getUserArgs ERROR: No stakingAddress found for network: ${network.name}`,
+        )
+    }
+
+    if (!args.subgraphUrl) {
+        throw new Error(
+            `getUserArgs ERROR: No subgraphUrl found for network: ${network.name}`,
+        )
+    }
+
     return args
 }
