@@ -72,37 +72,4 @@ describe("handleRewardsClaimed() tests", () => {
             assert.fieldEquals("StakerRewards", usdtId, "unclaimedAmount", zeroStr);
         });
     });
-
-    describe("Create StakingContract, create reward distributions, distribute rewards and stake", () => {
-        beforeEach(() => {
-            initializeAndSetUp();
-            createDistribution(usdtToken, usd100k, preInitDate);
-            distributeRewards(usdtToken, preInitDate);
-            stakeStandardFlexi(alice, bandLevels[1], bandIds[0], initDate);
-        });
-
-        test(
-            "Should throw error for trying to claim too many rewards",
-            () => {
-                claimRewards(alice, usdtToken, usd100k, initDate);
-                throw new Error();
-            },
-            true,
-        );
-    });
-
-    describe("Create StakingContract and claim rewards", () => {
-        beforeEach(() => {
-            initializeAndSetUp();
-        });
-
-        test(
-            "Should throw error for trying to claim before staking",
-            () => {
-                claimRewards(alice, usdtToken, initialClaimAmount, initDate);
-                throw new Error();
-            },
-            true,
-        );
-    });
 });

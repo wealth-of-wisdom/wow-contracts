@@ -23,36 +23,4 @@ describe("handleUnstaked() tests", () => {
             assert.notInStore("Band", bandIds[0].toString());
         });
     });
-
-    describe("Create StakingContract and, stake", () => {
-        beforeEach(() => {
-            initialize();
-            stakeVestedFlexi(alice, bandLevels[1], bandIds[0], initDate);
-        });
-
-        test(
-            "Should throw error for trying to unstake again",
-            () => {
-                unstake(alice, bandIds[0], false, initDate);
-                unstake(alice, bandIds[0], false, initDate);
-                throw new Error();
-            },
-            true,
-        );
-    });
-
-    describe("Create StakingContract", () => {
-        beforeEach(() => {
-            initialize();
-        });
-
-        test(
-            "Should throw error for trying to unstake before having staked",
-            () => {
-                unstake(alice, bandIds[0], false, initDate);
-                throw new Error();
-            },
-            true,
-        );
-    });
 });
