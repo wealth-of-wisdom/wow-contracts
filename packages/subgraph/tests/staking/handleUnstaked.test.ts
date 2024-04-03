@@ -24,7 +24,7 @@ describe("handleUnstaked() tests", () => {
         });
     });
 
-    describe("Create StakingContrac and, stake", () => {
+    describe("Create StakingContract and, stake", () => {
         beforeEach(() => {
             initialize();
             stakeVestedFlexi(alice, bandLevels[1], bandIds[0], initDate);

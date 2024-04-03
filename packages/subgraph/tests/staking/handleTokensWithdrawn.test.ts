@@ -17,14 +17,5 @@ describe("handleTokensWithdrawn() tests", () => {
             assert.fieldEquals("StakingContract", ids[0], "totalStakedAmount", bandLevelPrices[1].toString());
             assert.fieldEquals("Staker", alice.toHex(), "stakedAmount", bandLevelPrices[1].toString());
         });
-
-        test(
-            "Should throw error for trying to withdraw again (empty contract)",
-            () => {
-                withdrawTokens(wowToken, bob, bandLevelPrices[1]);
-                throw new Error();
-            },
-            true,
-        );
     });
 });
