@@ -8,7 +8,7 @@ import {
     Band,
     FundsDistribution,
 } from "../../generated/schema";
-import { ADDRESS_ZERO, BIGINT_ZERO } from "../utils/constants";
+import { ADDRESS_ZERO, BIGINT_ONE, BIGINT_ZERO } from "../utils/constants";
 import { stakingTypeFIX } from "../utils/utils";
 
 /*//////////////////////////////////////////////////////////////////////////
@@ -30,9 +30,11 @@ export function getOrInitStakingContract(): StakingContract {
         stakingContract.usdcToken = ADDRESS_ZERO;
         stakingContract.wowToken = ADDRESS_ZERO;
         stakingContract.sharesInMonths = [];
+        stakingContract.sharesChangeInMonths = [];
         stakingContract.nextBandId = BIGINT_ZERO;
         stakingContract.nextDistributionId = BIGINT_ZERO;
         stakingContract.percentagePrecision = 0;
+        stakingContract.sharePrecision = 0;
         stakingContract.totalPools = 0;
         stakingContract.totalBandLevels = 0;
         stakingContract.areUpgradesEnabled = false;
@@ -156,7 +158,7 @@ export function getOrInitBand(bandId: BigInt): Band {
         band = new Band(id);
         band.owner = ADDRESS_ZERO.toHex();
         band.stakingStartDate = BIGINT_ZERO;
-        band.bandLevel = getOrInitBandLevel(BIGINT_ZERO).id;
+        band.bandLevel = getOrInitBandLevel(BIGINT_ONE).id; // Use BandLevel 1 as default
         band.fixedMonths = 0;
         band.stakingType = stakingTypeFIX;
         band.areTokensVested = false;

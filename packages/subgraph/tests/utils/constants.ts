@@ -22,6 +22,8 @@ export const charlie: Address = Address.fromString("0x00000000000000000000000000
 //////////////////////////////////////////////////////////////////////////*/
 
 export const percentagePrecision: BigInt = BigInt.fromI32(100_000_000); // 1e8
+export const sharePrecision: BigInt = BigInt.fromI32(1_000_000); // 1e6
+
 export const totalPools: BigInt = BigInt.fromI32(9);
 export const totalBandLevels: BigInt = BigInt.fromI32(9);
 
@@ -47,6 +49,7 @@ export const usd100k: BigInt = BigInt.fromI32(100_000).times(usdDecimalsPrecisio
                                   DATES
 //////////////////////////////////////////////////////////////////////////*/
 
+export const preInitDate: BigInt = BigInt.fromI32(1000000000); // Sun Sep 09, 2001 1:46:40 AM
 export const initDate: BigInt = BigInt.fromI32(1710000000); // Sat Mar 09 2024 16:00:00 GMT+0000
 
 /*//////////////////////////////////////////////////////////////////////////
@@ -54,6 +57,8 @@ export const initDate: BigInt = BigInt.fromI32(1710000000); // Sat Mar 09 2024 1
 //////////////////////////////////////////////////////////////////////////*/
 
 export const zeroStr: string = "0";
+
+export const oneStr: string = "1";
 
 export const ids: string[] = createStringifiedArray(BIGINT_ZERO, BigInt.fromI32(100));
 

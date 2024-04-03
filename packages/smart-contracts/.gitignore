@@ -122,6 +122,9 @@ dist
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
 
+# Docker file
+.docker/
+
 # yarn v2
 .yarn/cache
 .yarn/unplugged
