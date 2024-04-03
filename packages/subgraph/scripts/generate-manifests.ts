@@ -10,9 +10,7 @@ const generateManifests = () => {
         const template = fs.readFileSync(templatePath, "utf8");
 
         fs.readdirSync(configsPath).forEach((file: string) => {
-            const data = JSON.parse(
-                fs.readFileSync(`${configsPath}/${file}`, "utf-8")
-            );
+            const data = JSON.parse(fs.readFileSync(`${configsPath}/${file}`, "utf-8"));
             const contents = Mustache.render(template, data);
             const [filename] = file.split(".");
 
@@ -26,10 +24,11 @@ const generateManifests = () => {
             console.info(`✅ Rendering into ${outputFile} done.`);
             fs.writeFileSync(outputFile, contents);
         });
-    } catch {
+    } catch (error) {
         console.error(
-            `Something went wrong, probably files in the ${configsPath} folder, or the ${templatePath} are missing`
+            `Something went wrong, probably files in the ${configsPath} folder, or the ${templatePath} is missing`,
         );
+        console.error(error);
     }
 };
 

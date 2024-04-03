@@ -1,0 +1,29 @@
+[
+    {
+        "name": "NFT Holders",
+        "tokens_amount_in_wow": "127000000",
+        "listing_release_percentage": 0,
+        "listing_amount_in_wow": "0",
+        "remaining_amount_after_listing_in_wow": "127000000",
+        "cliff_in_months": 24,
+        "vesting_in_months": 18
+    },
+    {
+        "name": "Community Sale 0.005",
+        "tokens_amount_in_wow": "110000000",
+        "listing_release_percentage": 0,
+        "listing_amount_in_wow": "0",
+        "remaining_amount_after_listing_in_wow": "110000000",
+        "cliff_in_months": 24,
+        "vesting_in_months": 18
+    },
+    {
+        "name": "Whitelist Sale 0.001",
+        "tokens_amount_in_wow": "5000000",
+        "listing_release_percentage": 55,
+        "listing_amount_in_wow": "0",
+        "remaining_amount_after_listing_in_wow": "4750000",
+        "cliff_in_months": 18,
+        "vesting_in_months": 12
+    }
+]
