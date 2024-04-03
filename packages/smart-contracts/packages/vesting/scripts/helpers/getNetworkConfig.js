@@ -20,8 +20,7 @@ async function getNetworkConfig() {
 
     // If staking is not provided using the config,
     // use a dummy address which will be replaced later
-    const stakingContract =
-        config.staking_contract || "0x0000000000000000000000000000000000000001"
+    const stakingContract = config.staking_contract || ethers.ZeroAddress
 
     if (!vestingToken || !listingDate || !totalTokens) {
         throw new Error("ERROR: Invalid config")

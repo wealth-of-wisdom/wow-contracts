@@ -1,5 +1,4 @@
 const { ethers, upgrades } = require("hardhat")
-require("dotenv").config()
 
 async function upgradeNftSale(nftSaleProxyAddress) {
     if (!nftSaleProxyAddress) {

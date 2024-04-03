@@ -1,4 +1,4 @@
-const { network } = require("hardhat")
+const { network, ethers } = require("hardhat")
 const networkConfig = require("../data/networkConfig.json")
 require("dotenv").config()
 
@@ -28,9 +28,8 @@ async function getNetworkConfig() {
     }
 
     // If vesting or gelato is not provided using the config,
-    // use a dummy address which will be replaced later
-    const vestingContract =
-        config.vesting_contract || "0x0000000000000000000000000000000000000001"
+    // use a zero address which will be replaced later
+    const vestingContract = config.vesting_contract || ethers.ZeroAddress
     const vestingPoolId = config.vesting_pool_id // Pool id can be zero
     const shouldSetProjectQuantities = config.set_project_quantities
 

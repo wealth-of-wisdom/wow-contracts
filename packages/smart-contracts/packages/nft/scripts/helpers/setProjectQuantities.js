@@ -1,12 +1,21 @@
 const levelsData = require("../data/levelsData.json")
 
-async function setProjectQuantities(nftAddress) {
+async function setProjectQuantities(nftAddress, totalProjectTypes) {
     const Nft = await ethers.getContractFactory("Nft")
     const nft = Nft.attach(nftAddress)
 
     const MAX_UINT16 = 65535
+    totalProjectTypes = parseInt(totalProjectTypes)
 
-    const projectsQuantities = [[], [], []]
+    if (totalProjectTypes !== 3) {
+        console.log("Only 3 project types are supported at the moment.")
+        return
+    }
+
+    const projectsQuantities = Array.from(
+        { length: totalProjectTypes },
+        () => [],
+    )
 
     for (let data of levelsData) {
         const standardQuantity =
@@ -31,7 +40,7 @@ async function setProjectQuantities(nftAddress) {
                               SET PROJECTS QUANTITIES
     //////////////////////////////////////////////////////////////////////////*/
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < totalProjectTypes; i++) {
         const quantities = projectsQuantities[i]
         const tx = await nft.setMultipleProjectsQuantity(false, i, quantities)
         await tx.wait()

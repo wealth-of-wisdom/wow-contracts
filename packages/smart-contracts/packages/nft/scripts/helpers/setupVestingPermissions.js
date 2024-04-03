@@ -1,7 +1,7 @@
 const { ethers } = require("hardhat")
 
 async function setupVestingPermissions(nftSaleAddress, vestingContract) {
-    if (vestingContract === "0x0000000000000000000000000000000000000001") {
+    if (vestingContract === ethers.ZeroAddress) {
         console.log("No vesting contract provided. Skipping vesting setup.")
         return
     }

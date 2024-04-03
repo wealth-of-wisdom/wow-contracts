@@ -1,8 +1,13 @@
 const upgradeNftSale = require("../helpers/upgradeNftSale")
+const { verifyNftSale } = require("./verifyContracts")
 require("dotenv").config()
 
 async function main() {
-    await upgradeNftSale(process.env.NFT_SALE_PROXY_CONTRACT)
+    const nftSaleProxyAddress = process.env.NFT_SALE_PROXY_CONTRACT
+
+    await upgradeNftSale(nftSaleProxyAddress)
+
+    await verifyNftSale(nftSaleProxyAddress)
 }
 
 main().catch((error) => {

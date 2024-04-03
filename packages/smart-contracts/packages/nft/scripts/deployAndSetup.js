@@ -6,7 +6,7 @@ const setupVestingPermissions = require("./helpers/setupVestingPermissions.js")
 const setupNftPermissions = require("./helpers/setupNftPermissions.js")
 const setLevelsData = require("./helpers/setLevelsData.js")
 const setProjectQuantities = require("./helpers/setProjectQuantities.js")
-const verifyContracts = require("./helpers/verifyContracts.js")
+const { verifyContracts } = require("./helpers/verifyContracts.js")
 const getNetworkConfig = require("./helpers/getNetworkConfig.js")
 
 async function main() {
@@ -67,7 +67,7 @@ async function main() {
     //////////////////////////////////////////////////////////////////////////*/
 
     if (shouldSetProjectQuantities) {
-        await setProjectQuantities(nftAddress)
+        await setProjectQuantities(nftAddress, totalProjectTypes)
     }
 
     /*//////////////////////////////////////////////////////////////////////////
