@@ -28,7 +28,14 @@
         "set-shares:sepolia": "npx hardhat run scripts/sub-tasks/setShares.js --network sepolia",
         "set-shares:arbitrum-one": "npx hardhat run scripts/sub-tasks/setShares.js --network arbitrumOne",
         "set-shares:arbitrum-sepolia": "npx hardhat run scripts/sub-tasks/setShares.js --network arbitrumSepolia",
-        "stake-and-distribute:arbitrum-sepolia": "npx hardhat run scripts/stakeAndDistribute.js --network arbitrumSepolia"
+        "stake:ethereum": "npx hardhat run scripts/approveAndStake.js --network ethereum",
+        "stake:sepolia": "npx hardhat run scripts/approveAndStake.js --network sepolia",
+        "stake:arbitrum-one": "npx hardhat run scripts/approveAndStake.js --network arbitrumOne",
+        "stake:arbitrum-sepolia": "npx hardhat run scripts/approveAndStake.js --network arbitrumSepolia",
+        "distribute:ethereum": "npx hardhat run scripts/approveAndDistribute.js --network ethereum",
+        "distribute:sepolia": "npx hardhat run scripts/approveAndDistribute.js --network sepolia",
+        "distribute:arbitrum-one": "npx hardhat run scripts/approveAndDistribute.js --network arbitrumOne",
+        "distribute:arbitrum-sepolia": "npx hardhat run scripts/approveAndDistribute.js --network arbitrumSepolia"
     },
     "dependencies": {},
     "devDependencies": {}
