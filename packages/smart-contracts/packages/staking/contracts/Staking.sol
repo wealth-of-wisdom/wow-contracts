@@ -10,6 +10,7 @@ import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
 import {Errors} from "./libraries/Errors.sol";
 
+// solhint-disable-next-line max-states-count
 contract Staking is
     IStaking,
     Initializable,
@@ -44,6 +45,8 @@ contract Staking is
     /*//////////////////////////////////////////////////////////////////////////
                                 INTERNAL STORAGE
     //////////////////////////////////////////////////////////////////////////*/
+
+    /* solhint-disable var-name-mixedcase */
 
     // Map user => bool (if user is staking)
     // 0 - false (not staking), 1 - true (is staking)
@@ -95,6 +98,8 @@ contract Staking is
     // True if distribution was created but rewards were not yet distributed
     // False if no distribution created or rewards were already distributed
     bool internal s_distributionInProgress;
+
+    /* solhint-enable */
 
     /*//////////////////////////////////////////////////////////////////////////
                             STORAGE FOR FUTURE UPGRADES
@@ -204,7 +209,9 @@ contract Staking is
      * @param   usdcToken  USDC token
      * @param   wowToken  WOW token
      * @param   vesting  address of the vesting contract (not contract as we don't call any functions from it)
+     * @param   gelato  address of the gelato executor which will call the distributeRewards and triggerSharesSync
      * @param   totalPools  total amount of pools used for staking
+     * @param   totalBandLevels  total amount of bands levels used for staking
      */
     function initialize(
         IERC20 usdtToken,
@@ -220,13 +227,14 @@ contract Staking is
         mAmountNotZero(totalPools)
         mAmountNotZero(totalBandLevels)
     {
+        /// @dev no validation for vesting and gelato is needed,
+        /// @dev because if it is zero, the contract will limit some functionality
+
         // Checks: Address cannot be zero (not using modifers to avoid stack too deep error)
         if (
             address(usdtToken) == address(0) ||
             address(usdcToken) == address(0) ||
-            address(wowToken) == address(0) ||
-            gelato == address(0) ||
-            vesting == address(0)
+            address(wowToken) == address(0)
         ) {
             revert Errors.Staking__ZeroAddress();
         }
@@ -1112,11 +1120,14 @@ contract Staking is
                             FUNCTIONS FOR UPGRADER ROLE
     //////////////////////////////////////////////////////////////////////////*/
 
+    /* solhint-disable no-empty-blocks */
     function _authorizeUpgrade(
         address newImplementation
     ) internal override onlyRole(UPGRADER_ROLE) {
         /// @dev This function is empty but uses a modifier to restrict access
     }
+
+    /* solhint-enable */
 
     /*//////////////////////////////////////////////////////////////////////////
                             INTERNAL VIEW/PURE FUNCTIONS

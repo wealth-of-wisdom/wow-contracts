@@ -1,4 +1,4 @@
-const { network } = require("hardhat")
+const { ethers, network } = require("hardhat")
 const networkConfig = require("../data/networkConfig.json")
 require("dotenv").config()
 
@@ -25,11 +25,10 @@ async function getNetworkConfig() {
         throw new Error("ERROR: Invalid config")
     }
 
-    const vestingContract =
-        config.vesting_contract || "0x0000000000000000000000000000000000000001"
-    const gelatoAddress =
-        process.env.GELATO_ADDRESS ||
-        "0x0000000000000000000000000000000000000001"
+    // If vesting or gelato is not provided using the config,
+    // use a dummy address which will be replaced later
+    const vestingContract = config.vesting_contract || ethers.ZeroAddress
+    const gelatoAddress = process.env.GELATO_ADDRESS || ethers.ZeroAddress
 
     return {
         usdtToken,

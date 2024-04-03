@@ -1,12 +1,6 @@
 const { ethers, upgrades } = require("hardhat")
 
 async function deployVesting(vestingToken, stakingContract, listingDate) {
-    if (!vestingToken || !stakingContract || !listingDate) {
-        throw new Error(
-            "Please provide parameters: vestingToken, stakingContract, listingDate",
-        )
-    }
-
     /*//////////////////////////////////////////////////////////////////////////
                                   DEPLOY VESTING
     //////////////////////////////////////////////////////////////////////////*/

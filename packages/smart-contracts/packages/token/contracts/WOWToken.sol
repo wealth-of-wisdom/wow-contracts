@@ -59,9 +59,12 @@ contract WOWToken is
         return super.nonces(owner);
     }
 
+    /* solhint-disable no-empty-blocks */
     function _authorizeUpgrade(
         address newImplementation
     ) internal override onlyRole(UPGRADER_ROLE) {}
+
+    /* solhint-enable */
 
     // The following functions are overrides required by Solidity.
     /**

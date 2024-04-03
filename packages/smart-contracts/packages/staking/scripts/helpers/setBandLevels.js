@@ -2,10 +2,6 @@ const { ethers } = require("hardhat")
 const bandLevelData = require("../data/bandLevelData.json")
 
 async function setBandLevels(stakingAddress) {
-    if (!stakingAddress) {
-        throw new Error("Please provide parameter: stakingAddress")
-    }
-
     const Staking = await ethers.getContractFactory("Staking")
     const staking = Staking.attach(stakingAddress)
 
@@ -17,7 +13,7 @@ async function setBandLevels(stakingAddress) {
 
     for (let band of bandLevelData) {
         const priceInWoWTokens = ethers.parseUnits(
-            band.band_price_in_eth,
+            band.price_in_wow,
             WOW_DECIMALS,
         )
 

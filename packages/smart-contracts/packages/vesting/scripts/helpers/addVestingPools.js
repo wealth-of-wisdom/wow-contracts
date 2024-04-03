@@ -2,12 +2,6 @@ const { ethers } = require("hardhat")
 const poolsData = require("../data/vestingPools.json")
 
 async function addVestingPools(vestingToken, vestingContract, totalTokens) {
-    if (!vestingToken || !vestingContract || !totalTokens) {
-        throw new Error(
-            "Please provide parameters: vestingToken, vestingContract, totalTokens",
-        )
-    }
-
     const Token = await ethers.getContractFactory("WOWToken")
     const token = Token.attach(vestingToken)
 
@@ -35,7 +29,7 @@ async function addVestingPools(vestingToken, vestingContract, totalTokens) {
 
     for (let pool of poolsData) {
         const tokenAmountInWei = ethers.parseUnits(
-            pool.tokens_amount_in_eth,
+            pool.tokens_amount_in_wow,
             tokenDecimals,
         )
 

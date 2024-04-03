@@ -39,6 +39,7 @@ contract Nft is
     //////////////////////////////////////////////////////////////////////////*/
 
     /* solhint-disable var-name-mixedcase */
+
     mapping(uint256 tokenId => NftData nftData) internal s_nftData;
 
     // Hash = keccak256(level, isGenesis)
@@ -52,6 +53,7 @@ contract Nft is
     IVesting internal s_vestingContract;
 
     uint16 internal s_maxLevel;
+
     uint16 internal s_promotionalVestingPID;
 
     uint8 internal s_totalProjectTypes; // Standard, Premium, Limited
@@ -111,10 +113,12 @@ contract Nft is
     )
         external
         initializer
-        mAddressNotZero(address(vestingContract))
         mAmountNotZero(maxLevel)
         mAmountNotZero(totalProjectTypes)
     {
+        /// @dev no validation for vestingContract is needed,
+        /// @dev because if it is zero, the contract will limit some functionality
+
         // Checks: name and symbol must not be empty
         if (bytes(name).length == 0 || bytes(symbol).length == 0) {
             revert Errors.Nft__EmptyString();
@@ -138,57 +142,6 @@ contract Nft is
         s_promotionalVestingPID = promotionalVestingPID;
         s_maxLevel = maxLevel;
         s_totalProjectTypes = totalProjectTypes;
-    }
-
-    /*//////////////////////////////////////////////////////////////////////////
-                            FUNCTIONS MINTER ROLE  
-    //////////////////////////////////////////////////////////////////////////*/
-
-    /**
-     * @notice  Mints Nft to user with defined level and type
-     * @notice  Sets the token URI using the base URI and the token ID
-     * @dev     Only MINTER_ROLE can call this function
-     * @param   to  user who will get the Nft
-     * @param   level  nft level purchased
-     * @param   isGenesis  is it a genesis nft
-     */
-    function safeMint(
-        address to,
-        uint16 level,
-        bool isGenesis
-    ) public onlyRole(MINTER_ROLE) mAddressNotZero(to) mValidLevel(level) {
-        NftLevel storage nftLevel = s_nftLevels[
-            _getLevelHash(level, isGenesis)
-        ];
-
-        uint256 nftAmount = nftLevel.nftAmount;
-
-        // Checks: the amount of NFTs minted must not exceed the max supply
-        if (!isGenesis && nftAmount >= nftLevel.supplyCap) {
-            revert Errors.Nft__SupplyCapReached(level, isGenesis, nftAmount);
-        }
-
-        // Effects: increment the token id
-        // tokenId is assigned prior to incrementing the token id, so it starts from 0
-        uint256 tokenId = s_nextTokenId++;
-
-        // Effects: mint the token
-        _safeMint(to, tokenId);
-
-        // Effects: increment the token quantity in the level
-        nftLevel.nftAmount++;
-
-        // Concatenate base URI, id in level and suffix to get the full URI
-        string memory uri = string.concat(
-            nftLevel.baseURI,
-            Strings.toString(nftAmount),
-            NFT_URI_SUFFIX
-        );
-
-        // Effects: set the token metadata URI (URI for each token is assigned before minting)
-        _setTokenURI(tokenId, uri);
-
-        emit NftMinted(to, tokenId, level, isGenesis, nftAmount);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -269,42 +222,6 @@ contract Nft is
     //////////////////////////////////////////////////////////////////////////*/
 
     /**
-     * @notice  sets all necesary information about the users Nft and its current state
-     * @param   tokenId  user minted and owned token id
-     * @param   level  nft level purchased
-     * @param   isGenesis  is it a genesis nft
-     * @param   activityType  activity state of the Nft
-     * @param   activityEndTimestamp  Nft regular expiration date
-     * @param   extendedActivityEndTimestamp  Nft extended expiration date
-     */
-    function setNftData(
-        uint256 tokenId,
-        uint16 level,
-        bool isGenesis,
-        ActivityType activityType,
-        uint256 activityEndTimestamp,
-        uint256 extendedActivityEndTimestamp
-    ) public onlyRole(NFT_DATA_MANAGER_ROLE) mValidLevel(level) {
-        // Effects: set nft data
-        s_nftData[tokenId] = NftData({
-            level: level,
-            isGenesis: isGenesis,
-            activityType: activityType,
-            activityEndTimestamp: activityEndTimestamp,
-            extendedActivityEndTimestamp: extendedActivityEndTimestamp
-        });
-
-        emit NftDataSet(
-            tokenId,
-            level,
-            isGenesis,
-            uint256(activityType),
-            activityEndTimestamp,
-            extendedActivityEndTimestamp
-        );
-    }
-
-    /**
      * @notice  mints Nft to user and sets required data
      * @param   receiver  user who will get the Nft
      * @param   level  nft level purchased
@@ -367,6 +284,45 @@ contract Nft is
         // Effects: mint the token and set metadata URI
         safeMint(receiver, newLevel, false);
     }
+
+    /**
+     * @notice  sets all necesary information about the users Nft and its current state
+     * @param   tokenId  user minted and owned token id
+     * @param   level  nft level purchased
+     * @param   isGenesis  is it a genesis nft
+     * @param   activityType  activity state of the Nft
+     * @param   activityEndTimestamp  Nft regular expiration date
+     * @param   extendedActivityEndTimestamp  Nft extended expiration date
+     */
+    /* solhint-disable ordering */
+    function setNftData(
+        uint256 tokenId,
+        uint16 level,
+        bool isGenesis,
+        ActivityType activityType,
+        uint256 activityEndTimestamp,
+        uint256 extendedActivityEndTimestamp
+    ) public onlyRole(NFT_DATA_MANAGER_ROLE) mValidLevel(level) {
+        // Effects: set nft data
+        s_nftData[tokenId] = NftData({
+            level: level,
+            isGenesis: isGenesis,
+            activityType: activityType,
+            activityEndTimestamp: activityEndTimestamp,
+            extendedActivityEndTimestamp: extendedActivityEndTimestamp
+        });
+
+        emit NftDataSet(
+            tokenId,
+            level,
+            isGenesis,
+            uint256(activityType),
+            activityEndTimestamp,
+            extendedActivityEndTimestamp
+        );
+    }
+
+    /* solhint-enable */
 
     /*//////////////////////////////////////////////////////////////////////////
                         FUNCTIONS FOR DEFAULT ADMIN ROLE
@@ -507,6 +463,7 @@ contract Nft is
      * @param   quantity  how many projects are going to
      * be accessible for its type and level
      */
+    /* solhint-disable ordering */
     function setProjectsQuantity(
         uint16 level,
         bool isGenesis,
@@ -523,6 +480,8 @@ contract Nft is
 
         emit ProjectsQuantitySet(level, isGenesis, project, quantity);
     }
+
+    /* solhint-enable */
 
     /**
      * @notice  Sets multiple accessible project amounts for a project in all levels
@@ -557,16 +516,66 @@ contract Nft is
      */
     function setVestingContract(
         IVesting newContract
-    )
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-        mAddressNotZero(address(newContract))
-    {
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         // Effects: set the new vesting contract
         s_vestingContract = newContract;
 
         emit VestingContractSet(newContract);
     }
+
+    /*//////////////////////////////////////////////////////////////////////////
+                            FUNCTIONS MINTER ROLE  
+    //////////////////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice  Mints Nft to user with defined level and type
+     * @notice  Sets the token URI using the base URI and the token ID
+     * @dev     Only MINTER_ROLE can call this function
+     * @param   to  user who will get the Nft
+     * @param   level  nft level purchased
+     * @param   isGenesis  is it a genesis nft
+     */
+    /* solhint-disable ordering */
+    function safeMint(
+        address to,
+        uint16 level,
+        bool isGenesis
+    ) public onlyRole(MINTER_ROLE) mAddressNotZero(to) mValidLevel(level) {
+        NftLevel storage nftLevel = s_nftLevels[
+            _getLevelHash(level, isGenesis)
+        ];
+
+        uint256 nftAmount = nftLevel.nftAmount;
+
+        // Checks: the amount of NFTs minted must not exceed the max supply
+        if (!isGenesis && nftAmount >= nftLevel.supplyCap) {
+            revert Errors.Nft__SupplyCapReached(level, isGenesis, nftAmount);
+        }
+
+        // Effects: increment the token id
+        // tokenId is assigned prior to incrementing the token id, so it starts from 0
+        uint256 tokenId = s_nextTokenId++;
+
+        // Effects: mint the token
+        _safeMint(to, tokenId);
+
+        // Effects: increment the token quantity in the level
+        nftLevel.nftAmount++;
+
+        // Concatenate base URI, id in level and suffix to get the full URI
+        string memory uri = string.concat(
+            nftLevel.baseURI,
+            Strings.toString(nftAmount),
+            NFT_URI_SUFFIX
+        );
+
+        // Effects: set the token metadata URI (URI for each token is assigned before minting)
+        _setTokenURI(tokenId, uri);
+
+        emit NftMinted(to, tokenId, level, isGenesis, nftAmount);
+    }
+
+    /* solhint-enable */
 
     /*//////////////////////////////////////////////////////////////////////////
                             EXTERNAL VIEW/PURE FUNCTIONS
@@ -711,9 +720,12 @@ contract Nft is
                             FUNCTIONS FOR UPGRADER ROLE
     //////////////////////////////////////////////////////////////////////////*/
 
+    /* solhint-disable no-empty-blocks */
     function _authorizeUpgrade(
         address newImplementation
     ) internal override onlyRole(UPGRADER_ROLE) {}
+
+    /* solhint-enable */
 
     /*//////////////////////////////////////////////////////////////////////////
                               INTERNAL FUNCTIONS

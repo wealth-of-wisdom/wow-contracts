@@ -31,12 +31,19 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     //////////////////////////////////////////////////////////////////////////*/
 
     /* solhint-disable var-name-mixedcase */
+
     IERC20 internal s_token;
+
     IStaking internal s_staking;
+
     mapping(uint16 => Pool) internal s_vestingPools;
+
     mapping(uint256 bandId => uint16 poolId) internal s_stakedPools;
+
     uint32 internal s_listingDate;
+
     uint16 internal s_poolCount;
+
     /* solhint-enable */
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -110,6 +117,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     /**
      * @notice Initializes the contract.
      * @param token ERC20 token address.
+     * @param stakingContract Staking contract address (can be zero address if not set yet)
      * @param listingDate Listing date in epoch timestamp format.
      */
     function initialize(
@@ -120,9 +128,11 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         external
         initializer
         mAddressNotZero(address(token))
-        mAddressNotZero(address(stakingContract))
         mValidListingDate(listingDate)
     {
+        /// @dev no validation for stakingContract is needed,
+        /// @dev because if it is zero, the contract will limit some functionality
+
         // Effects: Initialize AccessControl
         __AccessControl_init();
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -394,11 +404,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      */
     function setStakingContract(
         IStaking newStaking
-    )
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-        mAddressNotZero(address(newStaking))
-    {
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         // Effects: Set new staking contract address
         s_staking = newStaking;
 

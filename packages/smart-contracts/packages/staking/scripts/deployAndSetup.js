@@ -3,13 +3,32 @@ const setPools = require("./helpers/setPools")
 const setBandLevels = require("./helpers/setBandLevels")
 const setShares = require("./helpers/setShares")
 const verifyStaking = require("./helpers/verifyStaking")
+const getNetworkConfig = require("./helpers/getNetworkConfig")
 
 async function main() {
+    const {
+        usdtToken,
+        usdcToken,
+        wowToken,
+        vestingContract,
+        gelatoAddress,
+        totalPools,
+        totalBandLevels,
+    } = await getNetworkConfig()
+
     /*//////////////////////////////////////////////////////////////////////////
                                     DEPLOY STAKING
     //////////////////////////////////////////////////////////////////////////*/
 
-    const stakingAddress = await deployStaking()
+    const stakingAddress = await deployStaking(
+        usdtToken,
+        usdcToken,
+        wowToken,
+        vestingContract,
+        gelatoAddress,
+        totalPools,
+        totalBandLevels,
+    )
 
     /*//////////////////////////////////////////////////////////////////////////
                                       SET POOLS

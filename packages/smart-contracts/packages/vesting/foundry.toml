@@ -6,7 +6,7 @@ out = "build"
 allow_paths = ["../.."]
 libs = ["../../node_modules", "../../lib"]
 remappings = [
-    "@wealth-of-wisdom/staking=../staking",
+    "@wealth-of-wisdom/staking/=../staking/",
     "@openzeppelin/=../../node_modules/@openzeppelin/",
 ]
 gas_reports = ["*"]

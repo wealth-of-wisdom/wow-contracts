@@ -1,10 +1,6 @@
 const sharesData = require("../data/sharesData.json")
 
 async function setShares(stakingAddress) {
-    if (!stakingAddress) {
-        throw new Error("Please provide parameter: stakingAddress")
-    }
-
     const Staking = await ethers.getContractFactory("Staking")
     const staking = Staking.attach(stakingAddress)
 
