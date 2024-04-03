@@ -9,6 +9,29 @@ import {VestingMock} from "../mocks/VestingMock.sol";
 import {Base_Test} from "../Base.t.sol";
 
 contract VestingAssertions is Base_Test {
+    struct Balances {
+        uint256 vestingBalanceBefore;
+        uint256 vestingBalanceAfter;
+        uint256 adminBalanceBefore;
+        uint256 adminBalanceAfter;
+        uint256 aliceBalanceBefore;
+        uint256 bobBalanceBefore;
+    }
+    struct PoolData {
+        uint16 pid;
+        string name;
+        uint16 listingPercentageDividend;
+        uint16 listingPercentageDivisor;
+        uint16 cliffInDays;
+        uint16 cliffPercentageDividend;
+        uint16 cliffPercentageDivisor;
+        uint16 vestingDurationInMonths;
+        IVesting.UnlockTypes unlockType;
+        uint256 totalPoolTokenAmount;
+        uint256 vestingBalanceBefore;
+        uint256 adminBalanceBefore;
+    }
+
     function setUp() public virtual override {
         Base_Test.setUp();
     }
@@ -17,86 +40,79 @@ contract VestingAssertions is Base_Test {
                                 HELPERS
     //////////////////////////////////////////////////////////////////////////*/
 
-    function assertPoolData(
-        uint16 pid,
-        string memory name,
-        uint16 listingPercentageDividend,
-        uint16 listingPercentageDivisor,
-        uint16 cliffInDays,
-        uint16 cliffPercentageDividend,
-        uint16 cliffPercentageDivisor,
-        uint16 vestingDurationInMonths,
-        IVesting.UnlockTypes unlockType,
-        uint256 totalPoolTokenAmount,
-        uint256 vestingBalanceBefore,
-        uint256 adminBalanceBefore
-    ) internal {
-        uint256 vestingBalanceAfter = wowToken.balanceOf(address(vesting));
-        uint256 adminBalanceAfter = wowToken.balanceOf(admin);
+    function assertPoolData(PoolData memory poolData) internal {
+        Balances memory balances;
+
+        balances.vestingBalanceAfter = wowToken.balanceOf(address(vesting));
+        balances.adminBalanceAfter = wowToken.balanceOf(admin);
         (
             string memory nameSet,
             IVesting.UnlockTypes unlockTypeSet,
             uint256 totalAmountSet,
 
-        ) = vesting.getGeneralPoolData(pid);
+        ) = vesting.getGeneralPoolData(poolData.pid);
         (uint16 listingDividendSet, uint16 listingDivisorSet) = vesting
-            .getPoolListingData(pid);
+            .getPoolListingData(poolData.pid);
         (
             ,
             uint16 cliffInDaysSet,
             uint16 cliffDividendSet,
             uint16 cliffDivisorSet
-        ) = vesting.getPoolCliffData(pid);
+        ) = vesting.getPoolCliffData(poolData.pid);
         (, uint16 vestingDurationInMonthsSet, ) = vesting.getPoolVestingData(
-            pid
+            poolData.pid
         );
 
-        assertEq(name, nameSet, "Pool name incorrect");
+        assertEq(poolData.name, nameSet, "Pool name incorrect");
         assertEq(
-            listingPercentageDividend,
+            poolData.listingPercentageDividend,
             listingDividendSet,
             "Listing percentage dividend incorrect"
         );
         assertEq(
-            listingPercentageDivisor,
+            poolData.listingPercentageDivisor,
             listingDivisorSet,
             "Listing percentage divisor incorrect"
         );
-        assertEq(cliffInDays, cliffInDaysSet, "Cliff in days incorrect");
         assertEq(
-            cliffPercentageDivisor,
+            poolData.cliffInDays,
+            cliffInDaysSet,
+            "Cliff in days incorrect"
+        );
+        assertEq(
+            poolData.cliffPercentageDivisor,
             cliffDivisorSet,
             "Cliff percentage divisor incorrect"
         );
         assertEq(
-            cliffPercentageDividend,
+            poolData.cliffPercentageDividend,
             cliffDividendSet,
             "Cliff percentage dividend incorrect"
         );
         assertEq(
-            vestingDurationInMonths,
+            poolData.vestingDurationInMonths,
             vestingDurationInMonthsSet,
             "Vesting duration in months incorrect"
         );
         assertEq(
-            uint8(unlockType),
+            uint8(poolData.unlockType),
             uint8(unlockTypeSet),
             "Unlock type incorrect"
         );
         assertEq(
-            totalPoolTokenAmount,
+            poolData.totalPoolTokenAmount,
             totalAmountSet,
             "Total pool token amount incorrect"
         );
 
         assertEq(
-            vestingBalanceBefore + totalAmountSet,
-            vestingBalanceAfter,
+            poolData.vestingBalanceBefore + totalAmountSet,
+            balances.vestingBalanceAfter,
             "Vesting contract balance incorrect"
         );
         assertEq(
-            adminBalanceBefore - totalAmountSet,
-            adminBalanceAfter,
+            poolData.adminBalanceBefore - totalAmountSet,
+            balances.adminBalanceAfter,
             "Admin account balance incorrect"
         );
     }
