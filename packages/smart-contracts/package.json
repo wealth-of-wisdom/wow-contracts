@@ -1,0 +1,53 @@
+{
+    "name": "@wealth-of-wisdom/smart-contracts",
+    "version": "1.0.0",
+    "description": "Smart contracts of Wealth of Wisdom",
+    "license": "MIT",
+    "private": true,
+    "scripts": {
+        "prepare": "cd ../.. && husky install && cd packages/smart-contracts && npm run create-hooks",
+        "pre-commit": "npx lint-staged",
+        "create-hooks": "npx husky set ../../.husky/pre-commit \"cd packages/smart-contracts && npm run pre-commit\"",
+        "build": "find ./packages -maxdepth 1 -type d -exec sh -c 'cd \"{}\" && [ -f foundry.toml ] && echo \"Building in {}\" && forge build --via-ir || echo \"No Foundry project in {}\"' \\;",
+        "test": "find ./packages -maxdepth 1 -type d -exec sh -c 'cd \"{}\" && [ -f foundry.toml ] && echo \"Testing in {}\" && forge test --via-ir || echo \"No Foundry project in {}\"' \\;",
+        "coverage": "find ./packages -maxdepth 1 -type d -exec sh -c 'cd \"{}\" && [ -f foundry.toml ] && echo \"Running coverage in {}\" && forge coverage --via-ir || echo \"No Foundry project in {}\"' \\;"
+    },
+    "dependencies": {
+        "@openzeppelin/contracts": "5.0.1",
+        "@openzeppelin/contracts-upgradeable": "^5.0.0",
+        "@openzeppelin/hardhat-upgrades": "^3.0.5",
+        "dotenv": "^16.3.1"
+    },
+    "devDependencies": {
+        "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
+        "@nomicfoundation/hardhat-ethers": "^3.0.0",
+        "@nomicfoundation/hardhat-ignition": "^0.15.0",
+        "@nomicfoundation/hardhat-ignition-ethers": "^0.15.0",
+        "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
+        "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+        "@nomicfoundation/hardhat-verify": "^2.0.0",
+        "@typechain/ethers-v6": "^0.5.0",
+        "@typechain/hardhat": "^9.0.0",
+        "chai": "^4.2.0",
+        "ethers": "^6.4.0",
+        "hardhat": "^2.22.2",
+        "hardhat-gas-reporter": "^1.0.8",
+        "solidity-coverage": "^0.8.0",
+        "typechain": "^8.3.0",
+        "prettier": "^3.1.1",
+        "prettier-plugin-solidity": "^1.3.1",
+        "solhint": "^4.0.0",
+        "solhint-plugin-prettier": "^0.1.0",
+        "husky": "^8.0.3",
+        "lint-staged": "^15.2.0"
+    },
+    "lint-staged": {
+        "packages/**/contracts/**/*.sol": [
+            "yarn prettier --write",
+            "yarn solhint -f table --max-warnings 0"
+        ]
+    },
+    "workspaces": [
+        "packages/*"
+    ]
+}

@@ -1,0 +1,38 @@
+[
+    {
+        "id": 1,
+        "distribution_percentage": 1300000
+    },
+    {
+        "id": 2,
+        "distribution_percentage": 1700000
+    },
+    {
+        "id": 3,
+        "distribution_percentage": 3400000
+    },
+    {
+        "id": 4,
+        "distribution_percentage": 6400000
+    },
+    {
+        "id": 5,
+        "distribution_percentage": 15600000
+    },
+    {
+        "id": 6,
+        "distribution_percentage": 14600000
+    },
+    {
+        "id": 7,
+        "distribution_percentage": 24000000
+    },
+    {
+        "id": 8,
+        "distribution_percentage": 19000000
+    },
+    {
+        "id": 9,
+        "distribution_percentage": 14000000
+    }
+]

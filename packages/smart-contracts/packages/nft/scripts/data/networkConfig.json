@@ -1,0 +1,46 @@
+{
+    "ethereum": {
+        "usdt_token": "",
+        "usdc_token": "",
+        "nft_name": "WOW NFT Pass",
+        "nft_symbol": "WOWPASS",
+        "vesting_contract": "",
+        "vesting_pool_id": 0,
+        "max_level": 5,
+        "total_project_types": 3,
+        "set_project_quantities": false
+    },
+    "sepolia": {
+        "usdt_token": "0x4123AB83f7848fe4F901700097B3e79D22e6796F",
+        "usdc_token": "0xC026a2ce65e8819bfB253994e7d6852EC2e718CA",
+        "nft_name": "WOW NFT Pass (sepolia)",
+        "nft_symbol": "WOWPASS",
+        "vesting_contract": "",
+        "vesting_pool_id": 0,
+        "max_level": 5,
+        "total_project_types": 3,
+        "set_project_quantities": true
+    },
+    "arbitrumOne": {
+        "usdt_token": "",
+        "usdc_token": "",
+        "nft_name": "WOW NFT Pass",
+        "nft_symbol": "WOWPASS",
+        "vesting_contract": "",
+        "vesting_pool_id": 0,
+        "max_level": 5,
+        "total_project_types": 3,
+        "set_project_quantities": false
+    },
+    "arbitrumSepolia": {
+        "usdt_token": "0x0F7f537BF7115Bf7B8D583fFa284Db56F62C2fC7",
+        "usdc_token": "0x67108Aa81C31724c4d818060bef842A5f7Ad8368",
+        "nft_name": "WOW NFT Pass (arbitrum sepolia)",
+        "nft_symbol": "WOWPASS",
+        "vesting_contract": "",
+        "vesting_pool_id": 0,
+        "max_level": 5,
+        "total_project_types": 3,
+        "set_project_quantities": true
+    }
+}

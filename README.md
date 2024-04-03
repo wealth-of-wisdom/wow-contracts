@@ -2,7 +2,10 @@
 
 ## Packages:
 
--   nft
--   token
--   staking
--   vesting
+-   gelato-backend
+-   subgraph
+-   smart-contracts
+    -   nft
+    -   token
+    -   staking
+    -   vesting

@@ -1,0 +1,16 @@
+[profile.default]
+solc-version = "0.8.20"
+via_ir = true
+src = "contracts"
+out = "build"
+allow_paths = ["../.."]
+libs = ["../../node_modules", "../../lib"]
+remappings = [
+    "@openzeppelin/=../../node_modules/@openzeppelin/",
+    "@wealth-of-wisdom/staking/=./",
+    "@wealth-of-wisdom/vesting/=../vesting/",
+
+]
+gas_reports = ["*"]
+
+# See more config options https://github.com/foundry-rs/foundry/tree/master/config
