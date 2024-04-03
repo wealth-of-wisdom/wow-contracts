@@ -3,7 +3,7 @@ import { w3f, network } from "hardhat"
 import { HttpNetworkConfig } from "hardhat/types"
 import { JsonRpcProvider } from "@ethersproject/providers"
 import { Wallet } from "@ethersproject/wallet"
-import { getUserArgs } from "./getUserArgs"
+import { getUserArgs } from "./helpers/getUserArgs"
 
 const main = async () => {
     const syncSharesTask = w3f.get("sync-shares-task")

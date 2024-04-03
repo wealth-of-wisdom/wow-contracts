@@ -57,7 +57,6 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
         const stakingContractQuery = gql`
             query {
                 stakingContract(id: "0") {
-                    stakingContractAddress
                     lastSharesSyncDate
                 }
             }
@@ -70,20 +69,9 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
 
         // Get the staking data from the subgraph
         const stakingContractData = stakingQueryResult.data.stakingContract
-        const stakingAddressInSubgraph =
-            stakingContractData.stakingContractAddress
         const lastSynced: number = Number(
             stakingContractData.lastSharesSyncDate,
         )
-
-        // If the staking address in subgraph does not match the provided address
-        // It means that gelato function is using wrong staking contract or subgraph
-        if (stakingAddressInSubgraph !== stakingAddress) {
-            return {
-                canExec: false,
-                message: `Staking contract address in subgraph (${stakingAddressInSubgraph}) does not match the provided address (${stakingAddress})`,
-            }
-        }
 
         const timePassed: number = Math.floor(Date.now() / 1000) - lastSynced
 

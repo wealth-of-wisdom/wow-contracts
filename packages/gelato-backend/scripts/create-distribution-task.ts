@@ -4,7 +4,7 @@ import { HttpNetworkConfig } from "hardhat/types"
 import { JsonRpcProvider } from "@ethersproject/providers"
 import { Wallet } from "@ethersproject/wallet"
 import { stakingABI } from "../web3-functions/stakingABI"
-import { getUserArgs } from "./getUserArgs"
+import { getUserArgs } from "./helpers/getUserArgs"
 
 const main = async () => {
     const distributionTask = w3f.get("distribution-task")
