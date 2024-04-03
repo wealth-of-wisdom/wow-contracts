@@ -7,7 +7,7 @@ import {
     Web3FunctionSuccessContext,
 } from "@gelatonetwork/web3-functions-sdk"
 import { createClient, fetchExchange, cacheExchange, gql } from "@urql/core"
-import { stakingABI } from "../stakingABI"
+import stakingABI from "../stakingABI.json"
 
 // Success callback
 Web3Function.onSuccess(async (context: Web3FunctionSuccessContext) => {
