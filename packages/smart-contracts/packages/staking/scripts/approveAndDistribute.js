@@ -1,5 +1,5 @@
 const { ethers } = require("hardhat")
-const createDistribution = require("../helpers/createDistribution")
+const createDistribution = require("./helpers/createDistribution")
 const erc20Abi = require("./abis/erc20Abi")
 require("dotenv").config()
 
