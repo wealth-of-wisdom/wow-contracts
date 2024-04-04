@@ -1,6 +1,8 @@
 import { describe, test, beforeEach, assert, clearStore } from "matchstick-as/assembly/index";
 import { initialize, deleteVestingUser, stakeVestedFlexi, unstake } from "./helpers/helper";
-import { ids, alice, bandLevels, bandIds, initDate, usdcToken } from "../utils/constants";
+import { ids, bandIds, alice, usdcToken } from "../utils/data/constants";
+import { bandLevels } from "../utils/data/data";
+import { initDate } from "../utils/data/dates";
 import { BIGDEC_ZERO, BIGINT_ZERO } from "../../src/utils/constants";
 
 describe("handleUnstaked() tests", () => {

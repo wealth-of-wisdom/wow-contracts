@@ -46,14 +46,13 @@ import {
     createRewardsClaimedEvent,
 } from "../helpers/createEvents";
 import { BIGINT_ZERO, StakingType } from "../../../src/utils/constants";
+import { totalPools, totalBandLevels } from "../../utils/data/constants";
 import {
-    totalPools,
-    totalBandLevels,
     poolDistributionPercentages,
     bandLevelPrices,
     bandLevelAccessiblePools,
     sharesInMonths,
-} from "../../utils/constants";
+} from "../../utils/data/data";
 
 export function initialize(): void {
     handleInitialized(createInitializedEvent());

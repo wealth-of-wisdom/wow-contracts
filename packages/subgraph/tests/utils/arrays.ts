@@ -56,6 +56,11 @@ export function convertBigIntArrayToString(arr: BigInt[]): string {
     return `[${numbers}]`;
 }
 
+export function convertAddressArrayToString(arr: Address[]): string {
+    let numbers = arr.toString().split(",").join(", ");
+    return `[${numbers}]`;
+}
+
 export function convertStringToWrappedArray(addr: string): string {
     return "[".concat(addr).concat("]").replaceAll(",", ", ");
 }

@@ -2,18 +2,9 @@ import { Address, BigInt, log } from "@graphprotocol/graph-ts";
 import { describe, test, beforeAll, beforeEach, afterEach, clearStore, assert } from "matchstick-as/assembly/index";
 import { updateFlexiSharesDuringSync } from "../../src/utils/staking/sharesSync";
 import { stakeStandardFlexi, initializeAndSetUp } from "./helpers/helper";
-import {
-    alice,
-    bob,
-    charlie,
-    totalPools,
-    initDate,
-    bandLevels,
-    ids,
-    bandIds,
-    secondsInMonths,
-    sharesInMonths,
-} from "../utils/constants";
+import { alice, bob, charlie, totalPools, ids, bandIds } from "../utils/data/constants";
+import { bandLevels, secondsInMonths, sharesInMonths } from "../utils/data/data";
+import { initDate } from "../utils/data/dates";
 import { getOrInitStakingContract } from "../../src/helpers/staking.helpers";
 import { BIGINT_ZERO } from "../../src/utils/constants";
 import { convertBigIntArrayToString, createEmptyArray } from "../utils/arrays";

@@ -1,6 +1,8 @@
 import { describe, test, beforeEach, assert, clearStore } from "matchstick-as/assembly/index";
 import { initializeAndSetUp, stakeStandardFlexi, withdrawTokens } from "./helpers/helper";
-import { ids, alice, bob, bandLevels, bandIds, initDate, bandLevelPrices, wowToken } from "../utils/constants";
+import { ids, bandIds, alice, bob, wowToken } from "../utils/data/constants";
+import { bandLevels, bandLevelPrices } from "../utils/data/data";
+import { preInitDate, initDate } from "../utils/data/dates";
 
 describe("handleTokensWithdrawn() tests", () => {
     beforeEach(() => {

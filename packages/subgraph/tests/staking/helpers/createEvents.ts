@@ -24,7 +24,8 @@ import {
     RewardsClaimed as RewardsClaimedEvent,
 } from "../../../generated/Staking/Staking";
 import { BIGINT_ZERO, StakingType } from "../../../src/utils/constants";
-import { stakingAddress, initDate } from "../../utils/constants";
+import { stakingAddress } from "../../utils/data/constants";
+import { initDate } from "../../utils/data/dates";
 import { createMockedFunctions } from "./createMockedFunctions";
 
 export function createInitializedEvent(): InitializedEvent {

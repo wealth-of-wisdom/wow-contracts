@@ -1,17 +1,9 @@
 import { describe, test, beforeEach, assert, clearStore } from "matchstick-as/assembly/index";
 import { initialize, stakeStandardFlexi, createDistribution, distributeRewards } from "./helpers/helper";
 import { convertStringToWrappedArray } from "../utils/arrays";
-import {
-    ids,
-    alice,
-    bandLevels,
-    bandIds,
-    initDate,
-    preInitDate,
-    usdtToken,
-    usd100k,
-    zeroStr,
-} from "../utils/constants";
+import { ids, bandIds, alice, usdtToken, usd100k, zeroStr } from "../utils/data/constants";
+import { bandLevels } from "../utils/data/data";
+import { preInitDate, initDate } from "../utils/data/dates";
 
 describe("handleRewardsDistributed() tests", () => {
     beforeEach(() => {

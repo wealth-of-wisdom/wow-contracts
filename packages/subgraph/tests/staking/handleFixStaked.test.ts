@@ -1,17 +1,9 @@
 import { Address, BigInt, log } from "@graphprotocol/graph-ts";
 import { describe, test, beforeEach, beforeAll, afterEach, clearStore, assert } from "matchstick-as/assembly/index";
 import { initializeAndSetUp, stakeStandardFixed } from "./helpers/helper";
-import {
-    ids,
-    alice,
-    bob,
-    charlie,
-    bandLevels,
-    initDate,
-    bandIds,
-    totalPools,
-    sharesInMonths,
-} from "../utils/constants";
+import { ids, bandIds, alice, bob, charlie, totalPools } from "../utils/data/constants";
+import { initDate } from "../utils/data/dates";
+import { sharesInMonths, bandLevels } from "../utils/data/data";
 import { convertBigIntArrayToString, createEmptyArray } from "../utils/arrays";
 
 let bandsCount = 0;

@@ -1,6 +1,8 @@
 import { describe, test, beforeEach, assert, clearStore } from "matchstick-as/assembly/index";
 import { initialize, deleteVestingUser, stakeVestedFlexi } from "./helpers/helper";
-import { ids, alice, bandLevels, bandIds, initDate, usdcToken } from "../utils/constants";
+import { ids, bandIds, alice, usdcToken } from "../utils/data/constants";
+import { bandLevels } from "../utils/data/data";
+import { initDate } from "../utils/data/dates";
 
 describe("handleVestingUserDeleted() tests", () => {
     beforeEach(() => {

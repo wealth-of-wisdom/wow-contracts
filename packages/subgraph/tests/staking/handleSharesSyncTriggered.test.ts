@@ -1,17 +1,9 @@
 import { BigInt } from "@graphprotocol/graph-ts";
 import { describe, test, beforeEach, assert, clearStore } from "matchstick-as/assembly/index";
 import { initializeAndSetUp, stakeStandardFlexi, createDistribution, distributeRewards } from "./helpers/helper";
-import {
-    alice,
-    bandLevels,
-    bandIds,
-    preInitDate,
-    initDate,
-    usdtToken,
-    usd100k,
-    ids,
-    totalPools,
-} from "../utils/constants";
+import { ids, bandIds, alice, usdtToken, usd100k, totalPools } from "../utils/data/constants";
+import { bandLevels } from "../utils/data/data";
+import { preInitDate, initDate } from "../utils/data/dates";
 import { convertBigIntArrayToString, createEmptyArray } from "../utils/arrays";
 import { syncFlexiSharesEvery12Hours } from "../../src/utils/staking/sharesSync";
 
