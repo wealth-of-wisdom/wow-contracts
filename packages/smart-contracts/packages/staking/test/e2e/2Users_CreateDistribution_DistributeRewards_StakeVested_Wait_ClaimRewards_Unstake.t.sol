@@ -3,6 +3,17 @@ pragma solidity 0.8.20;
 
 import {StakingAssertions} from "./StakingAssertions.t.sol";
 
+struct Balances {
+    uint256 alicePreStakingBalance;
+    uint256 alicePostClaimingBalance;
+    uint256 bobPreStakingBalance;
+    uint256 bobPostUnstakingBalance;
+    uint256 stakingBalanceBefore;
+    uint256 stakingPreClaimingBalance;
+    uint256 stakingPostClaimingBalance;
+    uint256 adminBalanceBefore;
+}
+
 contract Staking_E2E_Test is StakingAssertions {
     function test_With2Users_CreateDistribution_DistributeRewards_StakeVested_Wait_ClaimRewards_Unstake()
         external
@@ -19,81 +30,103 @@ contract Staking_E2E_Test is StakingAssertions {
          * 8. Bob unstakes
          */
         // ARRANGE + ACT
+        Balances memory balances;
 
-        uint256 alicePreStakingBalance = wowToken.balanceOf(alice);
-        uint256 bobPreStakingBalance = wowToken.balanceOf(bob);
-
+        balances.alicePreStakingBalance = wowToken.balanceOf(alice);
+        balances.bobPreStakingBalance = wowToken.balanceOf(bob);
         uint256 firstBandId = staking.getNextBandId();
-        vm.startPrank(alice);
-        wowToken.approve(address(staking), BAND_2_PRICE);
-        staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_2, MONTH_0);
-        vm.stopPrank();
+
+        {
+            vm.startPrank(alice);
+            wowToken.approve(address(staking), BAND_2_PRICE);
+            staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_2, MONTH_0);
+            vm.stopPrank();
+        }
 
         uint256 secondBandId = staking.getNextBandId();
-        vm.startPrank(bob);
-        wowToken.approve(address(staking), BAND_4_PRICE);
-        staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0);
-        vm.stopPrank();
 
-        assertStaked(alice, firstBandId, BAND_LEVEL_2, 1);
-        assertStaked(bob, secondBandId, BAND_LEVEL_4, 1);
+        {
+            vm.startPrank(bob);
+            wowToken.approve(address(staking), BAND_4_PRICE);
+            staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0);
+            vm.stopPrank();
 
-        vm.warp(MONTH);
+            assertStaked(alice, firstBandId, BAND_LEVEL_2, 1);
+            assertStaked(bob, secondBandId, BAND_LEVEL_4, 1);
 
-        uint256 adminBalanceBefore = usdtToken.balanceOf(admin);
-        uint256 stakingBalanceBefore = usdtToken.balanceOf(address(staking));
+            vm.warp(MONTH);
+        }
 
-        vm.startPrank(admin);
-        usdtToken.approve(address(staking), DISTRIBUTION_AMOUNT);
-        staking.createDistribution(usdtToken, DISTRIBUTION_AMOUNT);
+        {
+            balances.adminBalanceBefore = usdtToken.balanceOf(admin);
+            balances.stakingBalanceBefore = usdtToken.balanceOf(
+                address(staking)
+            );
 
-        assertDistributionCreated(adminBalanceBefore, stakingBalanceBefore);
+            vm.startPrank(admin);
+            usdtToken.approve(address(staking), DISTRIBUTION_AMOUNT);
+            staking.createDistribution(usdtToken, DISTRIBUTION_AMOUNT);
 
-        staking.distributeRewards(usdtToken, MINIMAL_STAKERS, MINIMAL_REWARDS);
+            assertDistributionCreated(
+                balances.adminBalanceBefore,
+                balances.stakingBalanceBefore
+            );
 
-        assertRewardsDistributed(MINIMAL_STAKERS, MINIMAL_REWARDS);
-        vm.stopPrank();
+            staking.distributeRewards(
+                usdtToken,
+                MINIMAL_STAKERS,
+                MINIMAL_REWARDS
+            );
 
-        vm.warp(MONTH);
+            assertRewardsDistributed(MINIMAL_STAKERS, MINIMAL_REWARDS);
+            vm.stopPrank();
 
-        vm.prank(alice);
-        staking.claimRewards(usdtToken);
-        vm.prank(bob);
-        staking.claimRewards(usdtToken);
+            vm.warp(MONTH);
+        }
 
-        assertRewardsClaimed(alice);
-        assertRewardsClaimed(bob);
+        {
+            vm.prank(alice);
+            staking.claimRewards(usdtToken);
+            vm.prank(bob);
+            staking.claimRewards(usdtToken);
 
-        vm.prank(bob);
-        staking.unstake(secondBandId);
+            assertRewardsClaimed(alice);
+            assertRewardsClaimed(bob);
+
+            vm.prank(bob);
+            staking.unstake(secondBandId);
+        }
 
         (uint256 aliceClaimedRewards, uint256 aliceUnclaimedRewards) = staking
             .getStakerReward(alice, usdtToken);
         (uint256 bobClaimedRewards, uint256 bobUnclaimedRewards) = staking
             .getStakerReward(bob, usdtToken);
-        uint256 alicePostClaimingBalance = wowToken.balanceOf(alice) +
+        balances.alicePostClaimingBalance =
+            wowToken.balanceOf(alice) +
             BAND_2_PRICE;
-        uint256 bobPostUnstakingBalance = wowToken.balanceOf(bob);
-        uint256 stakingPreClaimingBalance = BAND_2_PRICE;
-        uint256 stakingPostClaimingBalance = wowToken.balanceOf(
+        balances.bobPostUnstakingBalance = wowToken.balanceOf(bob);
+        balances.stakingPreClaimingBalance = BAND_2_PRICE;
+        balances.stakingPostClaimingBalance = wowToken.balanceOf(
             address(staking)
         );
 
-        assertBalances(
-            stakingPreClaimingBalance,
-            stakingPostClaimingBalance,
-            bobPreStakingBalance,
-            bobPostUnstakingBalance,
-            alicePreStakingBalance,
-            alicePostClaimingBalance
-        );
+        {
+            assertBalances(
+                balances.stakingPreClaimingBalance,
+                balances.stakingPostClaimingBalance,
+                balances.bobPreStakingBalance,
+                balances.bobPostUnstakingBalance,
+                balances.alicePreStakingBalance,
+                balances.alicePostClaimingBalance
+            );
 
-        assertStaked(alice, firstBandId, BAND_LEVEL_2, 1);
-        assertUnstaked(secondBandId);
-        assertRewardData(alice, aliceClaimedRewards, aliceUnclaimedRewards);
-        assertRewardData(bob, bobClaimedRewards, bobUnclaimedRewards);
-        assertStakerBandIds(alice, ALICE_BAND_IDS);
-        assertStakerBandIds(bob, EMPTY_STAKER_BAND_IDS);
-        assertStateVariables(staking.getNextBandId(), false);
+            assertStaked(alice, firstBandId, BAND_LEVEL_2, 1);
+            assertUnstaked(secondBandId);
+            assertRewardData(alice, aliceClaimedRewards, aliceUnclaimedRewards);
+            assertRewardData(bob, bobClaimedRewards, bobUnclaimedRewards);
+            assertStakerBandIds(alice, ALICE_BAND_IDS);
+            assertStakerBandIds(bob, EMPTY_STAKER_BAND_IDS);
+            assertStateVariables(staking.getNextBandId(), false);
+        }
     }
 }

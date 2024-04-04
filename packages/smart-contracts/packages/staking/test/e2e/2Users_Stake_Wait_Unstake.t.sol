@@ -3,6 +3,15 @@ pragma solidity 0.8.20;
 
 import {StakingAssertions} from "./StakingAssertions.t.sol";
 
+struct Balances {
+    uint256 alicePreUnstakingBalance;
+    uint256 alicePostUnstakingBalance;
+    uint256 bobPreUnstakingBalance;
+    uint256 bobPostUnstakingBalance;
+    uint256 stakingPreUnstakingBalance;
+    uint256 stakingPostUnstakingBalance;
+}
+
 contract Staking_E2E_Test is StakingAssertions {
     function test_With2Users_Stake_Wait_Unstake() external setBandLevelData {
         /**
@@ -14,49 +23,58 @@ contract Staking_E2E_Test is StakingAssertions {
          */
 
         // ARRANGE + ACT
-        uint256 alicePreUnstakingBalance = wowToken.balanceOf(alice);
-        uint256 bobPreUnstakingBalance = wowToken.balanceOf(bob);
+        Balances memory balances;
 
+        balances.alicePreUnstakingBalance = wowToken.balanceOf(alice);
+        balances.bobPreUnstakingBalance = wowToken.balanceOf(bob);
         uint256 firstBandId = staking.getNextBandId();
-        vm.startPrank(alice);
-        wowToken.approve(address(staking), BAND_2_PRICE);
-        staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_2, MONTH_0);
-        vm.stopPrank();
+
+        {
+            vm.startPrank(alice);
+            wowToken.approve(address(staking), BAND_2_PRICE);
+            staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_2, MONTH_0);
+            vm.stopPrank();
+        }
 
         uint256 secondBandId = staking.getNextBandId();
-        vm.startPrank(bob);
-        wowToken.approve(address(staking), BAND_4_PRICE);
-        staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0);
-        vm.stopPrank();
 
-        vm.warp(MONTH);
+        {
+            vm.startPrank(bob);
+            wowToken.approve(address(staking), BAND_4_PRICE);
+            staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0);
+            vm.stopPrank();
 
-        vm.prank(alice);
-        staking.unstake(firstBandId);
+            vm.warp(MONTH);
 
-        vm.prank(bob);
-        staking.unstake(secondBandId);
+            vm.prank(alice);
+            staking.unstake(firstBandId);
 
-        uint256 alicePostUnstakingBalance = wowToken.balanceOf(alice);
-        uint256 bobPostUnstakingBalance = wowToken.balanceOf(bob);
-        uint256 stakingPostUnstakingBalance = wowToken.balanceOf(
+            vm.prank(bob);
+            staking.unstake(secondBandId);
+        }
+
+        balances.alicePostUnstakingBalance = wowToken.balanceOf(alice);
+        balances.bobPostUnstakingBalance = wowToken.balanceOf(bob);
+        balances.stakingPostUnstakingBalance = wowToken.balanceOf(
             address(staking)
         );
 
         // ASSERT
-        assertBalances(
-            stakingPostUnstakingBalance,
-            0,
-            bobPreUnstakingBalance,
-            bobPostUnstakingBalance,
-            alicePreUnstakingBalance,
-            alicePostUnstakingBalance
-        );
+        {
+            assertBalances(
+                balances.stakingPostUnstakingBalance,
+                balances.stakingPreUnstakingBalance,
+                balances.bobPreUnstakingBalance,
+                balances.bobPostUnstakingBalance,
+                balances.alicePreUnstakingBalance,
+                balances.alicePostUnstakingBalance
+            );
 
-        assertUnstaked(firstBandId);
-        assertUnstaked(secondBandId);
-        assertStakerBandIds(alice, EMPTY_STAKER_BAND_IDS);
-        assertStakerBandIds(bob, EMPTY_STAKER_BAND_IDS);
-        assertStateVariables(staking.getNextBandId(), false);
+            assertUnstaked(firstBandId);
+            assertUnstaked(secondBandId);
+            assertStakerBandIds(alice, EMPTY_STAKER_BAND_IDS);
+            assertStakerBandIds(bob, EMPTY_STAKER_BAND_IDS);
+            assertStateVariables(staking.getNextBandId(), false);
+        }
     }
 }
