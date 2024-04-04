@@ -1,4 +1,5 @@
 const { ethers } = require("hardhat")
+const createDistribution = require("../helpers/createDistribution")
 const erc20Abi = require("./abis/erc20Abi")
 require("dotenv").config()
 
@@ -7,6 +8,9 @@ async function main() {
     const tokenAddress = process.env.DISTRIBUTION_TOKEN_ADDRESS
     const distributionAmount = process.env.DISTRIBUTION_AMOUNT
     const shouldMintTokens = JSON.parse(process.env.SHOULD_MINT_TOKENS)
+
+    const [admin] = await ethers.getSigners()
+    const adminAddress = await admin.getAddress()
 
     const token = await ethers.getContractAt(erc20Abi, tokenAddress)
 
