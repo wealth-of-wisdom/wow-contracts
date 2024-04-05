@@ -12,7 +12,7 @@ import stakingABI from "../stakingABI.json"
 // Success callback
 Web3Function.onSuccess(async (context: Web3FunctionSuccessContext) => {
     const { transactionHash } = context
-    console.log("onSuccess: txHash: ", transactionHash)
+    console.log("onSuccess - txHash: ", transactionHash)
 })
 
 // Fail callback
