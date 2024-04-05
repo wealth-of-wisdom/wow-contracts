@@ -79,11 +79,11 @@ contract Staking_E2E_Test is StakingAssertions {
 
             staking.distributeRewards(
                 usdtToken,
-                MINIMAL_STAKERS,
-                MINIMAL_REWARDS
+                TWO_MINIMAL_STAKERS,
+                MINIMAL_REWARDS_2
             );
 
-            assertRewardsDistributed(MINIMAL_STAKERS, MINIMAL_REWARDS);
+            assertRewardsDistributed(TWO_MINIMAL_STAKERS, MINIMAL_REWARDS_2);
             vm.stopPrank();
 
             vm.startPrank(bob);

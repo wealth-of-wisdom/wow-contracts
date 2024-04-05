@@ -23,7 +23,8 @@ contract Base_Test is Test, StakingConstants, Events {
 
     address[] internal TEST_ACCOUNTS = [admin, alice, bob, carol, dan, eve];
     address[] internal STAKERS = [alice, bob, carol, dan, eve];
-    address[] internal MINIMAL_STAKERS = [alice, bob];
+    address[] internal TWO_MINIMAL_STAKERS = [alice, bob];
+    address[] internal THREE_MINIMAL_STAKERS = [alice, bob, carol];
 
     TokenMock internal usdtToken;
     TokenMock internal usdcToken;
