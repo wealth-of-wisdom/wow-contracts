@@ -30,7 +30,7 @@ const main = async () => {
 
     // Create task using automate sdk
     const { taskId, tx } = await automate.createBatchExecTask({
-        name: "Web3Function - Distribute rewards",
+        name: `Distribute rewards (cid: ${cid}) (staking: ${userArgs.stakingAddress})`,
         web3FunctionHash: cid,
         web3FunctionArgs: {
             stakingAddress: userArgs.stakingAddress as string,
@@ -44,7 +44,7 @@ const main = async () => {
                     [stakingInterface.getEventTopic("DistributionCreated")],
                 ],
             },
-            blockConfirmations: 0,
+            blockConfirmations: userArgs.blockConfirmations as number,
         },
     })
 

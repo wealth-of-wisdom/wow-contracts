@@ -12,7 +12,7 @@ import stakingABI from "../stakingABI.json"
 // Success callback
 Web3Function.onSuccess(async (context: Web3FunctionSuccessContext) => {
     const { transactionHash } = context
-    console.log("onSuccess - txHash: ", transactionHash)
+    console.log("onSuccess txHash: ", transactionHash)
 })
 
 // Fail callback
@@ -88,7 +88,7 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
             // Don't assign it to nextDistributionId to avoid leaving unprocessed distributions
             await storage.set(
                 "nextDistributionId",
-                (distributionId + 1).toString(),
+                nextDistributionId.toString(),
             )
 
             // Query for the distribution data
