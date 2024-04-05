@@ -77,6 +77,9 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
             (await storage.get("nextDistributionId")) ?? "0"
         const distributionId: number = Number(gelatoNextDistributionId)
 
+        console.log(`Next distribution ID in Sugraph: ${nextDistributionId}`)
+        console.log(`Next distribution ID in Gelato storage: ${distributionId}`)
+
         // If the next distribution ID in subgraph is greater than in gelato storage
         // It means that a new distribution has been added and we can execute the function
         // Otherwise, all distributions have been processed
