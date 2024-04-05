@@ -3,8 +3,8 @@ import { ethers, w3f, network } from "hardhat"
 import { HttpNetworkConfig } from "hardhat/types"
 import { JsonRpcProvider } from "@ethersproject/providers"
 import { Wallet } from "@ethersproject/wallet"
-import { stakingABI } from "../web3-functions/stakingABI"
 import { getUserArgs } from "./helpers/getUserArgs"
+import stakingABI from "../web3-functions/stakingABI.json"
 
 const main = async () => {
     const distributionTask = w3f.get("distribution-task")
