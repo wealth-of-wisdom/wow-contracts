@@ -53,7 +53,7 @@ describe("Create StakingContract, stake and upgrade band two times", () => {
         });
     });
 
-    describe("Upgrade band repeated", () => {
+    describe("Upgrade band twice", () => {
         beforeEach(() => {
             upgradeBand(
                 alice,

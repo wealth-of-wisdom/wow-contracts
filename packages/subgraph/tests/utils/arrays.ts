@@ -57,12 +57,17 @@ export function convertBigIntArrayToString(arr: BigInt[]): string {
 }
 
 export function convertAddressArrayToString(arr: Address[]): string {
-    let numbers = arr.toString().split(",").join(", ");
-    return `[${numbers}]`;
+    let values: string[] = [];
+    for (let i = 0; i < arr.length; i++) {
+        values.push(arr[i].toHex());
+    }
+
+    let addresses = values.toString().split(",").join(", ");
+    return `[${addresses}]`;
 }
 
-export function convertStringToWrappedArray(addr: string): string {
-    return "[".concat(addr).concat("]").replaceAll(",", ", ");
+export function convertStringToWrappedArray(val: string): string {
+    return `[${val}]`;
 }
 
 export function createEmptyArray(size: BigInt): BigInt[] {
