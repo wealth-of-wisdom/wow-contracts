@@ -294,6 +294,43 @@ describe("handleStaked()", () => {
                             assert.fieldEquals("Staker", alice.toHex(), "stakedAmount", bandLevelPrices[0].toString());
                         });
 
+                        describe("Shares calculations", () => {
+                            test("Should set band shares", () => {
+                                assert.fieldEquals("Band", ids[0], "sharesAmount", sharesInMonths[0].toString());
+                            });
+
+                            test("Should set staker shares", () => {
+                                const stakerId = alice.toHex();
+
+                                assert.fieldEquals(
+                                    "Staker",
+                                    stakerId,
+                                    "fixedSharesPerPool",
+                                    sharesInMonths[0].toString(),
+                                );
+                                assert.fieldEquals(
+                                    "Staker",
+                                    stakerId,
+                                    "isolatedFixedSharesPerPool",
+                                    sharesInMonths[0].toString(),
+                                );
+                            });
+
+                            test("Should set pool shares", () => {
+                                assert.fieldEquals(
+                                    "Pool",
+                                    ids[1],
+                                    "totalFixedSharesAmount",
+                                    sharesInMonths[0].toString(),
+                                );
+                                assert.fieldEquals(
+                                    "Pool",
+                                    ids[1],
+                                    "isolatedFixedSharesAmount",
+                                    sharesInMonths[0].toString(),
+                                );
+                            });
+                        });
                         // @todo calculate shares
                     });
 
