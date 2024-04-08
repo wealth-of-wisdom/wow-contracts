@@ -65,14 +65,14 @@ contract Staking_E2E_Test is StakingAssertions {
             vm.prank(admin);
             staking.setBandUpgradesEnabled(true);
 
-            vm.warp(MONTH);
+            skip(MONTH);
 
             vm.startPrank(bob);
             wowToken.approve(address(staking), BAND_5_PRICE - BAND_4_PRICE);
             staking.upgradeBand(secondBandId, BAND_LEVEL_5);
             vm.stopPrank();
 
-            vm.warp(MONTH);
+            skip(MONTH);
         }
 
         balances.adminBalanceBefore = usdtToken.balanceOf(admin);

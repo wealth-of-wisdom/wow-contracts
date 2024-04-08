@@ -82,7 +82,7 @@ contract Staking_E2E_Test is StakingAssertions {
             assertStaked(bob, secondBandId, BAND_LEVEL_3, 1);
             assertStaked(carol, thirdBandId, BAND_LEVEL_1, 1);
 
-            vm.warp(MONTH);
+            skip(MONTH);
         }
 
         {
@@ -114,7 +114,7 @@ contract Staking_E2E_Test is StakingAssertions {
             assertRewardsDistributed(THREE_MINIMAL_STAKERS, MINIMAL_REWARDS_3);
             vm.stopPrank();
 
-            vm.warp(MONTH);
+            skip(MONTH);
         }
         {
             vm.startPrank(bob);
@@ -171,7 +171,7 @@ contract Staking_E2E_Test is StakingAssertions {
             staking.claimRewards(usdtToken);
             assertRewardsClaimed(bob);
 
-            vm.warp(MONTH);
+            skip(MONTH);
 
             vm.prank(carol);
             staking.unstake(thirdBandId);

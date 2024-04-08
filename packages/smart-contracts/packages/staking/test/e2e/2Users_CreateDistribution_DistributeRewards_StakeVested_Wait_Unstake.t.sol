@@ -54,7 +54,7 @@ contract Staking_E2E_Test is StakingAssertions {
             assertStaked(alice, firstBandId, BAND_LEVEL_2, 1);
             assertStaked(bob, secondBandId, BAND_LEVEL_4, 1);
 
-            vm.warp(MONTH);
+            skip(MONTH);
         }
 
         uint256 adminBalanceBefore = usdtToken.balanceOf(admin);

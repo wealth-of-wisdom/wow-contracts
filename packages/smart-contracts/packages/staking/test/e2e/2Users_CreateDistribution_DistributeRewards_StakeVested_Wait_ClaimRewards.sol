@@ -56,7 +56,7 @@ contract Staking_E2E_Test is StakingAssertions {
         balances.alicePostStakingBalance = wowToken.balanceOf(alice);
         balances.bobPostStakingBalance = wowToken.balanceOf(bob);
 
-        vm.warp(MONTH);
+        skip(MONTH);
 
         balances.adminBalanceBefore = usdtToken.balanceOf(admin);
         balances.stakingBalanceBefore = usdtToken.balanceOf(address(staking));
@@ -85,7 +85,7 @@ contract Staking_E2E_Test is StakingAssertions {
             }
             vm.stopPrank();
 
-            vm.warp(MONTH);
+            skip(MONTH);
         }
 
         {
