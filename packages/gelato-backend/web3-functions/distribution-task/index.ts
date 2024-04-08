@@ -12,7 +12,7 @@ import stakingABI from "../stakingABI.json"
 // Success callback
 Web3Function.onSuccess(async (context: Web3FunctionSuccessContext) => {
     const { transactionHash } = context
-    console.log("onSuccess - txHash: ", transactionHash)
+    console.log("onSuccess txHash: ", transactionHash)
 })
 
 // Fail callback
@@ -77,6 +77,9 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
             (await storage.get("nextDistributionId")) ?? "0"
         const distributionId: number = Number(gelatoNextDistributionId)
 
+        console.log(`Next distribution ID in Sugraph: ${nextDistributionId}`)
+        console.log(`Next distribution ID in Gelato storage: ${distributionId}`)
+
         // If the next distribution ID in subgraph is greater than in gelato storage
         // It means that a new distribution has been added and we can execute the function
         // Otherwise, all distributions have been processed
@@ -85,7 +88,7 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
             // Don't assign it to nextDistributionId to avoid leaving unprocessed distributions
             await storage.set(
                 "nextDistributionId",
-                (distributionId + 1).toString(),
+                nextDistributionId.toString(),
             )
 
             // Query for the distribution data

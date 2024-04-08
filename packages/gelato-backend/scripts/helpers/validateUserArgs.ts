@@ -3,7 +3,12 @@ import { createClient, fetchExchange, cacheExchange, gql } from "@urql/core"
 export async function validateUserArgs(
     subgraphUrl: string,
     stakingAddress: string,
+    blockConfirmations: number | undefined,
 ) {
+    if (!blockConfirmations) {
+        throw new Error("Block confirmations not provided")
+    }
+
     // Create a new client for querying the subgraph
     const client = createClient({
         url: subgraphUrl,
