@@ -16,6 +16,14 @@ export const newToken: Address = Address.fromString("0x0000000000000000000000000
 export const alice: Address = Address.fromString("0x0000000000000000000000000000000000000100");
 export const bob: Address = Address.fromString("0x0000000000000000000000000000000000000101");
 export const charlie: Address = Address.fromString("0x0000000000000000000000000000000000000102");
+export const dan: Address = Address.fromString("0x0000000000000000000000000000000000000103");
+export const eve: Address = Address.fromString("0x0000000000000000000000000000000000000104");
+export const frank: Address = Address.fromString("0x0000000000000000000000000000000000000105");
+export const grace: Address = Address.fromString("0x0000000000000000000000000000000000000106");
+export const hank: Address = Address.fromString("0x0000000000000000000000000000000000000107");
+export const ivan: Address = Address.fromString("0x0000000000000000000000000000000000000108");
+
+export const users: Address[] = [alice, bob, charlie, dan, eve, frank, grace, hank, ivan];
 
 /*//////////////////////////////////////////////////////////////////////////
                                 NUMBERS

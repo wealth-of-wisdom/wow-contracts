@@ -1,4 +1,4 @@
-import { Address, BigInt } from "@graphprotocol/graph-ts";
+import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts";
 import { BIGINT_ONE, BIGINT_ZERO } from "../../src/utils/constants";
 
 /*//////////////////////////////////////////////////////////////////////////
@@ -72,4 +72,14 @@ export function convertStringToWrappedArray(val: string): string {
 
 export function createEmptyArray(size: BigInt): BigInt[] {
     return new Array<BigInt>(size.toI32()).fill(BIGINT_ZERO);
+}
+
+export function createDoubleEmptyArray(size1: BigInt, size2: BigInt): BigInt[][] {
+    const arr = new Array<BigInt[]>(size1.toI32());
+
+    for (let i = 0; i < size1.toI32(); i++) {
+        arr[i] = createEmptyArray(size2);
+    }
+
+    return arr;
 }
