@@ -372,9 +372,14 @@ contract Nft is
         mAddressNotZero(to)
         mValidLevel(level)
     {
+        if (tokenId < s_nextTokenId) {
+            revert Errors.Nft__TokenIdInUsedIdRange();
+        }
         _safeMint(to, level, isGenesis, tokenId);
+
         // Effects: set next token Id to continue from currect set Id
-        setNextTokenId(tokenId++);
+        uint256 nextTokenId = tokenId + 1;
+        setNextTokenId(nextTokenId);
     }
 
     /**

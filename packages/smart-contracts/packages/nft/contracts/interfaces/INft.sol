@@ -113,6 +113,13 @@ interface INft is INftEvents {
 
     function safeMint(address to, uint16 level, bool isGenesis) external;
 
+    function safeMintWithTokenId(
+        address to,
+        uint16 level,
+        bool isGenesis,
+        uint256 tokenId
+    ) external;
+
     function activateNftData(
         uint256 tokenId,
         bool isSettingVestingRewards
