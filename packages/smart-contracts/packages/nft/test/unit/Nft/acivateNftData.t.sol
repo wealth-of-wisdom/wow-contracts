@@ -15,7 +15,7 @@ contract Nft_ActivateNftData_Unit_Test is Unit_Test, IVestingEvents {
     {
         vm.expectRevert(Errors.Nft__NotNftOwner.selector);
         vm.prank(bob);
-        nft.activateNftData(NFT_TOKEN_ID_0);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
     }
 
     function test_activateNftData_RevertIf_NftDataAlreadyActivated()
@@ -23,9 +23,9 @@ contract Nft_ActivateNftData_Unit_Test is Unit_Test, IVestingEvents {
         mintLevel2NftForAlice
     {
         vm.startPrank(alice);
-        nft.activateNftData(NFT_TOKEN_ID_0);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
         vm.expectRevert(Errors.Nft__AlreadyActivated.selector);
-        nft.activateNftData(NFT_TOKEN_ID_0);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
         vm.stopPrank();
     }
 
@@ -34,7 +34,7 @@ contract Nft_ActivateNftData_Unit_Test is Unit_Test, IVestingEvents {
         mintLevel2NftForAlice
     {
         vm.prank(alice);
-        nft.activateNftData(NFT_TOKEN_ID_0);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
 
         INft.NftData memory nftData = nft.getNftData(NFT_TOKEN_ID_0);
 
@@ -57,7 +57,7 @@ contract Nft_ActivateNftData_Unit_Test is Unit_Test, IVestingEvents {
             LEVEL_2_EXTENSION_DURATION;
 
         vm.prank(alice);
-        nft.activateNftData(NFT_TOKEN_ID_0);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
 
         INft.NftData memory nftData = nft.getNftData(NFT_TOKEN_ID_0);
 
@@ -84,7 +84,7 @@ contract Nft_ActivateNftData_Unit_Test is Unit_Test, IVestingEvents {
         );
 
         vm.prank(alice);
-        nft.activateNftData(NFT_TOKEN_ID_0);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
 
         IVesting.Beneficiary memory beneficiary = vesting.getBeneficiary(
             DEFAULT_VESTING_PID,
@@ -103,7 +103,7 @@ contract Nft_ActivateNftData_Unit_Test is Unit_Test, IVestingEvents {
         mintLevel2NftForAlice
     {
         vm.prank(alice);
-        nft.activateNftData(NFT_TOKEN_ID_0);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
 
         IVesting.Beneficiary memory beneficiary = vesting.getBeneficiary(
             DEFAULT_VESTING_PID,
@@ -135,7 +135,7 @@ contract Nft_ActivateNftData_Unit_Test is Unit_Test, IVestingEvents {
         );
 
         vm.prank(alice);
-        nft.activateNftData(NFT_TOKEN_ID_0);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
 
         IVesting.Beneficiary memory beneficiary = vesting.getBeneficiary(
             DEFAULT_VESTING_PID,
@@ -158,7 +158,7 @@ contract Nft_ActivateNftData_Unit_Test is Unit_Test, IVestingEvents {
 
         vm.expectRevert();
         vm.prank(alice);
-        nft.activateNftData(NFT_TOKEN_ID_0);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
     }
 
     function test_activateNftData_EmitsBeneficiaryAddedEvent()
@@ -173,7 +173,7 @@ contract Nft_ActivateNftData_Unit_Test is Unit_Test, IVestingEvents {
         );
 
         vm.prank(alice);
-        nft.activateNftData(NFT_TOKEN_ID_0);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
     }
 
     function test_activateNftData_EmitsNftDataActivatedEvent()
@@ -195,6 +195,6 @@ contract Nft_ActivateNftData_Unit_Test is Unit_Test, IVestingEvents {
         );
 
         vm.prank(alice);
-        nft.activateNftData(NFT_TOKEN_ID_0);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
     }
 }

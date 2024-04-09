@@ -42,6 +42,8 @@ interface INftEvents {
 
     event VestingContractSet(IVesting newContract);
 
+    event NextTokenIdSet(uint256 nextTokenId);
+
     event LevelDataSet(
         uint16 level,
         bool isGenesis,
@@ -172,6 +174,8 @@ interface INft is INftEvents {
 
     function setVestingContract(IVesting newContract) external;
 
+    function setNextTokenId(uint256 nextTokenId) external;
+
     function getNftData(uint256 tokenId) external view returns (NftData memory);
 
     function getLevelData(
@@ -184,6 +188,8 @@ interface INft is INftEvents {
         bool isGenesis,
         uint8 project
     ) external view returns (uint16);
+
+    function getActiveNft(address owner) external view returns (uint256);
 
     function getNextTokenId() external view returns (uint256);
 

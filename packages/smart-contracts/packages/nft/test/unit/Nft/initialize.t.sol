@@ -53,18 +53,6 @@ contract Nft_Initialize_Unit_Test is Unit_Test {
         );
     }
 
-    function test_initialize_RevertIf_VestingContractIsZeroAddress() external {
-        vm.expectRevert(Errors.Nft__ZeroAddress.selector);
-        nft.initialize(
-            "Wealth of Wisdom",
-            "WOW",
-            IVesting(ZERO_ADDRESS),
-            DEFAULT_VESTING_PID,
-            MAX_LEVEL,
-            TOTAL_PROJECT_TYPES
-        );
-    }
-
     function test_initialize_RevertIf_NameAndSymbolStringsAreEmpty() external {
         vm.expectRevert(Errors.Nft__EmptyString.selector);
         vm.prank(admin);

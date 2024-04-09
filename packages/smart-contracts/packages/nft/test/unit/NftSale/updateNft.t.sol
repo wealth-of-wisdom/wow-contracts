@@ -67,7 +67,7 @@ contract NftSale_UpdateNf_Unit_Test is Unit_Test {
 
     function test_updateNftData_RevertIf_NftIsGenesis() external {
         vm.prank(admin);
-        sale.mintGenesisNfts(genesisUser, genesisLevel);
+        sale.mintGenesisNfts(genesisUser, genesisLevel, false, true);
 
         vm.expectRevert(Errors.NftSale__UnupdatableNft.selector);
         vm.prank(alice);
@@ -91,7 +91,7 @@ contract NftSale_UpdateNf_Unit_Test is Unit_Test {
         mintLevel2NftForAlice
     {
         vm.startPrank(alice);
-        nft.activateNftData(NFT_TOKEN_ID_0);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
 
         skip(LEVEL_2_LIFECYCLE_DURATION);
         tokenUSDT.approve(address(sale), upgradePrice);
@@ -192,7 +192,7 @@ contract NftSale_UpdateNf_Unit_Test is Unit_Test {
         mintLevel2NftForAlice
     {
         vm.startPrank(alice);
-        nft.activateNftData(NFT_TOKEN_ID_0);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
         tokenUSDT.approve(address(sale), upgradePrice);
         sale.updateNft(NFT_TOKEN_ID_0, LEVEL_3, tokenUSDT);
         vm.stopPrank();

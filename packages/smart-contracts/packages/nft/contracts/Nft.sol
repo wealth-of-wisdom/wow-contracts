@@ -48,6 +48,9 @@ contract Nft is
     // Hash = keccak256(level, isGenesis, project type number (0 - Standard, 1 - Premium, 2- Limited)))
     mapping(bytes32 configHash => uint16 quantity) internal s_projectsPerNft;
 
+    // Map of current active NFT to its owner
+    mapping(address owner => uint256 tokenId) internal s_activeNft;
+
     uint256 internal s_nextTokenId;
 
     IVesting internal s_vestingContract;
@@ -166,11 +169,21 @@ contract Nft is
         NftLevel storage levelData = s_nftLevels[
             _getLevelHash(nftData.level, nftData.isGenesis)
         ];
+        uint256 previouslyActiveTokenId = s_activeNft[msg.sender];
+        NftData memory oldNftData = s_nftData[previouslyActiveTokenId];
 
         // Checks: data must not be activated
         if (nftData.activityType != ActivityType.NOT_ACTIVATED) {
             revert Errors.Nft__AlreadyActivated();
         }
+
+        // We check by previous activation status
+        // If we check by id, we miss the first ID 0
+        // e.g.: previouslyActiveTokenId != 0
+        if (oldNftData.activityType == ActivityType.ACTIVATION_TRIGGERED)
+            oldNftData.activityType = ActivityType.DEACTIVATED;
+
+        s_activeNft[msg.sender] = tokenId;
 
         // Effects: update nft data
         nftData.activityType = ActivityType.ACTIVATION_TRIGGERED;
@@ -337,6 +350,32 @@ contract Nft is
     /*//////////////////////////////////////////////////////////////////////////
                         FUNCTIONS FOR DEFAULT ADMIN ROLE
     //////////////////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice  Mints Nft to user with defined level, type and token Id
+     * @notice  Sets the token URI using the base URI and pre defined token Id
+     * @dev     Only MINTER_ROLE can call this function
+     * @param   to  user who will get the Nft
+     * @param   level  nft level purchased
+     * @param   isGenesis  is it a genesis nft
+     * @param   tokenId  id that is going to be minted
+     */
+    /* solhint-disable ordering */
+    function safeMintWithTokenId(
+        address to,
+        uint16 level,
+        bool isGenesis,
+        uint256 tokenId
+    )
+        public
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        mAddressNotZero(to)
+        mValidLevel(level)
+    {
+        _safeMint(to, level, isGenesis, tokenId);
+        // Effects: set next token Id to continue from currect set Id
+        setNextTokenId(tokenId++);
+    }
 
     /**
      * @notice  set the token metadata URI (URI for each token is assigned before minting)
@@ -533,6 +572,19 @@ contract Nft is
         emit VestingContractSet(newContract);
     }
 
+    /**
+     * @notice  Sets next token Id in emergencies (after minting with specific token Id)
+     * @param   nextTokenId  new next token Id
+     */
+    function setNextTokenId(
+        uint256 nextTokenId
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        // Effects: set the new next token Id
+        s_nextTokenId = nextTokenId;
+
+        emit NextTokenIdSet(nextTokenId);
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                             FUNCTIONS MINTER ROLE  
     //////////////////////////////////////////////////////////////////////////*/
@@ -551,38 +603,10 @@ contract Nft is
         uint16 level,
         bool isGenesis
     ) public onlyRole(MINTER_ROLE) mAddressNotZero(to) mValidLevel(level) {
-        NftLevel storage nftLevel = s_nftLevels[
-            _getLevelHash(level, isGenesis)
-        ];
-
-        uint256 nftAmount = nftLevel.nftAmount;
-
-        // Checks: the amount of NFTs minted must not exceed the max supply
-        if (!isGenesis && nftAmount >= nftLevel.supplyCap) {
-            revert Errors.Nft__SupplyCapReached(level, isGenesis, nftAmount);
-        }
-
         // Effects: increment the token id
         // tokenId is assigned prior to incrementing the token id, so it starts from 0
         uint256 tokenId = s_nextTokenId++;
-
-        // Effects: mint the token
-        _safeMint(to, tokenId);
-
-        // Effects: increment the token quantity in the level
-        nftLevel.nftAmount++;
-
-        // Concatenate base URI, id in level and suffix to get the full URI
-        string memory uri = string.concat(
-            nftLevel.baseURI,
-            Strings.toString(nftAmount),
-            NFT_URI_SUFFIX
-        );
-
-        // Effects: set the token metadata URI (URI for each token is assigned before minting)
-        _setTokenURI(tokenId, uri);
-
-        emit NftMinted(to, tokenId, level, isGenesis, nftAmount);
+        _safeMint(to, level, isGenesis, tokenId);
     }
 
     /* solhint-enable */
@@ -626,6 +650,14 @@ contract Nft is
         uint8 project
     ) external view returns (uint16) {
         return s_projectsPerNft[_getProjectHash(level, isGenesis, project)];
+    }
+
+    /**
+     * @notice  Returns activated NFT for owner
+     * @return  address  token owner
+     */
+    function getActiveNft(address owner) external view returns (uint256) {
+        return s_activeNft[owner];
     }
 
     /**
@@ -754,5 +786,41 @@ contract Nft is
         uint8 project // 0 - Standard, 1 - Premium, 2- Limited
     ) internal pure returns (bytes32) {
         return keccak256(abi.encode(level, isGenesis, project));
+    }
+
+    function _safeMint(
+        address to,
+        uint16 level,
+        bool isGenesis,
+        uint256 tokenId
+    ) public onlyRole(MINTER_ROLE) mAddressNotZero(to) mValidLevel(level) {
+        NftLevel storage nftLevel = s_nftLevels[
+            _getLevelHash(level, isGenesis)
+        ];
+
+        uint256 nftAmount = nftLevel.nftAmount;
+
+        // Checks: the amount of NFTs minted must not exceed the max supply
+        if (!isGenesis && nftAmount >= nftLevel.supplyCap) {
+            revert Errors.Nft__SupplyCapReached(level, isGenesis, nftAmount);
+        }
+
+        // Effects: mint the token
+        _safeMint(to, tokenId);
+
+        // Effects: increment the token quantity in the level
+        nftLevel.nftAmount++;
+
+        // Concatenate base URI, id in level and suffix to get the full URI
+        string memory uri = string.concat(
+            nftLevel.baseURI,
+            Strings.toString(nftAmount),
+            NFT_URI_SUFFIX
+        );
+
+        // Effects: set the token metadata URI (URI for each token is assigned before minting)
+        _setTokenURI(tokenId, uri);
+
+        emit NftMinted(to, tokenId, level, isGenesis, nftAmount);
     }
 }
