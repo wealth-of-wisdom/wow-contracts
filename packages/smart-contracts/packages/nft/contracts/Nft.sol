@@ -153,7 +153,10 @@ contract Nft is
      * @notice  manages other data about the Nft and adds its holder to vesting pool
      * @param   tokenId  user minted and owned token id
      */
-    function activateNftData(uint256 tokenId) external {
+    function activateNftData(
+        uint256 tokenId,
+        bool isSettingVestingRewards
+    ) external {
         // Checks: sender must be the owner of the Nft
         if (ownerOf(tokenId) != msg.sender) {
             revert Errors.Nft__NotNftOwner();
@@ -178,35 +181,36 @@ contract Nft is
             nftData.activityEndTimestamp +
             levelData.extensionDuration;
 
-        (
-            ,
-            ,
-            uint256 totalPoolTokenAmount,
-            uint256 dedicatedPoolTokenAmount
-        ) = s_vestingContract.getGeneralPoolData(s_promotionalVestingPID);
+        if (isSettingVestingRewards) {
+            (
+                ,
+                ,
+                uint256 totalPoolTokenAmount,
+                uint256 dedicatedPoolTokenAmount
+            ) = s_vestingContract.getGeneralPoolData(s_promotionalVestingPID);
 
-        // Calculate the amount of tokens that can still be distributed
-        uint256 undedicatedTokens = totalPoolTokenAmount -
-            dedicatedPoolTokenAmount;
+            // Calculate the amount of tokens that can still be distributed
+            uint256 undedicatedTokens = totalPoolTokenAmount -
+                dedicatedPoolTokenAmount;
 
-        if (undedicatedTokens > 0) {
-            // Rewards are fixed for each level
-            uint256 rewardTokens = levelData.vestingRewardWOWTokens;
+            if (undedicatedTokens > 0) {
+                // Rewards are fixed for each level
+                uint256 rewardTokens = levelData.vestingRewardWOWTokens;
 
-            // If there are enough tokens, then the reward is vestingRewardWOWTokens
-            // Otherwise, the reward is the amount of tokens that can still be distributed
-            if (undedicatedTokens < rewardTokens) {
-                rewardTokens = undedicatedTokens;
+                // If there are enough tokens, then the reward is vestingRewardWOWTokens
+                // Otherwise, the reward is the amount of tokens that can still be distributed
+                if (undedicatedTokens < rewardTokens) {
+                    rewardTokens = undedicatedTokens;
+                }
+
+                // Effects: add the holder to the vesting pool
+                s_vestingContract.addBeneficiary(
+                    s_promotionalVestingPID,
+                    msg.sender,
+                    rewardTokens
+                );
             }
-
-            // Effects: add the holder to the vesting pool
-            s_vestingContract.addBeneficiary(
-                s_promotionalVestingPID,
-                msg.sender,
-                rewardTokens
-            );
         }
-
         emit NftDataActivated(
             msg.sender,
             tokenId,
@@ -231,7 +235,13 @@ contract Nft is
         address receiver,
         uint16 level,
         bool isGenesis
-    ) external onlyRole(NFT_DATA_MANAGER_ROLE) onlyRole(MINTER_ROLE) {
+    )
+        external
+        onlyRole(NFT_DATA_MANAGER_ROLE)
+        onlyRole(MINTER_ROLE)
+        returns (uint256 tokenId)
+    {
+        tokenId = s_nextTokenId;
         // Effects: set nft data with next token id
         setNftData(
             s_nextTokenId,

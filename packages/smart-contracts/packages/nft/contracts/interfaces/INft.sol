@@ -111,7 +111,10 @@ interface INft is INftEvents {
 
     function safeMint(address to, uint16 level, bool isGenesis) external;
 
-    function activateNftData(uint256 tokenId) external;
+    function activateNftData(
+        uint256 tokenId,
+        bool isSettingVestingRewards
+    ) external;
 
     function setNftData(
         uint256 tokenId,
@@ -126,7 +129,7 @@ interface INft is INftEvents {
         address receiver,
         uint16 level,
         bool isGenesis
-    ) external;
+    ) external returns (uint256 tokenId);
 
     function mintAndUpdateNftData(
         address receiver,
