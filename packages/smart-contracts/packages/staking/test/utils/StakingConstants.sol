@@ -61,13 +61,42 @@ abstract contract StakingConstants {
     //////////////////////////////////////////////////////////////////////////*/
 
     uint256 internal constant ALICE_REWARDS_2 =
-        (DISTRIBUTION_AMOUNT * 10) / 100; // 10%
-    uint256 internal constant BOB_REWARDS_2 = (DISTRIBUTION_AMOUNT * 90) / 100; // 90%
+        ((DISTRIBUTION_AMOUNT * 13) /
+            1000 +
+            (DISTRIBUTION_AMOUNT * 17) /
+            1000) / 2;
+    uint256 internal constant BOB_REWARDS_2 =
+        ((DISTRIBUTION_AMOUNT * 13) /
+            1000 +
+            (DISTRIBUTION_AMOUNT * 17) /
+            1000) /
+            2 +
+            (DISTRIBUTION_AMOUNT * 34) /
+            1000 +
+            (DISTRIBUTION_AMOUNT * 64) /
+            1000;
+
+    uint256 internal constant BOB_REWARDS_3 =
+        ((DISTRIBUTION_AMOUNT * 13) / 1000) / 3;
+    uint256 internal constant CAROL_REWARDS_3 =
+        ((DISTRIBUTION_AMOUNT * 13) / 1000) /
+            3 +
+            ((DISTRIBUTION_AMOUNT * 17) / 1000) /
+            2 +
+            (DISTRIBUTION_AMOUNT * 34) /
+            1000;
+
     uint256[] STAKER_BAND_IDS = [0];
     uint256[] EMPTY_STAKER_BAND_IDS;
-    uint256[] MINIMAL_REWARDS = [ALICE_REWARDS_2, BOB_REWARDS_2];
+    uint256[] MINIMAL_REWARDS_2 = [ALICE_REWARDS_2, BOB_REWARDS_2];
+    uint256[] MINIMAL_REWARDS_3 = [
+        ALICE_REWARDS_2,
+        BOB_REWARDS_3,
+        CAROL_REWARDS_3
+    ];
     uint256[] ALICE_BAND_IDS = [BAND_ID_0];
     uint256[] BOB_BAND_IDS = [BAND_ID_1];
+    uint256[] CAROL_BAND_IDS = [BAND_ID_2];
 
     /*//////////////////////////////////////////////////////////////////////////
                                     ENUMS

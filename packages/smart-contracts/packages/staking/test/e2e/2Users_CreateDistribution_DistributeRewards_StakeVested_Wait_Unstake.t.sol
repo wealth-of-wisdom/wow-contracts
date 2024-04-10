@@ -54,7 +54,7 @@ contract Staking_E2E_Test is StakingAssertions {
             assertStaked(alice, firstBandId, BAND_LEVEL_2, 1);
             assertStaked(bob, secondBandId, BAND_LEVEL_4, 1);
 
-            vm.warp(MONTH);
+            skip(MONTH);
         }
 
         uint256 adminBalanceBefore = usdtToken.balanceOf(admin);
@@ -69,11 +69,11 @@ contract Staking_E2E_Test is StakingAssertions {
 
             staking.distributeRewards(
                 usdtToken,
-                MINIMAL_STAKERS,
-                MINIMAL_REWARDS
+                TWO_MINIMAL_STAKERS,
+                MINIMAL_REWARDS_2
             );
 
-            assertRewardsDistributed(MINIMAL_STAKERS, MINIMAL_REWARDS);
+            assertRewardsDistributed(TWO_MINIMAL_STAKERS, MINIMAL_REWARDS_2);
             vm.stopPrank();
 
             vm.prank(alice);

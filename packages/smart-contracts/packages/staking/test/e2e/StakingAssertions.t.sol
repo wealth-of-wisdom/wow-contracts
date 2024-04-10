@@ -80,6 +80,17 @@ contract StakingAssertions is Base_Test {
         );
     }
 
+    function assertOtherUserBalance(
+        uint256 userPreStakingBalance,
+        uint256 userPostStakingBalance
+    ) internal {
+        assertEq(
+            userPostStakingBalance,
+            userPreStakingBalance,
+            "User balance incorrect"
+        );
+    }
+
     function assertDistributionCreated(
         uint256 adminBalanceBefore,
         uint256 stakingBalanceBefore
@@ -156,7 +167,7 @@ contract StakingAssertions is Base_Test {
         uint256[] memory stakerBandIds
     ) internal {
         uint256[] memory bandIds = staking.getStakerBandIds(staker);
-        assertEq(stakerBandIds, bandIds, "Staker band id missmatch");
+        assertEq(stakerBandIds, bandIds, "Staker band id mismatch");
     }
 
     function assertStateVariables(
