@@ -2010,7 +2010,538 @@ describe("handleStaked()", () => {
 
                                 describe("2 bands unstaked (with ids 0, 2)", () => {
                                     beforeAll(() => {
-                                        unstakedBandsArray = [bandIds[0], bandIds[1], bandIds[2], bandIds[6], bandIds[7], bandIds[8]];
+                                        unstakedBandsArray = [
+                                            bandIds[0],
+                                            bandIds[1],
+                                            bandIds[2],
+                                            bandIds[6],
+                                            bandIds[7],
+                                            bandIds[8],
+                                        ];
+                                        expectedLeftBands = createArray(bandIds[3], bandIds[5]);
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("3 bands unstaked (with ids 0, 1, 2)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[0], bandIds[8]);
+                                        expectedLeftBands = [];
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+                            });
+                        });
+
+                        describe("Band level 5", () => {
+                            beforeAll(() => {
+                                bandLevel = 5;
+                            });
+
+                            describe("1 FIXED band staked", () => {
+                                beforeAll(() => {
+                                    stakedBandsArray = createArray(bandIds[0], bandIds[2]);
+                                });
+
+                                describe("1 band unstaked", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[0], bandIds[2]);
+                                        expectedLeftBands = [];
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+                            });
+
+                            describe("2 FIXED bands staked", () => {
+                                beforeAll(() => {
+                                    stakedBandsArray = createArray(bandIds[0], bandIds[5]);
+                                });
+
+                                describe("1 band unstaked (with id 0)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[0], bandIds[2]);
+                                        expectedLeftBands = createArray(bandIds[3], bandIds[5]);
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("1 band unstaked (with id 1)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[3], bandIds[5]);
+                                        expectedLeftBands = createArray(bandIds[0], bandIds[2]);
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("2 bands unstaked", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[0], bandIds[5]);
+                                        expectedLeftBands = [];
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+                            });
+
+                            describe("3 FIXED bands", () => {
+                                beforeAll(() => {
+                                    stakedBandsArray = createArray(bandIds[0], bandIds[8]);
+                                });
+
+                                describe("1 band unstaked (with id 0)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[0], bandIds[2]);
+                                        // When popping last item (we copy the last element to the removed one)
+                                        expectedLeftBands = [
+                                            bandIds[6],
+                                            bandIds[3],
+                                            bandIds[7],
+                                            bandIds[4],
+                                            bandIds[8],
+                                            bandIds[5],
+                                        ];
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("1 band unstaked (with id 1)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[3], bandIds[5]);
+                                        expectedLeftBands = [
+                                            bandIds[0],
+                                            bandIds[6],
+                                            bandIds[1],
+                                            bandIds[7],
+                                            bandIds[2],
+                                            bandIds[8],
+                                        ];
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("1 band unstaked (with id 2)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[6], bandIds[8]);
+                                        expectedLeftBands = [
+                                            bandIds[0],
+                                            bandIds[3],
+                                            bandIds[1],
+                                            bandIds[4],
+                                            bandIds[2],
+                                            bandIds[5],
+                                        ];
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("2 bands unstaked (with ids 0, 1)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[0], bandIds[5]);
+                                        expectedLeftBands = createArray(bandIds[6], bandIds[8]);
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("2 bands unstaked (with ids 1, 2)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[3], bandIds[8]);
+                                        expectedLeftBands = createArray(bandIds[0], bandIds[2]);
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("2 bands unstaked (with ids 0, 2)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = [
+                                            bandIds[0],
+                                            bandIds[1],
+                                            bandIds[2],
+                                            bandIds[6],
+                                            bandIds[7],
+                                            bandIds[8],
+                                        ];
+                                        expectedLeftBands = createArray(bandIds[3], bandIds[5]);
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("3 bands unstaked (with ids 0, 1, 2)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[0], bandIds[8]);
+                                        expectedLeftBands = [];
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+                            });
+                        });
+
+                        describe("Band level 9", () => {
+                            beforeAll(() => {
+                                bandLevel = 9;
+                            });
+
+                            describe("1 FIXED band staked", () => {
+                                beforeAll(() => {
+                                    stakedBandsArray = createArray(bandIds[0], bandIds[2]);
+                                });
+
+                                describe("1 band unstaked", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[0], bandIds[2]);
+                                        expectedLeftBands = [];
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+                            });
+
+                            describe("2 FIXED bands staked", () => {
+                                beforeAll(() => {
+                                    stakedBandsArray = createArray(bandIds[0], bandIds[5]);
+                                });
+
+                                describe("1 band unstaked (with id 0)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[0], bandIds[2]);
+                                        expectedLeftBands = createArray(bandIds[3], bandIds[5]);
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("1 band unstaked (with id 1)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[3], bandIds[5]);
+                                        expectedLeftBands = createArray(bandIds[0], bandIds[2]);
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("2 bands unstaked", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[0], bandIds[5]);
+                                        expectedLeftBands = [];
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+                            });
+
+                            describe("3 FIXED bands", () => {
+                                beforeAll(() => {
+                                    stakedBandsArray = createArray(bandIds[0], bandIds[8]);
+                                });
+
+                                describe("1 band unstaked (with id 0)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[0], bandIds[2]);
+                                        // When popping last item (we copy the last element to the removed one)
+                                        expectedLeftBands = [
+                                            bandIds[6],
+                                            bandIds[3],
+                                            bandIds[7],
+                                            bandIds[4],
+                                            bandIds[8],
+                                            bandIds[5],
+                                        ];
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("1 band unstaked (with id 1)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[3], bandIds[5]);
+                                        expectedLeftBands = [
+                                            bandIds[0],
+                                            bandIds[6],
+                                            bandIds[1],
+                                            bandIds[7],
+                                            bandIds[2],
+                                            bandIds[8],
+                                        ];
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("1 band unstaked (with id 2)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[6], bandIds[8]);
+                                        expectedLeftBands = [
+                                            bandIds[0],
+                                            bandIds[3],
+                                            bandIds[1],
+                                            bandIds[4],
+                                            bandIds[2],
+                                            bandIds[5],
+                                        ];
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("2 bands unstaked (with ids 0, 1)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[0], bandIds[5]);
+                                        expectedLeftBands = createArray(bandIds[6], bandIds[8]);
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("2 bands unstaked (with ids 1, 2)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[3], bandIds[8]);
+                                        expectedLeftBands = createArray(bandIds[0], bandIds[2]);
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("2 bands unstaked (with ids 0, 2)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = [
+                                            bandIds[0],
+                                            bandIds[1],
+                                            bandIds[2],
+                                            bandIds[6],
+                                            bandIds[7],
+                                            bandIds[8],
+                                        ];
                                         expectedLeftBands = createArray(bandIds[3], bandIds[5]);
                                     });
 
@@ -2082,7 +2613,7 @@ describe("handleStaked()", () => {
 
                             for (let i = 0; i < unstakedBandsCount; i++) {
                                 for (let j = 0; j < stakersCount; j++) {
-                                    unstakeVested(
+                                    unstakeStandard(
                                         stakers[j],
                                         unstakedBandsArray[i * stakersCount + j],
                                         monthsAfterInit[2],
@@ -2094,6 +2625,530 @@ describe("handleStaked()", () => {
                         describe("Band level 1", () => {
                             beforeAll(() => {
                                 bandLevel = 1;
+                            });
+
+                            describe("1 FIXED band staked", () => {
+                                beforeAll(() => {
+                                    stakedBandsArray = createArray(bandIds[0], bandIds[2]);
+                                });
+
+                                describe("1 band unstaked", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[0], bandIds[2]);
+                                        expectedLeftBands = [];
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+                            });
+
+                            describe("2 FIXED bands staked", () => {
+                                beforeAll(() => {
+                                    stakedBandsArray = createArray(bandIds[0], bandIds[5]);
+                                });
+
+                                describe("1 band unstaked (with id 0)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[0], bandIds[2]);
+                                        expectedLeftBands = createArray(bandIds[3], bandIds[5]);
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("1 band unstaked (with id 1)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[3], bandIds[5]);
+                                        expectedLeftBands = createArray(bandIds[0], bandIds[2]);
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("2 bands unstaked", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[0], bandIds[5]);
+                                        expectedLeftBands = [];
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+                            });
+
+                            describe("3 FIXED bands", () => {
+                                beforeAll(() => {
+                                    stakedBandsArray = createArray(bandIds[0], bandIds[8]);
+                                });
+
+                                describe("1 band unstaked (with id 0)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[0], bandIds[2]);
+                                        // When popping last item (we copy the last element to the removed one)
+                                        expectedLeftBands = [
+                                            bandIds[6],
+                                            bandIds[3],
+                                            bandIds[7],
+                                            bandIds[4],
+                                            bandIds[8],
+                                            bandIds[5],
+                                        ];
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("1 band unstaked (with id 1)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[3], bandIds[5]);
+                                        expectedLeftBands = [
+                                            bandIds[0],
+                                            bandIds[6],
+                                            bandIds[1],
+                                            bandIds[7],
+                                            bandIds[2],
+                                            bandIds[8],
+                                        ];
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("1 band unstaked (with id 2)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[6], bandIds[8]);
+                                        expectedLeftBands = [
+                                            bandIds[0],
+                                            bandIds[3],
+                                            bandIds[1],
+                                            bandIds[4],
+                                            bandIds[2],
+                                            bandIds[5],
+                                        ];
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("2 bands unstaked (with ids 0, 1)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[0], bandIds[5]);
+                                        expectedLeftBands = createArray(bandIds[6], bandIds[8]);
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("2 bands unstaked (with ids 1, 2)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[3], bandIds[8]);
+                                        expectedLeftBands = createArray(bandIds[0], bandIds[2]);
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("2 bands unstaked (with ids 0, 2)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = [
+                                            bandIds[0],
+                                            bandIds[1],
+                                            bandIds[2],
+                                            bandIds[6],
+                                            bandIds[7],
+                                            bandIds[8],
+                                        ];
+                                        expectedLeftBands = createArray(bandIds[3], bandIds[5]);
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("3 bands unstaked (with ids 0, 1, 2)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[0], bandIds[8]);
+                                        expectedLeftBands = [];
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+                            });
+                        });
+
+                        describe("Band level 5", () => {
+                            beforeAll(() => {
+                                bandLevel = 5;
+                            });
+
+                            describe("1 FIXED band staked", () => {
+                                beforeAll(() => {
+                                    stakedBandsArray = createArray(bandIds[0], bandIds[2]);
+                                });
+
+                                describe("1 band unstaked", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[0], bandIds[2]);
+                                        expectedLeftBands = [];
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+                            });
+
+                            describe("2 FIXED bands staked", () => {
+                                beforeAll(() => {
+                                    stakedBandsArray = createArray(bandIds[0], bandIds[5]);
+                                });
+
+                                describe("1 band unstaked (with id 0)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[0], bandIds[2]);
+                                        expectedLeftBands = createArray(bandIds[3], bandIds[5]);
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("1 band unstaked (with id 1)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[3], bandIds[5]);
+                                        expectedLeftBands = createArray(bandIds[0], bandIds[2]);
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("2 bands unstaked", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[0], bandIds[5]);
+                                        expectedLeftBands = [];
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+                            });
+
+                            describe("3 FIXED bands", () => {
+                                beforeAll(() => {
+                                    stakedBandsArray = createArray(bandIds[0], bandIds[8]);
+                                });
+
+                                describe("1 band unstaked (with id 0)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[0], bandIds[2]);
+                                        // When popping last item (we copy the last element to the removed one)
+                                        expectedLeftBands = [
+                                            bandIds[6],
+                                            bandIds[3],
+                                            bandIds[7],
+                                            bandIds[4],
+                                            bandIds[8],
+                                            bandIds[5],
+                                        ];
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("1 band unstaked (with id 1)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[3], bandIds[5]);
+                                        expectedLeftBands = [
+                                            bandIds[0],
+                                            bandIds[6],
+                                            bandIds[1],
+                                            bandIds[7],
+                                            bandIds[2],
+                                            bandIds[8],
+                                        ];
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("1 band unstaked (with id 2)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[6], bandIds[8]);
+                                        expectedLeftBands = [
+                                            bandIds[0],
+                                            bandIds[3],
+                                            bandIds[1],
+                                            bandIds[4],
+                                            bandIds[2],
+                                            bandIds[5],
+                                        ];
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("2 bands unstaked (with ids 0, 1)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[0], bandIds[5]);
+                                        expectedLeftBands = createArray(bandIds[6], bandIds[8]);
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("2 bands unstaked (with ids 1, 2)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[3], bandIds[8]);
+                                        expectedLeftBands = createArray(bandIds[0], bandIds[2]);
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("2 bands unstaked (with ids 0, 2)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = [
+                                            bandIds[0],
+                                            bandIds[1],
+                                            bandIds[2],
+                                            bandIds[6],
+                                            bandIds[7],
+                                            bandIds[8],
+                                        ];
+                                        expectedLeftBands = createArray(bandIds[3], bandIds[5]);
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+
+                                describe("3 bands unstaked (with ids 0, 1, 2)", () => {
+                                    beforeAll(() => {
+                                        unstakedBandsArray = createArray(bandIds[0], bandIds[8]);
+                                        expectedLeftBands = [];
+                                    });
+
+                                    test("Fixed months - 1", () => {
+                                        fixedMonths = months[1];
+                                    });
+
+                                    test("Fixed months - 12", () => {
+                                        fixedMonths = months[12];
+                                    });
+
+                                    test("Fixed months - 24", () => {
+                                        fixedMonths = months[24];
+                                    });
+                                });
+                            });
+                        });
+
+                        describe("Band level 9", () => {
+                            beforeAll(() => {
+                                bandLevel = 9;
                             });
 
                             describe("1 FIXED band staked", () => {
