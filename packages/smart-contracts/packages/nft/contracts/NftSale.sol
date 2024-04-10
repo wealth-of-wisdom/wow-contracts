@@ -180,9 +180,7 @@ contract NftSale is
      */
     function mintGenesisNfts(
         address[] memory receivers,
-        uint16[] memory levels,
-        bool isActive,
-        bool isSettingVestingRewards
+        uint16[] memory levels
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         // Cache length of receivers array for usage in the loop
         uint256 receiversLength = receivers.length;
@@ -194,15 +192,7 @@ contract NftSale is
 
         for (uint256 i; i < receiversLength; i++) {
             // Interactions: mint genesis nft
-            uint256 tokenId = s_nftContract.mintAndSetNftData(
-                receivers[i],
-                levels[i],
-                true
-            );
-
-            if (isActive) {
-                s_nftContract.activateNftData(tokenId, isSettingVestingRewards);
-            }
+            s_nftContract.mintAndSetNftData(receivers[i], levels[i], true);
 
             emit NftMinted(receivers[i], levels[i], true, 0);
         }

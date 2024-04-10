@@ -55,9 +55,7 @@ interface INftSale is INftSaleEvents {
 
     function mintGenesisNfts(
         address[] memory receivers,
-        uint16[] memory levels,
-        bool isActive,
-        bool isSettingVestingRewards
+        uint16[] memory levels
     ) external;
 
     function setUSDTToken(IERC20 newToken) external;

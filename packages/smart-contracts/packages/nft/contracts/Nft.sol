@@ -158,10 +158,11 @@ contract Nft is
      */
     function activateNftData(
         uint256 tokenId,
-        bool isSettingVestingRewards
-    ) external {
+        bool isSettingVestingRewards,
+        address user
+    ) public {
         // Checks: sender must be the owner of the Nft
-        if (ownerOf(tokenId) != msg.sender) {
+        if (ownerOf(tokenId) != user) {
             revert Errors.Nft__NotNftOwner();
         }
 
@@ -169,7 +170,7 @@ contract Nft is
         NftLevel storage levelData = s_nftLevels[
             _getLevelHash(nftData.level, nftData.isGenesis)
         ];
-        uint256 previouslyActiveTokenId = s_activeNft[msg.sender];
+        uint256 previouslyActiveTokenId = s_activeNft[user];
         NftData storage oldNftData = s_nftData[previouslyActiveTokenId];
 
         // Checks: data must not be activated
@@ -181,13 +182,13 @@ contract Nft is
         // If we check by id, we miss the first ID 0
         // e.g.: previouslyActiveTokenId != 0
         if (
-            ownerOf(previouslyActiveTokenId) == msg.sender &&
+            ownerOf(previouslyActiveTokenId) == user &&
             oldNftData.activityType == ActivityType.ACTIVATION_TRIGGERED
         ) {
             oldNftData.activityType = ActivityType.DEACTIVATED;
         }
 
-        s_activeNft[msg.sender] = tokenId;
+        s_activeNft[user] = tokenId;
 
         // Effects: update nft data
         nftData.activityType = ActivityType.ACTIVATION_TRIGGERED;
@@ -223,13 +224,13 @@ contract Nft is
                 // Effects: add the holder to the vesting pool
                 s_vestingContract.addBeneficiary(
                     s_promotionalVestingPID,
-                    msg.sender,
+                    user,
                     rewardTokens
                 );
             }
         }
         emit NftDataActivated(
-            msg.sender,
+            user,
             tokenId,
             nftData.level,
             nftData.isGenesis,
@@ -376,14 +377,7 @@ contract Nft is
         mAddressNotZero(to)
         mValidLevel(level)
     {
-        if (tokenId < s_nextTokenId) {
-            revert Errors.Nft__TokenIdInUsedIdRange();
-        }
         _safeMint(to, level, isGenesis, tokenId);
-
-        // Effects: set next token Id to continue from currect set Id
-        uint256 nextTokenId = tokenId + 1;
-        setNextTokenId(nextTokenId);
     }
 
     /**
@@ -829,6 +823,10 @@ contract Nft is
 
         // Effects: set the token metadata URI (URI for each token is assigned before minting)
         _setTokenURI(tokenId, uri);
+
+        if (isGenesis) {
+            activateNftData(tokenId, false, to);
+        }
 
         emit NftMinted(to, tokenId, level, isGenesis, nftAmount);
     }

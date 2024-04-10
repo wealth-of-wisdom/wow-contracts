@@ -25,16 +25,6 @@ contract Nft_SafeMintWithTokenId_Unit_Test is Unit_Test {
         nft.safeMintWithTokenId(ZERO_ADDRESS, LEVEL_1, false, NFT_TOKEN_ID_0);
     }
 
-    function test_safeMintWithTokenId_RevertIf_Nft__TokenIdInUsedIdRange()
-        external
-    {
-        vm.startPrank(admin);
-        nft.safeMintWithTokenId(alice, LEVEL_1, false, NFT_TOKEN_ID_6);
-        vm.expectRevert(Errors.Nft__TokenIdInUsedIdRange.selector);
-        nft.safeMintWithTokenId(alice, LEVEL_1, false, NFT_TOKEN_ID_0);
-        vm.stopPrank();
-    }
-
     function test_safeMintWithTokenId_RevertIf_LevelIsZero() external {
         uint16 level = 0;
         vm.expectRevert(
