@@ -267,6 +267,7 @@ export function removeBandFromStakerBands(staker: Staker, band: Band, stakedAmou
                 staker.flexiBands = stakerBandIds;
             }
 
+            staker.bandsCount = staker.bandsCount - 1;
             staker.stakedAmount = staker.stakedAmount.minus(stakedAmount);
             staker.save();
 
