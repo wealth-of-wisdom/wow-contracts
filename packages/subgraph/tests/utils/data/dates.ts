@@ -21,6 +21,18 @@ export const month9AfterInit: BigInt = month8AfterInit.plus(monthInSeconds);
 export const month10AfterInit: BigInt = month9AfterInit.plus(monthInSeconds);
 export const month11AfterInit: BigInt = month10AfterInit.plus(monthInSeconds);
 export const month12AfterInit: BigInt = month11AfterInit.plus(monthInSeconds);
+export const month13AfterInit: BigInt = month12AfterInit.plus(monthInSeconds);
+export const month14AfterInit: BigInt = month13AfterInit.plus(monthInSeconds);
+export const month15AfterInit: BigInt = month14AfterInit.plus(monthInSeconds);
+export const month16AfterInit: BigInt = month15AfterInit.plus(monthInSeconds);
+export const month17AfterInit: BigInt = month16AfterInit.plus(monthInSeconds);
+export const month18AfterInit: BigInt = month17AfterInit.plus(monthInSeconds);
+export const month19AfterInit: BigInt = month18AfterInit.plus(monthInSeconds);
+export const month20AfterInit: BigInt = month19AfterInit.plus(monthInSeconds);
+export const month21AfterInit: BigInt = month20AfterInit.plus(monthInSeconds);
+export const month22AfterInit: BigInt = month21AfterInit.plus(monthInSeconds);
+export const month23AfterInit: BigInt = month22AfterInit.plus(monthInSeconds);
+export const month24AfterInit: BigInt = month23AfterInit.plus(monthInSeconds);
 
 export const monthsAfterInit: BigInt[] = [
     initDate,
@@ -36,4 +48,16 @@ export const monthsAfterInit: BigInt[] = [
     month10AfterInit,
     month11AfterInit,
     month12AfterInit,
+    month13AfterInit,
+    month14AfterInit,
+    month15AfterInit,
+    month16AfterInit,
+    month17AfterInit,
+    month18AfterInit,
+    month19AfterInit,
+    month20AfterInit,
+    month21AfterInit,
+    month22AfterInit,
+    month23AfterInit,
+    month24AfterInit,
 ];
