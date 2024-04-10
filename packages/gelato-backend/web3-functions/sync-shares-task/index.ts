@@ -37,7 +37,9 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
 
     try {
         // Get data from the user arguments
-        const stakingAddress: string = userArgs.stakingAddress as string
+        const stakingAddress: string = (
+            userArgs.stakingAddress as string
+        ).toLowerCase()
         const subgraphUrl: string = userArgs.subgraphUrl as string
 
         // We will trigger the shares sync if ~24 hours have passed since the last sync
@@ -71,7 +73,7 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
         // Get the staking data from the subgraph
         const stakingContractData = stakingQueryResult.data.stakingContract
         const stakingAddressInSubgraph: string =
-            stakingContractData.stakingContractAddress
+            stakingContractData.stakingContractAddress.toLowerCase()
         const lastSynced: number = Number(
             stakingContractData.lastSharesSyncDate,
         )
