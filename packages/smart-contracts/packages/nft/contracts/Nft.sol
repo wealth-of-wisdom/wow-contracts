@@ -170,7 +170,7 @@ contract Nft is
             _getLevelHash(nftData.level, nftData.isGenesis)
         ];
         uint256 previouslyActiveTokenId = s_activeNft[msg.sender];
-        NftData memory oldNftData = s_nftData[previouslyActiveTokenId];
+        NftData storage oldNftData = s_nftData[previouslyActiveTokenId];
 
         // Checks: data must not be activated
         if (nftData.activityType != ActivityType.NOT_ACTIVATED) {
@@ -180,8 +180,12 @@ contract Nft is
         // We check by previous activation status
         // If we check by id, we miss the first ID 0
         // e.g.: previouslyActiveTokenId != 0
-        if (oldNftData.activityType == ActivityType.ACTIVATION_TRIGGERED)
+        if (
+            ownerOf(previouslyActiveTokenId) == msg.sender &&
+            oldNftData.activityType == ActivityType.ACTIVATION_TRIGGERED
+        ) {
             oldNftData.activityType = ActivityType.DEACTIVATED;
+        }
 
         s_activeNft[msg.sender] = tokenId;
 
@@ -257,7 +261,7 @@ contract Nft is
         tokenId = s_nextTokenId;
         // Effects: set nft data with next token id
         setNftData(
-            s_nextTokenId,
+            tokenId,
             level,
             isGenesis,
             INft.ActivityType.NOT_ACTIVATED,

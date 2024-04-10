@@ -200,8 +200,9 @@ contract NftSale is
                 true
             );
 
-            if (isActive)
+            if (isActive) {
                 s_nftContract.activateNftData(tokenId, isSettingVestingRewards);
+            }
 
             emit NftMinted(receivers[i], levels[i], true, 0);
         }
