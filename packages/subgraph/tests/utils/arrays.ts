@@ -1,4 +1,4 @@
-import { Address, BigInt } from "@graphprotocol/graph-ts";
+import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts";
 import { BIGINT_ONE, BIGINT_ZERO } from "../../src/utils/constants";
 
 /*//////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,22 @@ export function createArrayWithMultiplication(start: BigInt, end: BigInt, multip
 
     for (let i = 0; i < size.toI32(); i++) {
         arr[i] = start.plus(BigInt.fromI32(i).times(multiplier));
+    }
+
+    return arr;
+}
+
+export function createArrayWithMultiplicationAndAddition(
+    start: BigInt,
+    end: BigInt,
+    multiplier: BigInt,
+    initNum: BigInt,
+): BigInt[] {
+    const size = end.minus(start).plus(BIGINT_ONE);
+    const arr = new Array<BigInt>(size.toI32());
+
+    for (let i = 0; i < size.toI32(); i++) {
+        arr[i] = start.plus(initNum).plus(BigInt.fromI32(i).times(multiplier));
     }
 
     return arr;
@@ -56,10 +72,30 @@ export function convertBigIntArrayToString(arr: BigInt[]): string {
     return `[${numbers}]`;
 }
 
-export function convertStringToWrappedArray(addr: string): string {
-    return "[".concat(addr).concat("]").replaceAll(",", ", ");
+export function convertAddressArrayToString(arr: Address[]): string {
+    let values: string[] = [];
+    for (let i = 0; i < arr.length; i++) {
+        values.push(arr[i].toHex());
+    }
+
+    let addresses = values.toString().split(",").join(", ");
+    return `[${addresses}]`;
+}
+
+export function convertStringToWrappedArray(val: string): string {
+    return `[${val}]`;
 }
 
 export function createEmptyArray(size: BigInt): BigInt[] {
     return new Array<BigInt>(size.toI32()).fill(BIGINT_ZERO);
+}
+
+export function createDoubleEmptyArray(size1: BigInt, size2: BigInt): BigInt[][] {
+    const arr = new Array<BigInt[]>(size1.toI32());
+
+    for (let i = 0; i < size1.toI32(); i++) {
+        arr[i] = createEmptyArray(size2);
+    }
+
+    return arr;
 }

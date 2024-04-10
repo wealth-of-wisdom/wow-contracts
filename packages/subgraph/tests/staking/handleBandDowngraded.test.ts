@@ -1,7 +1,9 @@
 import { BigInt } from "@graphprotocol/graph-ts";
 import { describe, test, beforeEach, clearStore, assert } from "matchstick-as/assembly/index";
-import { initialize, initializeAndSetUp, stakeStandardFlexi, downgradeBand } from "./helpers/helper";
-import { alice, initDate, bandLevelPrices, bandLevels, ids, bandIds } from "../utils/constants";
+import { initializeAndSetUp, stakeStandardFlexi, downgradeBand } from "./helpers/helper";
+import { alice, ids, bandIds } from "../utils/data/constants";
+import { initDate } from "../utils/data/dates";
+import { bandLevels, bandLevelPrices } from "../utils/data/data";
 
 const starterLevel = 5;
 const firstDowngradeLevel = 3;
@@ -10,15 +12,13 @@ const secondDowngradeLevel = 1;
 describe("handleBandDowngraded() tests", () => {
     beforeEach(() => {
         clearStore();
-    });
-    //NOTE: share functionality for downgrade bands - incomplete
-    describe("Create StakingContract, stake and downgrade band", () => {
-        beforeEach(() => {
-            clearStore();
-            initialize();
+        initializeAndSetUp();
 
-            initializeAndSetUp();
-            stakeStandardFlexi(alice, bandLevels[starterLevel - 1], bandIds[0], initDate);
+        stakeStandardFlexi(alice, bandLevels[starterLevel - 1], bandIds[0], initDate);
+    });
+
+    describe("Downgrade band once", () => {
+        beforeEach(() => {
             downgradeBand(
                 alice,
                 BigInt.fromString(ids[0]),
@@ -28,33 +28,33 @@ describe("handleBandDowngraded() tests", () => {
             );
         });
 
-        test("Should downgrade band and change band level", () => {
-            //Assert changed field
+        test("Should change band level", () => {
             assert.fieldEquals("Band", ids[0], "bandLevel", firstDowngradeLevel.toString());
+            assert.entityCount("Band", 1);
+        });
+
+        test("Should change total staked amount", () => {
             assert.fieldEquals(
                 "StakingContract",
                 ids[0],
                 "totalStakedAmount",
                 bandLevelPrices[firstDowngradeLevel - 1].toString(),
             );
+        });
+
+        test("Should change staker's staked amount", () => {
             assert.fieldEquals(
                 "Staker",
                 alice.toHex(),
                 "stakedAmount",
                 bandLevelPrices[firstDowngradeLevel - 1].toString(),
             );
-            assert.entityCount("Band", 1);
             assert.entityCount("Staker", 1);
         });
     });
 
-    describe("Create StakingContract, stake and downgrade band two times", () => {
+    describe("Downgrade band twice", () => {
         beforeEach(() => {
-            clearStore();
-            initialize();
-
-            initializeAndSetUp();
-            stakeStandardFlexi(alice, bandLevels[starterLevel - 1], bandIds[0], initDate);
             downgradeBand(
                 alice,
                 BigInt.fromString(ids[0]),
@@ -64,30 +64,34 @@ describe("handleBandDowngraded() tests", () => {
             );
             downgradeBand(
                 alice,
-                BigInt.fromString(bandIds[0].toString()),
+                BigInt.fromString(ids[0]),
                 BigInt.fromI32(firstDowngradeLevel),
                 BigInt.fromI32(secondDowngradeLevel),
                 initDate,
             );
         });
 
-        test("Should allow another downgrade and change band level", () => {
-            //Assert changed field
-            assert.fieldEquals("Band", bandIds[0].toString(), "bandLevel", secondDowngradeLevel.toString());
+        test("Should change band level", () => {
+            assert.fieldEquals("Band", ids[0], "bandLevel", secondDowngradeLevel.toString());
+            assert.entityCount("Band", 1);
+        });
+
+        test("Should change total staked amount", () => {
             assert.fieldEquals(
                 "StakingContract",
                 ids[0],
                 "totalStakedAmount",
                 bandLevelPrices[secondDowngradeLevel - 1].toString(),
             );
+        });
+
+        test("Should change staker's staked amount", () => {
             assert.fieldEquals(
                 "Staker",
                 alice.toHex(),
                 "stakedAmount",
                 bandLevelPrices[secondDowngradeLevel - 1].toString(),
             );
-
-            assert.entityCount("Band", 1);
             assert.entityCount("Staker", 1);
         });
     });

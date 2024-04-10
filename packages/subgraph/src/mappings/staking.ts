@@ -89,7 +89,7 @@ export function handleBandLevelSet(event: BandLevelSetEvent): void {
     const poolsAmount: number = event.params.accessiblePools.length;
     for (let i = 0; i < poolsAmount; i++) {
         const pool: Pool = getOrInitPool(BigInt.fromI32(event.params.accessiblePools[i]));
-        bandPoolIds.push(pool.id.toString());
+        bandPoolIds.push(pool.id);
     }
 
     bandLevel.accessiblePools = bandPoolIds;
@@ -175,6 +175,7 @@ export function handleDistributionCreated(event: DistributionCreatedEvent): void
 
     // Increase distribution id
     stakingContract.nextDistributionId = distributionId.plus(BIGINT_ONE);
+    stakingContract.isDistributionInProgress = true;
     stakingContract.save();
 
     // Update shares for stakers and pools
@@ -195,6 +196,8 @@ export function handleDistributionCreated(event: DistributionCreatedEvent): void
 
 export function handleRewardsDistributed(event: RewardsDistributedEvent): void {
     const stakingContract: StakingContract = getOrInitStakingContract();
+    stakingContract.isDistributionInProgress = false;
+    stakingContract.save();
 
     // Get last distribution id
     const distribution: FundsDistribution = getOrInitFundsDistribution(
@@ -314,6 +317,12 @@ export function handleVestingUserDeleted(event: VestingUserDeletedEvent): void {
     removeAllStakerRewards(stakingContract, staker);
 }
 
+/**
+ * @dev Currently, the share functionality for upgrades is incomplete
+ * @dev The share functionality for upgrades will be implemented in the future
+ * @dev when staking contract will be updated to support band upgrades (confimed by client)
+ * @dev This handler should update the pools that staker is part of
+ */
 export function handleBandUpgraded(event: BandUpgradedEvent): void {
     // Sync shares if needed
     syncFlexiSharesEvery12Hours(event.block.timestamp);
@@ -326,6 +335,12 @@ export function handleBandUpgraded(event: BandUpgradedEvent): void {
     );
 }
 
+/**
+ * @dev Currently, the share functionality for downgrades is incomplete
+ * @dev The share functionality for downgrades will be implemented in the future
+ * @dev when staking contract will be updated to support band downgrades (confimed by client)
+ * @dev This handler should update the pools that staker is part of
+ */
 export function handleBandDowngraded(event: BandDowngradedEvent): void {
     // Sync shares if needed
     syncFlexiSharesEvery12Hours(event.block.timestamp);

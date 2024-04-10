@@ -9,7 +9,7 @@ import {
     sharePrecision,
     totalPools,
     totalBandLevels,
-} from "../../utils/constants";
+} from "../../utils/data/constants";
 
 export function createMockedFunctions(): void {
     createMockedFunction_getTokenUSDT();

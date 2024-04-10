@@ -1,8 +1,9 @@
 import { BigInt } from "@graphprotocol/graph-ts";
 import { describe, test, beforeEach, clearStore, assert } from "matchstick-as/assembly/index";
-import { initialize, initializeAndSetUp, stakeStandardFlexi, upgradeBand } from "./helpers/helper";
-import { alice, initDate, bandLevelPrices, bandLevels, ids, bandIds } from "../utils/constants";
-import { BIGINT_ONE } from "../../src/utils/constants";
+import { initializeAndSetUp, stakeStandardFlexi, upgradeBand } from "./helpers/helper";
+import { alice, ids, bandIds } from "../utils/data/constants";
+import { initDate } from "../utils/data/dates";
+import { bandLevels, bandLevelPrices } from "../utils/data/data";
 
 const starterLevel = 1;
 const firstUpgradeLevel = 2;
@@ -11,16 +12,13 @@ const secondUpgradeLevel = 4;
 describe("Create StakingContract, stake and upgrade band two times", () => {
     beforeEach(() => {
         clearStore();
+        initializeAndSetUp();
+
+        stakeStandardFlexi(alice, bandLevels[starterLevel - 1], bandIds[0], initDate);
     });
 
-    //NOTE: share functionality for upgrade bands - incomplete
-    describe("Create StakingContract, stake and upgrade band", () => {
+    describe("Upgrade band once", () => {
         beforeEach(() => {
-            clearStore();
-            initialize();
-
-            initializeAndSetUp();
-            stakeStandardFlexi(alice, bandLevels[starterLevel - 1], bandIds[0], initDate);
             upgradeBand(
                 alice,
                 BigInt.fromString(ids[0]),
@@ -30,34 +28,33 @@ describe("Create StakingContract, stake and upgrade band two times", () => {
             );
         });
 
-        test("Should upgrade band and change band level", () => {
-            //Assert changed field
+        test("Should change band level", () => {
             assert.fieldEquals("Band", ids[0], "bandLevel", firstUpgradeLevel.toString());
+            assert.entityCount("Band", 1);
+        });
+
+        test("Should change total staked amount", () => {
             assert.fieldEquals(
                 "StakingContract",
                 ids[0],
                 "totalStakedAmount",
                 bandLevelPrices[firstUpgradeLevel - 1].toString(),
             );
+        });
+
+        test("Should change staker's staked amount", () => {
             assert.fieldEquals(
                 "Staker",
                 alice.toHex(),
                 "stakedAmount",
                 bandLevelPrices[firstUpgradeLevel - 1].toString(),
             );
-
-            assert.entityCount("Band", 1);
             assert.entityCount("Staker", 1);
         });
     });
 
-    describe("Upgrade band repeated", () => {
+    describe("Upgrade band twice", () => {
         beforeEach(() => {
-            clearStore();
-            initialize();
-
-            initializeAndSetUp();
-            stakeStandardFlexi(alice, bandLevels[starterLevel - 1], bandIds[0], initDate);
             upgradeBand(
                 alice,
                 BigInt.fromString(ids[0]),
@@ -73,22 +70,28 @@ describe("Create StakingContract, stake and upgrade band two times", () => {
                 initDate,
             );
         });
-        test("Should allow another upgrade and change band level", () => {
-            //Assert changed field
+
+        test("Should change band level", () => {
             assert.fieldEquals("Band", ids[0], "bandLevel", secondUpgradeLevel.toString());
+            assert.entityCount("Band", 1);
+        });
+
+        test("Should change total staked amount", () => {
             assert.fieldEquals(
                 "StakingContract",
                 ids[0],
                 "totalStakedAmount",
                 bandLevelPrices[secondUpgradeLevel - 1].toString(),
             );
+        });
+
+        test("Should change staker's staked amount", () => {
             assert.fieldEquals(
                 "Staker",
                 alice.toHex(),
                 "stakedAmount",
                 bandLevelPrices[secondUpgradeLevel - 1].toString(),
             );
-            assert.entityCount("Band", 1);
             assert.entityCount("Staker", 1);
         });
     });
