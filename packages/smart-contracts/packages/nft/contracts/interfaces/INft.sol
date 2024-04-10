@@ -122,8 +122,7 @@ interface INft is INftEvents {
 
     function activateNftData(
         uint256 tokenId,
-        bool isSettingVestingRewards,
-        address user
+        bool isSettingVestingRewards
     ) external;
 
     function setNftData(
