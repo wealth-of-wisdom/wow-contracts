@@ -720,7 +720,7 @@ contract Nft is
         uint16 level,
         bool isGenesis,
         uint256 tokenId
-    ) public onlyRole(MINTER_ROLE) mAddressNotZero(to) mValidLevel(level) {
+    ) internal onlyRole(MINTER_ROLE) mAddressNotZero(to) mValidLevel(level) {
         NftLevel storage nftLevel = s_nftLevels[
             _getLevelHash(level, isGenesis)
         ];
