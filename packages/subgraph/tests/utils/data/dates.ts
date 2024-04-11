@@ -13,7 +13,7 @@ export const initDate: BigInt = BigInt.fromI32(1710000000); // Sat Mar 09 2024 1
 
 export const monthsAfterInit: BigInt[] = createArrayWithMultiplicationAndAddition(
     BIGINT_ZERO,
-    BigInt.fromI32(25),
+    BigInt.fromI32(50),
     monthInSeconds,
     initDate,
 );
