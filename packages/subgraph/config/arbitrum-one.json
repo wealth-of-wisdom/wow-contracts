@@ -1,9 +1,9 @@
 {
     "network": "arbitrum-one",
     "vestingAddress": "0x0000000000000000000000000000000000000000",
-    "stakingAddress": "0x0000000000000000000000000000000000000000",
+    "stakingAddress": "0x3d5f603c739C52D47D9691f885119F9bDC1699eB",
     "nftAddress": "0x0000000000000000000000000000000000000000",
-    "startBlock": 0,
+    "startBlock": 199512978,
     "includeVesting": true,
     "includeStaking": true,
     "includeNft": true

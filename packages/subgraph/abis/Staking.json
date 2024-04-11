@@ -1,16 +1,8 @@
 [
-    {
-        "inputs": [],
-        "name": "AccessControlBadConfirmation",
-        "type": "error"
-    },
+    { "inputs": [], "name": "AccessControlBadConfirmation", "type": "error" },
     {
         "inputs": [
-            {
-                "internalType": "address",
-                "name": "account",
-                "type": "address"
-            },
+            { "internalType": "address", "name": "account", "type": "address" },
             {
                 "internalType": "bytes32",
                 "name": "neededRole",
@@ -21,24 +13,12 @@
         "type": "error"
     },
     {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "target",
-                "type": "address"
-            }
-        ],
+        "inputs": [{ "internalType": "address", "name": "target", "type": "address" }],
         "name": "AddressEmptyCode",
         "type": "error"
     },
     {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "account",
-                "type": "address"
-            }
-        ],
+        "inputs": [{ "internalType": "address", "name": "account", "type": "address" }],
         "name": "AddressInsufficientBalance",
         "type": "error"
     },
@@ -53,34 +33,12 @@
         "name": "ERC1967InvalidImplementation",
         "type": "error"
     },
+    { "inputs": [], "name": "ERC1967NonPayable", "type": "error" },
+    { "inputs": [], "name": "FailedInnerCall", "type": "error" },
+    { "inputs": [], "name": "InvalidInitialization", "type": "error" },
+    { "inputs": [], "name": "NotInitializing", "type": "error" },
     {
-        "inputs": [],
-        "name": "ERC1967NonPayable",
-        "type": "error"
-    },
-    {
-        "inputs": [],
-        "name": "FailedInnerCall",
-        "type": "error"
-    },
-    {
-        "inputs": [],
-        "name": "InvalidInitialization",
-        "type": "error"
-    },
-    {
-        "inputs": [],
-        "name": "NotInitializing",
-        "type": "error"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "token",
-                "type": "address"
-            }
-        ],
+        "inputs": [{ "internalType": "address", "name": "token", "type": "address" }],
         "name": "SafeERC20FailedOperation",
         "type": "error"
     },
@@ -122,54 +80,26 @@
         "type": "error"
     },
     {
-        "inputs": [
-            {
-                "internalType": "uint16",
-                "name": "bandLevel",
-                "type": "uint16"
-            }
-        ],
+        "inputs": [{ "internalType": "uint16", "name": "bandLevel", "type": "uint16" }],
         "name": "Staking__InvalidBandLevel",
         "type": "error"
     },
     {
-        "inputs": [
-            {
-                "internalType": "uint48",
-                "name": "percentage",
-                "type": "uint48"
-            }
-        ],
+        "inputs": [{ "internalType": "uint48", "name": "percentage", "type": "uint48" }],
         "name": "Staking__InvalidDistributionPercentage",
         "type": "error"
     },
     {
-        "inputs": [
-            {
-                "internalType": "uint8",
-                "name": "month",
-                "type": "uint8"
-            }
-        ],
+        "inputs": [{ "internalType": "uint8", "name": "month", "type": "uint8" }],
         "name": "Staking__InvalidMonth",
         "type": "error"
     },
     {
-        "inputs": [
-            {
-                "internalType": "uint16",
-                "name": "poolId",
-                "type": "uint16"
-            }
-        ],
+        "inputs": [{ "internalType": "uint16", "name": "poolId", "type": "uint16" }],
         "name": "Staking__InvalidPoolId",
         "type": "error"
     },
-    {
-        "inputs": [],
-        "name": "Staking__MaximumLevelExceeded",
-        "type": "error"
-    },
+    { "inputs": [], "name": "Staking__MaximumLevelExceeded", "type": "error" },
     {
         "inputs": [
             {
@@ -186,75 +116,25 @@
         "name": "Staking__MismatchedArrayLengths",
         "type": "error"
     },
-    {
-        "inputs": [],
-        "name": "Staking__NoRewardsToClaim",
-        "type": "error"
-    },
-    {
-        "inputs": [],
-        "name": "Staking__NonExistantToken",
-        "type": "error"
-    },
+    { "inputs": [], "name": "Staking__NoRewardsToClaim", "type": "error" },
+    { "inputs": [], "name": "Staking__NonExistantToken", "type": "error" },
     {
         "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "bandId",
-                "type": "uint256"
-            },
-            {
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-            }
+            { "internalType": "uint256", "name": "bandId", "type": "uint256" },
+            { "internalType": "address", "name": "owner", "type": "address" }
         ],
         "name": "Staking__NotBandOwner",
         "type": "error"
     },
+    { "inputs": [], "name": "Staking__NotFlexiTypeBand", "type": "error" },
+    { "inputs": [], "name": "Staking__OnlyFlexiTypeAllowed", "type": "error" },
+    { "inputs": [], "name": "Staking__UnlockDateNotReached", "type": "error" },
+    { "inputs": [], "name": "Staking__UpgradesDisabled", "type": "error" },
+    { "inputs": [], "name": "Staking__ZeroAddress", "type": "error" },
+    { "inputs": [], "name": "Staking__ZeroAmount", "type": "error" },
+    { "inputs": [], "name": "UUPSUnauthorizedCallContext", "type": "error" },
     {
-        "inputs": [],
-        "name": "Staking__NotFlexiTypeBand",
-        "type": "error"
-    },
-    {
-        "inputs": [],
-        "name": "Staking__OnlyFlexiTypeAllowed",
-        "type": "error"
-    },
-    {
-        "inputs": [],
-        "name": "Staking__UnlockDateNotReached",
-        "type": "error"
-    },
-    {
-        "inputs": [],
-        "name": "Staking__UpgradesDisabled",
-        "type": "error"
-    },
-    {
-        "inputs": [],
-        "name": "Staking__ZeroAddress",
-        "type": "error"
-    },
-    {
-        "inputs": [],
-        "name": "Staking__ZeroAmount",
-        "type": "error"
-    },
-    {
-        "inputs": [],
-        "name": "UUPSUnauthorizedCallContext",
-        "type": "error"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "bytes32",
-                "name": "slot",
-                "type": "bytes32"
-            }
-        ],
+        "inputs": [{ "internalType": "bytes32", "name": "slot", "type": "bytes32" }],
         "name": "UUPSUnsupportedProxiableUUID",
         "type": "error"
     },
@@ -765,104 +645,56 @@
     {
         "inputs": [],
         "name": "DEFAULT_ADMIN_ROLE",
-        "outputs": [
-            {
-                "internalType": "bytes32",
-                "name": "",
-                "type": "bytes32"
-            }
-        ],
+        "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
         "stateMutability": "view",
         "type": "function"
     },
     {
         "inputs": [],
         "name": "GELATO_EXECUTOR_ROLE",
-        "outputs": [
-            {
-                "internalType": "bytes32",
-                "name": "",
-                "type": "bytes32"
-            }
-        ],
+        "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
         "stateMutability": "view",
         "type": "function"
     },
     {
         "inputs": [],
         "name": "PERCENTAGE_PRECISION",
-        "outputs": [
-            {
-                "internalType": "uint48",
-                "name": "",
-                "type": "uint48"
-            }
-        ],
+        "outputs": [{ "internalType": "uint48", "name": "", "type": "uint48" }],
         "stateMutability": "view",
         "type": "function"
     },
     {
         "inputs": [],
         "name": "SHARE",
-        "outputs": [
-            {
-                "internalType": "uint48",
-                "name": "",
-                "type": "uint48"
-            }
-        ],
+        "outputs": [{ "internalType": "uint48", "name": "", "type": "uint48" }],
         "stateMutability": "view",
         "type": "function"
     },
     {
         "inputs": [],
         "name": "UPGRADER_ROLE",
-        "outputs": [
-            {
-                "internalType": "bytes32",
-                "name": "",
-                "type": "bytes32"
-            }
-        ],
+        "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
         "stateMutability": "view",
         "type": "function"
     },
     {
         "inputs": [],
         "name": "UPGRADE_INTERFACE_VERSION",
-        "outputs": [
-            {
-                "internalType": "string",
-                "name": "",
-                "type": "string"
-            }
-        ],
+        "outputs": [{ "internalType": "string", "name": "", "type": "string" }],
         "stateMutability": "view",
         "type": "function"
     },
     {
         "inputs": [],
         "name": "VESTING_ROLE",
-        "outputs": [
-            {
-                "internalType": "bytes32",
-                "name": "",
-                "type": "bytes32"
-            }
-        ],
+        "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
         "stateMutability": "view",
         "type": "function"
     },
     {
         "inputs": [],
         "name": "areBandUpgradesEnabled",
-        "outputs": [
-            {
-                "internalType": "bool",
-                "name": "enabled",
-                "type": "bool"
-            }
-        ],
+        "outputs": [{ "internalType": "bool", "name": "enabled", "type": "bool" }],
         "stateMutability": "view",
         "type": "function"
     },
@@ -893,11 +725,7 @@
                 "name": "token",
                 "type": "address"
             },
-            {
-                "internalType": "uint256",
-                "name": "amount",
-                "type": "uint256"
-            }
+            { "internalType": "uint256", "name": "amount", "type": "uint256" }
         ],
         "name": "createDistribution",
         "outputs": [],
@@ -905,13 +733,7 @@
         "type": "function"
     },
     {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "user",
-                "type": "address"
-            }
-        ],
+        "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
         "name": "deleteVestingUser",
         "outputs": [],
         "stateMutability": "nonpayable",
@@ -942,11 +764,7 @@
     },
     {
         "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "bandId",
-                "type": "uint256"
-            },
+            { "internalType": "uint256", "name": "bandId", "type": "uint256" },
             {
                 "internalType": "uint16",
                 "name": "newBandLevel",
@@ -959,20 +777,10 @@
         "type": "function"
     },
     {
-        "inputs": [
-            {
-                "internalType": "uint16",
-                "name": "bandLevel",
-                "type": "uint16"
-            }
-        ],
+        "inputs": [{ "internalType": "uint16", "name": "bandLevel", "type": "uint16" }],
         "name": "getBandLevel",
         "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "price",
-                "type": "uint256"
-            },
+            { "internalType": "uint256", "name": "price", "type": "uint256" },
             {
                 "internalType": "uint16[]",
                 "name": "accessiblePools",
@@ -985,24 +793,12 @@
     {
         "inputs": [],
         "name": "getNextBandId",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
         "stateMutability": "view",
         "type": "function"
     },
     {
-        "inputs": [
-            {
-                "internalType": "uint16",
-                "name": "poolId",
-                "type": "uint16"
-            }
-        ],
+        "inputs": [{ "internalType": "uint16", "name": "poolId", "type": "uint16" }],
         "name": "getPool",
         "outputs": [
             {
@@ -1015,86 +811,38 @@
         "type": "function"
     },
     {
-        "inputs": [
-            {
-                "internalType": "bytes32",
-                "name": "role",
-                "type": "bytes32"
-            }
-        ],
+        "inputs": [{ "internalType": "bytes32", "name": "role", "type": "bytes32" }],
         "name": "getRoleAdmin",
-        "outputs": [
-            {
-                "internalType": "bytes32",
-                "name": "",
-                "type": "bytes32"
-            }
-        ],
+        "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
         "stateMutability": "view",
         "type": "function"
     },
     {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "index",
-                "type": "uint256"
-            }
-        ],
+        "inputs": [{ "internalType": "uint256", "name": "index", "type": "uint256" }],
         "name": "getSharesInMonth",
-        "outputs": [
-            {
-                "internalType": "uint48",
-                "name": "shares",
-                "type": "uint48"
-            }
-        ],
+        "outputs": [{ "internalType": "uint48", "name": "shares", "type": "uint48" }],
         "stateMutability": "view",
         "type": "function"
     },
     {
         "inputs": [],
         "name": "getSharesInMonthArray",
-        "outputs": [
-            {
-                "internalType": "uint48[]",
-                "name": "",
-                "type": "uint48[]"
-            }
-        ],
+        "outputs": [{ "internalType": "uint48[]", "name": "", "type": "uint48[]" }],
         "stateMutability": "view",
         "type": "function"
     },
     {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "bandId",
-                "type": "uint256"
-            }
-        ],
+        "inputs": [{ "internalType": "uint256", "name": "bandId", "type": "uint256" }],
         "name": "getStakerBand",
         "outputs": [
-            {
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-            },
+            { "internalType": "address", "name": "owner", "type": "address" },
             {
                 "internalType": "uint32",
                 "name": "stakingStartDate",
                 "type": "uint32"
             },
-            {
-                "internalType": "uint16",
-                "name": "bandLevel",
-                "type": "uint16"
-            },
-            {
-                "internalType": "uint8",
-                "name": "fixedMonths",
-                "type": "uint8"
-            },
+            { "internalType": "uint16", "name": "bandLevel", "type": "uint16" },
+            { "internalType": "uint8", "name": "fixedMonths", "type": "uint8" },
             {
                 "internalType": "enum IStaking.StakingTypes",
                 "name": "stakingType",
@@ -1110,13 +858,7 @@
         "type": "function"
     },
     {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "staker",
-                "type": "address"
-            }
-        ],
+        "inputs": [{ "internalType": "address", "name": "staker", "type": "address" }],
         "name": "getStakerBandIds",
         "outputs": [
             {
@@ -1130,11 +872,7 @@
     },
     {
         "inputs": [
-            {
-                "internalType": "address",
-                "name": "staker",
-                "type": "address"
-            },
+            { "internalType": "address", "name": "staker", "type": "address" },
             {
                 "internalType": "contract IERC20",
                 "name": "token",
@@ -1160,65 +898,35 @@
     {
         "inputs": [],
         "name": "getTokenUSDC",
-        "outputs": [
-            {
-                "internalType": "contract IERC20",
-                "name": "",
-                "type": "address"
-            }
-        ],
+        "outputs": [{ "internalType": "contract IERC20", "name": "", "type": "address" }],
         "stateMutability": "view",
         "type": "function"
     },
     {
         "inputs": [],
         "name": "getTokenUSDT",
-        "outputs": [
-            {
-                "internalType": "contract IERC20",
-                "name": "",
-                "type": "address"
-            }
-        ],
+        "outputs": [{ "internalType": "contract IERC20", "name": "", "type": "address" }],
         "stateMutability": "view",
         "type": "function"
     },
     {
         "inputs": [],
         "name": "getTokenWOW",
-        "outputs": [
-            {
-                "internalType": "contract IERC20",
-                "name": "",
-                "type": "address"
-            }
-        ],
+        "outputs": [{ "internalType": "contract IERC20", "name": "", "type": "address" }],
         "stateMutability": "view",
         "type": "function"
     },
     {
         "inputs": [],
         "name": "getTotalBandLevels",
-        "outputs": [
-            {
-                "internalType": "uint16",
-                "name": "",
-                "type": "uint16"
-            }
-        ],
+        "outputs": [{ "internalType": "uint16", "name": "", "type": "uint16" }],
         "stateMutability": "view",
         "type": "function"
     },
     {
         "inputs": [],
         "name": "getTotalPools",
-        "outputs": [
-            {
-                "internalType": "uint16",
-                "name": "",
-                "type": "uint16"
-            }
-        ],
+        "outputs": [{ "internalType": "uint16", "name": "", "type": "uint16" }],
         "stateMutability": "view",
         "type": "function"
     },
@@ -1236,36 +944,16 @@
         "type": "function"
     },
     {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "index",
-                "type": "uint256"
-            }
-        ],
+        "inputs": [{ "internalType": "uint256", "name": "index", "type": "uint256" }],
         "name": "getUser",
-        "outputs": [
-            {
-                "internalType": "address",
-                "name": "user",
-                "type": "address"
-            }
-        ],
+        "outputs": [{ "internalType": "address", "name": "user", "type": "address" }],
         "stateMutability": "view",
         "type": "function"
     },
     {
         "inputs": [
-            {
-                "internalType": "bytes32",
-                "name": "role",
-                "type": "bytes32"
-            },
-            {
-                "internalType": "address",
-                "name": "account",
-                "type": "address"
-            }
+            { "internalType": "bytes32", "name": "role", "type": "bytes32" },
+            { "internalType": "address", "name": "account", "type": "address" }
         ],
         "name": "grantRole",
         "outputs": [],
@@ -1274,25 +962,11 @@
     },
     {
         "inputs": [
-            {
-                "internalType": "bytes32",
-                "name": "role",
-                "type": "bytes32"
-            },
-            {
-                "internalType": "address",
-                "name": "account",
-                "type": "address"
-            }
+            { "internalType": "bytes32", "name": "role", "type": "bytes32" },
+            { "internalType": "address", "name": "account", "type": "address" }
         ],
         "name": "hasRole",
-        "outputs": [
-            {
-                "internalType": "bool",
-                "name": "",
-                "type": "bool"
-            }
-        ],
+        "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
         "stateMutability": "view",
         "type": "function"
     },
@@ -1313,16 +987,8 @@
                 "name": "wowToken",
                 "type": "address"
             },
-            {
-                "internalType": "address",
-                "name": "vesting",
-                "type": "address"
-            },
-            {
-                "internalType": "address",
-                "name": "gelato",
-                "type": "address"
-            },
+            { "internalType": "address", "name": "vesting", "type": "address" },
+            { "internalType": "address", "name": "gelato", "type": "address" },
             {
                 "internalType": "uint16",
                 "name": "totalPools",
@@ -1342,36 +1008,20 @@
     {
         "inputs": [],
         "name": "isDistributionInProgress",
-        "outputs": [
-            {
-                "internalType": "bool",
-                "name": "inProgress",
-                "type": "bool"
-            }
-        ],
+        "outputs": [{ "internalType": "bool", "name": "inProgress", "type": "bool" }],
         "stateMutability": "view",
         "type": "function"
     },
     {
         "inputs": [],
         "name": "proxiableUUID",
-        "outputs": [
-            {
-                "internalType": "bytes32",
-                "name": "",
-                "type": "bytes32"
-            }
-        ],
+        "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
         "stateMutability": "view",
         "type": "function"
     },
     {
         "inputs": [
-            {
-                "internalType": "bytes32",
-                "name": "role",
-                "type": "bytes32"
-            },
+            { "internalType": "bytes32", "name": "role", "type": "bytes32" },
             {
                 "internalType": "address",
                 "name": "callerConfirmation",
@@ -1385,16 +1035,8 @@
     },
     {
         "inputs": [
-            {
-                "internalType": "bytes32",
-                "name": "role",
-                "type": "bytes32"
-            },
-            {
-                "internalType": "address",
-                "name": "account",
-                "type": "address"
-            }
+            { "internalType": "bytes32", "name": "role", "type": "bytes32" },
+            { "internalType": "address", "name": "account", "type": "address" }
         ],
         "name": "revokeRole",
         "outputs": [],
@@ -1403,16 +1045,8 @@
     },
     {
         "inputs": [
-            {
-                "internalType": "uint16",
-                "name": "bandLevel",
-                "type": "uint16"
-            },
-            {
-                "internalType": "uint256",
-                "name": "price",
-                "type": "uint256"
-            },
+            { "internalType": "uint16", "name": "bandLevel", "type": "uint16" },
+            { "internalType": "uint256", "name": "price", "type": "uint256" },
             {
                 "internalType": "uint16[]",
                 "name": "accessiblePools",
@@ -1425,26 +1059,14 @@
         "type": "function"
     },
     {
-        "inputs": [
-            {
-                "internalType": "bool",
-                "name": "enabled",
-                "type": "bool"
-            }
-        ],
+        "inputs": [{ "internalType": "bool", "name": "enabled", "type": "bool" }],
         "name": "setBandUpgradesEnabled",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
     },
     {
-        "inputs": [
-            {
-                "internalType": "bool",
-                "name": "inProgress",
-                "type": "bool"
-            }
-        ],
+        "inputs": [{ "internalType": "bool", "name": "inProgress", "type": "bool" }],
         "name": "setDistributionInProgress",
         "outputs": [],
         "stateMutability": "nonpayable",
@@ -1452,11 +1074,7 @@
     },
     {
         "inputs": [
-            {
-                "internalType": "uint16",
-                "name": "poolId",
-                "type": "uint16"
-            },
+            { "internalType": "uint16", "name": "poolId", "type": "uint16" },
             {
                 "internalType": "uint48",
                 "name": "distributionPercentage",
@@ -1553,16 +1171,8 @@
                 "name": "stakingType",
                 "type": "uint8"
             },
-            {
-                "internalType": "uint16",
-                "name": "bandLevel",
-                "type": "uint16"
-            },
-            {
-                "internalType": "uint8",
-                "name": "month",
-                "type": "uint8"
-            }
+            { "internalType": "uint16", "name": "bandLevel", "type": "uint16" },
+            { "internalType": "uint8", "name": "month", "type": "uint8" }
         ],
         "name": "stake",
         "outputs": [],
@@ -1571,35 +1181,17 @@
     },
     {
         "inputs": [
-            {
-                "internalType": "address",
-                "name": "user",
-                "type": "address"
-            },
+            { "internalType": "address", "name": "user", "type": "address" },
             {
                 "internalType": "enum IStaking.StakingTypes",
                 "name": "stakingType",
                 "type": "uint8"
             },
-            {
-                "internalType": "uint16",
-                "name": "bandLevel",
-                "type": "uint16"
-            },
-            {
-                "internalType": "uint8",
-                "name": "month",
-                "type": "uint8"
-            }
+            { "internalType": "uint16", "name": "bandLevel", "type": "uint16" },
+            { "internalType": "uint8", "name": "month", "type": "uint8" }
         ],
         "name": "stakeVested",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "bandId",
-                "type": "uint256"
-            }
-        ],
+        "outputs": [{ "internalType": "uint256", "name": "bandId", "type": "uint256" }],
         "stateMutability": "nonpayable",
         "type": "function"
     },
@@ -1612,13 +1204,7 @@
             }
         ],
         "name": "supportsInterface",
-        "outputs": [
-            {
-                "internalType": "bool",
-                "name": "",
-                "type": "bool"
-            }
-        ],
+        "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
         "stateMutability": "view",
         "type": "function"
     },
@@ -1630,13 +1216,7 @@
         "type": "function"
     },
     {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "bandId",
-                "type": "uint256"
-            }
-        ],
+        "inputs": [{ "internalType": "uint256", "name": "bandId", "type": "uint256" }],
         "name": "unstake",
         "outputs": [],
         "stateMutability": "nonpayable",
@@ -1644,16 +1224,8 @@
     },
     {
         "inputs": [
-            {
-                "internalType": "address",
-                "name": "user",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "bandId",
-                "type": "uint256"
-            }
+            { "internalType": "address", "name": "user", "type": "address" },
+            { "internalType": "uint256", "name": "bandId", "type": "uint256" }
         ],
         "name": "unstakeVested",
         "outputs": [],
@@ -1662,11 +1234,7 @@
     },
     {
         "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "bandId",
-                "type": "uint256"
-            },
+            { "internalType": "uint256", "name": "bandId", "type": "uint256" },
             {
                 "internalType": "uint16",
                 "name": "newBandLevel",
@@ -1685,11 +1253,7 @@
                 "name": "newImplementation",
                 "type": "address"
             },
-            {
-                "internalType": "bytes",
-                "name": "data",
-                "type": "bytes"
-            }
+            { "internalType": "bytes", "name": "data", "type": "bytes" }
         ],
         "name": "upgradeToAndCall",
         "outputs": [],
@@ -1703,11 +1267,7 @@
                 "name": "token",
                 "type": "address"
             },
-            {
-                "internalType": "uint256",
-                "name": "amount",
-                "type": "uint256"
-            }
+            { "internalType": "uint256", "name": "amount", "type": "uint256" }
         ],
         "name": "withdrawTokens",
         "outputs": [],
