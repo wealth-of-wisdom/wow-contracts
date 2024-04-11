@@ -43,7 +43,9 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
         console.log(`Event detected: ${event.eventFragment.name}`)
 
         // Get data from the user arguments
-        const stakingAddress: string = userArgs.stakingAddress as string
+        const stakingAddress: string = (
+            userArgs.stakingAddress as string
+        ).toLowerCase()
         const subgraphUrl: string = userArgs.subgraphUrl as string
 
         // Create a new client for querying the subgraph
@@ -70,7 +72,7 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
         // Get the staking data from the subgraph
         const stakingContractData = stakingQueryResult.data.stakingContract
         const stakingAddressInSubgraph: string =
-            stakingContractData.stakingContractAddress
+            stakingContractData.stakingContractAddress.toLowerCase()
         const nextDistributionId: number = Number(
             stakingContractData.nextDistributionId,
         )
