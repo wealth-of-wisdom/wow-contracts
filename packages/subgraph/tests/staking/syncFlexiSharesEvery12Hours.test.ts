@@ -3,7 +3,7 @@ import { describe, test, beforeAll, beforeEach, afterEach, clearStore, assert } 
 import { syncFlexiSharesEvery12Hours } from "../../src/utils/staking/sharesSync";
 import { stakeStandardFlexi, initializeAndSetUp, stakeVestedFlexi } from "./helpers/helper";
 import { alice, bob, charlie, totalPools, ids, bandIds } from "../utils/data/constants";
-import { bandLevels, months, secondsInMonths, sharesInMonths } from "../utils/data/data";
+import { bandLevels, sharesInMonths } from "../utils/data/data";
 import { initDate, monthsAfterInit } from "../utils/data/dates";
 import { BIGINT_ZERO } from "../../src/utils/constants";
 import { convertBigIntArrayToString, createEmptyArray } from "../utils/arrays";
