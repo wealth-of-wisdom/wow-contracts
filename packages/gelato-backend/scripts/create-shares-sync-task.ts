@@ -27,7 +27,7 @@ const main = async () => {
 
     // Create task using automate sdk
     const { taskId, tx } = await automate.createBatchExecTask({
-        name: "Web3Function - Sync shares",
+        name: `Sync shares (cid: ${cid}) (staking: ${userArgs.stakingAddress})`,
         web3FunctionHash: cid,
         web3FunctionArgs: {
             stakingAddress: userArgs.stakingAddress as string,

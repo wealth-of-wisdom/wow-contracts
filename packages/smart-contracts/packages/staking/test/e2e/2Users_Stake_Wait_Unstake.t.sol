@@ -44,7 +44,7 @@ contract Staking_E2E_Test is StakingAssertions {
             staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0);
             vm.stopPrank();
 
-            vm.warp(MONTH);
+            skip(MONTH);
 
             vm.prank(alice);
             staking.unstake(firstBandId);

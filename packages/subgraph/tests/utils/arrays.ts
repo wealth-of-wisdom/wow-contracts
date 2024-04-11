@@ -29,6 +29,22 @@ export function createArrayWithMultiplication(start: BigInt, end: BigInt, multip
     return arr;
 }
 
+export function createArrayWithMultiplicationAndAddition(
+    start: BigInt,
+    end: BigInt,
+    multiplier: BigInt,
+    initNum: BigInt,
+): BigInt[] {
+    const size = end.minus(start).plus(BIGINT_ONE);
+    const arr = new Array<BigInt>(size.toI32());
+
+    for (let i = 0; i < size.toI32(); i++) {
+        arr[i] = start.plus(initNum).plus(BigInt.fromI32(i).times(multiplier));
+    }
+
+    return arr;
+}
+
 export function createDoubleArray(start: BigInt, end: BigInt): BigInt[][] {
     const size = end.minus(start).plus(BIGINT_ONE);
     const arr = new Array<BigInt[]>(size.toI32());

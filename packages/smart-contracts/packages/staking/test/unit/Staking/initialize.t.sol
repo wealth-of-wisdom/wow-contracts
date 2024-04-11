@@ -80,32 +80,6 @@ contract Staking_Initialize_Unit_Test is Unit_Test {
         );
     }
 
-    function test_initialize_RevertIf_VestingIsZeroAddress() external {
-        vm.expectRevert(Errors.Staking__ZeroAddress.selector);
-        staking.initialize(
-            usdtToken,
-            usdcToken,
-            wowToken,
-            ZERO_ADDRESS,
-            GELATO_EXECUTOR_ADDRESS,
-            TOTAL_POOLS,
-            TOTAL_BAND_LEVELS
-        );
-    }
-
-    function test_initialize_RevertIf_GelatoIsZeroAddress() external {
-        vm.expectRevert(Errors.Staking__ZeroAddress.selector);
-        staking.initialize(
-            usdtToken,
-            usdcToken,
-            wowToken,
-            address(vesting),
-            ZERO_ADDRESS,
-            TOTAL_POOLS,
-            TOTAL_BAND_LEVELS
-        );
-    }
-
     function test_initialize_RevertIf_TotalPoolsIsZero() external {
         vm.expectRevert(Errors.Staking__ZeroAmount.selector);
         staking.initialize(

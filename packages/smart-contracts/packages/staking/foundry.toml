@@ -1,6 +1,5 @@
 [profile.default]
 solc-version = "0.8.20"
-via_ir = true
 src = "contracts"
 out = "build"
 allow_paths = ["../.."]

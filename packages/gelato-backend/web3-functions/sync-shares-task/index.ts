@@ -6,7 +6,7 @@ import {
     Web3FunctionSuccessContext,
 } from "@gelatonetwork/web3-functions-sdk"
 import { createClient, fetchExchange, cacheExchange, gql } from "@urql/core"
-import { stakingABI } from "../stakingABI"
+import stakingABI from "../stakingABI.json"
 
 // Success callback
 Web3Function.onSuccess(async (context: Web3FunctionSuccessContext) => {
@@ -37,7 +37,9 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
 
     try {
         // Get data from the user arguments
-        const stakingAddress: string = userArgs.stakingAddress as string
+        const stakingAddress: string = (
+            userArgs.stakingAddress as string
+        ).toLowerCase()
         const subgraphUrl: string = userArgs.subgraphUrl as string
 
         // We will trigger the shares sync if ~24 hours have passed since the last sync
@@ -57,6 +59,7 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
         const stakingContractQuery = gql`
             query {
                 stakingContract(id: "0") {
+                    stakingContractAddress
                     lastSharesSyncDate
                 }
             }
@@ -69,9 +72,20 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
 
         // Get the staking data from the subgraph
         const stakingContractData = stakingQueryResult.data.stakingContract
+        const stakingAddressInSubgraph: string =
+            stakingContractData.stakingContractAddress.toLowerCase()
         const lastSynced: number = Number(
             stakingContractData.lastSharesSyncDate,
         )
+
+        // If the staking address in subgraph does not match the provided address
+        // It means that gelato function is using wrong staking contract or subgraph
+        if (stakingAddressInSubgraph !== stakingAddress) {
+            return {
+                canExec: false,
+                message: `Staking contract address in subgraph (${stakingAddressInSubgraph}) does not match the provided address (${stakingAddress})`,
+            }
+        }
 
         const timePassed: number = Math.floor(Date.now() / 1000) - lastSynced
 

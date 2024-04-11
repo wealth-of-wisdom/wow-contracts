@@ -5,6 +5,7 @@ import { validateUserArgs } from "./validateUserArgs"
 type UserArgs = {
     stakingAddress: string
     subgraphUrl: string
+    blockConfirmations?: number
 }
 
 type NetworkConfig = {
@@ -34,7 +35,11 @@ export const getUserArgs = async () => {
         )
     }
 
-    await validateUserArgs(args.subgraphUrl, args.stakingAddress)
+    await validateUserArgs(
+        args.subgraphUrl,
+        args.stakingAddress,
+        args.blockConfirmations,
+    )
 
     return args
 }
