@@ -1,4 +1,4 @@
-import { Address, BigInt, log } from "@graphprotocol/graph-ts";
+import { Address, BigInt } from "@graphprotocol/graph-ts";
 import { describe, test, beforeEach, assert, clearStore, beforeAll } from "matchstick-as/assembly/index";
 import {
     createDistribution,
@@ -16,20 +16,17 @@ import {
     alice,
     bob,
     usdcToken,
-    zeroStr,
     usd100k,
     usd200k,
     usd300k,
-    usd400k,
     usd500k,
     percentagePrecision,
     totalPools,
 } from "../utils/data/constants";
-import { preInitDate, initDate, monthsAfterInit, dayInSeconds } from "../utils/data/dates";
+import { monthsAfterInit, dayInSeconds } from "../utils/data/dates";
 import { sharesInMonths, bandLevels, months, poolDistributionPercentages } from "../utils/data/data";
 import { convertAddressArrayToString, convertBigIntArrayToString, createEmptyArray } from "../utils/arrays";
 import { BIGINT_ZERO } from "../../src/utils/constants";
-import { StakingContract } from "../../generated/schema";
 
 let bandLevel: BigInt;
 let fixedMonths: BigInt;

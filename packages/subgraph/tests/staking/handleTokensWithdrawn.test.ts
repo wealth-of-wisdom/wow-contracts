@@ -2,7 +2,7 @@ import { describe, test, beforeEach, assert, clearStore } from "matchstick-as/as
 import { initializeAndSetUp, stakeStandardFlexi, withdrawTokens } from "./helpers/helper";
 import { ids, bandIds, alice, bob, wowToken } from "../utils/data/constants";
 import { bandLevels, bandLevelPrices } from "../utils/data/data";
-import { preInitDate, initDate } from "../utils/data/dates";
+import { initDate } from "../utils/data/dates";
 
 describe("handleTokensWithdrawn() tests", () => {
     beforeEach(() => {

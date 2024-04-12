@@ -3,7 +3,6 @@ import { initialize, setSharesInMonth } from "../helpers/helper";
 import { convertBigIntArrayToString } from "../../utils/arrays";
 import { ids } from "../../utils/data/constants";
 import { sharesInMonths } from "../../utils/data/data";
-import { BIGINT_ZERO } from "../../../src/utils/constants";
 
 describe("handleInitialized() tests", () => {
     beforeEach(() => {

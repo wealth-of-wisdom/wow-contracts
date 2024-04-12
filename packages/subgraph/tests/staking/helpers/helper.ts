@@ -46,7 +46,7 @@ import {
     createRewardsClaimedEvent,
 } from "../helpers/createEvents";
 import { BIGINT_ZERO, StakingType } from "../../../src/utils/constants";
-import { totalPools, totalBandLevels } from "../../utils/data/constants";
+import { totalPools, totalBandLevels, percentagePrecision } from "../../utils/data/constants";
 import {
     poolDistributionPercentages,
     bandLevelPrices,
@@ -208,4 +208,14 @@ export function downgradeBand(
 
 export function claimRewards(staker: Address, token: Address, amount: BigInt, date: BigInt): void {
     handleRewardsClaimed(createRewardsClaimedEvent(staker, token, amount, date));
+}
+
+/*//////////////////////////////////////////////////////////////////////////
+                            HELPER FUNCTIONS
+////////////////////////////////////////////////////////////////////////*/
+
+export function getPoolAllocation(totalAmount: BigInt, poolIndex: string): BigInt {
+    return totalAmount
+        .times(poolDistributionPercentages[BigInt.fromString(poolIndex).toI32()])
+        .div(percentagePrecision);
 }
