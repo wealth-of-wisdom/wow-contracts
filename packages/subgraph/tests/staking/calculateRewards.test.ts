@@ -175,6 +175,11 @@ describe("calculateRewards", () => {
         });
 
         describe("2 staker, 2 FIXED and 2 FLEXI", () => {
+            beforeAll(() => {
+                expectedStakers = [alice, bob];
+                expectedStakersCount = expectedStakers.length;
+            });
+
             describe("More than 5 months", () => {
                 beforeEach(() => {
                     stakeStandardFixed(alice, bandLevels[0], bandIds[0], months[10], monthsAfterInit[1]);
@@ -189,8 +194,6 @@ describe("calculateRewards", () => {
                     const flexiShares2 = sharesInMonths[0];
                     const totalShares2 = fixedShares2.plus(flexiShares2);
 
-                    expectedStakers = [alice, bob];
-                    expectedStakersCount = expectedStakers.length;
                     expectedSharesForStakers = [
                         [
                             totalShares1,
@@ -331,8 +334,6 @@ describe("calculateRewards", () => {
                     const flexiShares2 = sharesInMonths[0];
                     const totalShares2 = fixedShares2.plus(flexiShares2);
 
-                    expectedStakers = [alice, bob];
-                    expectedStakersCount = expectedStakers.length;
                     expectedSharesForStakers = [
                         [
                             totalShares1,
