@@ -48,6 +48,9 @@ contract Nft is
     // Hash = keccak256(level, isGenesis, project type number (0 - Standard, 1 - Premium, 2- Limited)))
     mapping(bytes32 configHash => uint16 quantity) internal s_projectsPerNft;
 
+    // Map of current active NFT to its owner
+    mapping(address owner => uint256 tokenId) internal s_activeNft;
+
     uint256 internal s_nextTokenId;
 
     IVesting internal s_vestingContract;
@@ -153,68 +156,11 @@ contract Nft is
      * @notice  manages other data about the Nft and adds its holder to vesting pool
      * @param   tokenId  user minted and owned token id
      */
-    function activateNftData(uint256 tokenId) external {
-        // Checks: sender must be the owner of the Nft
-        if (ownerOf(tokenId) != msg.sender) {
-            revert Errors.Nft__NotNftOwner();
-        }
-
-        NftData storage nftData = s_nftData[tokenId];
-        NftLevel storage levelData = s_nftLevels[
-            _getLevelHash(nftData.level, nftData.isGenesis)
-        ];
-
-        // Checks: data must not be activated
-        if (nftData.activityType != ActivityType.NOT_ACTIVATED) {
-            revert Errors.Nft__AlreadyActivated();
-        }
-
-        // Effects: update nft data
-        nftData.activityType = ActivityType.ACTIVATION_TRIGGERED;
-        nftData.activityEndTimestamp =
-            block.timestamp +
-            levelData.lifecycleDuration;
-        nftData.extendedActivityEndTimestamp =
-            nftData.activityEndTimestamp +
-            levelData.extensionDuration;
-
-        (
-            ,
-            ,
-            uint256 totalPoolTokenAmount,
-            uint256 dedicatedPoolTokenAmount
-        ) = s_vestingContract.getGeneralPoolData(s_promotionalVestingPID);
-
-        // Calculate the amount of tokens that can still be distributed
-        uint256 undedicatedTokens = totalPoolTokenAmount -
-            dedicatedPoolTokenAmount;
-
-        if (undedicatedTokens > 0) {
-            // Rewards are fixed for each level
-            uint256 rewardTokens = levelData.vestingRewardWOWTokens;
-
-            // If there are enough tokens, then the reward is vestingRewardWOWTokens
-            // Otherwise, the reward is the amount of tokens that can still be distributed
-            if (undedicatedTokens < rewardTokens) {
-                rewardTokens = undedicatedTokens;
-            }
-
-            // Effects: add the holder to the vesting pool
-            s_vestingContract.addBeneficiary(
-                s_promotionalVestingPID,
-                msg.sender,
-                rewardTokens
-            );
-        }
-
-        emit NftDataActivated(
-            msg.sender,
-            tokenId,
-            nftData.level,
-            nftData.isGenesis,
-            nftData.activityEndTimestamp,
-            nftData.extendedActivityEndTimestamp
-        );
+    function activateNftData(
+        uint256 tokenId,
+        bool isSettingVestingRewards
+    ) external {
+        _activateNftData(tokenId, isSettingVestingRewards, msg.sender);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -231,10 +177,16 @@ contract Nft is
         address receiver,
         uint16 level,
         bool isGenesis
-    ) external onlyRole(NFT_DATA_MANAGER_ROLE) onlyRole(MINTER_ROLE) {
+    )
+        external
+        onlyRole(NFT_DATA_MANAGER_ROLE)
+        onlyRole(MINTER_ROLE)
+        returns (uint256 tokenId)
+    {
+        tokenId = s_nextTokenId;
         // Effects: set nft data with next token id
         setNftData(
-            s_nextTokenId,
+            tokenId,
             level,
             isGenesis,
             INft.ActivityType.NOT_ACTIVATED,
@@ -327,6 +279,30 @@ contract Nft is
     /*//////////////////////////////////////////////////////////////////////////
                         FUNCTIONS FOR DEFAULT ADMIN ROLE
     //////////////////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice  Mints Nft to user with defined level, type and token Id
+     * @notice  Sets the token URI using the base URI and pre defined token Id
+     * @dev     Only MINTER_ROLE can call this function
+     * @param   to  user who will get the Nft
+     * @param   level  nft level purchased
+     * @param   isGenesis  is it a genesis nft
+     * @param   tokenId  id that is going to be minted
+     */
+    /* solhint-disable ordering */
+    function safeMintWithTokenId(
+        address to,
+        uint16 level,
+        bool isGenesis,
+        uint256 tokenId
+    )
+        public
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        mAddressNotZero(to)
+        mValidLevel(level)
+    {
+        _safeMint(to, level, isGenesis, tokenId);
+    }
 
     /**
      * @notice  set the token metadata URI (URI for each token is assigned before minting)
@@ -523,6 +499,19 @@ contract Nft is
         emit VestingContractSet(newContract);
     }
 
+    /**
+     * @notice  Sets next token Id in emergencies (after minting with specific token Id)
+     * @param   nextTokenId  new next token Id
+     */
+    function setNextTokenId(
+        uint256 nextTokenId
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        // Effects: set the new next token Id
+        s_nextTokenId = nextTokenId;
+
+        emit NextTokenIdSet(nextTokenId);
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                             FUNCTIONS MINTER ROLE  
     //////////////////////////////////////////////////////////////////////////*/
@@ -541,38 +530,10 @@ contract Nft is
         uint16 level,
         bool isGenesis
     ) public onlyRole(MINTER_ROLE) mAddressNotZero(to) mValidLevel(level) {
-        NftLevel storage nftLevel = s_nftLevels[
-            _getLevelHash(level, isGenesis)
-        ];
-
-        uint256 nftAmount = nftLevel.nftAmount;
-
-        // Checks: the amount of NFTs minted must not exceed the max supply
-        if (!isGenesis && nftAmount >= nftLevel.supplyCap) {
-            revert Errors.Nft__SupplyCapReached(level, isGenesis, nftAmount);
-        }
-
         // Effects: increment the token id
         // tokenId is assigned prior to incrementing the token id, so it starts from 0
         uint256 tokenId = s_nextTokenId++;
-
-        // Effects: mint the token
-        _safeMint(to, tokenId);
-
-        // Effects: increment the token quantity in the level
-        nftLevel.nftAmount++;
-
-        // Concatenate base URI, id in level and suffix to get the full URI
-        string memory uri = string.concat(
-            nftLevel.baseURI,
-            Strings.toString(nftAmount),
-            NFT_URI_SUFFIX
-        );
-
-        // Effects: set the token metadata URI (URI for each token is assigned before minting)
-        _setTokenURI(tokenId, uri);
-
-        emit NftMinted(to, tokenId, level, isGenesis, nftAmount);
+        _safeMint(to, level, isGenesis, tokenId);
     }
 
     /* solhint-enable */
@@ -616,6 +577,14 @@ contract Nft is
         uint8 project
     ) external view returns (uint16) {
         return s_projectsPerNft[_getProjectHash(level, isGenesis, project)];
+    }
+
+    /**
+     * @notice  Returns activated NFT for owner
+     * @return  address  token owner
+     */
+    function getActiveNft(address owner) external view returns (uint256) {
+        return s_activeNft[owner];
     }
 
     /**
@@ -744,5 +713,135 @@ contract Nft is
         uint8 project // 0 - Standard, 1 - Premium, 2- Limited
     ) internal pure returns (bytes32) {
         return keccak256(abi.encode(level, isGenesis, project));
+    }
+
+    function _safeMint(
+        address to,
+        uint16 level,
+        bool isGenesis,
+        uint256 tokenId
+    ) internal onlyRole(MINTER_ROLE) mAddressNotZero(to) mValidLevel(level) {
+        NftLevel storage nftLevel = s_nftLevels[
+            _getLevelHash(level, isGenesis)
+        ];
+
+        uint256 nftAmount = nftLevel.nftAmount;
+
+        // Checks: the amount of NFTs minted must not exceed the max supply
+        if (!isGenesis && nftAmount >= nftLevel.supplyCap) {
+            revert Errors.Nft__SupplyCapReached(level, isGenesis, nftAmount);
+        }
+
+        // Effects: mint the token
+        _safeMint(to, tokenId);
+
+        // Effects: increment the token quantity in the level
+        nftLevel.nftAmount++;
+
+        // Concatenate base URI, id in level and suffix to get the full URI
+        string memory uri = string.concat(
+            nftLevel.baseURI,
+            Strings.toString(nftAmount),
+            NFT_URI_SUFFIX
+        );
+
+        // Effects: set the token metadata URI (URI for each token is assigned before minting)
+        _setTokenURI(tokenId, uri);
+
+        if (isGenesis) {
+            _activateNftData(tokenId, false, to);
+        }
+
+        emit NftMinted(to, tokenId, level, isGenesis, nftAmount);
+    }
+
+    /**
+     * @notice  Sets Nft data state as ACTIVATION_TRIGGERED,
+     * @notice  manages other data about the Nft and adds its holder to vesting pool
+     * @param   tokenId  user minted and owned token id
+     * @param   isSettingVestingRewards  should it set vesting rewards automatically
+     * @param   user  user whose Nft will be activated
+     */
+    function _activateNftData(
+        uint256 tokenId,
+        bool isSettingVestingRewards,
+        address user
+    ) public {
+        // Checks: sender must be the owner of the Nft
+        if (ownerOf(tokenId) != user) {
+            revert Errors.Nft__NotNftOwner();
+        }
+
+        NftData storage nftData = s_nftData[tokenId];
+        NftLevel storage levelData = s_nftLevels[
+            _getLevelHash(nftData.level, nftData.isGenesis)
+        ];
+        uint256 previouslyActiveTokenId = s_activeNft[user];
+        NftData storage oldNftData = s_nftData[previouslyActiveTokenId];
+
+        // Checks: data must not be activated
+        if (nftData.activityType != ActivityType.NOT_ACTIVATED) {
+            revert Errors.Nft__AlreadyActivated();
+        }
+
+        // We check by previous activation status
+        // If we check by id, we miss the first ID 0
+        // e.g.: previouslyActiveTokenId != 0
+        if (
+            ownerOf(previouslyActiveTokenId) == user &&
+            oldNftData.activityType == ActivityType.ACTIVATION_TRIGGERED
+        ) {
+            oldNftData.activityType = ActivityType.DEACTIVATED;
+        }
+
+        s_activeNft[user] = tokenId;
+
+        // Effects: update nft data
+        nftData.activityType = ActivityType.ACTIVATION_TRIGGERED;
+        nftData.activityEndTimestamp =
+            block.timestamp +
+            levelData.lifecycleDuration;
+        nftData.extendedActivityEndTimestamp =
+            nftData.activityEndTimestamp +
+            levelData.extensionDuration;
+
+        if (isSettingVestingRewards) {
+            (
+                ,
+                ,
+                uint256 totalPoolTokenAmount,
+                uint256 dedicatedPoolTokenAmount
+            ) = s_vestingContract.getGeneralPoolData(s_promotionalVestingPID);
+
+            // Calculate the amount of tokens that can still be distributed
+            uint256 undedicatedTokens = totalPoolTokenAmount -
+                dedicatedPoolTokenAmount;
+
+            if (undedicatedTokens > 0) {
+                // Rewards are fixed for each level
+                uint256 rewardTokens = levelData.vestingRewardWOWTokens;
+
+                // If there are enough tokens, then the reward is vestingRewardWOWTokens
+                // Otherwise, the reward is the amount of tokens that can still be distributed
+                if (undedicatedTokens < rewardTokens) {
+                    rewardTokens = undedicatedTokens;
+                }
+
+                // Effects: add the holder to the vesting pool
+                s_vestingContract.addBeneficiary(
+                    s_promotionalVestingPID,
+                    user,
+                    rewardTokens
+                );
+            }
+        }
+        emit NftDataActivated(
+            user,
+            tokenId,
+            nftData.level,
+            nftData.isGenesis,
+            nftData.activityEndTimestamp,
+            nftData.extendedActivityEndTimestamp
+        );
     }
 }

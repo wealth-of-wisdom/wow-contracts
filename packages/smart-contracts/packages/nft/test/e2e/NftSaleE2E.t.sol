@@ -179,7 +179,7 @@ contract NftSale_E2E_Test is Base_Test {
         tokenUSDT.approve(address(sale), type(uint256).max);
         sale.mintNft(LEVEL_1, tokenUSDT);
         sale.updateNft(NFT_TOKEN_ID_0, LEVEL_2, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_1);
+        nft.activateNftData(NFT_TOKEN_ID_1, true);
         nft.safeTransferFrom(alice, bob, NFT_TOKEN_ID_1);
         vm.stopPrank();
 
@@ -210,7 +210,7 @@ contract NftSale_E2E_Test is Base_Test {
         vm.startPrank(alice);
         tokenUSDT.approve(address(sale), type(uint256).max);
         sale.mintNft(LEVEL_1, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_0);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
         sale.updateNft(NFT_TOKEN_ID_0, LEVEL_2, tokenUSDT);
         nft.safeTransferFrom(alice, bob, NFT_TOKEN_ID_1);
         vm.stopPrank();
@@ -243,9 +243,9 @@ contract NftSale_E2E_Test is Base_Test {
         vm.startPrank(alice);
         tokenUSDT.approve(address(sale), type(uint256).max);
         sale.mintNft(LEVEL_1, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_0);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
         sale.updateNft(NFT_TOKEN_ID_0, LEVEL_2, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_1);
+        nft.activateNftData(NFT_TOKEN_ID_1, true);
         nft.safeTransferFrom(alice, bob, NFT_TOKEN_ID_1);
         vm.stopPrank();
 
@@ -290,7 +290,7 @@ contract NftSale_E2E_Test is Base_Test {
         sale.updateNft(NFT_TOKEN_ID_1, LEVEL_3, tokenUSDT);
         sale.updateNft(NFT_TOKEN_ID_2, LEVEL_4, tokenUSDT);
         sale.updateNft(NFT_TOKEN_ID_3, LEVEL_5, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_4);
+        nft.activateNftData(NFT_TOKEN_ID_4, true);
         nft.safeTransferFrom(alice, bob, NFT_TOKEN_ID_4);
         vm.stopPrank();
 
@@ -334,15 +334,15 @@ contract NftSale_E2E_Test is Base_Test {
         vm.startPrank(alice);
         tokenUSDT.approve(address(sale), type(uint256).max);
         sale.mintNft(LEVEL_1, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_0);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
         sale.updateNft(NFT_TOKEN_ID_0, LEVEL_2, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_1);
+        nft.activateNftData(NFT_TOKEN_ID_1, true);
         sale.updateNft(NFT_TOKEN_ID_1, LEVEL_3, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_2);
+        nft.activateNftData(NFT_TOKEN_ID_2, true);
         sale.updateNft(NFT_TOKEN_ID_2, LEVEL_4, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_3);
+        nft.activateNftData(NFT_TOKEN_ID_3, true);
         sale.updateNft(NFT_TOKEN_ID_3, LEVEL_5, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_4);
+        nft.activateNftData(NFT_TOKEN_ID_4, true);
         nft.safeTransferFrom(alice, bob, NFT_TOKEN_ID_4);
         vm.stopPrank();
 
@@ -408,7 +408,7 @@ contract NftSale_E2E_Test is Base_Test {
         tokenUSDT.approve(address(sale), type(uint256).max);
         sale.mintNft(LEVEL_1, tokenUSDT);
         sale.updateNft(NFT_TOKEN_ID_0, LEVEL_5, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_1);
+        nft.activateNftData(NFT_TOKEN_ID_1, true);
         nft.safeTransferFrom(alice, bob, NFT_TOKEN_ID_1);
         vm.stopPrank();
 
@@ -442,9 +442,9 @@ contract NftSale_E2E_Test is Base_Test {
         vm.startPrank(alice);
         tokenUSDT.approve(address(sale), type(uint256).max);
         sale.mintNft(LEVEL_1, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_0);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
         sale.updateNft(NFT_TOKEN_ID_0, LEVEL_5, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_1);
+        nft.activateNftData(NFT_TOKEN_ID_1, true);
         nft.safeTransferFrom(alice, bob, NFT_TOKEN_ID_1);
         vm.stopPrank();
 
@@ -479,10 +479,15 @@ contract NftSale_E2E_Test is Base_Test {
 
         // ARRANGE + ACT
         vm.prank(admin);
-        sale.mintGenesisNfts(singleReceiverArray, singleLevelArray);
+        sale.mintGenesisNfts(
+            singleReceiverArray,
+            singleLevelArray,
+            false,
+            true
+        );
 
         vm.startPrank(alice);
-        nft.activateNftData(NFT_TOKEN_ID_0);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
         nft.safeTransferFrom(alice, bob, NFT_TOKEN_ID_0);
         vm.stopPrank();
 
@@ -517,14 +522,14 @@ contract NftSale_E2E_Test is Base_Test {
         tokenUSDT.approve(address(sale), type(uint256).max);
         sale.mintNft(LEVEL_1, tokenUSDT);
         sale.updateNft(NFT_TOKEN_ID_0, LEVEL_2, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_1);
+        nft.activateNftData(NFT_TOKEN_ID_1, true);
         nft.safeTransferFrom(alice, bob, NFT_TOKEN_ID_1);
         vm.stopPrank();
 
         vm.startPrank(bob);
         tokenUSDC.approve(address(sale), type(uint256).max);
         sale.updateNft(NFT_TOKEN_ID_1, LEVEL_3, tokenUSDC);
-        nft.activateNftData(NFT_TOKEN_ID_2);
+        nft.activateNftData(NFT_TOKEN_ID_2, true);
         nft.safeTransferFrom(bob, alice, NFT_TOKEN_ID_2);
         vm.stopPrank();
 
@@ -572,7 +577,7 @@ contract NftSale_E2E_Test is Base_Test {
         tokenUSDT.approve(address(sale), type(uint256).max);
         sale.mintNft(LEVEL_1, tokenUSDT);
         sale.updateNft(NFT_TOKEN_ID_0, LEVEL_2, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_1);
+        nft.activateNftData(NFT_TOKEN_ID_1, true);
         nft.safeTransferFrom(alice, dan, NFT_TOKEN_ID_1);
         vm.stopPrank();
 
@@ -580,7 +585,7 @@ contract NftSale_E2E_Test is Base_Test {
         tokenUSDC.approve(address(sale), type(uint256).max);
         sale.mintNft(LEVEL_1, tokenUSDC);
         sale.updateNft(NFT_TOKEN_ID_2, LEVEL_2, tokenUSDC);
-        nft.activateNftData(NFT_TOKEN_ID_3);
+        nft.activateNftData(NFT_TOKEN_ID_3, true);
         nft.safeTransferFrom(bob, dan, NFT_TOKEN_ID_3);
         vm.stopPrank();
 
@@ -588,7 +593,7 @@ contract NftSale_E2E_Test is Base_Test {
         tokenUSDT.approve(address(sale), type(uint256).max);
         sale.mintNft(LEVEL_1, tokenUSDT);
         sale.updateNft(NFT_TOKEN_ID_4, LEVEL_2, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_5);
+        nft.activateNftData(NFT_TOKEN_ID_5, true);
         nft.safeTransferFrom(carol, dan, NFT_TOKEN_ID_5);
         vm.stopPrank();
 
@@ -650,7 +655,7 @@ contract NftSale_E2E_Test is Base_Test {
         vm.startPrank(alice);
         tokenUSDT.approve(address(sale), type(uint256).max);
         sale.mintNft(LEVEL_1, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_0);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
         sale.updateNft(NFT_TOKEN_ID_0, LEVEL_2, tokenUSDT);
         nft.safeTransferFrom(alice, dan, NFT_TOKEN_ID_1);
         vm.stopPrank();
@@ -658,7 +663,7 @@ contract NftSale_E2E_Test is Base_Test {
         vm.startPrank(bob);
         tokenUSDC.approve(address(sale), type(uint256).max);
         sale.mintNft(LEVEL_1, tokenUSDC);
-        nft.activateNftData(NFT_TOKEN_ID_2);
+        nft.activateNftData(NFT_TOKEN_ID_2, true);
         sale.updateNft(NFT_TOKEN_ID_2, LEVEL_2, tokenUSDC);
         nft.safeTransferFrom(bob, dan, NFT_TOKEN_ID_3);
         vm.stopPrank();
@@ -666,7 +671,7 @@ contract NftSale_E2E_Test is Base_Test {
         vm.startPrank(carol);
         tokenUSDT.approve(address(sale), type(uint256).max);
         sale.mintNft(LEVEL_1, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_4);
+        nft.activateNftData(NFT_TOKEN_ID_4, true);
         sale.updateNft(NFT_TOKEN_ID_4, LEVEL_2, tokenUSDT);
         nft.safeTransferFrom(carol, dan, NFT_TOKEN_ID_5);
         vm.stopPrank();
@@ -732,27 +737,27 @@ contract NftSale_E2E_Test is Base_Test {
         vm.startPrank(alice);
         tokenUSDT.approve(address(sale), type(uint256).max);
         sale.mintNft(LEVEL_1, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_0);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
         sale.updateNft(NFT_TOKEN_ID_0, LEVEL_2, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_1);
+        nft.activateNftData(NFT_TOKEN_ID_1, true);
         nft.safeTransferFrom(alice, dan, NFT_TOKEN_ID_1);
         vm.stopPrank();
 
         vm.startPrank(bob);
         tokenUSDC.approve(address(sale), type(uint256).max);
         sale.mintNft(LEVEL_1, tokenUSDC);
-        nft.activateNftData(NFT_TOKEN_ID_2);
+        nft.activateNftData(NFT_TOKEN_ID_2, true);
         sale.updateNft(NFT_TOKEN_ID_2, LEVEL_2, tokenUSDC);
-        nft.activateNftData(NFT_TOKEN_ID_3);
+        nft.activateNftData(NFT_TOKEN_ID_3, true);
         nft.safeTransferFrom(bob, dan, NFT_TOKEN_ID_3);
         vm.stopPrank();
 
         vm.startPrank(carol);
         tokenUSDT.approve(address(sale), type(uint256).max);
         sale.mintNft(LEVEL_1, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_4);
+        nft.activateNftData(NFT_TOKEN_ID_4, true);
         sale.updateNft(NFT_TOKEN_ID_4, LEVEL_2, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_5);
+        nft.activateNftData(NFT_TOKEN_ID_5, true);
         nft.safeTransferFrom(carol, dan, NFT_TOKEN_ID_5);
         vm.stopPrank();
 
@@ -848,7 +853,7 @@ contract NftSale_E2E_Test is Base_Test {
         sale.updateNft(NFT_TOKEN_ID_1, LEVEL_3, tokenUSDT);
         sale.updateNft(NFT_TOKEN_ID_2, LEVEL_4, tokenUSDT);
         sale.updateNft(NFT_TOKEN_ID_3, LEVEL_5, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_4);
+        nft.activateNftData(NFT_TOKEN_ID_4, true);
         nft.safeTransferFrom(alice, dan, NFT_TOKEN_ID_4);
         vm.stopPrank();
 
@@ -859,7 +864,7 @@ contract NftSale_E2E_Test is Base_Test {
         sale.updateNft(NFT_TOKEN_ID_6, LEVEL_3, tokenUSDC);
         sale.updateNft(NFT_TOKEN_ID_7, LEVEL_4, tokenUSDC);
         sale.updateNft(NFT_TOKEN_ID_8, LEVEL_5, tokenUSDC);
-        nft.activateNftData(NFT_TOKEN_ID_9);
+        nft.activateNftData(NFT_TOKEN_ID_9, true);
         nft.safeTransferFrom(bob, dan, NFT_TOKEN_ID_9);
         vm.stopPrank();
 
@@ -870,7 +875,7 @@ contract NftSale_E2E_Test is Base_Test {
         sale.updateNft(NFT_TOKEN_ID_11, LEVEL_3, tokenUSDT);
         sale.updateNft(NFT_TOKEN_ID_12, LEVEL_4, tokenUSDT);
         sale.updateNft(NFT_TOKEN_ID_13, LEVEL_5, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_14);
+        nft.activateNftData(NFT_TOKEN_ID_14, true);
         nft.safeTransferFrom(carol, dan, NFT_TOKEN_ID_14);
         vm.stopPrank();
 
@@ -952,7 +957,7 @@ contract NftSale_E2E_Test is Base_Test {
         tokenUSDT.approve(address(sale), type(uint256).max);
         sale.mintNft(LEVEL_3, tokenUSDT);
         sale.updateNft(NFT_TOKEN_ID_0, LEVEL_5, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_1);
+        nft.activateNftData(NFT_TOKEN_ID_1, true);
         nft.safeTransferFrom(alice, dan, NFT_TOKEN_ID_1);
         vm.stopPrank();
 
@@ -960,7 +965,7 @@ contract NftSale_E2E_Test is Base_Test {
         tokenUSDC.approve(address(sale), type(uint256).max);
         sale.mintNft(LEVEL_3, tokenUSDC);
         sale.updateNft(NFT_TOKEN_ID_2, LEVEL_5, tokenUSDC);
-        nft.activateNftData(NFT_TOKEN_ID_3);
+        nft.activateNftData(NFT_TOKEN_ID_3, true);
         nft.safeTransferFrom(bob, dan, NFT_TOKEN_ID_3);
         vm.stopPrank();
 
@@ -968,7 +973,7 @@ contract NftSale_E2E_Test is Base_Test {
         tokenUSDT.approve(address(sale), type(uint256).max);
         sale.mintNft(LEVEL_3, tokenUSDT);
         sale.updateNft(NFT_TOKEN_ID_4, LEVEL_5, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_5);
+        nft.activateNftData(NFT_TOKEN_ID_5, true);
         nft.safeTransferFrom(carol, dan, NFT_TOKEN_ID_5);
         vm.stopPrank();
 
@@ -1035,27 +1040,27 @@ contract NftSale_E2E_Test is Base_Test {
         vm.startPrank(alice);
         tokenUSDT.approve(address(sale), type(uint256).max);
         sale.mintNft(LEVEL_3, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_0);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
         sale.updateNft(NFT_TOKEN_ID_0, LEVEL_5, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_1);
+        nft.activateNftData(NFT_TOKEN_ID_1, true);
         nft.safeTransferFrom(alice, dan, NFT_TOKEN_ID_1);
         vm.stopPrank();
 
         vm.startPrank(bob);
         tokenUSDC.approve(address(sale), type(uint256).max);
         sale.mintNft(LEVEL_3, tokenUSDC);
-        nft.activateNftData(NFT_TOKEN_ID_2);
+        nft.activateNftData(NFT_TOKEN_ID_2, true);
         sale.updateNft(NFT_TOKEN_ID_2, LEVEL_5, tokenUSDC);
-        nft.activateNftData(NFT_TOKEN_ID_3);
+        nft.activateNftData(NFT_TOKEN_ID_3, true);
         nft.safeTransferFrom(bob, dan, NFT_TOKEN_ID_3);
         vm.stopPrank();
 
         vm.startPrank(carol);
         tokenUSDT.approve(address(sale), type(uint256).max);
         sale.mintNft(LEVEL_3, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_4);
+        nft.activateNftData(NFT_TOKEN_ID_4, true);
         sale.updateNft(NFT_TOKEN_ID_4, LEVEL_5, tokenUSDT);
-        nft.activateNftData(NFT_TOKEN_ID_5);
+        nft.activateNftData(NFT_TOKEN_ID_5, true);
         nft.safeTransferFrom(carol, dan, NFT_TOKEN_ID_5);
         vm.stopPrank();
 
@@ -1132,20 +1137,25 @@ contract NftSale_E2E_Test is Base_Test {
 
         // ARRANGE + ACT
         vm.prank(admin);
-        sale.mintGenesisNfts(threeReceiversArray, threeLevelsArray);
+        sale.mintGenesisNfts(
+            threeReceiversArray,
+            threeLevelsArray,
+            false,
+            true
+        );
 
         vm.startPrank(alice);
-        nft.activateNftData(NFT_TOKEN_ID_0);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
         nft.safeTransferFrom(alice, dan, NFT_TOKEN_ID_0);
         vm.stopPrank();
 
         vm.startPrank(bob);
-        nft.activateNftData(NFT_TOKEN_ID_1);
+        nft.activateNftData(NFT_TOKEN_ID_1, true);
         nft.safeTransferFrom(bob, dan, NFT_TOKEN_ID_1);
         vm.stopPrank();
 
         vm.startPrank(carol);
-        nft.activateNftData(NFT_TOKEN_ID_2);
+        nft.activateNftData(NFT_TOKEN_ID_2, true);
         nft.safeTransferFrom(carol, dan, NFT_TOKEN_ID_2);
         vm.stopPrank();
 

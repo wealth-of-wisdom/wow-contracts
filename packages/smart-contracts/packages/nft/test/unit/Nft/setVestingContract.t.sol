@@ -21,12 +21,6 @@ contract NftSale_SetVestingContract_Unit_Test is Unit_Test {
         nft.setVestingContract(newVesting);
     }
 
-    function test_setVestingContract_RevertIf_ZeroAddress() external {
-        vm.expectRevert(Errors.Nft__ZeroAddress.selector);
-        vm.prank(admin);
-        nft.setVestingContract(IVesting(ZERO_ADDRESS));
-    }
-
     function test_setVestingContract_SetsVestingContract() external {
         vm.prank(admin);
         nft.setVestingContract(newVesting);

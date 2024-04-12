@@ -45,24 +45,24 @@ contract NftSale_MintGenesisNft_Unit_Test is Unit_Test {
             )
         );
         vm.prank(alice);
-        sale.mintGenesisNfts(singleUserArray, singleLevelArray);
+        sale.mintGenesisNfts(singleUserArray, singleLevelArray, false, true);
     }
 
     function test_mintGenesisNft_RevertIf_ArrayLengthsDoNotMatch() external {
         vm.expectRevert(Errors.NftSale__MismatchInVariableLength.selector);
         vm.prank(admin);
-        sale.mintGenesisNfts(singleUserArray, threeLevelsArray);
+        sale.mintGenesisNfts(singleUserArray, threeLevelsArray, false, true);
     }
 
     function test_mintGenesisNft_RevertIf_ReceiverIsZeroAddress() external {
         vm.expectRevert(Errors.Nft__ZeroAddress.selector);
         vm.prank(admin);
-        sale.mintGenesisNfts(zeroAddressArray, singleLevelArray);
+        sale.mintGenesisNfts(zeroAddressArray, singleLevelArray, false, true);
     }
 
     function test_mintGenesisNft_Creates1NewNft() external {
         vm.prank(admin);
-        sale.mintGenesisNfts(singleUserArray, singleLevelArray);
+        sale.mintGenesisNfts(singleUserArray, singleLevelArray, false, true);
 
         INft.NftData memory nftData = nft.getNftData(NFT_TOKEN_ID_0);
         assertGenesisNft(nftData, LEVEL_2);
@@ -70,7 +70,7 @@ contract NftSale_MintGenesisNft_Unit_Test is Unit_Test {
 
     function test_mintGenesisNft_Creates3NewNfts() external {
         vm.prank(admin);
-        sale.mintGenesisNfts(threeUsersArray, threeLevelsArray);
+        sale.mintGenesisNfts(threeUsersArray, threeLevelsArray, false, true);
 
         assertGenesisNft(nft.getNftData(NFT_TOKEN_ID_0), LEVEL_1);
         assertGenesisNft(nft.getNftData(NFT_TOKEN_ID_1), LEVEL_2);
@@ -79,7 +79,7 @@ contract NftSale_MintGenesisNft_Unit_Test is Unit_Test {
 
     function test_mintGenesisNft_Mints1Nft() external {
         vm.prank(admin);
-        sale.mintGenesisNfts(singleUserArray, singleLevelArray);
+        sale.mintGenesisNfts(singleUserArray, singleLevelArray, false, true);
 
         assertEq(nft.getNextTokenId(), NFT_TOKEN_ID_1, "Token id incorrect");
         assertEq(nft.balanceOf(alice), 1, "User did not receive nft");
@@ -88,7 +88,7 @@ contract NftSale_MintGenesisNft_Unit_Test is Unit_Test {
 
     function test_mintGenesisNft_Mints3Nft() external {
         vm.prank(admin);
-        sale.mintGenesisNfts(threeUsersArray, threeLevelsArray);
+        sale.mintGenesisNfts(threeUsersArray, threeLevelsArray, false, true);
 
         assertEq(nft.getNextTokenId(), 3, "Token id incorrect");
         assertEq(nft.balanceOf(alice), 2, "Alice did not receive nft");
@@ -109,6 +109,6 @@ contract NftSale_MintGenesisNft_Unit_Test is Unit_Test {
         emit NftMinted(bob, LEVEL_3, true, 0);
 
         vm.prank(admin);
-        sale.mintGenesisNfts(threeUsersArray, threeLevelsArray);
+        sale.mintGenesisNfts(threeUsersArray, threeLevelsArray, false, true);
     }
 }
