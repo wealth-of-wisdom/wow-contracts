@@ -51,7 +51,7 @@ describe("calculateRewards", () => {
         initializeAndSetUp();
     });
 
-    describe("FIXED and FLEXI bands", () => {
+    describe("FIXED bands and FLEXI bands", () => {
         describe("1 staker, 1 FIXED and 1 FLEXI", () => {
             describe("More than 2 months", () => {
                 beforeEach(() => {
