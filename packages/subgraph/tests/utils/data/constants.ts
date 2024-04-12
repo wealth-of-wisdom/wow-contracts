@@ -63,10 +63,6 @@ export const usd1m: BigInt = BigInt.fromI32(1_000_000).times(usdDecimalsPrecisio
                                     IDS
 //////////////////////////////////////////////////////////////////////////*/
 
-export const zeroStr: string = "0";
-
-export const oneStr: string = "1";
-
 export const ids: string[] = createStringifiedArray(BIGINT_ZERO, BigInt.fromI32(100));
 
 export const bandIds: BigInt[] = createArray(BIGINT_ZERO, BigInt.fromI32(100));

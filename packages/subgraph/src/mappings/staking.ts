@@ -301,7 +301,7 @@ export function handleUnstaked(event: UnstakedEvent): void {
     }
     // Else if type is FLEXI and sync was not executed, update shares
     else if (!syncExecuted) {
-        removeFlexiShares(staker, band, bandLevel.accessiblePools);
+        removeFlexiShares(isStakerRemoved ? null : staker, band, bandLevel.accessiblePools);
     }
 }
 

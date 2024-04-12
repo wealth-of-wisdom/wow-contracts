@@ -1,22 +1,10 @@
 import { Address, BigInt, log } from "@graphprotocol/graph-ts";
 import { describe, test, beforeEach, beforeAll, afterEach, clearStore, assert } from "matchstick-as/assembly/index";
-import {
-    initializeAndSetUp,
-    stakeStandardFixed,
-    stakeVestedFixed,
-    unstakeStandard,
-} from "../helpers/helper";
+import { initializeAndSetUp, stakeStandardFixed, stakeVestedFixed, unstakeStandard } from "../helpers/helper";
 import { ids, bandIds, alice, bob, charlie, totalPools } from "../../utils/data/constants";
 import { monthsAfterInit } from "../../utils/data/dates";
 import { sharesInMonths, bandLevels, months, bandLevelPrices } from "../../utils/data/data";
-import {
-    convertAddressArrayToString,
-    convertBigIntArrayToString,
-    createArray,
-    createArrayWithMultiplication,
-    createEmptyArray,
-} from "../../utils/arrays";
-import { stringifyStakingType } from "../../../src/utils/utils";
+import { convertBigIntArrayToString, createArray, createEmptyArray } from "../../utils/arrays";
 import { BIGINT_ZERO } from "../../../src/utils/constants";
 
 let stakedBandsCount = 0;
@@ -38,11 +26,7 @@ let expectedLeftBands: BigInt[];
 let fixedStakerSharesPerPool: BigInt[];
 let isolatedFixedSharesPerPool: BigInt[];
 
-// Flexi bands data
-let flexiStakerSharesPerPool: BigInt[];
-let isolatedFlexiSharesPerPool: BigInt[];
-
-describe("handleStaked()", () => {
+describe("handleUnstaked()", () => {
     beforeEach(() => {
         clearStore();
         initializeAndSetUp();
