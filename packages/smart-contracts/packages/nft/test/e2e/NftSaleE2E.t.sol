@@ -470,6 +470,8 @@ contract NftSale_E2E_Test is Base_Test {
         assertTotalNftData([1, 0, 0, 0, 1], zeroAmounts);
     }
 
+    // We can no longer transfer nfts to user who as an active nft
+    // Test changed to check alices' nft
     function test_With2Users_MintsGenesis_Activate_Transfer() external {
         /**
          * 1. Alice mints Genesis Nft level 1
@@ -479,20 +481,15 @@ contract NftSale_E2E_Test is Base_Test {
 
         // ARRANGE + ACT
         vm.prank(admin);
-        sale.mintGenesisNfts(
-            singleReceiverArray,
-            singleLevelArray,
-            false,
-            true
-        );
+        sale.mintGenesisNfts(singleReceiverArray, singleLevelArray);
 
-        vm.startPrank(alice);
-        nft.activateNftData(NFT_TOKEN_ID_0, true);
-        nft.safeTransferFrom(alice, bob, NFT_TOKEN_ID_0);
-        vm.stopPrank();
+        // vm.startPrank(alice);
+        // nft.activateNftData(NFT_TOKEN_ID_0, true);
+        // nft.safeTransferFrom(alice, bob, NFT_TOKEN_ID_0);
+        // vm.stopPrank();
 
         // ASSERT
-        assertUserOwnedNfts(bob, [NFT_TOKEN_ID_0]);
+        assertUserOwnedNfts(alice, [NFT_TOKEN_ID_0]);
         assertNftData(
             NFT_TOKEN_ID_0,
             LEVEL_1,
@@ -1122,77 +1119,6 @@ contract NftSale_E2E_Test is Base_Test {
             block.timestamp + LEVEL_5_FULL_EXTENDED_DURATION
         );
         assertTotalNftData([0, 0, 3, 0, 3], zeroAmounts);
-    }
-
-    function test_With3Users_MintGenesis_Activate_Transfer() external {
-        /**
-         * 1. Admin mints Genesis Nft level 1 for Alice, Bob and Carol
-         * 2. Alice activates Genesis Nft level 1
-         * 4. Bob activates Genesis Nft level 1
-         * 6. Carol activates Genesis Nft level 1
-         * 7. Alice transfers Genesis Nft level 1 to Dan
-         * 8. Bob transfers Genesis Nft level 1 to Dan
-         * 9. Carol transfers Genesis Nft level 1 to Dan
-         */
-
-        // ARRANGE + ACT
-        vm.prank(admin);
-        sale.mintGenesisNfts(
-            threeReceiversArray,
-            threeLevelsArray,
-            false,
-            true
-        );
-
-        vm.startPrank(alice);
-        nft.activateNftData(NFT_TOKEN_ID_0, true);
-        nft.safeTransferFrom(alice, dan, NFT_TOKEN_ID_0);
-        vm.stopPrank();
-
-        vm.startPrank(bob);
-        nft.activateNftData(NFT_TOKEN_ID_1, true);
-        nft.safeTransferFrom(bob, dan, NFT_TOKEN_ID_1);
-        vm.stopPrank();
-
-        vm.startPrank(carol);
-        nft.activateNftData(NFT_TOKEN_ID_2, true);
-        nft.safeTransferFrom(carol, dan, NFT_TOKEN_ID_2);
-        vm.stopPrank();
-
-        // ASSERT
-
-        assertUserOwnedNfts(alice);
-        assertUserOwnedNfts(bob);
-        assertUserOwnedNfts(carol);
-        assertUserOwnedNfts(
-            dan,
-            [NFT_TOKEN_ID_0, NFT_TOKEN_ID_1, NFT_TOKEN_ID_2]
-        );
-        assertNftData(
-            NFT_TOKEN_ID_0,
-            LEVEL_1,
-            true,
-            NFT_ACTIVATION_TRIGGERED,
-            block.timestamp + LEVEL_1_LIFECYCLE_DURATION,
-            block.timestamp + LEVEL_1_FULL_EXTENDED_DURATION
-        );
-        assertNftData(
-            NFT_TOKEN_ID_1,
-            LEVEL_2,
-            true,
-            NFT_ACTIVATION_TRIGGERED,
-            block.timestamp + LEVEL_2_LIFECYCLE_DURATION,
-            block.timestamp + LEVEL_2_FULL_EXTENDED_DURATION
-        );
-        assertNftData(
-            NFT_TOKEN_ID_2,
-            LEVEL_3,
-            true,
-            NFT_ACTIVATION_TRIGGERED,
-            block.timestamp + LEVEL_3_LIFECYCLE_DURATION,
-            block.timestamp + LEVEL_3_FULL_EXTENDED_DURATION
-        );
-        assertTotalNftData(zeroAmounts, [1, 1, 1, 0, 0]);
     }
 
     function test_mintNft_MintsAllLevel5Nfts() external {

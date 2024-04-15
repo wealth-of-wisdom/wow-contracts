@@ -67,7 +67,7 @@ contract NftSale_UpdateNf_Unit_Test is Unit_Test {
 
     function test_updateNftData_RevertIf_NftIsGenesis() external {
         vm.prank(admin);
-        sale.mintGenesisNfts(genesisUser, genesisLevel, false, true);
+        sale.mintGenesisNfts(genesisUser, genesisLevel);
 
         vm.expectRevert(Errors.NftSale__UnupdatableNft.selector);
         vm.prank(alice);

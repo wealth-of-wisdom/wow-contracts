@@ -21,6 +21,24 @@ contract Nft_TransferFrom_Unit_Test is Unit_Test {
         nft.transferFrom(alice, bob, NFT_TOKEN_ID_0);
     }
 
+    function test_transferFrom_RevertIf_UserOwnsActiveNft()
+        external
+        mintLevel2NftForAlice
+    {
+        vm.startPrank(admin);
+        nft.grantRole(WHITELISTED_SENDER_ROLE, alice);
+        tokenUSDT.approve(address(sale), type(uint256).max);
+        sale.mintNft(LEVEL_2, tokenUSDT);
+        vm.stopPrank();
+
+        vm.startPrank(alice);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
+
+        vm.expectRevert(Errors.Nft__UserOwnsActiveNft.selector);
+        nft.transferFrom(alice, admin, NFT_TOKEN_ID_0);
+        vm.stopPrank();
+    }
+
     function test_transferFrom_TransfersNftSuccessfully()
         external
         mintLevel2NftForAlice

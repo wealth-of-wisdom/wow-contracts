@@ -583,7 +583,7 @@ contract Nft is
      * @notice  Returns activated NFT for owner
      * @return  address  token owner
      */
-    function getActiveNft(address owner) external view returns (uint256) {
+    function getActiveNft(address owner) public view returns (uint256) {
         return s_activeNft[owner];
     }
 
@@ -647,6 +647,11 @@ contract Nft is
         override(INft, IERC721, ERC721Upgradeable)
         onlyRole(WHITELISTED_SENDER_ROLE)
     {
+        uint256 activeUserNft = getActiveNft(to);
+        if (
+            s_nftData[activeUserNft].activityType ==
+            ActivityType.ACTIVATION_TRIGGERED
+        ) revert Errors.Nft__UserOwnsActiveNft();
         ERC721Upgradeable.transferFrom(from, to, tokenId);
     }
 
@@ -780,18 +785,20 @@ contract Nft is
         NftData storage oldNftData = s_nftData[previouslyActiveTokenId];
 
         // Checks: data must not be activated
-        if (nftData.activityType != ActivityType.NOT_ACTIVATED) {
+        if (nftData.activityType == ActivityType.ACTIVATION_TRIGGERED) {
             revert Errors.Nft__AlreadyActivated();
         }
 
         // We check by previous activation status
         // If we check by id, we miss the first ID 0
         // e.g.: previouslyActiveTokenId != 0
-        if (
-            ownerOf(previouslyActiveTokenId) == user &&
-            oldNftData.activityType == ActivityType.ACTIVATION_TRIGGERED
-        ) {
-            oldNftData.activityType = ActivityType.DEACTIVATED;
+        if (previouslyActiveTokenId != 0 && tokenId != 0) {
+            if (
+                _ownerOf(previouslyActiveTokenId) == user &&
+                oldNftData.activityType == ActivityType.ACTIVATION_TRIGGERED
+            ) {
+                oldNftData.activityType = ActivityType.DEACTIVATED;
+            }
         }
 
         s_activeNft[user] = tokenId;
@@ -835,6 +842,7 @@ contract Nft is
                 );
             }
         }
+
         emit NftDataActivated(
             user,
             tokenId,

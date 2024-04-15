@@ -24,6 +24,7 @@ library Errors {
     error Nft__AlreadyActivated();
     error Nft__GenesisNftNotUpdatable();
     error Nft__ReceiverNotOwner();
+    error Nft__UserOwnsActiveNft();
 
     /*//////////////////////////////////////////////////////////////////////////
                                     NFT SALE
