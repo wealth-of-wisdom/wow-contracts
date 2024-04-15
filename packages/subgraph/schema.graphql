@@ -191,6 +191,12 @@ type VestingPoolAllocation @entity {
     stakedTokens: BigInt!
 
     """
+    Tokens available for staking, but not staked yet.
+    Example: 500
+    """
+    unstakedTokens: BigInt!
+
+    """
     Tokens claimed by the beneficiary.
     Example: 2000
     """
@@ -241,6 +247,12 @@ type Beneficiary @entity {
     Example: 1000
     """
     totalStakedTokens: BigInt!
+
+    """
+    Tokens available for staking, but not staked yet.
+    Example: 500
+    """
+    totalUnstakedTokens: BigInt!
 
     """
     Tokens claimed by the beneficiary.

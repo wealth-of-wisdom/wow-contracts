@@ -116,6 +116,7 @@ export function handleVestingPoolAdded(event: VestingPoolAddedEvent): void {
 export function handleBeneficiaryAdded(event: BeneficiaryAddedEvent): void {
     const poolId: BigInt = BigInt.fromI32(event.params.poolIndex);
     const beneficiaryAddress: Address = event.params.beneficiary;
+    const addedAmount = event.params.addedTokenAmount;
 
     const vesting: Vesting = Vesting.bind(event.address);
     const data = vesting.getBeneficiary(poolId.toI32(), beneficiaryAddress);
@@ -129,8 +130,8 @@ export function handleBeneficiaryAdded(event: BeneficiaryAddedEvent): void {
 
     // Update accumulated data for all allocations by beneficiary
     // We need to subtract the old allocation data and add the new allocation data
-    // Because this event can be triggered multiple times for the same beneficiary and pool
-    beneficiary.totalTokens = beneficiary.totalTokens.minus(poolAllocation.totalTokens).plus(data.totalTokenAmount);
+    // Because we want to update only the single allocation data
+    beneficiary.totalTokens = beneficiary.totalTokens.plus(addedAmount);
     beneficiary.totalListingTokens = beneficiary.totalListingTokens
         .minus(poolAllocation.listingTokens)
         .plus(data.listingTokenAmount);
@@ -140,12 +141,8 @@ export function handleBeneficiaryAdded(event: BeneficiaryAddedEvent): void {
     beneficiary.totalVestedTokens = beneficiary.totalVestedTokens
         .minus(poolAllocation.vestedTokens)
         .plus(data.vestedTokenAmount);
-    beneficiary.totalStakedTokens = beneficiary.totalStakedTokens
-        .minus(poolAllocation.stakedTokens)
-        .plus(data.stakedTokenAmount);
-    beneficiary.totalClaimedTokens = beneficiary.totalClaimedTokens
-        .minus(poolAllocation.claimedTokens)
-        .plus(data.claimedTokenAmount);
+
+    beneficiary.totalUnstakedTokens = beneficiary.totalTokens.minus(beneficiary.totalStakedTokens);
     beneficiary.totalUnclaimedTokens = beneficiary.totalTokens.minus(beneficiary.totalClaimedTokens);
     beneficiary.totalAllocations = totalAllocations;
     beneficiary.save();
@@ -155,8 +152,7 @@ export function handleBeneficiaryAdded(event: BeneficiaryAddedEvent): void {
     poolAllocation.listingTokens = data.listingTokenAmount;
     poolAllocation.cliffTokens = data.cliffTokenAmount;
     poolAllocation.vestedTokens = data.vestedTokenAmount;
-    poolAllocation.stakedTokens = data.stakedTokenAmount;
-    poolAllocation.claimedTokens = data.claimedTokenAmount;
+    poolAllocation.unstakedTokens = data.totalTokenAmount.minus(data.stakedTokenAmount);
     poolAllocation.unclaimedTokens = data.totalTokenAmount.minus(data.claimedTokenAmount);
     poolAllocation.save();
 
@@ -193,8 +189,9 @@ export function handleBeneficiaryRemoved(event: BeneficiaryRemovedEvent): void {
         beneficiary.totalCliffTokens = beneficiary.totalCliffTokens.minus(poolAllocation.cliffTokens);
         beneficiary.totalVestedTokens = beneficiary.totalVestedTokens.minus(poolAllocation.vestedTokens);
         beneficiary.totalStakedTokens = beneficiary.totalStakedTokens.minus(poolAllocation.stakedTokens);
+        beneficiary.totalUnstakedTokens = beneficiary.totalUnstakedTokens.minus(poolAllocation.unstakedTokens);
         beneficiary.totalClaimedTokens = beneficiary.totalClaimedTokens.minus(poolAllocation.claimedTokens);
-        beneficiary.totalUnclaimedTokens = beneficiary.totalTokens.minus(beneficiary.totalClaimedTokens);
+        beneficiary.totalUnclaimedTokens = beneficiary.totalUnclaimedTokens.minus(poolAllocation.unclaimedTokens);
         beneficiary.totalAllocations -= 1;
         beneficiary.save();
     }
@@ -256,11 +253,13 @@ export function handleTokensClaimed(event: TokensClaimedEvent): void {
     const poolAllocation: VestingPoolAllocation = getOrInitVestingPoolAllocation(poolId, beneficiaryAddress);
     poolAllocation.claimedTokens = poolAllocation.claimedTokens.plus(claimedAmount);
     poolAllocation.unclaimedTokens = poolAllocation.unclaimedTokens.minus(claimedAmount);
+    poolAllocation.unstakedTokens = poolAllocation.unstakedTokens.minus(claimedAmount);
     poolAllocation.save();
 
     const beneficiary: Beneficiary = getOrInitBeneficiary(beneficiaryAddress);
     beneficiary.totalClaimedTokens = beneficiary.totalClaimedTokens.plus(claimedAmount);
     beneficiary.totalUnclaimedTokens = beneficiary.totalUnclaimedTokens.minus(claimedAmount);
+    beneficiary.totalUnstakedTokens = beneficiary.totalUnstakedTokens.minus(claimedAmount);
     beneficiary.save();
 }
 
@@ -283,10 +282,12 @@ export function handleVestedTokensStaked(event: VestedTokensStakedEvent): void {
 
     const poolAllocation: VestingPoolAllocation = getOrInitVestingPoolAllocation(poolId, beneficiaryAddress);
     poolAllocation.stakedTokens = poolAllocation.stakedTokens.plus(stakedAmount);
+    poolAllocation.unstakedTokens = poolAllocation.unstakedTokens.minus(stakedAmount);
     poolAllocation.save();
 
     const beneficiary: Beneficiary = getOrInitBeneficiary(beneficiaryAddress);
     beneficiary.totalStakedTokens = beneficiary.totalStakedTokens.plus(stakedAmount);
+    beneficiary.totalUnstakedTokens = beneficiary.totalUnstakedTokens.minus(stakedAmount);
     beneficiary.save();
 
     // Update the vesting pool in the band entity
@@ -308,9 +309,11 @@ export function handleVestedTokensUnstaked(event: VestedTokensUnstakedEvent): vo
 
     const poolAllocation: VestingPoolAllocation = getOrInitVestingPoolAllocation(poolId, beneficiaryAddress);
     poolAllocation.stakedTokens = poolAllocation.stakedTokens.minus(unstakedAmount);
+    poolAllocation.unstakedTokens = poolAllocation.unstakedTokens.plus(unstakedAmount);
     poolAllocation.save();
 
     const beneficiary: Beneficiary = getOrInitBeneficiary(beneficiaryAddress);
     beneficiary.totalStakedTokens = beneficiary.totalStakedTokens.minus(unstakedAmount);
+    beneficiary.totalUnstakedTokens = beneficiary.totalUnstakedTokens.plus(unstakedAmount);
     beneficiary.save();
 }

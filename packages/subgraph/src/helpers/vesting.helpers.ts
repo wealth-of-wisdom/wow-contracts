@@ -79,6 +79,7 @@ export function getOrInitVestingPoolAllocation(poolId: BigInt, beneficiaryAddres
         vestingPoolAllocation.cliffTokens = BIGINT_ZERO;
         vestingPoolAllocation.vestedTokens = BIGINT_ZERO;
         vestingPoolAllocation.stakedTokens = BIGINT_ZERO;
+        vestingPoolAllocation.unstakedTokens = BIGINT_ZERO;
         vestingPoolAllocation.claimedTokens = BIGINT_ZERO;
         vestingPoolAllocation.unclaimedTokens = BIGINT_ZERO;
 
@@ -108,6 +109,7 @@ export function getOrInitBeneficiary(beneficiaryAddress: Address): Beneficiary {
         beneficiary.totalCliffTokens = BIGINT_ZERO;
         beneficiary.totalVestedTokens = BIGINT_ZERO;
         beneficiary.totalStakedTokens = BIGINT_ZERO;
+        beneficiary.totalUnstakedTokens = BIGINT_ZERO;
         beneficiary.totalClaimedTokens = BIGINT_ZERO;
         beneficiary.totalUnclaimedTokens = BIGINT_ZERO;
         beneficiary.totalAllocations = 0;
