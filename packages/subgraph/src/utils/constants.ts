@@ -7,6 +7,7 @@ export const BIGINT_PERCENTAGE_MULTIPLIER: BigInt = BigInt.fromI32(100);
 export const BIGINT_1e12: BigInt = BigInt.fromString("1000000000000"); // 1e12
 
 export const BIGDEC_ZERO: BigDecimal = BigDecimal.zero();
+export const BIGDEC_HUNDRED: BigDecimal = BigDecimal.fromString("100");
 
 export const ADDRESS_ZERO: Address = Address.zero();
 

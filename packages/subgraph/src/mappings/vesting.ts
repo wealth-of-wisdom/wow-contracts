@@ -29,7 +29,7 @@ import {
 } from "../helpers/vesting.helpers";
 import { getUnlockTypeFromBigInt, stringifyUnlockType } from "../utils/utils";
 import { Address, BigDecimal, BigInt, store } from "@graphprotocol/graph-ts";
-import { BIGDEC_ZERO, BIGINT_ZERO, UnlockType } from "../utils/constants";
+import { BIGDEC_HUNDRED, BIGDEC_ZERO, BIGINT_ZERO, UnlockType } from "../utils/constants";
 
 /**
  * Handles the Initialized event triggered when the contract is initialized.
@@ -69,7 +69,7 @@ export function handleVestingPoolAdded(event: VestingPoolAddedEvent): void {
     const listingPercentageDividend: BigDecimal = BigInt.fromI32(listingData.getValue0()).toBigDecimal();
     const listingPercentageDivisor: BigDecimal = BigInt.fromI32(listingData.getValue1()).toBigDecimal();
     const listingPercentage: BigDecimal = listingPercentageDivisor.notEqual(BIGDEC_ZERO)
-        ? listingPercentageDividend.div(listingPercentageDivisor)
+        ? BIGDEC_HUNDRED.times(listingPercentageDividend).div(listingPercentageDivisor)
         : BIGDEC_ZERO;
 
     const cliffEndDate: BigInt = cliffData.getValue0();
@@ -78,13 +78,13 @@ export function handleVestingPoolAdded(event: VestingPoolAddedEvent): void {
     const cliffPercentageDividend: BigDecimal = BigInt.fromI32(cliffData.getValue2()).toBigDecimal();
     const cliffPercentageDivisor: BigDecimal = BigInt.fromI32(cliffData.getValue3()).toBigDecimal();
     const cliffPercentage: BigDecimal = cliffPercentageDivisor.notEqual(BIGDEC_ZERO)
-        ? cliffPercentageDividend.div(cliffPercentageDivisor)
+        ? BIGDEC_HUNDRED.times(cliffPercentageDividend).div(cliffPercentageDivisor)
         : BIGDEC_ZERO;
 
     const vestingEndDate: BigInt = vestingData.getValue0();
     const vestingDurationInDays: BigInt = BigInt.fromI32(vestingData.getValue2());
     const vestingDuration: BigInt = vestingDurationInDays.times(secondsInDay);
-    const vestingPercentage: BigDecimal = BigDecimal.fromString("100").minus(listingPercentage).minus(cliffPercentage);
+    const vestingPercentage: BigDecimal = BIGDEC_HUNDRED.minus(listingPercentage).minus(cliffPercentage);
 
     // Initialize VestingPool entity
     const poolId: BigInt = BigInt.fromI32(event.params.poolIndex);
