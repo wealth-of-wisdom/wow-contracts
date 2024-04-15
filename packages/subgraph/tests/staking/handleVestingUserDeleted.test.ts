@@ -1,10 +1,7 @@
 import { describe, test, beforeEach, assert, clearStore } from "matchstick-as/assembly/index";
 import {
-    initialize,
     deleteVestingUser,
-    stakeVestedFlexi,
     initializeAndSetUp,
-    stakeVestedFixed,
     stakeStandardFixed,
     stakeStandardFlexi,
     createDistribution,
@@ -12,8 +9,7 @@ import {
 } from "./helpers/helper";
 import { ids, bandIds, alice, usdcToken, bob, usdtToken, usd100k } from "../utils/data/constants";
 import { bandLevels, months } from "../utils/data/data";
-import { initDate, monthsAfterInit } from "../utils/data/dates";
-import { Address, BigInt } from "@graphprotocol/graph-ts";
+import { monthsAfterInit } from "../utils/data/dates";
 
 describe("handleVestingUserDeleted() tests", () => {
     beforeEach(() => {

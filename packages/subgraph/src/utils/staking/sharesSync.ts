@@ -7,7 +7,7 @@ import {
     getOrInitBand,
     getOrInitStakingContract,
 } from "../../helpers/staking.helpers";
-import { stakingTypeFIX, StakerShares, StakerAndPoolShares } from "../utils";
+import { stakingTypeFIX, StakerShares, StakerAndPoolShares, stakingTypeFLEXI } from "../utils";
 import { BIGINT_ZERO } from "../constants";
 
 /*//////////////////////////////////////////////////////////////////////////
@@ -91,7 +91,7 @@ export function removeFixedShares(staker: Staker | null, band: Band, accessibleP
 }
 
 export function removeFlexiShares(staker: Staker | null, band: Band, accessiblePools: string[]): void {
-    if (band.stakingType == stakingTypeFIX) {
+    if (band.stakingType == stakingTypeFLEXI) {
         const totalAccessiblePools = accessiblePools.length;
         const bandShares: BigInt = band.sharesAmount;
 

@@ -9,7 +9,6 @@ import {
     sharePrecision,
     totalPools,
     totalBandLevels,
-    zeroStr,
     ids,
 } from "../utils/data/constants";
 import { initDate } from "../utils/data/dates";

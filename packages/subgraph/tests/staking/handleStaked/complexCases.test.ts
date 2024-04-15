@@ -1,5 +1,5 @@
-import { Address, BigInt, Bytes, log } from "@graphprotocol/graph-ts";
-import { describe, test, beforeEach, beforeAll, afterEach, clearStore, assert } from "matchstick-as/assembly/index";
+import { Address, BigInt } from "@graphprotocol/graph-ts";
+import { describe, test, beforeEach, beforeAll, clearStore, assert } from "matchstick-as/assembly/index";
 import {
     initializeAndSetUp,
     stakeStandardFixed,
@@ -8,18 +8,17 @@ import {
     stakeVestedFlexi,
 } from "../helpers/helper";
 import { ids, bandIds, alice, bob, charlie, users, totalPools, totalBandLevels, dan } from "../../utils/data/constants";
-import { initDate, monthsAfterInit } from "../../utils/data/dates";
+import { monthsAfterInit } from "../../utils/data/dates";
 import { sharesInMonths, bandLevels, months, bandLevelPrices } from "../../utils/data/data";
 import {
     convertAddressArrayToString,
     convertBigIntArrayToString,
     createArray,
-    createArrayWithMultiplication,
     createDoubleEmptyArray,
     createEmptyArray,
 } from "../../utils/arrays";
 import { stringifyStakingType } from "../../../src/utils/utils";
-import { BIGINT_TWO, BIGINT_ZERO, StakingType } from "../../../src/utils/constants";
+import { BIGINT_ZERO, StakingType } from "../../../src/utils/constants";
 
 let bandsCount = 0;
 let stakersCount = 0;

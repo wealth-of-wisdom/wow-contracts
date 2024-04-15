@@ -1,27 +1,11 @@
-import { Address, BigInt, Bytes, log } from "@graphprotocol/graph-ts";
+import { Address, BigInt, log } from "@graphprotocol/graph-ts";
 import { describe, test, beforeEach, beforeAll, afterEach, clearStore, assert } from "matchstick-as/assembly/index";
-import {
-    initializeAndSetUp,
-    stakeStandardFixed,
-    stakeStandardFlexi,
-    stakeVestedFixed,
-    stakeVestedFlexi,
-    triggerSharesSync,
-    unstakeStandard,
-    unstakeVested,
-} from "../helpers/helper";
+import { initializeAndSetUp, stakeStandardFixed, stakeVestedFixed, unstakeStandard } from "../helpers/helper";
 import { ids, bandIds, alice, bob, charlie, totalPools } from "../../utils/data/constants";
 import { monthsAfterInit } from "../../utils/data/dates";
 import { sharesInMonths, bandLevels, months, bandLevelPrices } from "../../utils/data/data";
-import {
-    convertAddressArrayToString,
-    convertBigIntArrayToString,
-    createArray,
-    createArrayWithMultiplication,
-    createEmptyArray,
-} from "../../utils/arrays";
-import { stringifyStakingType } from "../../../src/utils/utils";
-import { BIGINT_ZERO, StakingType } from "../../../src/utils/constants";
+import { convertBigIntArrayToString, createArray, createEmptyArray } from "../../utils/arrays";
+import { BIGINT_ZERO } from "../../../src/utils/constants";
 
 let stakedBandsCount = 0;
 let unstakedBandsCount = 0;
@@ -42,11 +26,7 @@ let expectedLeftBands: BigInt[];
 let fixedStakerSharesPerPool: BigInt[];
 let isolatedFixedSharesPerPool: BigInt[];
 
-// Flexi bands data
-let flexiStakerSharesPerPool: BigInt[];
-let isolatedFlexiSharesPerPool: BigInt[];
-
-describe("handleStaked()", () => {
+describe("handleUnstaked()", () => {
     beforeEach(() => {
         clearStore();
         initializeAndSetUp();
@@ -94,6 +74,7 @@ describe("handleStaked()", () => {
 
                         log.debug("Should remove staker entity", []);
                         assert.notInStore("Staker", alice.toHex());
+                        assert.entityCount("Staker", 0);
                     } else {
                         log.debug("Should remove band from staker bands array", []);
                         assert.fieldEquals(
@@ -1678,6 +1659,7 @@ describe("handleStaked()", () => {
                         for (let i = 0; i < stakersCount; i++) {
                             assert.notInStore("Staker", stakers[i].toHex());
                         }
+                        assert.entityCount("Staker", 0);
                     } else {
                         log.debug("Should remove band from staker bands array", []);
                         for (let i = 0; i < stakersCount; i++) {
@@ -1712,25 +1694,28 @@ describe("handleStaked()", () => {
                     /*//////////////////////////////////////////////////////////////////////////
                                                     ASSERT SHARES
                     //////////////////////////////////////////////////////////////////////////*/
-
+                    
                     if (stakedBandsCount !== unstakedBandsCount) {
                         log.debug("Should update staker fixed shares", []);
-                        assert.fieldEquals(
-                            "Staker",
-                            alice.toHex(),
-                            "fixedSharesPerPool",
-                            convertBigIntArrayToString(fixedStakerSharesPerPool),
-                        );
-                        assert.fieldEquals(
-                            "Staker",
-                            alice.toHex(),
-                            "isolatedFixedSharesPerPool",
-                            convertBigIntArrayToString(isolatedFixedSharesPerPool),
-                        );
-
                         log.debug("Should not update staker flexi shares", []);
-                        assert.fieldEquals("Staker", alice.toHex(), "flexiSharesPerPool", emptySharesArray);
-                        assert.fieldEquals("Staker", alice.toHex(), "isolatedFlexiSharesPerPool", emptySharesArray);
+                        for (let i = 0; i < stakersCount; i++) {
+                            const staker = stakers[i].toHex();
+                            assert.fieldEquals(
+                                "Staker",
+                                staker,
+                                "fixedSharesPerPool",
+                                convertBigIntArrayToString(fixedStakerSharesPerPool),
+                            );
+                            assert.fieldEquals(
+                                "Staker",
+                                staker,
+                                "isolatedFixedSharesPerPool",
+                                convertBigIntArrayToString(isolatedFixedSharesPerPool),
+                            );
+
+                            assert.fieldEquals("Staker", staker, "flexiSharesPerPool", emptySharesArray);
+                            assert.fieldEquals("Staker", staker, "isolatedFlexiSharesPerPool", emptySharesArray);
+                        }
                     }
 
                     log.debug("Should update pool fixed shares", []);
