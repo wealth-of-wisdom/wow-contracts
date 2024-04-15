@@ -19,6 +19,7 @@ dataSources:
           file: ./src/mappings/vesting.ts
           entities:
               - VestingPool
+              - VestingPoolAllocation
               - Beneficiary
           abis:
             - name: Vesting
@@ -44,6 +45,8 @@ dataSources:
               handler: handleStakingContractSet
             - event: TokensClaimed(indexed uint16,indexed address,uint256)
               handler: handleTokensClaimed
+            - event: AllTokensClaimed(indexed address,uint256)
+              handler: handleAllTokensClaimed
 {{/includeVesting}}
 {{#includeNft}}
     - kind: ethereum/contract

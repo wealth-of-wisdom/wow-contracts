@@ -25,36 +25,31 @@ type VestingContract @entity {
 
     """
     Hexadecimal address of the vesting contract.
-    Type: Bytes
     Example: "0xabc123"
     """
     vestingContractAddress: Bytes!
 
     """
     Hexadecimal address of the associated staking contract.
-    Type: Bytes
     Example: "0xdef456"
     """
     stakingContractAddress: Bytes!
 
     """
     Hexadecimal address of the token used for vesting contract.
-    Type: Bytes
     Example: "0xghi789"
     """
     tokenContractAddress: Bytes!
 
     """
-    Date when the vesting contract was listed.
-    Type: BigInt
-    Example: 1642402345000
+    Unix timestamp when the vesting contract was listed.
+    Example: 1642402345
     """
     listingDate: BigInt!
 
     """
     Total added pool amount
-    Type: Int
-    Example: 1642402345000
+    Example: 20
     """
     totalAmountOfPools: Int!
 }
@@ -63,111 +58,81 @@ type VestingContract @entity {
 type VestingPool @entity {
     """
     Unique identifier for the vesting pool.
-    Type: ID
     Example: "456"
     """
     id: ID!
 
     """
-    Numeric identifier for the pool.
-    Type: BigInt
-    Example: 789
-    """
-    poolId: BigInt!
-
-    """
-    Associated Vesting Contract for the pool.
-    """
-    vestingContract: VestingContract!
-
-    """
     Name of the vesting pool.
-    Type: String
     Example: "Main Pool"
     """
     name: String!
 
     """
-    Listing percentage dividend for the pool.
-    Type: BigInt
-    Example: 100
-    """
-    listingPercentageDividend: BigInt!
-
-    """
-    Listing percentage divisor for the pool.
-    Type: BigInt
-    Example: 1000
-    """
-    listingPercentageDivisor: BigInt!
-
-    """
-    Duration of the cliff period.
-    Type: BigInt
-    Example: 2592000000 (30 days in milliseconds)
-    """
-    cliffDuration: BigInt!
-
-    """
-    End date of the cliff period.
-    Type: BigInt
-    Example: 1645000000000
-    """
-    cliffEndDate: BigInt!
-
-    """
-    Cliff percentage dividend for the pool.
-    Type: BigInt
-    Example: 200
-    """
-    cliffPercentageDividend: BigInt!
-
-    """
-    Cliff percentage divisor for the pool.
-    Type: BigInt
-    Example: 1000
-    """
-    cliffPercentageDivisor: BigInt!
-
-    """
-    Duration of the vesting period.
-    Type: BigInt
-    Example: 7776000000 (90 days in milliseconds)
-    """
-    vestingDuration: BigInt!
-
-    """
-    End date of the vesting period.
-    Type: BigInt
-    Example: 1648000000000
-    """
-    vestingEndDate: BigInt!
-
-    """
     Type of unlocking mechanism (DAILY or MONTHLY).
-    Type: UnlockType
     Example: DAILY
     """
     unlockType: UnlockType!
 
     """
-    Amount of dedicated tokens for the pool.
-    Type: BigInt
+    Total amount of tokens in the pool.
+    Example: 100000
+    """
+    totalPoolTokens: BigInt!
+
+    """
+    Amount of dedicated tokens for the pool users.
     Example: 1000
     """
     dedicatedPoolTokens: BigInt!
 
     """
-    Total amount of tokens in the pool.
-    Type: BigInt
-    Example: 100000
+    Listing allocation amount in percentage.
+    Example: 10
     """
-    totalPoolTokenAmount: BigInt!
+    listingPercentage: BigDecimal!
+
+    """
+    Duration of the cliff period in seconds
+    Example: 2592000 (30 days in seconds)
+    """
+    cliffDuration: BigInt!
+
+    """
+    Unix timestamp when the cliff period ends.
+    Example: 1645000000
+    """
+    cliffEndDate: BigInt!
+
+    """
+    Cliff allocation amount in percentage.
+    Example: 20
+    """
+    cliffPercentage: BigDecimal!
+
+    """
+    Duration of the vesting period in seconds
+    Example: 7776000 (90 days in seconds)
+    """
+    vestingDuration: BigInt!
+
+    """
+    Unix timestamp when the vesting period ends.
+    Example: 1648000000
+    """
+    vestingEndDate: BigInt!
+
+    """
+    Vesting allocation amount in percentage.
+    This is the remaining percentage: `100 - listingPercentage - cliffPercentage`
+    Example: 70
+    """
+    vestingPercentage: BigDecimal!
 
     """
     List of beneficiaries associated with the pool.
     """
-    beneficiaries: [Beneficiary!] @derivedFrom(field: "vestingPool")
+    allocations: [VestingPoolAllocation!] @derivedFrom(field: "vestingPool")
 
     """
     List of band Ids staked from associated pool.
@@ -175,12 +140,12 @@ type VestingPool @entity {
     bands: [Band!]! @derivedFrom(field: "vestingPool")
 }
 
-# Entity representing Beneficiary
-type Beneficiary @entity {
+# Entity representing Vesting Pool Allocation
+# This entity holds single pool allocation for the beneficiary
+type VestingPoolAllocation @entity {
     """
-    Hexadecimal address of the beneficiary.
-    Type: Bytes
-        Example: "0x123abc"
+    Id composed of: vestingPool-beneficiary
+    Example: "456-0x123abc"
     """
     id: ID!
 
@@ -190,46 +155,114 @@ type Beneficiary @entity {
     vestingPool: VestingPool!
 
     """
+    Owner of the tokens allocation.
+    """
+    beneficiary: Beneficiary!
+
+    """
     Total tokens allocated to the beneficiary.
-    Type: BigInt
     Example: 5000
     """
     totalTokens: BigInt!
 
     """
-    Tokens vested to the beneficiary.
-    Type: BigInt
-    Example: 2500
-    """
-    vestedTokens: BigInt!
-
-    """
-    Tokens vested during the cliff period.
-    Type: BigInt
-    Example: 1000
-    """
-    cliffTokens: BigInt!
-
-    """
-    Tokens vested during the listing period.
-    Type: BigInt
+    Tokens unlocked on the listing date.
     Example: 500
     """
     listingTokens: BigInt!
 
     """
+    Tokens unlocked during the cliff period.
+    Example: 1000
+    """
+    cliffTokens: BigInt!
+
+    """
+    Tokens vested to the beneficiary.
+    This equals to `totalTokens - listingTokens - cliffTokens`.
+    Example: 2500
+    """
+    vestedTokens: BigInt!
+
+    """
     Tokens staked by the beneficiary.
-    Type: BigInt
     Example: 1000
     """
     stakedTokens: BigInt!
 
     """
     Tokens claimed by the beneficiary.
-    Type: BigInt
     Example: 2000
     """
     claimedTokens: BigInt!
+
+    """
+    Tokens that are not claimed yet.
+    """
+    unclaimedTokens: BigInt!
+}
+
+# Entity representing Beneficiary
+# It adds data from all pools that the beneficiary is associated with
+type Beneficiary @entity {
+    """
+    Hexadecimal address of the beneficiary.
+    Example: "0x123abc"
+    """
+    id: ID!
+
+    """
+    Total tokens allocated to the beneficiary.
+    Example: 5000
+    """
+    totalTokens: BigInt!
+
+    """
+    Tokens unlocked on the listing date.
+    Example: 500
+    """
+    totalListingTokens: BigInt!
+
+    """
+    Tokens unlocked during the cliff period.
+    Example: 1000
+    """
+    totalCliffTokens: BigInt!
+
+    """
+    Tokens vested to the beneficiary.
+    This equals to `totalTokens - totalListingTokens - totalCliffTokens`.
+    Example: 2500
+    """
+    totalVestedTokens: BigInt!
+
+    """
+    Tokens staked by the beneficiary.
+    Example: 1000
+    """
+    totalStakedTokens: BigInt!
+
+    """
+    Tokens claimed by the beneficiary.
+    Example: 2000
+    """
+    totalClaimedTokens: BigInt!
+
+    """
+    Tokens that are not claimed yet.
+    Example: 500
+    """
+    totalUnclaimedTokens: BigInt!
+
+    """
+    Total number of allocations associated with the beneficiary.
+    """
+    totalAllocations: Int!
+
+    """
+    List of allocations associated with the beneficiary.
+    """
+    allocations: [VestingPoolAllocation!] @derivedFrom(field: "beneficiary")
 }
 
 ############################################################
