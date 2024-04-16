@@ -281,26 +281,82 @@ type Beneficiary @entity {
 #                       NFT & NFT Sale
 ############################################################
 
+# NFT contract details/settings
 type NftContract @entity {
+    """
+    Always equal to 0
+    This is a unique identifier for the NFT contract.
+    """
     id: ID!
+
+    """
+    NFT contract address
+    """
     nftContractAddress: Bytes!
 }
 
 # NFT details
 type Nft @entity {
+    """
+    ID of the NFT from the smart contract
+    """
     id: ID!
+
+    """
+    ID of the NFT in the specific level
+    """
     idInLevel: BigInt!
+
+    """
+    Level of the NFT
+    From 1 to 5
+    """
     level: BigInt!
+
+    """
+    Shows if this NFT is genesis type
+    """
     isGenesis: Boolean!
+
+    """
+    Shows if the NFT is active or not
+    There can only be one active NFT per user
+    """
+    isActive: Boolean!
+
+    """
+    Date when the NFT will be deactivated
+    """
     activityEndTimestamp: BigInt!
+
+    """
+    If user has extended duration for the NFT, this field will be set to the new date
+    """
     extendedActivityEndTimestamp: BigInt!
+
+    """
+    Owner who controls the NFT
+    """
     owner: User!
 }
 
 # NFT holder info
 type User @entity {
+    """
+    User address which is the ID
+    """
     id: ID!
+
+    """
+    All NFTs that user owns
+    """
     nfts: [Nft!]! @derivedFrom(field: "owner")
+
+    """
+    Active NFT that user owns
+    If no active NFT, this field will be null
+    """
+    activeNft: Nft
 }
 
 ############################################################
