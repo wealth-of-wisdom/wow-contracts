@@ -4,6 +4,7 @@ pragma solidity 0.8.20;
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {IERC721Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {Errors} from "../../../contracts/libraries/Errors.sol";
+import {INft} from "../../../contracts/interfaces/INft.sol";
 import {Unit_Test} from "../Unit.t.sol";
 
 contract Nft_SafeMintWithTokenId_Unit_Test is Unit_Test {
@@ -62,23 +63,44 @@ contract Nft_SafeMintWithTokenId_Unit_Test is Unit_Test {
     function test_safeMintWithTokenId_SetsCorrectNextTokenId() external {
         vm.startPrank(admin);
         nft.safeMintWithTokenId(alice, LEVEL_1, false, NFT_TOKEN_ID_6);
-        assertEq(nft.getNextTokenId(), NFT_TOKEN_ID_7, "Next token ID not 7");
+        assertEq(
+            nft.getNextTokenId(),
+            NFT_TOKEN_ID_0,
+            "Next token ID changed from 0"
+        );
     }
 
     function test_safeMintWithTokenId_IncreasesNextTokenIdBy1() external {
         vm.prank(admin);
         nft.safeMintWithTokenId(alice, LEVEL_1, false, NFT_TOKEN_ID_0);
 
-        assertEq(nft.getNextTokenId(), 1, "Next token ID not 1");
+        assertEq(nft.getNextTokenId(), NFT_TOKEN_ID_0, "Next token ID changed");
     }
 
     function test_safeMintWithTokenId_IncreasesNextTokenIdBy2() external {
         vm.startPrank(admin);
+        nft.setNftData(
+            NFT_TOKEN_ID_0,
+            LEVEL_1,
+            false,
+            INft.ActivityType.NOT_ACTIVATED,
+            0,
+            0
+        );
         nft.safeMintWithTokenId(alice, LEVEL_1, false, NFT_TOKEN_ID_0);
+
+        nft.setNftData(
+            NFT_TOKEN_ID_1,
+            LEVEL_2,
+            true,
+            INft.ActivityType.NOT_ACTIVATED,
+            0,
+            0
+        );
         nft.safeMintWithTokenId(bob, LEVEL_2, true, NFT_TOKEN_ID_1);
         vm.stopPrank();
 
-        assertEq(nft.getNextTokenId(), 2, "Next token ID not 1");
+        assertEq(nft.getNextTokenId(), NFT_TOKEN_ID_0, "Next token ID changed");
     }
 
     function test_safeMintWithTokenId_IncreasesNextTokenIdBy10()
@@ -90,10 +112,18 @@ contract Nft_SafeMintWithTokenId_Unit_Test is Unit_Test {
 
     function test_safeMintWithTokenId_NotAllTokensExist() external {
         vm.startPrank(admin);
+        nft.setNftData(
+            NFT_TOKEN_ID_1,
+            LEVEL_2,
+            true,
+            INft.ActivityType.NOT_ACTIVATED,
+            0,
+            0
+        );
         nft.safeMintWithTokenId(bob, LEVEL_2, true, NFT_TOKEN_ID_1);
         vm.stopPrank();
 
-        assertEq(nft.getNextTokenId(), 2, "Next token ID not 2");
+        assertEq(nft.getNextTokenId(), 0, "Next token ID changed from 0");
         assertEq(nft.ownerOf(NFT_TOKEN_ID_1), bob, "NFT not minted");
 
         vm.expectRevert(
@@ -115,7 +145,24 @@ contract Nft_SafeMintWithTokenId_Unit_Test is Unit_Test {
 
     function test_safeMintWithTokenId_Mints2TokensFor1User() external {
         vm.startPrank(admin);
+        nft.setNftData(
+            NFT_TOKEN_ID_0,
+            LEVEL_1,
+            false,
+            INft.ActivityType.NOT_ACTIVATED,
+            0,
+            0
+        );
         nft.safeMintWithTokenId(alice, LEVEL_1, false, NFT_TOKEN_ID_0);
+
+        nft.setNftData(
+            NFT_TOKEN_ID_3,
+            LEVEL_1,
+            false,
+            INft.ActivityType.NOT_ACTIVATED,
+            0,
+            0
+        );
         nft.safeMintWithTokenId(alice, LEVEL_2, true, NFT_TOKEN_ID_3);
         vm.stopPrank();
 

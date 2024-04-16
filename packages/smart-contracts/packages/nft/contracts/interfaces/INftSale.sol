@@ -58,6 +58,10 @@ interface INftSale is INftSaleEvents {
         uint16[] memory levels
     ) external;
 
+    function pause() external;
+
+    function unpause() external;
+
     function setUSDTToken(IERC20 newToken) external;
 
     function setUSDCToken(IERC20 newToken) external;

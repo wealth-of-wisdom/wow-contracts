@@ -3,6 +3,7 @@ pragma solidity 0.8.20;
 
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {Errors} from "../../../contracts/libraries/Errors.sol";
+import {INft} from "../../../contracts/interfaces/INft.sol";
 import {Unit_Test} from "../Unit.t.sol";
 
 contract Nft_SafeMint_Unit_Test is Unit_Test {
@@ -67,7 +68,24 @@ contract Nft_SafeMint_Unit_Test is Unit_Test {
 
     function test_safeMint_IncreasesNextTokenIdBy2() external {
         vm.startPrank(admin);
+        nft.setNftData(
+            NFT_TOKEN_ID_0,
+            LEVEL_1,
+            false,
+            INft.ActivityType.NOT_ACTIVATED,
+            0,
+            0
+        );
         nft.safeMint(alice, LEVEL_1, false);
+
+        nft.setNftData(
+            NFT_TOKEN_ID_1,
+            LEVEL_2,
+            true,
+            INft.ActivityType.NOT_ACTIVATED,
+            0,
+            0
+        );
         nft.safeMint(bob, LEVEL_2, true);
         vm.stopPrank();
 
@@ -91,7 +109,24 @@ contract Nft_SafeMint_Unit_Test is Unit_Test {
 
     function test_safeMint_Mints2TokensFor1User() external {
         vm.startPrank(admin);
+        nft.setNftData(
+            NFT_TOKEN_ID_0,
+            LEVEL_1,
+            false,
+            INft.ActivityType.NOT_ACTIVATED,
+            0,
+            0
+        );
         nft.safeMint(alice, LEVEL_1, false);
+
+        nft.setNftData(
+            NFT_TOKEN_ID_1,
+            LEVEL_2,
+            true,
+            INft.ActivityType.NOT_ACTIVATED,
+            0,
+            0
+        );
         nft.safeMint(alice, LEVEL_2, true);
         vm.stopPrank();
 

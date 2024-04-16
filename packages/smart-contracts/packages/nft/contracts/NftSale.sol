@@ -4,6 +4,7 @@ pragma solidity 0.8.20;
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {INftSale} from "./interfaces/INftSale.sol";
@@ -14,7 +15,8 @@ contract NftSale is
     INftSale,
     Initializable,
     AccessControlUpgradeable,
-    UUPSUpgradeable
+    UUPSUpgradeable,
+    PausableUpgradeable
 {
     /*//////////////////////////////////////////////////////////////////////////
                                     LIBRARIES
@@ -86,6 +88,7 @@ contract NftSale is
     {
         __AccessControl_init();
         __UUPSUpgradeable_init();
+        __Pausable_init();
 
         // Effects: set the roles
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -109,7 +112,7 @@ contract NftSale is
     function mintNft(
         uint16 level,
         IERC20 token
-    ) external mValidLevel(level) mTokenExists(token) {
+    ) external mValidLevel(level) mTokenExists(token) whenNotPaused {
         uint256 cost = s_nftContract.getLevelData(level, false).price;
 
         // Effects: Transfer the payment to the contract
@@ -131,7 +134,7 @@ contract NftSale is
         uint256 tokenId,
         uint16 newLevel,
         IERC20 token
-    ) external mValidLevel(newLevel) mTokenExists(token) {
+    ) external mValidLevel(newLevel) mTokenExists(token) whenNotPaused {
         // Checks: the sender must be the owner of the NFT
         if (s_nftContract.ownerOf(tokenId) != msg.sender) {
             revert Errors.NftSale__NotNftOwner();
@@ -174,6 +177,20 @@ contract NftSale is
     //////////////////////////////////////////////////////////////////////////*/
 
     /**
+     * @notice  Puts all contract functions on hold until unpaused
+     */
+    function pause() external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {
+        _pause();
+    }
+
+    /**
+     * @notice  Reumes all function work for contract
+     */
+    function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) whenPaused {
+        _unpause();
+    }
+
+    /**
      * @notice Mints a new Genesis NFT with the given level
      * @param receivers Receivers of the NFTs (must be the same length as levels)
      * @param levels NFT levels
@@ -181,7 +198,7 @@ contract NftSale is
     function mintGenesisNfts(
         address[] memory receivers,
         uint16[] memory levels
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {
         // Cache length of receivers array for usage in the loop
         uint256 receiversLength = receivers.length;
 
@@ -206,7 +223,7 @@ contract NftSale is
     function withdrawTokens(
         IERC20 token,
         uint256 amount
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {
         // Checks: the amount must be greater than 0
         if (amount == 0) {
             revert Errors.NftSale__ZeroAmount();
@@ -231,7 +248,12 @@ contract NftSale is
      */
     function setUSDTToken(
         IERC20 newToken
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) mAddressNotZero(address(newToken)) {
+    )
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        mAddressNotZero(address(newToken))
+        whenNotPaused
+    {
         // Effects: set new token for USDT
         s_usdtToken = newToken;
         emit USDTTokenSet(newToken);
@@ -243,7 +265,12 @@ contract NftSale is
      */
     function setUSDCToken(
         IERC20 newToken
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) mAddressNotZero(address(newToken)) {
+    )
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        mAddressNotZero(address(newToken))
+        whenNotPaused
+    {
         // Effects: set new token for USDC
         s_usdcToken = newToken;
         emit USDCTokenSet(newToken);
@@ -259,6 +286,7 @@ contract NftSale is
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
         mAddressNotZero(address(newContract))
+        whenNotPaused
     {
         // Effects: set new NFT contract
         s_nftContract = newContract;
@@ -313,21 +341,31 @@ contract NftSale is
 
     /// @dev The following functions are overrides required by Solidity.
 
+    /* solhint-disable ordering */
     function supportsInterface(
         bytes4 interfaceId
     ) public view override(AccessControlUpgradeable) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
+    /* solhint-enable */
+
     /*//////////////////////////////////////////////////////////////////////////
                             FUNCTIONS FOR UPGRADER ROLE
     //////////////////////////////////////////////////////////////////////////*/
 
+    /* solhint-disable no-empty-blocks */
     function _authorizeUpgrade(
         address newImplementation
     ) internal override onlyRole(UPGRADER_ROLE) {
         /// @dev This function is empty but uses a modifier to restrict access
     }
 
-    uint256[50] private __gap; // @question Why are we adding storage at the end of the contract?
+    /* solhint-enable */
+
+    /*//////////////////////////////////////////////////////////////////////////
+                            GAP FOR FUTURE VARIABLES
+    //////////////////////////////////////////////////////////////////////////*/
+
+    uint256[50] private __gap;
 }

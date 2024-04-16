@@ -184,6 +184,7 @@ contract Nft is
         returns (uint256 tokenId)
     {
         tokenId = s_nextTokenId;
+
         // Effects: set nft data with next token id
         setNftData(
             tokenId,
@@ -533,6 +534,8 @@ contract Nft is
         // Effects: increment the token id
         // tokenId is assigned prior to incrementing the token id, so it starts from 0
         uint256 tokenId = s_nextTokenId++;
+
+        // Effects: mint the token and set metadata URI
         _safeMint(to, level, isGenesis, tokenId);
     }
 
@@ -647,6 +650,32 @@ contract Nft is
         override(INft, IERC721, ERC721Upgradeable)
         onlyRole(WHITELISTED_SENDER_ROLE)
     {
+        uint256 senderActiveNftId = s_activeNft[from];
+        uint256 receiverActiveNftId = s_activeNft[to];
+
+        // Checks: The nft that is being transferred is active one
+        if (
+            _ownerOf(senderActiveNftId) == from && tokenId == senderActiveNftId
+        ) {
+            // Checks: user must not own an active NFT
+            // We check the ownership because the nft id can be 0 (which is default value)
+            if (
+                _ownerOf(receiverActiveNftId) == to &&
+                s_nftData[receiverActiveNftId].activityType ==
+                ActivityType.ACTIVATION_TRIGGERED
+            ) {
+                revert Errors.Nft__UserOwnsActiveNft();
+            }
+
+            // Effects: Update the active NFT for the sender
+            delete s_activeNft[from];
+
+            // Effects: Update the active NFT for the receiver
+            s_activeNft[to] = tokenId;
+        }
+        // Else if nft is not active, we can transfer it without any additional checks
+
+        // Effects: transfer the token from one user to another
         ERC721Upgradeable.transferFrom(from, to, tokenId);
     }
 
@@ -772,23 +801,21 @@ contract Nft is
             revert Errors.Nft__NotNftOwner();
         }
 
-        NftData storage nftData = s_nftData[tokenId];
+        NftData storage newNftData = s_nftData[tokenId];
         NftLevel storage levelData = s_nftLevels[
-            _getLevelHash(nftData.level, nftData.isGenesis)
+            _getLevelHash(newNftData.level, newNftData.isGenesis)
         ];
-        uint256 previouslyActiveTokenId = s_activeNft[user];
-        NftData storage oldNftData = s_nftData[previouslyActiveTokenId];
+        uint256 activeNftId = s_activeNft[user];
+        NftData storage oldNftData = s_nftData[activeNftId];
 
         // Checks: data must not be activated
-        if (nftData.activityType != ActivityType.NOT_ACTIVATED) {
+        if (newNftData.activityType != ActivityType.NOT_ACTIVATED) {
             revert Errors.Nft__AlreadyActivated();
         }
 
-        // We check by previous activation status
-        // If we check by id, we miss the first ID 0
-        // e.g.: previouslyActiveTokenId != 0
+        // Checks: only deactivate nfts that are activated and owned by the user
         if (
-            ownerOf(previouslyActiveTokenId) == user &&
+            _ownerOf(activeNftId) == user &&
             oldNftData.activityType == ActivityType.ACTIVATION_TRIGGERED
         ) {
             oldNftData.activityType = ActivityType.DEACTIVATED;
@@ -797,12 +824,12 @@ contract Nft is
         s_activeNft[user] = tokenId;
 
         // Effects: update nft data
-        nftData.activityType = ActivityType.ACTIVATION_TRIGGERED;
-        nftData.activityEndTimestamp =
+        newNftData.activityType = ActivityType.ACTIVATION_TRIGGERED;
+        newNftData.activityEndTimestamp =
             block.timestamp +
             levelData.lifecycleDuration;
-        nftData.extendedActivityEndTimestamp =
-            nftData.activityEndTimestamp +
+        newNftData.extendedActivityEndTimestamp =
+            newNftData.activityEndTimestamp +
             levelData.extensionDuration;
 
         if (isSettingVestingRewards) {
@@ -835,13 +862,14 @@ contract Nft is
                 );
             }
         }
+
         emit NftDataActivated(
             user,
             tokenId,
-            nftData.level,
-            nftData.isGenesis,
-            nftData.activityEndTimestamp,
-            nftData.extendedActivityEndTimestamp
+            newNftData.level,
+            newNftData.isGenesis,
+            newNftData.activityEndTimestamp,
+            newNftData.extendedActivityEndTimestamp
         );
     }
 }
