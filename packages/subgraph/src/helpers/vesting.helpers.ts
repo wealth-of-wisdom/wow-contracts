@@ -1,23 +1,21 @@
 import { Address, BigInt, log, Bytes } from "@graphprotocol/graph-ts";
-import { BIGINT_ZERO, ADDRESS_ZERO, UnlockType } from "../utils/constants";
-import { VestingContract, VestingPool, Beneficiary } from "../../generated/schema";
+import { BIGINT_ZERO, ADDRESS_ZERO, UnlockType, BIGDEC_ZERO } from "../utils/constants";
+import { VestingContract, VestingPool, VestingPoolAllocation, Beneficiary } from "../../generated/schema";
 import { stringifyUnlockType } from "../utils/utils";
 
 /**
  * Retrieves or initializes a VestingContract entity.
- * @param vestingContractAddress - The address of the VestingContract.
  * @returns The VestingContract entity.
  */
-export function getOrInitVestingContract(vestingContractAddress: Address): VestingContract {
-    //  @note: redundant ID and vesting contract address.
-    let vestingContractId = BIGINT_ZERO.toString();
+export function getOrInitVestingContract(): VestingContract {
+    const vestingContractId = "0";
     let vestingContract = VestingContract.load(vestingContractId);
 
     if (!vestingContract) {
         vestingContract = new VestingContract(vestingContractId);
 
-        // set default Vesting contract entity values
-        vestingContract.vestingContractAddress = vestingContractAddress;
+        // Set default Vesting contract entity values
+        vestingContract.vestingContractAddress = Address.zero();
         vestingContract.stakingContractAddress = Address.zero();
         vestingContract.tokenContractAddress = Address.zero();
         vestingContract.listingDate = BIGINT_ZERO;
@@ -31,32 +29,28 @@ export function getOrInitVestingContract(vestingContractAddress: Address): Vesti
 
 /**
  * Retrieves or initializes a VestingPool entity.
- * @param vestingContractAddress - The address of the VestingContract.
  * @param poolId - The pool ID.
  * @returns The VestingPool entity.
  */
 export function getOrInitVestingPool(poolId: BigInt): VestingPool {
-    let vestingPoolId = poolId.toString();
+    const vestingPoolId = poolId.toString();
     let vestingPool = VestingPool.load(vestingPoolId);
 
     if (!vestingPool) {
         vestingPool = new VestingPool(vestingPoolId);
 
         // Set default Vesting pool entity values
-        vestingPool.poolId = BIGINT_ZERO;
-        vestingPool.vestingContract = BIGINT_ZERO.toString();
         vestingPool.name = "";
-        vestingPool.listingPercentageDividend = BIGINT_ZERO;
-        vestingPool.listingPercentageDivisor = BIGINT_ZERO;
+        vestingPool.listingPercentage = BIGDEC_ZERO;
         vestingPool.cliffDuration = BIGINT_ZERO;
         vestingPool.cliffEndDate = BIGINT_ZERO;
-        vestingPool.cliffPercentageDividend = BIGINT_ZERO;
-        vestingPool.cliffPercentageDivisor = BIGINT_ZERO;
+        vestingPool.cliffPercentage = BIGDEC_ZERO;
         vestingPool.vestingDuration = BIGINT_ZERO;
         vestingPool.vestingEndDate = BIGINT_ZERO;
+        vestingPool.vestingPercentage = BIGDEC_ZERO;
         vestingPool.unlockType = stringifyUnlockType(UnlockType.DAILY);
         vestingPool.dedicatedPoolTokens = BIGINT_ZERO;
-        vestingPool.totalPoolTokenAmount = BIGINT_ZERO;
+        vestingPool.totalPoolTokens = BIGINT_ZERO;
 
         vestingPool.save();
     }
@@ -65,14 +59,44 @@ export function getOrInitVestingPool(poolId: BigInt): VestingPool {
 }
 
 /**
+ * Retrieves or initializes a VestingPoolAllocation entity.
+ * @param poolId - The pool ID.
+ * @param beneficiaryAddress - The beneficiary address.
+ * @returns The VestingPoolAllocation entity.
+ */
+export function getOrInitVestingPoolAllocation(poolId: BigInt, beneficiaryAddress: Address): VestingPoolAllocation {
+    const vestingPoolAllocationId = poolId.toString() + "-" + beneficiaryAddress.toHex();
+    let vestingPoolAllocation = VestingPoolAllocation.load(vestingPoolAllocationId);
+
+    if (!vestingPoolAllocation) {
+        vestingPoolAllocation = new VestingPoolAllocation(vestingPoolAllocationId);
+
+        // Set default Vesting pool entity values
+        vestingPoolAllocation.vestingPool = getOrInitVestingPool(poolId).id;
+        vestingPoolAllocation.beneficiary = getOrInitBeneficiary(beneficiaryAddress).id;
+        vestingPoolAllocation.totalTokens = BIGINT_ZERO;
+        vestingPoolAllocation.listingTokens = BIGINT_ZERO;
+        vestingPoolAllocation.cliffTokens = BIGINT_ZERO;
+        vestingPoolAllocation.vestedTokens = BIGINT_ZERO;
+        vestingPoolAllocation.stakedTokens = BIGINT_ZERO;
+        vestingPoolAllocation.unstakedTokens = BIGINT_ZERO;
+        vestingPoolAllocation.claimedTokens = BIGINT_ZERO;
+        vestingPoolAllocation.unclaimedTokens = BIGINT_ZERO;
+
+        vestingPoolAllocation.save();
+    }
+
+    return vestingPoolAllocation;
+}
+
+/**
  * Retrieves or initializes a Beneficiary entity.
  * @param vestingContractAddress - The address of the VestingContract.
  * @param beneficiaryAddress - The address of the beneficiary.
- * @param poolId - The pool ID.
  * @returns The Beneficiary entity.
  */
-export function getOrInitBeneficiary(beneficiaryAddress: Address, poolId: BigInt): Beneficiary {
-    let beneficiaryId = beneficiaryAddress.toHex() + "-" + poolId.toHex();
+export function getOrInitBeneficiary(beneficiaryAddress: Address): Beneficiary {
+    let beneficiaryId = beneficiaryAddress.toHex();
 
     let beneficiary = Beneficiary.load(beneficiaryId);
 
@@ -80,13 +104,15 @@ export function getOrInitBeneficiary(beneficiaryAddress: Address, poolId: BigInt
         beneficiary = new Beneficiary(beneficiaryId);
 
         // Set default Vesting pool entity values
-        beneficiary.vestingPool = getOrInitVestingPool(poolId).id;
         beneficiary.totalTokens = BIGINT_ZERO;
-        beneficiary.cliffTokens = BIGINT_ZERO;
-        beneficiary.listingTokens = BIGINT_ZERO;
-        beneficiary.vestedTokens = BIGINT_ZERO;
-        beneficiary.stakedTokens = BIGINT_ZERO;
-        beneficiary.claimedTokens = BIGINT_ZERO;
+        beneficiary.totalListingTokens = BIGINT_ZERO;
+        beneficiary.totalCliffTokens = BIGINT_ZERO;
+        beneficiary.totalVestedTokens = BIGINT_ZERO;
+        beneficiary.totalStakedTokens = BIGINT_ZERO;
+        beneficiary.totalUnstakedTokens = BIGINT_ZERO;
+        beneficiary.totalClaimedTokens = BIGINT_ZERO;
+        beneficiary.totalUnclaimedTokens = BIGINT_ZERO;
+        beneficiary.totalAllocations = 0;
 
         beneficiary.save();
     }

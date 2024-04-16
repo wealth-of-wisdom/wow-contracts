@@ -6,28 +6,43 @@ import {
     ListingDateChanged as ListingDateChangedEvent,
     StakingContractSet as StakingContractSetEvent,
     TokensClaimed as TokensClaimedEvent,
+    AllTokensClaimed as AllTokensClaimedEvent,
     VestedTokensStaked as VestedTokensStakedEvent,
     VestedTokensUnstaked as VestedTokensUnstakedEvent,
-    Vesting,
     VestingPoolAdded as VestingPoolAddedEvent,
+    Vesting,
 } from "../../generated/Vesting/Vesting";
 import { getOrInitBand } from "../helpers/staking.helpers";
-import { VestingContract, Beneficiary, Band, VestingPool } from "../../generated/schema";
-import { getOrInitBeneficiary, getOrInitVestingContract, getOrInitVestingPool } from "../helpers/vesting.helpers";
+import {
+    VestingContract,
+    Beneficiary,
+    Band,
+    VestingPool,
+    VestingPoolAllocationLoader,
+    VestingPoolAllocation,
+} from "../../generated/schema";
+import {
+    getOrInitBeneficiary,
+    getOrInitVestingContract,
+    getOrInitVestingPool,
+    getOrInitVestingPoolAllocation,
+} from "../helpers/vesting.helpers";
 import { getUnlockTypeFromBigInt, stringifyUnlockType } from "../utils/utils";
-import { BigInt, store } from "@graphprotocol/graph-ts";
+import { Address, BigDecimal, BigInt, store } from "@graphprotocol/graph-ts";
+import { BIGDEC_HUNDRED, BIGDEC_ZERO, BIGINT_ZERO, UnlockType } from "../utils/constants";
 
 /**
  * Handles the Initialized event triggered when the contract is initialized.
  * @param event - The InitializedEvent containing the contract address.
  */
 export function handleInitialized(event: InitializedEvent): void {
-    const vestingContract: VestingContract = getOrInitVestingContract(event.address);
-
+    const vestingContract: VestingContract = getOrInitVestingContract();
     const vesting = Vesting.bind(event.address);
+
+    vestingContract.vestingContractAddress = event.address;
+    vestingContract.stakingContractAddress = vesting.getStakingContract();
     vestingContract.tokenContractAddress = vesting.getToken();
     vestingContract.listingDate = vesting.getListingDate();
-    vestingContract.stakingContractAddress = vesting.getStakingContract();
     vestingContract.save();
 }
 
@@ -36,58 +51,61 @@ export function handleInitialized(event: InitializedEvent): void {
  * @param event - The VestingPoolAddedEvent containing the contract address and new pool index.
  */
 export function handleVestingPoolAdded(event: VestingPoolAddedEvent): void {
-    const vestingContractBind: Vesting = Vesting.bind(event.address);
-    const poolIndex: BigInt = BigInt.fromI32(event.params.poolIndex);
-
-    const vestingPool: VestingPool = getOrInitVestingPool(poolIndex);
-
     // Fetch data from Vesting contract
-    const generalData = vestingContractBind.getGeneralPoolData(event.params.poolIndex);
-    const vestingData = vestingContractBind.getPoolVestingData(event.params.poolIndex);
-    const listingData = vestingContractBind.getPoolListingData(event.params.poolIndex);
-    const cliffData = vestingContractBind.getPoolCliffData(event.params.poolIndex);
+    const vesting: Vesting = Vesting.bind(event.address);
+    const generalData = vesting.getGeneralPoolData(event.params.poolIndex);
+    const vestingData = vesting.getPoolVestingData(event.params.poolIndex);
+    const listingData = vesting.getPoolListingData(event.params.poolIndex);
+    const cliffData = vesting.getPoolCliffData(event.params.poolIndex);
+    const secondsInDay: BigInt = vesting.DAY();
 
-    // Getting data from Vesting contract getters
-    const poolName = generalData.value0;
-    const unlockType = generalData.value1;
-    const totalPoolTokenAmount = generalData.value2;
-    const dedicatedPoolTokenAmount = generalData.value3;
+    // Extract data from Vesting contract getters
+    const poolName: string = generalData.getValue0();
+    const unlockTypeNum: BigInt = BigInt.fromI32(generalData.getValue1());
+    const unlockTypeStr: string = stringifyUnlockType(getUnlockTypeFromBigInt(unlockTypeNum));
+    const totalPoolTokensAmount: BigInt = generalData.getValue2();
+    const dedicatedPoolTokensAmount: BigInt = generalData.getValue3();
 
-    const vestingEndDate = vestingData.value0;
+    const listingPercentageDividend: BigDecimal = BigInt.fromI32(listingData.getValue0()).toBigDecimal();
+    const listingPercentageDivisor: BigDecimal = BigInt.fromI32(listingData.getValue1()).toBigDecimal();
+    const listingPercentage: BigDecimal = listingPercentageDivisor.notEqual(BIGDEC_ZERO)
+        ? BIGDEC_HUNDRED.times(listingPercentageDividend).div(listingPercentageDivisor)
+        : BIGDEC_ZERO;
 
-    const vestingDurationInDays = BigInt.fromI32(vestingData.value2);
+    const cliffEndDate: BigInt = cliffData.getValue0();
+    const cliffInDays: BigInt = BigInt.fromI32(cliffData.getValue1());
+    const cliffDuration: BigInt = cliffInDays.times(secondsInDay);
+    const cliffPercentageDividend: BigDecimal = BigInt.fromI32(cliffData.getValue2()).toBigDecimal();
+    const cliffPercentageDivisor: BigDecimal = BigInt.fromI32(cliffData.getValue3()).toBigDecimal();
+    const cliffPercentage: BigDecimal = cliffPercentageDivisor.notEqual(BIGDEC_ZERO)
+        ? BIGDEC_HUNDRED.times(cliffPercentageDividend).div(cliffPercentageDivisor)
+        : BIGDEC_ZERO;
 
-    const listingPercentageDividend = BigInt.fromI32(listingData.value0);
-    const listingPercentageDivisor = BigInt.fromI32(listingData.value1);
+    const vestingEndDate: BigInt = vestingData.getValue0();
+    const vestingDurationInDays: BigInt = BigInt.fromI32(vestingData.getValue2());
+    const vestingDuration: BigInt = vestingDurationInDays.times(secondsInDay);
+    const vestingPercentage: BigDecimal = BIGDEC_HUNDRED.minus(listingPercentage).minus(cliffPercentage);
 
-    const cliffEndDate = cliffData.value0;
-    const cliffInDays = BigInt.fromI32(cliffData.value1);
-    const cliffPercentageDividend = BigInt.fromI32(cliffData.value2);
-    const cliffPercentageDivisor = BigInt.fromI32(cliffData.value3);
+    // Initialize VestingPool entity
+    const poolId: BigInt = BigInt.fromI32(event.params.poolIndex);
+    const vestingPool: VestingPool = getOrInitVestingPool(poolId);
 
-    const vestingContract: VestingContract = getOrInitVestingContract(event.address);
-    const totalPoolAmount = vestingContract.totalAmountOfPools;
-
-    // Update VestingPool entity properties
-    vestingPool.poolId = poolIndex;
-    vestingPool.vestingContract = event.address.toHex();
     vestingPool.name = poolName;
-    vestingPool.unlockType = stringifyUnlockType(getUnlockTypeFromBigInt(BigInt.fromI32(unlockType)));
-    // TotalPoolTokens is the total number of tokens that are allocated for each pool
-    vestingPool.totalPoolTokenAmount = totalPoolTokenAmount;
-    vestingPool.dedicatedPoolTokens = dedicatedPoolTokenAmount;
-    vestingPool.listingPercentageDividend = listingPercentageDividend;
-    vestingPool.listingPercentageDivisor = listingPercentageDivisor;
-    vestingPool.cliffDuration = cliffInDays;
+    vestingPool.unlockType = unlockTypeStr;
+    vestingPool.totalPoolTokens = totalPoolTokensAmount; // Total tokens allocation in the pool
+    vestingPool.dedicatedPoolTokens = dedicatedPoolTokensAmount; // Assigned tokens in the pool
+    vestingPool.listingPercentage = listingPercentage;
+    vestingPool.cliffDuration = cliffDuration;
     vestingPool.cliffEndDate = cliffEndDate;
-    vestingPool.cliffPercentageDividend = cliffPercentageDividend;
-    vestingPool.cliffPercentageDivisor = cliffPercentageDivisor;
-    vestingPool.vestingDuration = vestingDurationInDays;
+    vestingPool.cliffPercentage = cliffPercentage;
+    vestingPool.vestingDuration = vestingDuration;
     vestingPool.vestingEndDate = vestingEndDate;
+    vestingPool.vestingPercentage = vestingPercentage;
     vestingPool.save();
 
-    // Update total pool amount in Vesting
-    vestingContract.totalAmountOfPools = totalPoolAmount + 1;
+    // Increment total pool count in VestingContract entity
+    const vestingContract: VestingContract = getOrInitVestingContract();
+    vestingContract.totalAmountOfPools += 1;
     vestingContract.save();
 }
 
@@ -96,30 +114,51 @@ export function handleVestingPoolAdded(event: VestingPoolAddedEvent): void {
  * @param event - The BeneficiaryAddedEvent containing beneficiary, pool, and token amount details.
  */
 export function handleBeneficiaryAdded(event: BeneficiaryAddedEvent): void {
-    const beneficiary: Beneficiary = getOrInitBeneficiary(
-        event.params.beneficiary,
-        BigInt.fromI32(event.params.poolIndex),
-    );
+    const poolId: BigInt = BigInt.fromI32(event.params.poolIndex);
+    const beneficiaryAddress: Address = event.params.beneficiary;
+    const addedAmount = event.params.addedTokenAmount;
 
-    const vestingPool: VestingPool = getOrInitVestingPool(BigInt.fromI32(event.params.poolIndex));
-    const vestingContract: Vesting = Vesting.bind(event.address);
+    const vesting: Vesting = Vesting.bind(event.address);
+    const data = vesting.getBeneficiary(poolId.toI32(), beneficiaryAddress);
 
-    const beneficiaryData = vestingContract.getBeneficiary(event.params.poolIndex, event.params.beneficiary);
-    const dedicatedPoolTokenAmount = vestingPool.dedicatedPoolTokens;
+    const poolAllocation: VestingPoolAllocation = getOrInitVestingPoolAllocation(poolId, beneficiaryAddress);
+    const beneficiary: Beneficiary = getOrInitBeneficiary(beneficiaryAddress);
 
-    // Updated user data
+    // If allocation was just created, increment total allocations for the beneficiary
+    let totalAllocations = beneficiary.totalAllocations;
+    if (poolAllocation.totalTokens.equals(BIGINT_ZERO)) totalAllocations += 1;
 
-    beneficiary.id = event.params.beneficiary.toString();
-    beneficiary.vestingPool = event.params.poolIndex.toString();
-    beneficiary.totalTokens = beneficiaryData.totalTokenAmount;
-    beneficiary.listingTokens = beneficiaryData.listingTokenAmount;
-    beneficiary.cliffTokens = beneficiaryData.cliffTokenAmount;
-    beneficiary.vestedTokens = beneficiaryData.vestedTokenAmount;
-    beneficiary.stakedTokens = beneficiaryData.stakedTokenAmount;
-    beneficiary.claimedTokens = beneficiaryData.claimedTokenAmount;
+    // Update accumulated data for all allocations by beneficiary
+    // We need to subtract the old allocation data and add the new allocation data
+    // Because we want to update only the single allocation data
+    beneficiary.totalTokens = beneficiary.totalTokens.plus(addedAmount);
+    beneficiary.totalListingTokens = beneficiary.totalListingTokens
+        .minus(poolAllocation.listingTokens)
+        .plus(data.listingTokenAmount);
+    beneficiary.totalCliffTokens = beneficiary.totalCliffTokens
+        .minus(poolAllocation.cliffTokens)
+        .plus(data.cliffTokenAmount);
+    beneficiary.totalVestedTokens = beneficiary.totalVestedTokens
+        .minus(poolAllocation.vestedTokens)
+        .plus(data.vestedTokenAmount);
+
+    beneficiary.totalUnstakedTokens = beneficiary.totalTokens.minus(beneficiary.totalStakedTokens);
+    beneficiary.totalUnclaimedTokens = beneficiary.totalTokens.minus(beneficiary.totalClaimedTokens);
+    beneficiary.totalAllocations = totalAllocations;
     beneficiary.save();
 
-    vestingPool.dedicatedPoolTokens = dedicatedPoolTokenAmount.plus(event.params.addedTokenAmount);
+    // Initialize or update allocation with data for the beneficiary
+    poolAllocation.totalTokens = data.totalTokenAmount;
+    poolAllocation.listingTokens = data.listingTokenAmount;
+    poolAllocation.cliffTokens = data.cliffTokenAmount;
+    poolAllocation.vestedTokens = data.vestedTokenAmount;
+    poolAllocation.unstakedTokens = data.totalTokenAmount.minus(data.stakedTokenAmount);
+    poolAllocation.unclaimedTokens = data.totalTokenAmount.minus(data.claimedTokenAmount);
+    poolAllocation.save();
+
+    // Update the total dedicated tokens in the pool
+    const vestingPool: VestingPool = getOrInitVestingPool(poolId);
+    vestingPool.dedicatedPoolTokens = vestingPool.dedicatedPoolTokens.plus(event.params.addedTokenAmount);
     vestingPool.save();
 }
 
@@ -128,16 +167,38 @@ export function handleBeneficiaryAdded(event: BeneficiaryAddedEvent): void {
  * @param event - The BeneficiaryRemovedEvent containing beneficiary and pool details.
  */
 export function handleBeneficiaryRemoved(event: BeneficiaryRemovedEvent): void {
-    const beneficiary: Beneficiary = getOrInitBeneficiary(
-        event.params.beneficiary,
-        BigInt.fromI32(event.params.poolIndex),
-    );
-    const vestingPool: VestingPool = getOrInitVestingPool(BigInt.fromI32(event.params.poolIndex));
-    const dedicatedPoolTokenAmount = vestingPool.dedicatedPoolTokens;
+    /// @dev We don't remove bands in this event as all the bands are removed in Staking handler
 
-    store.remove("Beneficiary", beneficiary.id);
+    const poolId: BigInt = BigInt.fromI32(event.params.poolIndex);
+    const beneficiaryAddress: Address = event.params.beneficiary;
 
-    vestingPool.dedicatedPoolTokens = dedicatedPoolTokenAmount.minus(event.params.availableAmount);
+    const poolAllocation: VestingPoolAllocation = getOrInitVestingPoolAllocation(poolId, beneficiaryAddress);
+    const beneficiary: Beneficiary = getOrInitBeneficiary(beneficiaryAddress);
+
+    // Remove the allocation data from the beneficiary
+    store.remove("VestingPoolAllocation", poolAllocation.id);
+
+    // Remove the beneficiary if there are no more allocations
+    if (beneficiary.totalAllocations == 1) {
+        store.remove("Beneficiary", beneficiary.id);
+    } else {
+        // Update accumulated data for all allocations by beneficiary
+        // We need to subtract the old allocation data
+        beneficiary.totalTokens = beneficiary.totalTokens.minus(poolAllocation.totalTokens);
+        beneficiary.totalListingTokens = beneficiary.totalListingTokens.minus(poolAllocation.listingTokens);
+        beneficiary.totalCliffTokens = beneficiary.totalCliffTokens.minus(poolAllocation.cliffTokens);
+        beneficiary.totalVestedTokens = beneficiary.totalVestedTokens.minus(poolAllocation.vestedTokens);
+        beneficiary.totalStakedTokens = beneficiary.totalStakedTokens.minus(poolAllocation.stakedTokens);
+        beneficiary.totalUnstakedTokens = beneficiary.totalUnstakedTokens.minus(poolAllocation.unstakedTokens);
+        beneficiary.totalClaimedTokens = beneficiary.totalClaimedTokens.minus(poolAllocation.claimedTokens);
+        beneficiary.totalUnclaimedTokens = beneficiary.totalUnclaimedTokens.minus(poolAllocation.unclaimedTokens);
+        beneficiary.totalAllocations -= 1;
+        beneficiary.save();
+    }
+
+    // Update the total dedicated tokens in the pool
+    const vestingPool: VestingPool = getOrInitVestingPool(poolId);
+    vestingPool.dedicatedPoolTokens = vestingPool.dedicatedPoolTokens.minus(event.params.availableAmount);
     vestingPool.save();
 }
 
@@ -155,15 +216,15 @@ export function handleContractTokensWithdrawn(event: ContractTokensWithdrawnEven
  * @param event - The ListingDateChangedEvent containing the new listing date.
  */
 export function handleListingDateChanged(event: ListingDateChangedEvent): void {
-    const vestingContract: VestingContract = getOrInitVestingContract(event.address);
+    const newListingDate = event.params.newDate;
 
-    vestingContract.listingDate = event.params.newDate;
+    const vestingContract: VestingContract = getOrInitVestingContract();
+    vestingContract.listingDate = newListingDate;
     vestingContract.save();
 
-    const totalPoolAmount = vestingContract.totalAmountOfPools;
-    for (let i = 0; i < totalPoolAmount; i++) {
+    const totalPools = vestingContract.totalAmountOfPools;
+    for (let i = 0; i < totalPools; i++) {
         const vestingPool: VestingPool = getOrInitVestingPool(BigInt.fromI32(i));
-        const newListingDate = event.params.newDate;
         vestingPool.cliffEndDate = newListingDate.plus(vestingPool.cliffDuration);
         vestingPool.vestingEndDate = vestingPool.cliffEndDate.plus(vestingPool.vestingDuration);
         vestingPool.save();
@@ -175,10 +236,8 @@ export function handleListingDateChanged(event: ListingDateChangedEvent): void {
  * @param event - The StakingContractSetEvent containing the new staking contract address.
  */
 export function handleStakingContractSet(event: StakingContractSetEvent): void {
-    const vestingContract: VestingContract = getOrInitVestingContract(event.address);
-
+    const vestingContract: VestingContract = getOrInitVestingContract();
     vestingContract.stakingContractAddress = event.params.newContract;
-
     vestingContract.save();
 }
 
@@ -187,14 +246,29 @@ export function handleStakingContractSet(event: StakingContractSetEvent): void {
  * @param event - The TokensClaimedEvent containing beneficiary, pool, and claimed token amount details.
  */
 export function handleTokensClaimed(event: TokensClaimedEvent): void {
-    const beneficiary: Beneficiary = getOrInitBeneficiary(event.params.user, BigInt.fromI32(event.params.poolIndex));
+    const poolId: BigInt = BigInt.fromI32(event.params.poolIndex);
+    const beneficiaryAddress: Address = event.params.user;
+    const claimedAmount: BigInt = event.params.tokenAmount;
 
-    // sum claimed amount
-    beneficiary.claimedTokens = beneficiary.claimedTokens.plus(event.params.tokenAmount);
-    // @note I think also needed total tokens that are claimed removed from total tokens (not sure about that)
-    beneficiary.totalTokens = beneficiary.totalTokens.minus(beneficiary.claimedTokens);
+    const poolAllocation: VestingPoolAllocation = getOrInitVestingPoolAllocation(poolId, beneficiaryAddress);
+    poolAllocation.claimedTokens = poolAllocation.claimedTokens.plus(claimedAmount);
+    poolAllocation.unclaimedTokens = poolAllocation.unclaimedTokens.minus(claimedAmount);
+    poolAllocation.unstakedTokens = poolAllocation.unstakedTokens.minus(claimedAmount);
+    poolAllocation.save();
 
+    const beneficiary: Beneficiary = getOrInitBeneficiary(beneficiaryAddress);
+    beneficiary.totalClaimedTokens = beneficiary.totalClaimedTokens.plus(claimedAmount);
+    beneficiary.totalUnclaimedTokens = beneficiary.totalUnclaimedTokens.minus(claimedAmount);
+    beneficiary.totalUnstakedTokens = beneficiary.totalUnstakedTokens.minus(claimedAmount);
     beneficiary.save();
+}
+
+/**
+ * Handles the AllTokensClaimed event triggered when all tokens are claimed by a beneficiary.
+ * @param event - The AllTokensClaimedEvent containing beneficiary and pool details.
+ */
+export function handleAllTokensClaimed(event: AllTokensClaimedEvent): void {
+    /// @dev This handler is not used as all the logic is handled in handleTokensClaimed event
 }
 
 /**
@@ -202,15 +276,23 @@ export function handleTokensClaimed(event: TokensClaimedEvent): void {
  * @param event - The VestedTokensStakedEvent containing poolIndex, beneficiary and amount details.
  */
 export function handleVestedTokensStaked(event: VestedTokensStakedEvent): void {
-    const band: Band = getOrInitBand(event.params.bandId);
-    const beneficiary: Beneficiary = getOrInitBeneficiary(
-        event.params.beneficiary,
-        BigInt.fromI32(event.params.poolIndex),
-    );
-    beneficiary.stakedTokens = beneficiary.stakedTokens.plus(event.params.amount);
+    const poolId: BigInt = BigInt.fromI32(event.params.poolIndex);
+    const beneficiaryAddress: Address = event.params.beneficiary;
+    const stakedAmount: BigInt = event.params.amount;
+
+    const poolAllocation: VestingPoolAllocation = getOrInitVestingPoolAllocation(poolId, beneficiaryAddress);
+    poolAllocation.stakedTokens = poolAllocation.stakedTokens.plus(stakedAmount);
+    poolAllocation.unstakedTokens = poolAllocation.unstakedTokens.minus(stakedAmount);
+    poolAllocation.save();
+
+    const beneficiary: Beneficiary = getOrInitBeneficiary(beneficiaryAddress);
+    beneficiary.totalStakedTokens = beneficiary.totalStakedTokens.plus(stakedAmount);
+    beneficiary.totalUnstakedTokens = beneficiary.totalUnstakedTokens.minus(stakedAmount);
     beneficiary.save();
 
-    band.vestingPool = event.params.poolIndex.toString();
+    // Update the vesting pool in the band entity
+    const band: Band = getOrInitBand(event.params.bandId);
+    band.vestingPool = getOrInitVestingPool(poolId).id;
     band.save();
 }
 
@@ -219,13 +301,19 @@ export function handleVestedTokensStaked(event: VestedTokensStakedEvent): void {
  * @param event - The VestedTokensUnstakedEvent containing poolIndex, beneficiary and amount details.
  */
 export function handleVestedTokensUnstaked(event: VestedTokensUnstakedEvent): void {
-    const band: Band = getOrInitBand(event.params.bandId);
-    const beneficiary: Beneficiary = getOrInitBeneficiary(
-        event.params.beneficiary,
-        BigInt.fromI32(event.params.poolIndex),
-    );
-    beneficiary.stakedTokens = beneficiary.stakedTokens.minus(event.params.amount);
-    beneficiary.save();
+    /// @dev Don't remove band entity as it is removed in Staking handler
 
-    store.remove("Band", band.id);
+    const poolId: BigInt = BigInt.fromI32(event.params.poolIndex);
+    const beneficiaryAddress: Address = event.params.beneficiary;
+    const unstakedAmount: BigInt = event.params.amount;
+
+    const poolAllocation: VestingPoolAllocation = getOrInitVestingPoolAllocation(poolId, beneficiaryAddress);
+    poolAllocation.stakedTokens = poolAllocation.stakedTokens.minus(unstakedAmount);
+    poolAllocation.unstakedTokens = poolAllocation.unstakedTokens.plus(unstakedAmount);
+    poolAllocation.save();
+
+    const beneficiary: Beneficiary = getOrInitBeneficiary(beneficiaryAddress);
+    beneficiary.totalStakedTokens = beneficiary.totalStakedTokens.minus(unstakedAmount);
+    beneficiary.totalUnstakedTokens = beneficiary.totalUnstakedTokens.plus(unstakedAmount);
+    beneficiary.save();
 }
