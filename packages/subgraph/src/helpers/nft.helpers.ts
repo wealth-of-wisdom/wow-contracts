@@ -1,20 +1,18 @@
-import { Address } from "@graphprotocol/graph-ts";
+import { Address, BigInt } from "@graphprotocol/graph-ts";
 import { NftContract, Nft, User } from "../../generated/schema"; // Adjust the import path as necessary
 import { BIGINT_ZERO } from "../utils/constants";
 
 /**
  * Retrieves or initializes an NFTContract entity.
- * @param contractAddress Nft contract address
  * @returns The NFTContract entity.
  */
-export function getOrInitNFTContract(contractAddress: Address): NftContract {
-    // @todo Id for singleton NftContract entity should be 0
-    const id = contractAddress.toHex();
+export function getOrInitNftContract(): NftContract {
+    const id = "0";
     let nftContract = NftContract.load(id);
 
     if (!nftContract) {
         nftContract = new NftContract(id);
-        nftContract.nftContractAddress = contractAddress;
+        nftContract.nftContractAddress = Address.zero();
 
         nftContract.save();
     }
@@ -27,17 +25,19 @@ export function getOrInitNFTContract(contractAddress: Address): NftContract {
  * @param tokenId The tokenId of the Nft.
  * @returns The Nft entity.
  */
-export function getOrInitNft(tokenId: string): Nft {
-    let nft = Nft.load(tokenId);
+export function getOrInitNft(tokenId: BigInt): Nft {
+    const id = tokenId.toString();
+    let nft = Nft.load(id);
 
     if (!nft) {
-        nft = new Nft(tokenId);
-        nft.owner = "";
+        nft = new Nft(id);
+        nft.idInLevel = BIGINT_ZERO;
         nft.level = BIGINT_ZERO;
         nft.isGenesis = false;
-        nft.idInLevel = BIGINT_ZERO;
+        nft.isActive = false;
         nft.activityEndTimestamp = BIGINT_ZERO;
         nft.extendedActivityEndTimestamp = BIGINT_ZERO;
+        nft.owner = Address.zero().toString();
 
         nft.save();
     }

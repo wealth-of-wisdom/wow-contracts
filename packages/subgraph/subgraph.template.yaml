@@ -71,7 +71,7 @@ dataSources:
         - event: NftMinted(indexed address,indexed uint256,uint16,bool,uint256)
           handler: handleNftMinted
         - event: NftDataActivated(indexed address,indexed uint256,uint16,bool,uint256,uint256)
-          handler: handleNftActivation
+          handler: handleNftDataActivated
 {{/includeNft}}
 {{#includeStaking}}
     - kind: ethereum/contract      
