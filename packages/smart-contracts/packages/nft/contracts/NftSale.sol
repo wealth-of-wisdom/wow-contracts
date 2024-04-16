@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
-import {ERC721PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721PausableUpgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {INftSale} from "./interfaces/INftSale.sol";
@@ -15,10 +14,9 @@ import {Errors} from "./libraries/Errors.sol";
 contract NftSale is
     INftSale,
     Initializable,
-    ERC721Upgradeable,
-    ERC721PausableUpgradeable,
     AccessControlUpgradeable,
-    UUPSUpgradeable
+    UUPSUpgradeable,
+    PausableUpgradeable
 {
     /*//////////////////////////////////////////////////////////////////////////
                                     LIBRARIES
@@ -89,8 +87,8 @@ contract NftSale is
         mAddressNotZero(address(nft))
     {
         __AccessControl_init();
-        __ERC721Pausable_init();
         __UUPSUpgradeable_init();
+        __Pausable_init();
 
         // Effects: set the roles
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -181,14 +179,14 @@ contract NftSale is
     /**
      * @notice  Puts all contract functions on hold until unpaused
      */
-    function pause() public onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {
+    function pause() external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {
         _pause();
     }
 
     /**
      * @notice  Reumes all function work for contract
      */
-    function unpause() public onlyRole(DEFAULT_ADMIN_ROLE) whenPaused {
+    function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) whenPaused {
         _unpause();
     }
 
@@ -343,38 +341,31 @@ contract NftSale is
 
     /// @dev The following functions are overrides required by Solidity.
 
+    /* solhint-disable ordering */
     function supportsInterface(
         bytes4 interfaceId
-    )
-        public
-        view
-        override(AccessControlUpgradeable, ERC721Upgradeable)
-        returns (bool)
-    {
+    ) public view override(AccessControlUpgradeable) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
-    function _update(
-        address to,
-        uint256 tokenId,
-        address auth
-    )
-        internal
-        override(ERC721Upgradeable, ERC721PausableUpgradeable)
-        returns (address)
-    {
-        return super._update(to, tokenId, auth);
-    }
+    /* solhint-enable */
 
     /*//////////////////////////////////////////////////////////////////////////
                             FUNCTIONS FOR UPGRADER ROLE
     //////////////////////////////////////////////////////////////////////////*/
 
+    /* solhint-disable no-empty-blocks */
     function _authorizeUpgrade(
         address newImplementation
     ) internal override onlyRole(UPGRADER_ROLE) {
         /// @dev This function is empty but uses a modifier to restrict access
     }
 
-    uint256[50] private __gap; // @question Why are we adding storage at the end of the contract?
+    /* solhint-enable */
+
+    /*//////////////////////////////////////////////////////////////////////////
+                            GAP FOR FUTURE VARIABLES
+    //////////////////////////////////////////////////////////////////////////*/
+
+    uint256[50] private __gap;
 }
