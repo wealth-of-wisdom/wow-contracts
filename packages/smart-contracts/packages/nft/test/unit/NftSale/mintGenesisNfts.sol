@@ -9,7 +9,7 @@ import {Unit_Test} from "../Unit.t.sol";
 
 contract NftSale_MintGenesisNft_Unit_Test is Unit_Test {
     address[] singleUserArray = [alice];
-    address[] threeUsersArray = [alice, alice, bob];
+    address[] threeUsersArray = [alice, bob, carol];
     address[] zeroAddressArray = [ZERO_ADDRESS];
 
     uint16[] singleLevelArray = [LEVEL_2];
@@ -91,22 +91,23 @@ contract NftSale_MintGenesisNft_Unit_Test is Unit_Test {
         sale.mintGenesisNfts(threeUsersArray, threeLevelsArray);
 
         assertEq(nft.getNextTokenId(), 3, "Token id incorrect");
-        assertEq(nft.balanceOf(alice), 2, "Alice did not receive nft");
+        assertEq(nft.balanceOf(alice), 1, "Alice did not receive nft");
         assertEq(nft.balanceOf(bob), 1, "Bob did not receive nft");
+        assertEq(nft.balanceOf(carol), 1, "Carol did not receive nft");
         assertEq(nft.ownerOf(NFT_TOKEN_ID_0), alice, "Not the owner");
-        assertEq(nft.ownerOf(NFT_TOKEN_ID_1), alice, "Not the owner");
-        assertEq(nft.ownerOf(NFT_TOKEN_ID_2), bob, "Not the owner");
+        assertEq(nft.ownerOf(NFT_TOKEN_ID_1), bob, "Not the owner");
+        assertEq(nft.ownerOf(NFT_TOKEN_ID_2), carol, "Not the owner");
     }
 
     function test_mintGenesisNft_EmitsNftMintedEvent3Times() external {
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit(address(sale));
         emit NftMinted(alice, LEVEL_1, true, 0);
 
-        vm.expectEmit(true, true, true, true);
-        emit NftMinted(alice, LEVEL_2, true, 0);
+        vm.expectEmit(address(sale));
+        emit NftMinted(bob, LEVEL_2, true, 0);
 
-        vm.expectEmit(true, true, true, true);
-        emit NftMinted(bob, LEVEL_3, true, 0);
+        vm.expectEmit(address(sale));
+        emit NftMinted(carol, LEVEL_3, true, 0);
 
         vm.prank(admin);
         sale.mintGenesisNfts(threeUsersArray, threeLevelsArray);

@@ -131,16 +131,16 @@ contract Base_Test is Test, Constants, Events {
 
     function _mintEachLevelNft() internal {
         vm.startPrank(admin);
-        nft.safeMint(alice, LEVEL_1, false);
-        nft.safeMint(bob, LEVEL_2, false);
-        nft.safeMint(carol, LEVEL_3, false);
-        nft.safeMint(dan, LEVEL_4, false);
-        nft.safeMint(eve, LEVEL_5, false);
-        nft.safeMint(eve, LEVEL_1, true);
-        nft.safeMint(dan, LEVEL_2, true);
-        nft.safeMint(carol, LEVEL_3, true);
-        nft.safeMint(bob, LEVEL_4, true);
-        nft.safeMint(alice, LEVEL_5, true);
+        nft.mintAndSetNftData(alice, LEVEL_1, false);
+        nft.mintAndSetNftData(bob, LEVEL_2, false);
+        nft.mintAndSetNftData(carol, LEVEL_3, false);
+        nft.mintAndSetNftData(dan, LEVEL_4, false);
+        nft.mintAndSetNftData(eve, LEVEL_5, false);
+        nft.mintAndSetNftData(eve, LEVEL_1, true);
+        nft.mintAndSetNftData(dan, LEVEL_2, true);
+        nft.mintAndSetNftData(carol, LEVEL_3, true);
+        nft.mintAndSetNftData(bob, LEVEL_4, true);
+        nft.mintAndSetNftData(alice, LEVEL_5, true);
         vm.stopPrank();
     }
 
