@@ -1,29 +1,29 @@
 [
     {
         "name": "NFT Holders",
-        "tokens_amount_in_wow": "127000000",
-        "listing_release_percentage": 0,
-        "listing_amount_in_wow": "0",
-        "remaining_amount_after_listing_in_wow": "127000000",
+        "listing_release_percentage": 10,
         "cliff_in_months": 24,
-        "vesting_in_months": 18
+        "cliff_release_percentage": 15,
+        "vesting_in_months": 18,
+        "unlock_type": "DAILY",
+        "tokens_amount_in_wow": "80000000000"
     },
     {
         "name": "Community Sale 0.005",
-        "tokens_amount_in_wow": "110000000",
-        "listing_release_percentage": 0,
-        "listing_amount_in_wow": "0",
-        "remaining_amount_after_listing_in_wow": "110000000",
+        "listing_release_percentage": 5,
         "cliff_in_months": 24,
-        "vesting_in_months": 18
+        "cliff_release_percentage": 0,
+        "vesting_in_months": 18,
+        "unlock_type": "MONTHLY",
+        "tokens_amount_in_wow": "10000000000"
     },
     {
         "name": "Whitelist Sale 0.001",
-        "tokens_amount_in_wow": "5000000",
         "listing_release_percentage": 55,
-        "listing_amount_in_wow": "0",
-        "remaining_amount_after_listing_in_wow": "4750000",
         "cliff_in_months": 18,
-        "vesting_in_months": 12
+        "cliff_release_percentage": 10,
+        "vesting_in_months": 12,
+        "unlock_type": "DAILY",
+        "tokens_amount_in_wow": "10000000000"
     }
 ]

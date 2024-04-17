@@ -6,6 +6,10 @@ async function addBeneficiaries(tokenAddress, vestingAddress) {
     const poolsCount = await vesting.getPoolCount()
     const DECIMALS = 18
 
+    /*//////////////////////////////////////////////////////////////////////////
+                                VALIDATE ALL THE DATA
+    //////////////////////////////////////////////////////////////////////////*/
+
     await validateData(vesting, beneficiaries, Number(poolsCount), DECIMALS)
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -38,40 +42,30 @@ async function validateData(vesting, data, poolsCount, decimals) {
     const allBeneficiariesTokensPerPool = Array(poolsCount).fill(BigInt(0))
 
     for (let user of data) {
-        if (
-            !user.pool_id ||
-            !user.beneficiary_address ||
-            !user.tokens_amount_in_wow
-        ) {
-            throw new Error("Invalid user data!")
-        }
-
         // Validate data types
-        if (typeof user.pool_id !== "number") {
-            throw new Error(`Invalid pool ID type: ${user.pool_id}`)
-        }
-
-        if (typeof user.beneficiary_address !== "string") {
-            throw new Error(
-                `Invalid token amount type: ${user.beneficiary_address}`,
-            )
-        }
-
-        if (typeof user.tokens_amount_in_wow !== "string") {
-            throw new Error(
-                `Invalid token amount type: ${user.tokens_amount_in_wow}`,
-            )
-        }
-
-        // Validate pool ID
-        if (user.pool_id < 0 || user.pool_id >= poolsCount) {
+        if (
+            typeof user.pool_id !== "number" ||
+            user.pool_id < 0 ||
+            user.pool_id >= poolsCount
+        ) {
             throw new Error(`Invalid pool ID: ${user.pool_id}`)
         }
 
-        // Validate wallet address
-        if (!ethers.isAddress(user.beneficiary_address)) {
+        if (
+            typeof user.beneficiary_address !== "string" ||
+            !ethers.isAddress(user.beneficiary_address)
+        ) {
             throw new Error(
                 `Invalid beneficiary address: ${user.beneficiary_address}`,
+            )
+        }
+
+        if (
+            typeof user.tokens_amount_in_wow !== "string" ||
+            isNaN(user.tokens_amount_in_wow)
+        ) {
+            throw new Error(
+                `Invalid tokens amount: ${user.tokens_amount_in_wow}`,
             )
         }
 
@@ -89,6 +83,8 @@ async function validateData(vesting, data, poolsCount, decimals) {
         const dedicatedPoolAmount = BigInt(pool[3])
         const undedicatedPoolAmount = totalPoolAmount - dedicatedPoolAmount
 
+        // If at least one beneficiary is added to the pool we need to check that pool was filled correctly
+        // @todo Not sure if this is actually needed
         if (allBeneficiariesTokensPerPool[poolId] !== undedicatedPoolAmount) {
             throw new Error(
                 `Amounts don't add up for pool ${poolId} - expected ${undedicatedPoolAmount} but got ${allBeneficiariesTokensPerPool[poolId]}`,
