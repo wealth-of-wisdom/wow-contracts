@@ -29,6 +29,69 @@ contract Nft_ActivateNftData_Unit_Test is Unit_Test, IVestingEvents {
         vm.stopPrank();
     }
 
+    function test_activateNftData_RevertIf_AlreadyDeactivated()
+        external
+        mintLevel2NftForAlice
+        mintLevel2NftForAlice
+    {
+        vm.startPrank(alice);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
+        nft.activateNftData(NFT_TOKEN_ID_1, true);
+
+        vm.expectRevert(Errors.Nft__AlreadyActivated.selector);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
+        vm.stopPrank();
+    }
+
+    function test_activateNftData_DeactivatesOldNft()
+        external
+        mintLevel2NftForAlice
+        mintLevel2NftForAlice
+    {
+        vm.startPrank(alice);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
+        nft.activateNftData(NFT_TOKEN_ID_1, true);
+        vm.stopPrank();
+
+        INft.NftData memory nftData = nft.getNftData(NFT_TOKEN_ID_0);
+        assertEq(
+            uint8(nftData.activityType),
+            uint8(NFT_DEACTIVATED),
+            "NftData was not deactivated"
+        );
+    }
+
+    function test_activateNftData_UpdatesActiveNftIdOnce()
+        external
+        mintLevel2NftForAlice
+    {
+        vm.prank(alice);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
+
+        assertEq(
+            nft.getActiveNft(alice),
+            NFT_TOKEN_ID_0,
+            "Active NFT ID is incorrect"
+        );
+    }
+
+    function test_activateNftData_UpdatesActiveNftIdTwice()
+        external
+        mintLevel2NftForAlice
+        mintLevel2NftForAlice
+    {
+        vm.startPrank(alice);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
+        nft.activateNftData(NFT_TOKEN_ID_1, true);
+        vm.stopPrank();
+
+        assertEq(
+            nft.getActiveNft(alice),
+            NFT_TOKEN_ID_1,
+            "Active NFT ID is incorrect"
+        );
+    }
+
     function test_activateNftData_UpdatesNftDataActivity()
         external
         mintLevel2NftForAlice
@@ -85,6 +148,47 @@ contract Nft_ActivateNftData_Unit_Test is Unit_Test, IVestingEvents {
 
         vm.prank(alice);
         nft.activateNftData(NFT_TOKEN_ID_0, true);
+
+        IVesting.Beneficiary memory beneficiary = vesting.getBeneficiary(
+            DEFAULT_VESTING_PID,
+            alice
+        );
+
+        assertEq(
+            beneficiary.totalTokenAmount,
+            0,
+            "Locked tokens amount is incorrect"
+        );
+    }
+
+    function test_activateNftData_DoesNotAddBeneficiaryInVestingIfFlagWasDisabled()
+        external
+        mintLevel2NftForAlice
+    {
+        vm.prank(alice);
+        nft.activateNftData(NFT_TOKEN_ID_0, false);
+
+        IVesting.Beneficiary memory beneficiary = vesting.getBeneficiary(
+            DEFAULT_VESTING_PID,
+            alice
+        );
+
+        assertEq(
+            beneficiary.totalTokenAmount,
+            0,
+            "Locked tokens amount is incorrect"
+        );
+    }
+
+    function test_activateNftData_DoesNotAddBeneficiaryInVestingIfFlagWasDisabledTwice()
+        external
+        mintLevel2NftForAlice
+        mintLevel2NftForAlice
+    {
+        vm.startPrank(alice);
+        nft.activateNftData(NFT_TOKEN_ID_0, false);
+        nft.activateNftData(NFT_TOKEN_ID_1, false);
+        vm.stopPrank();
 
         IVesting.Beneficiary memory beneficiary = vesting.getBeneficiary(
             DEFAULT_VESTING_PID,
