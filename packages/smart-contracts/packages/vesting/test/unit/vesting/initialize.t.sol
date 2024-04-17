@@ -24,11 +24,6 @@ contract Vesting_Initialize_Unit_Test is Unit_Test {
         vesting.initialize(IERC20(ZERO_ADDRESS), staking, LISTING_DATE);
     }
 
-    function test_initialize_RevertIf_StakingContractIsZeroAddress() external {
-        vm.expectRevert(Errors.Vesting__ZeroAddress.selector);
-        vesting.initialize(wowToken, IStaking(ZERO_ADDRESS), LISTING_DATE);
-    }
-
     function test_initialize_RevertIf_ListingDateNotInFuture() external {
         vm.warp(LISTING_DATE + 1 seconds);
         vm.expectRevert(Errors.Vesting__ListingDateNotInFuture.selector);
@@ -64,6 +59,19 @@ contract Vesting_Initialize_Unit_Test is Unit_Test {
         assertEq(
             address(vesting.getStakingContract()),
             address(staking),
+            "Staking contract should be set correctly"
+        );
+    }
+
+    function test_initialize_AllowsToSetStakingContractToZeroAddress()
+        external
+    {
+        vm.warp(LISTING_DATE - 1 seconds);
+        vesting.initialize(wowToken, IStaking(ZERO_ADDRESS), LISTING_DATE);
+
+        assertEq(
+            address(vesting.getStakingContract()),
+            ZERO_ADDRESS,
             "Staking contract should be set correctly"
         );
     }

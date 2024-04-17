@@ -655,7 +655,10 @@ contract Nft is
 
         // Checks: The nft that is being transferred is active one
         if (
-            _ownerOf(senderActiveNftId) == from && tokenId == senderActiveNftId
+            _ownerOf(senderActiveNftId) == from &&
+            s_nftData[senderActiveNftId].activityType ==
+            ActivityType.ACTIVATION_TRIGGERED &&
+            tokenId == senderActiveNftId
         ) {
             // Checks: user must not own an active NFT
             // We check the ownership because the nft id can be 0 (which is default value)
