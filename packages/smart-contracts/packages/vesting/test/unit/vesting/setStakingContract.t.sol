@@ -29,14 +29,6 @@ contract Vesting_SetStakingContract_Unit_Test is Unit_Test {
         vesting.setStakingContract(newStakingContract);
     }
 
-    function test_setStakingContract_RevertIf_NewStakingContractIsZero()
-        external
-    {
-        vm.expectRevert(Errors.Vesting__ZeroAddress.selector);
-        vm.prank(admin);
-        vesting.setStakingContract(IStaking(ZERO_ADDRESS));
-    }
-
     function test_setStakingContract_SetsStakingContractCorrectly() external {
         vm.prank(admin);
         vesting.setStakingContract(newStakingContract);
@@ -44,6 +36,19 @@ contract Vesting_SetStakingContract_Unit_Test is Unit_Test {
         assertEq(
             address(vesting.getStakingContract()),
             address(newStakingContract),
+            "Should set staking contract correctly"
+        );
+    }
+
+    function test_setStakingContract_AllowsToSetStakingContractToZeroAddress()
+        external
+    {
+        vm.prank(admin);
+        vesting.setStakingContract(IStaking(ZERO_ADDRESS));
+
+        assertEq(
+            address(vesting.getStakingContract()),
+            ZERO_ADDRESS,
             "Should set staking contract correctly"
         );
     }
