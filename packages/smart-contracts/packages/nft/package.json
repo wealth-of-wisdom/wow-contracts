@@ -38,7 +38,15 @@
         "setup-vesting-permissions:ethereum": "npx hardhat run scripts/sub-tasks/setupVestingPermissions.js --network ethereum",
         "setup-vesting-permissions:sepolia": "npx hardhat run scripts/sub-tasks/setupVestingPermissions.js --network sepolia",
         "setup-vesting-permissions:arbitrum-one": "npx hardhat run scripts/sub-tasks/setupVestingPermissions.js --network arbitrumOne",
-        "setup-vesting-permissions:arbitrum-sepolia": "npx hardhat run scripts/sub-tasks/setupVestingPermissions.js --network arbitrumSepolia"
+        "setup-vesting-permissions:arbitrum-sepolia": "npx hardhat run scripts/sub-tasks/setupVestingPermissions.js --network arbitrumSepolia",
+        "mint-nft:ethereum": "npx hardhat run scripts/sub-tasks/mintAndSetNftData.js --network ethereum",
+        "mint-nft:sepolia": "npx hardhat run scripts/sub-tasks/mintAndSetNftData.js --network sepolia;",
+        "mint-nft:arbitrum-one": "npx hardhat run scripts/sub-tasks/mintAndSetNftData.js --network arbitrumOne",
+        "mint-nft:arbitrum-sepolia": "npx hardhat run scripts/sub-tasks/mintAndSetNftData.js --network arbitrumSepolia",
+        "mint-genesis-nft:ethereum": "npx hardhat run scripts/sub-tasks/mintGenesisNfts.js --network ethereum",
+        "mint-genesis-nft:sepolia": "npx hardhat run scripts/sub-tasks/mintGenesisNfts.js --network sepolia;",
+        "mint-genesis-nft:arbitrum-one": "npx hardhat run scripts/sub-tasks/mintGenesisNfts.js --network arbitrumOne",
+        "mint-genesis-nft:arbitrum-sepolia": "npx hardhat run scripts/sub-tasks/mintGenesisNfts.js --network arbitrumSepolia"
     },
     "dependencies": {},
     "devDependencies": {}
