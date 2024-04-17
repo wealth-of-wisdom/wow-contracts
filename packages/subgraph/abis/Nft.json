@@ -268,6 +268,11 @@
     },
     {
         "inputs": [],
+        "name": "Nft__UserOwnsActiveNft",
+        "type": "error"
+    },
+    {
+        "inputs": [],
         "name": "Nft__ZeroAddress",
         "type": "error"
     },
@@ -464,6 +469,19 @@
             }
         ],
         "name": "MetadataUpdate",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "nextTokenId",
+                "type": "uint256"
+            }
+        ],
+        "name": "NextTokenIdSet",
         "type": "event"
     },
     {
@@ -856,6 +874,34 @@
                 "internalType": "uint256",
                 "name": "tokenId",
                 "type": "uint256"
+            },
+            {
+                "internalType": "bool",
+                "name": "isSettingVestingRewards",
+                "type": "bool"
+            },
+            {
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            }
+        ],
+        "name": "_activateNftData",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "tokenId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bool",
+                "name": "isSettingVestingRewards",
+                "type": "bool"
             }
         ],
         "name": "activateNftData",
@@ -911,6 +957,25 @@
         "name": "burn",
         "outputs": [],
         "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            }
+        ],
+        "name": "getActiveNft",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
         "type": "function"
     },
     {
@@ -1280,7 +1345,13 @@
             }
         ],
         "name": "mintAndSetNftData",
-        "outputs": [],
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "tokenId",
+                "type": "uint256"
+            }
+        ],
         "stateMutability": "nonpayable",
         "type": "function"
     },
@@ -1407,6 +1478,34 @@
             }
         ],
         "name": "safeMint",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "to",
+                "type": "address"
+            },
+            {
+                "internalType": "uint16",
+                "name": "level",
+                "type": "uint16"
+            },
+            {
+                "internalType": "bool",
+                "name": "isGenesis",
+                "type": "bool"
+            },
+            {
+                "internalType": "uint256",
+                "name": "tokenId",
+                "type": "uint256"
+            }
+        ],
+        "name": "safeMintWithTokenId",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -1565,6 +1664,19 @@
             }
         ],
         "name": "setMultipleProjectsQuantity",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "nextTokenId",
+                "type": "uint256"
+            }
+        ],
+        "name": "setNextTokenId",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
