@@ -3,6 +3,7 @@ pragma solidity 0.8.20;
 
 import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
+import {IVesting} from "@wealth-of-wisdom/vesting/contracts/interfaces/IVesting.sol";
 import {INft} from "../../../contracts/interfaces/INft.sol";
 import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {Unit_Test} from "../Unit.t.sol";
@@ -111,5 +112,21 @@ contract NftSale_MintGenesisNft_Unit_Test is Unit_Test {
 
         vm.prank(admin);
         sale.mintGenesisNfts(threeUsersArray, threeLevelsArray);
+    }
+
+    function test_mintGenesisNft_DoesNotLockTokensInVesting() external {
+        vm.prank(admin);
+        sale.mintGenesisNfts(singleUserArray, singleLevelArray);
+
+        IVesting.Beneficiary memory beneficiary = vesting.getBeneficiary(
+            DEFAULT_VESTING_PID,
+            alice
+        );
+
+        assertEq(
+            beneficiary.totalTokenAmount,
+            0,
+            "Locked tokens amount is incorrect"
+        );
     }
 }
