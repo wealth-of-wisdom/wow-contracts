@@ -10,10 +10,18 @@ async function mintAndSetNftData(nftAddress) {
     //////////////////////////////////////////////////////////////////////////*/
 
     for (let data of nftData) {
-        const tx = await nft.mintAndSetNftData(data.wallet, data.level, false)
+        if ((await nft.getNextTokenId()) == data.token_id) {
+            const tx = await nft.mintAndSetNftData(
+                data.wallet,
+                data.level,
+                false,
+            )
 
-        await tx.wait()
-        console.log(`Receiver ${data.wallet} - level ${data.level} data set`)
+            await tx.wait()
+            console.log(
+                `Receiver ${data.wallet} - level ${data.level} data set`,
+            )
+        }
     }
 }
 
