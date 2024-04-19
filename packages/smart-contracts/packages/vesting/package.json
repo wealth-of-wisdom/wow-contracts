@@ -19,7 +19,11 @@
         "add-pools:ethereum": "npx hardhat run scripts/sub-tasks/addVestingPools.js --network ethereum",
         "add-pools:sepolia": "npx hardhat run scripts/sub-tasks/addVestingPools.js --network sepolia",
         "add-pools:arbitrum-one": "npx hardhat run scripts/sub-tasks/addVestingPools.js --network arbitrumOne",
-        "add-pools:arbitrum-sepolia": "npx hardhat run scripts/sub-tasks/addVestingPools.js --network arbitrumSepolia"
+        "add-pools:arbitrum-sepolia": "npx hardhat run scripts/sub-tasks/addVestingPools.js --network arbitrumSepolia",
+        "add-beneficiaries:ethereum": "npx hardhat run scripts/sub-tasks/addBeneficiaries.js --network ethereum",
+        "add-beneficiaries:sepolia": "npx hardhat run scripts/sub-tasks/addBeneficiaries.js --network sepolia",
+        "add-beneficiaries:arbitrum-one": "npx hardhat run scripts/sub-tasks/addBeneficiaries.js --network arbitrumOne",
+        "add-beneficiaries:arbitrum-sepolia": "npx hardhat run scripts/sub-tasks/addBeneficiaries.js --network arbitrumSepolia"
     },
     "dependencies": {
         "@wealth-of-wisdom/staking": "1.0.0"

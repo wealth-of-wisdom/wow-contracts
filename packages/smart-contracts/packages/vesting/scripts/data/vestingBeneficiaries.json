@@ -1,0 +1,17 @@
+[
+    {
+        "pool_id": 0,
+        "beneficiary_address": "0xD27027E344CFa27Ea1d3864b1fcE3B3C709Beda9",
+        "tokens_amount_in_wow": "80000000000"
+    },
+    {
+        "pool_id": 1,
+        "beneficiary_address": "0xD27027E344CFa27Ea1d3864b1fcE3B3C709Beda9",
+        "tokens_amount_in_wow": "10000000000"
+    },
+    {
+        "pool_id": 2,
+        "beneficiary_address": "0xD27027E344CFa27Ea1d3864b1fcE3B3C709Beda9",
+        "tokens_amount_in_wow": "10000000000"
+    }
+]
