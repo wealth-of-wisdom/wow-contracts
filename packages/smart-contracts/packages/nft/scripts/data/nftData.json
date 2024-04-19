@@ -2,134 +2,101 @@
     {
         "token_id": 0,
         "wallet": "0x9C738752ba9DfF60a85EBcCe2Ac75DE0352bEa29",
-        "level": "1",
-        "token_amount": 988,
-        "token_type": "USDC"
+        "level": "1"
     },
     {
         "token_id": 1,
         "wallet": "0xd17d505e49826Db4719ee6aFBAb924ca39eC36d7",
-        "level": "3",
-        "token_amount": 9988,
-        "token_type": "USDT"
+        "level": "3"
     },
     {
         "token_id": 2,
         "wallet": "0x3991df365ec2c6d4553647E7939111bC7932C5D0",
-        "level": "1",
-        "token_amount": 988,
-        "token_type": "USDC"
+        "level": "1"
     },
     {
         "token_id": 3,
         "wallet": "0x5aDb3F2103dF1eE4372001f7829C78683DEFef94",
-        "level": "1",
-        "token_amount": 988,
-        "token_type": "USDT"
+        "level": "1"
     },
     {
         "token_id": 4,
         "wallet": "0x615a7E36cf3d61d9B8500eb7128F85530E6fAD16",
-        "level": "2",
-        "token_amount": 4988,
-        "token_type": "USDT"
+        "level": "2"
     },
     {
         "token_id": 5,
         "wallet": "0x816FB7FCdB23FD9a771d2507AE4D1D32308491c0",
-        "level": "2",
-        "token_amount": 4988,
-        "token_type": "USDC"
+        "level": "2"
     },
     {
         "token_id": 6,
         "wallet": "0xc52Ba3EbD2dAa78568433cd9C881C13Be6b1348E",
-        "level": "1",
-        "token_amount": 988,
-        "token_type": "USDT"
+        "level": "1"
     },
     {
         "token_id": 7,
         "wallet": "0x0E6c155a69e46d1F28cd3becEb82413d0191e20e",
-        "level": "3",
-        "token_amount": 9988,
-        "token_type": "USDT"
+        "level": "3"
     },
     {
         "token_id": 8,
         "wallet": "0xc52Ba3EbD2dAa78568433cd9C881C13Be6b1348E",
-        "level": "5",
-        "token_amount": 99988,
-        "token_type": "USDT"
+        "level": "5"
     },
     {
         "token_id": 9,
         "wallet": "0x6a34916648F981b0ce228B47fb913B4ED9B84b83",
-        "level": "1",
-        "token_amount": 988,
-        "token_type": "USDC"
+        "level": "1"
     },
     {
         "token_id": 10,
         "wallet": "0xD43DBb7C5e72FD481381e24ECB18Dc062061c65F",
-        "level": "1",
-        "token_amount": 988,
-        "token_type": "USDT"
+        "level": "1"
     },
     {
         "token_id": 11,
         "wallet": "0xD353faCB3fd68f011E6E395E663C340743D5C31c",
-        "level": "1",
-        "token_amount": 988,
-        "token_type": "USDT"
+        "level": "1"
     },
     {
         "token_id": 12,
         "wallet": "0x122c4C2259Ceaf08Ce4520d07f3D9745F8E85393",
-        "level": "1",
-        "token_amount": 988,
-        "token_type": "USDT"
+        "level": "1"
     },
     {
         "token_id": 13,
         "wallet": "0x747aC0F08A4b75c97e3d0b2f2A7F32C59516120E",
-        "level": "1",
-        "token_amount": 988,
-        "token_type": "USDC"
+        "level": "1"
     },
     {
         "token_id": 14,
         "wallet": "0x75c9FB051BAAe7e4678162226DCddA5255a062A3",
-        "level": "1",
-        "token_amount": 988,
-        "token_type": "USDC"
+        "level": "1"
     },
     {
         "token_id": 15,
         "wallet": "0xBefD50D944dBd3f38bC52fD498df1A17eD0d5fdf",
-        "level": "1",
-        "token_amount": 988,
-        "token_type": "USDC"
+        "level": "1"
     },
     {
         "token_id": 16,
         "wallet": "0x77Bd13aBFd65eD71118c551977a13f9925C7B337",
-        "level": "1",
-        "token_amount": 988,
-        "token_type": "USDC"
+        "level": "1"
     },
     {
         "token_id": 17,
         "wallet": "0xE4F2BDf290cCAd2c8A71700f57f4E27AE7a0EEA9",
-        "level": "1",
-        "token_amount": 988,
-        "token_type": "USDC"
+        "level": "1"
     },
     {
         "token_id": 18,
         "wallet": "0x63Eb4CCC19108914DC76A6bd59f6339bf6757ba7",
-        "level": "1",
-        "token_amount": 988,
-        "token_type": "USDC"
+        "level": "1"
+    },
+    {
+        "token_id": 19,
+        "wallet": "0xF3ea4605eeA5205794B486e603F8f5B59D787d6f",
+        "level": "1"
     }
 ]
