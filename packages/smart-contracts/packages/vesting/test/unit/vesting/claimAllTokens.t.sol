@@ -327,6 +327,43 @@ contract Vesting_ClaimAllTokens_Unit_Test is Unit_Test {
         vesting.claimAllTokens();
     }
 
+    function test_claimAllTokens_MultiplePools_ClaimFromOnePool_OtherPoolUnlockedTokensZero()
+        external
+        approveAndAddTwoPools
+        addBeneficiaryToTwoPools(alice)
+    {
+        uint256 balanceBefore = wowToken.balanceOf(address(vesting));
+
+        vm.warp(LISTING_DATE + 1 minutes);
+        vm.startPrank(alice);
+
+        IVesting.Beneficiary memory tokenData = vesting.getBeneficiary(
+            SECONDARY_POOL,
+            alice
+        );
+
+        vesting.claimTokens(SECONDARY_POOL);
+        vesting.claimAllTokens();
+        vm.stopPrank();
+
+        uint256 balanceAfter = wowToken.balanceOf(address(vesting));
+
+        IVesting.Beneficiary memory tokenData1 = vesting.getBeneficiary(
+            PRIMARY_POOL,
+            alice
+        );
+        IVesting.Beneficiary memory tokenData2 = vesting.getBeneficiary(
+            SECONDARY_POOL,
+            alice
+        );
+        assertEq(
+            balanceBefore -
+                tokenData1.listingTokenAmount -
+                tokenData2.listingTokenAmount,
+            balanceAfter
+        );
+    }
+
     function test_claimAllTokens_MultiplePools_EmitsTokensClaimedEvent()
         external
         approveAndAddTwoPools
