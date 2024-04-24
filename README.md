@@ -14,14 +14,15 @@ Every purchase of a WOW Token contributes directly to the wealth protocol, a poo
 Vesting pools can be added in the constructor or separately in addVestingPoolFunction.<br />
 Example data for pools:
 
-| Vesting Pool          | Tokens      | %   Listing | Cliff release % | Cliff period (months) | Vesting                                              |
+| Vesting Pool          | Tokens      | Listing %  | Cliff release % | Cliff period (months) | Vesting                                              |
 |-----------------------|-------------|-------------|-----------------|-----------------------|------------------------------------------------------|
 | NFT Holders           | 8,000,000  | 10 %         | 15 %           | 24                     | Mothly                        |
 | Community Sale 0.005               | 100,000  | 5 %         | 0 %           | 24                     | Monthly                        |
 | Whitelist Sale 0.001             | 21,000,000  | 55 %         | 10 %           | 18                     | Daily   |
 
 # Main vesting contract code
-[Vesting.sol](contracts/Vesting.sol)
+[Vesting.sol](packages/smart-contracts/packages/vesting/contracts
+/Vesting.sol)
 
 # Deployment
 ## Prerequisites:
