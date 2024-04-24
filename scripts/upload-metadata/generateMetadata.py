@@ -1,7 +1,7 @@
 import os
 import json
 
-def generate_metadata(name_prefix, description, image_urls, level, author, lifecycle, lifecycle_extension, prices, quantity):
+def generate_metadata(name_prefix, description, image_urls, animation_urls, level, author, lifecycle, lifecycle_extension, prices, quantity):
     metadata_list = []
 
     for i in range(1, quantity + 1):
@@ -10,6 +10,7 @@ def generate_metadata(name_prefix, description, image_urls, level, author, lifec
             "name": current_name,
             "description": description,
             "image": image_urls[level-1],  # Use the corresponding image URL for the level
+            "animation": animation_urls[level-1],  # Use the corresponding animation URL for the level
             "attributes": [
                 {"trait_type": "Author", "value": author},
                 {"trait_type": "Lifecycle", "value": str(lifecycle[level-1]) if level <= len(lifecycle) and lifecycle[level-1] not in ["Unavailable", "Unlimited"] else str(lifecycle[level-1])},
@@ -35,6 +36,7 @@ def generate_and_save_metadata(config, output_folder):
                 value["name_prefix"],
                 value["description"],
                 value["image_urls"],
+                value["animation_urls"],
                 level,
                 value["author"],
                 value["lifecycle"],
@@ -42,7 +44,7 @@ def generate_and_save_metadata(config, output_folder):
                 value["prices"],
                 quantity
             )
-            save_metadata(metadata_list, os.path.join(output_folder, f"test_metadata_{key}_level{level:02d}"))
+            save_metadata(metadata_list, os.path.join(output_folder, f"metadata_{key}_level{level:02d}"))
 
 # Load config
 with open("nftProperties.json") as config_file:

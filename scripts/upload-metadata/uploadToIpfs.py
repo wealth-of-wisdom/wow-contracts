@@ -7,7 +7,6 @@ import requests
 load_dotenv()
 JWT = os.getenv("PINATA_JWT")
 
-
 def pin_directory_to_pinata(src):
     url = "https://api.pinata.cloud/pinning/pinFileToIPFS"
 
@@ -44,7 +43,7 @@ def upload_metadata_folders(metadata_folder_base_path, folder_prefix):
 metadata_folder_base_path = "metadata"
 
 # normal NFT metadata folders
-upload_metadata_folders(metadata_folder_base_path, "test_metadata_nft_level")
+upload_metadata_folders(metadata_folder_base_path, "metadata_nft_level")
 
 # genesis NFT metadata folders
-upload_metadata_folders(metadata_folder_base_path, "test_metadata_genesis_nft_level")
+upload_metadata_folders(metadata_folder_base_path, "metadata_genesis_nft_level")

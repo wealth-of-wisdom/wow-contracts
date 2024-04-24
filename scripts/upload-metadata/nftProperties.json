@@ -1,34 +1,60 @@
 {
-    "nft": {
-      "name_prefix": "WOW-LVL",
-      "description": "WOW Access Pass NFT: Your key to the world of exclusive crypto opportunities. The WOW Access Pass NFT embodies empowerment, knowledge, trust, and community, offering unparalleled access to high-potential early-stage crypto and NFT projects.\nEnhance your financial journey with curated insights, direct access to expertly vetted ventures, and tailored educational content. With the WOW Access Pass, you're not just participating in crypto; you're joining a movement towards informed and empowered digital asset ownership.",
-      "image_urls": [
-        "https://ipfs.io/ipfs/QmQEaeoiWpgnzdiMaxLVMjyAHGY7Q1TwaQsojgiuE1iwLa",
-        "https://ipfs.io/ipfs/QmUbS1fqupPjUEuyzuRFyWHpCgWhAUQYiUqJYKgScExPuM",
-        "https://ipfs.io/ipfs/QmdHg6uYMPqmTWE4x6PvugDYvvsownrQ8CmhDKuDq4EbvY",
-        "https://ipfs.io/ipfs/Qmaayndjwqm8tTngNJLaEpDLmUrnT7MLjKv8fM3khjKyFq",
-        "https://ipfs.io/ipfs/QmWqRPz9D4kiqoDvfXM7kzmGBhSQ7GQKwNGaMVuXApBUtb"
-      ],
-      "author": "Wealth Of Wisdom",
-      "lifecycle": [12, 15, 24, 40, "Unlimited"],
-      "lifecycle_extension": ["Unavailable", 15, 18, "Unlimited", "Unavailable"],
-      "prices": [988, 4988, 9988, 32988, 999988],
-      "level_quantities": [15, 15, 15, 15, 15]
-    },
-    "genesis_nft": {
-      "name_prefix": "WOW-OG-LVL",
-      "description": "WOW Access Pass NFT: Your key to the world of exclusive crypto opportunities. The WOW Access Pass NFT embodies empowerment, knowledge, trust, and community, offering unparalleled access to high-potential early-stage crypto and NFT projects.\nEnhance your financial journey with curated insights, direct access to expertly vetted ventures, and tailored educational content. With the WOW Access Pass, you're not just participating in crypto; you're joining a movement towards informed and empowered digital asset ownership.",
-      "image_urls": [
-        "https://ipfs.io/ipfs/QmQEaeoiWpgnzdiMaxLVMjyAHGY7Q1TwaQsojgiuE1iwLa",
-        "https://ipfs.io/ipfs/QmUbS1fqupPjUEuyzuRFyWHpCgWhAUQYiUqJYKgScExPuM",
-        "https://ipfs.io/ipfs/QmdHg6uYMPqmTWE4x6PvugDYvvsownrQ8CmhDKuDq4EbvY",
-        "https://ipfs.io/ipfs/Qmaayndjwqm8tTngNJLaEpDLmUrnT7MLjKv8fM3khjKyFq",
-        "https://ipfs.io/ipfs/QmWqRPz9D4kiqoDvfXM7kzmGBhSQ7GQKwNGaMVuXApBUtb"
-      ],
-      "author": "Wealth Of Wisdom",
-      "lifecycle": ["Unlimited", "Unlimited", "Unlimited", "Unlimited", "Unlimited"],
-      "lifecycle_extension": ["Unavailable", "Unavailable", "Unavailable", "Unavailable", "Unavailable"],
-      "prices": [988, 4988, 9988, 32988, 999988],
-      "level_quantities": [15, 15, 15, 15, 15]
-    }
+  "nft": {
+    "name_prefix": "WOW-LVL",
+    "description": "WOW Access Pass NFT: Your key to the world of exclusive crypto opportunities. The WOW Access Pass NFT embodies empowerment, knowledge, trust, and community, offering unparalleled access to high-potential early-stage crypto and NFT projects.\nEnhance your financial journey with curated insights, direct access to expertly vetted ventures, and tailored educational content. With the WOW Access Pass, you're not just participating in crypto; you're joining a movement towards informed and empowered digital asset ownership.",
+    "image_urls": [
+      "https://ipfs.io/ipfs/QmVSJGEpFR7WSsxAh4PjtpvLksmXXtSUBTZac3JD53M3Ng",
+      "https://ipfs.io/ipfs/QmYKNwPHxuAABsMnSbYprbQMTPPpS81ynan3Frw1GZRBQy",
+      "https://ipfs.io/ipfs/QmcjsXcLrk7KQTFbgV4AfVDyvJF528Jr5RrWGLAinS5jTn",
+      "https://ipfs.io/ipfs/QmXiRy1AirvyRVJdfB5W3BoKMwbGFgzpdTFJB7paTJproi",
+      "https://ipfs.io/ipfs/QmXpfKNykwQjoCE1RvFqFxHwb7Mm3PNCx6SGwKdBA3E6M3"
+    ],
+    "animation_urls": [
+      "https://ipfs.io/ipfs/QmaSMoes9Qmf8uGACqzwmiVktbBFEXcS8dXF5mLyd1ag7z",
+      "https://ipfs.io/ipfs/QmNkoVU7o1gvt2AQCdQeraHW2uN3qTR6YufPrrmSbKzrgX",
+      "https://ipfs.io/ipfs/QmPYgTsX7LHnumn7YKwHqwd2iApzzr6LFiprXS1KiquNVF",
+      "https://ipfs.io/ipfs/QmNfZy7XFM4t3oYwRKYGY2mFUvLE39FjVbaS983EHNRCC2",
+      "https://ipfs.io/ipfs/QmPewgzVSkUiXzybQGB8C8d1dtLKJM47QZX822GCTpEj4P"
+    ],
+    "author": "Wealth Of Wisdom",
+    "lifecycle": [12, 24, 42, 60, "Unlimited"],
+    "lifecycle_extension": ["Unavailable", 15, 18, "Unlimited", "Unavailable"],
+    "prices": [988, 4988, 9988, 32988, 999988],
+    "level_quantities": [2000, 1000, 500, 200, 17]
+  },
+  "genesis_nft": {
+    "name_prefix": "WOW-OG-LVL",
+    "description": "WOW Access Pass NFT: Your key to the world of exclusive crypto opportunities. The WOW Access Pass NFT embodies empowerment, knowledge, trust, and community, offering unparalleled access to high-potential early-stage crypto and NFT projects.\nEnhance your financial journey with curated insights, direct access to expertly vetted ventures, and tailored educational content. With the WOW Access Pass, you're not just participating in crypto; you're joining a movement towards informed and empowered digital asset ownership.",
+    "image_urls": [
+      "https://ipfs.io/ipfs/QmVphPGV64pMhp6wGwtYRT72WmmupRjW6o2u62Cz23N9Zh",
+      "https://ipfs.io/ipfs/QmRCwubTg3pduPC3MLFqD4BSjsKGBYXmNJKqdfTnMa393f",
+      "https://ipfs.io/ipfs/QmPUTQb5M4gQeyLJpSqRqn5GigayWugqdkC4y8uKpHxAGz",
+      "https://ipfs.io/ipfs/QmaGN6pDrFJAbepmfoHhgcuPSANaStLXNgvHxeskVTmHHp",
+      "https://ipfs.io/ipfs/QmcF4iQu8t2ejPfZ72dCdheLCKi6RbBQJ4ko7wYBwAa5TB"
+    ],
+    "animation_urls": [
+      "https://ipfs.io/ipfs/QmRBxggcVoKiaQw7KcuPLjxAFuCPiuTpNhp1LvLyrGf1w4",
+      "https://ipfs.io/ipfs/QmUExtKnms3SbYHTZk8BRzMa2HGCy2D7WcwzpLSheVzf76",
+      "https://ipfs.io/ipfs/QmXZj3ThviTCcr8yWebfxkkrQDzPvvyQLyefYaLFnKwr2y",
+      "https://ipfs.io/ipfs/QmYYjruq8J7dBbFVbxxgud5if5YSqgHnBTZ2qTWGPrGxhw",
+      "https://ipfs.io/ipfs/QmNRDvB2Sp99fYR2UcLcRTiZ4awyLBucBuXBYepdeE4jL7"
+    ],
+    "author": "Wealth Of Wisdom",
+    "lifecycle": [
+      "Unlimited",
+      "Unlimited",
+      "Unlimited",
+      "Unlimited",
+      "Unlimited"
+    ],
+    "lifecycle_extension": [
+      "Unavailable",
+      "Unavailable",
+      "Unavailable",
+      "Unavailable",
+      "Unavailable"
+    ],
+    "prices": [988, 4988, 9988, 32988, 999988],
+    "level_quantities": [0, 0, 0, 0, 0]
   }
+}
