@@ -21,8 +21,7 @@ Example data for pools:
 | Whitelist Sale 0.001             | 21,000,000  | 55 %         | 10 %           | 18                     | Daily   |
 
 # Main vesting contract code
-[Vesting.sol](packages/smart-contracts/packages/vesting/contracts
-/Vesting.sol)
+[Vesting.sol](packages/smart-contracts/packages/vesting/contracts/Vesting.sol)
 
 # Deployment
 ## Prerequisites:
