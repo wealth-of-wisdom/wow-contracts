@@ -365,40 +365,6 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     }
 
     /**
-     * @notice Transfers tokens to the selected recipient.
-     * @param customToken ERC20 token address.
-     * @param recipient Address of the recipient.
-     * @param tokenAmount Absolute token amount (with included decimals).
-     */
-    function withdrawContractTokens(
-        IERC20 customToken,
-        address recipient,
-        uint256 tokenAmount
-    )
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-        mAddressNotZero(address(customToken))
-        mAddressNotZero(recipient)
-        mAmountNotZero(tokenAmount)
-    {
-        // Checks: Can not withdraw vesting token
-        if (customToken == s_token) {
-            revert Errors.Vesting__CanNotWithdrawVestedTokens();
-        }
-
-        // Checks: Enough tokens in the contract
-        if (tokenAmount > customToken.balanceOf(address(this))) {
-            revert Errors.Vesting__InsufficientBalance();
-        }
-
-        // Interactions: Transfer tokens to the recipient
-        customToken.safeTransfer(recipient, tokenAmount);
-
-        // Effects: Emit event
-        emit ContractTokensWithdrawn(customToken, recipient, tokenAmount);
-    }
-
-    /**
      * @notice Allows admin to set new staking contract address.
      * @param newStaking Address of the new staking contract.
      */

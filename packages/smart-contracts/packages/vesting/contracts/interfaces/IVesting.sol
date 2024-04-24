@@ -138,12 +138,6 @@ interface IVesting is IVestingEvents {
 
     function changeListingDate(uint32 newListingDate) external;
 
-    function withdrawContractTokens(
-        IERC20 customToken,
-        address recipient,
-        uint256 tokenAmount
-    ) external;
-
     function setStakingContract(IStaking newStaking) external;
 
     function claimTokens(uint16 pid) external;
