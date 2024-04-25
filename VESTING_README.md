@@ -50,19 +50,19 @@ Edit [networkConfig.json](packages/smart-contracts/packages/vesting/scripts/data
         "listing_date": "",
         "all_pools_token_amount_in_eth": ""
     },
-    "sepolia": {
+"sepolia": {
         "vesting_token": "",
         "staking_contract": "",
         "listing_date": "",
         "all_pools_token_amount_in_eth": ""
     },
-    "arbitrumOne": {
+"arbitrumOne": {
         "vesting_token": "",
         "staking_contract": "",
         "listing_date": "",
         "all_pools_token_amount_in_eth": ""
     },
-    "arbitrumSepolia": {
+"arbitrumSepolia": {
         "vesting_token": "",
         "staking_contract": "",
         "listing_date": "",
