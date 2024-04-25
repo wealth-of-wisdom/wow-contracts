@@ -12,7 +12,7 @@ contract Vesting_AddMultipleBeneficiaries_Unit_Test is Unit_Test {
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
                 alice,
-                DEFAULT_ADMIN_ROLE
+                BENEFICIARIES_MANAGER_ROLE
             )
         );
         vm.prank(alice);
