@@ -16,11 +16,10 @@ Example data for pools:
 | Community Sale 0.005               | 100,000  | 5 %         | 0 %           | 24                     | Monthly                        |
 | Whitelist Sale 0.001             | 21,000,000  | 55 %         | 10 %           | 18                     | Daily   |
 
+# Deployment
 ### Main vesting contract code
 [Vesting.sol](packages/smart-contracts/packages/vesting/contracts/Vesting.sol)
 
-
-# Deployment
 ## Prerequisites:
 - node  (version >= 18.12.0)
 - Ubuntu
