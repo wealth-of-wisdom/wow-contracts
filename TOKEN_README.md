@@ -33,9 +33,9 @@ PRIVATE_KEY=
 Edit [config.json](packages/smart-contracts/packages/token/scripts/data/config.json) file to set up contract deployment data:
 
 ```bash
-    "name": "",
-    "symbol": "",
-    "initial_token_amount_in_eth": ""
+"name": "",
+"symbol": "",
+"initial_token_amount_in_eth": ""
 ```
 
 ### 1: Install smart contract dependencies
