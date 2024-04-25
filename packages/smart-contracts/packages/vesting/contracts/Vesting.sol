@@ -286,7 +286,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         uint16 pid,
         address[] calldata beneficiaries,
         uint256[] calldata tokenAmounts
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) mPoolExists(pid) {
+    ) external onlyRole(BENEFICIARIES_MANAGER_ROLE) mPoolExists(pid) {
         uint256 beneficiaryCount = beneficiaries.length;
 
         // Checks: Array lengths should be equal
