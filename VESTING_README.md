@@ -1,6 +1,3 @@
-# Main vesting contract code
-[Vesting.sol](packages/smart-contracts/packages/vesting/contracts/Vesting.sol)
-
 # Vesting for WOW platform
 ![Vesting Schedule](Vesting-diagram.png?raw=true) <br />
 This contract implements token vesting and claiming for the specified list of beneficiaries.
@@ -18,6 +15,10 @@ Example data for pools:
 | NFT Holders           | 8,000,000  | 10 %         | 15 %           | 24                     | Mothly                        |
 | Community Sale 0.005               | 100,000  | 5 %         | 0 %           | 24                     | Monthly                        |
 | Whitelist Sale 0.001             | 21,000,000  | 55 %         | 10 %           | 18                     | Daily   |
+
+### Main vesting contract code
+[Vesting.sol](packages/smart-contracts/packages/vesting/contracts/Vesting.sol)
+
 
 # Deployment
 ## Prerequisites:
