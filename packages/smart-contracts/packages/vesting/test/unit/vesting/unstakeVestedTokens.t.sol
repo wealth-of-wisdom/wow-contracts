@@ -23,6 +23,7 @@ contract Vesting_UnstakeVestedTokens_Unit_Test is Unit_Test {
         addBeneficiary(alice)
         stakeVestedTokens(alice)
     {
+        vm.warp(MONTH * MONTH_2);
         vm.startPrank(alice);
         vm.expectCall(
             address(vesting),
@@ -51,6 +52,7 @@ contract Vesting_UnstakeVestedTokens_Unit_Test is Unit_Test {
         addBeneficiary(alice)
         stakeVestedTokens(alice)
     {
+        vm.warp(MONTH * MONTH_2);
         vm.startPrank(alice);
         vm.expectEmit(address(vesting));
         emit VestedTokensUnstaked(PRIMARY_POOL, alice, BAND_1_PRICE, BAND_ID_0);

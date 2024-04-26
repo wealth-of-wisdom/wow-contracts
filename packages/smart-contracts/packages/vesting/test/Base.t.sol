@@ -184,9 +184,9 @@ contract Base_Test is
     function _stakeVestedTokens(address beneficiary) internal {
         vm.startPrank(beneficiary);
         vesting.stakeVestedTokens(
-            STAKING_TYPE_FLEXI,
+            STAKING_TYPE_FIX,
             BAND_LEVEL_1,
-            0,
+            MONTH_1,
             PRIMARY_POOL
         );
         vm.stopPrank();

@@ -60,9 +60,9 @@ contract Vesting_ClaimTokens_Unit_Test is Unit_Test {
         vm.warp(LISTING_DATE + 1 minutes);
         vm.prank(alice);
         vesting.stakeVestedTokens(
-            STAKING_TYPE_FLEXI,
+            STAKING_TYPE_FIX,
             BAND_LEVEL_1,
-            MONTH_0,
+            MONTH_1,
             PRIMARY_POOL
         );
 

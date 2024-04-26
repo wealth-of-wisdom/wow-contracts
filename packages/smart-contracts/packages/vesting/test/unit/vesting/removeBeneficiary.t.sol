@@ -119,9 +119,9 @@ contract Vesting_RemoveBeneficiary_Unit_Test is Unit_Test {
         vm.warp(CLIFF_END_DATE);
         vm.prank(alice);
         vesting.stakeVestedTokens(
-            STAKING_TYPE_FLEXI,
+            STAKING_TYPE_FIX,
             BAND_LEVEL_1,
-            MONTH_0,
+            MONTH_1,
             PRIMARY_POOL
         );
 
@@ -176,9 +176,9 @@ contract Vesting_RemoveBeneficiary_Unit_Test is Unit_Test {
         vm.warp(CLIFF_END_DATE);
         vm.prank(alice);
         vesting.stakeVestedTokens(
-            STAKING_TYPE_FLEXI,
+            STAKING_TYPE_FIX,
             BAND_LEVEL_1,
-            MONTH_0,
+            MONTH_1,
             PRIMARY_POOL
         );
 

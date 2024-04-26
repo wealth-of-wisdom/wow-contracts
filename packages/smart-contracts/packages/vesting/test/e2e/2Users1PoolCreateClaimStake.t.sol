@@ -25,6 +25,7 @@ contract Vesting_E2E_Test is VestingAssertions {
         vm.startPrank(admin);
         balances.vestingBalanceBefore = wowToken.balanceOf(address(vesting));
         balances.adminBalanceBefore = wowToken.balanceOf(admin);
+        staking.setSharesInMonth(SHARES_IN_MONTH);
 
         {
             wowToken.approve(address(vesting), TOTAL_POOL_TOKEN_AMOUNT);
@@ -111,9 +112,9 @@ contract Vesting_E2E_Test is VestingAssertions {
             );
 
             vesting.stakeVestedTokens(
-                STAKING_TYPE_FLEXI,
+                STAKING_TYPE_FIX,
                 BAND_LEVEL_1,
-                MONTH_0,
+                MONTH_1,
                 PRIMARY_POOL
             );
             assertStakerVestedData(PRIMARY_POOL, alice, BAND_1_PRICE);
@@ -140,9 +141,9 @@ contract Vesting_E2E_Test is VestingAssertions {
             );
 
             vesting.stakeVestedTokens(
-                STAKING_TYPE_FLEXI,
+                STAKING_TYPE_FIX,
                 BAND_LEVEL_2,
-                MONTH_0,
+                MONTH_1,
                 PRIMARY_POOL
             );
             assertStakerVestedData(PRIMARY_POOL, bob, BAND_2_PRICE);
