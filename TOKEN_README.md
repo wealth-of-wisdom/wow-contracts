@@ -3,7 +3,7 @@ Tokens will be available for claiming in the [Wealth Of Wisdom platform](https:/
 Every purchase of a WOW Token contributes directly to the wealth protocol, a pool of capital allocated to finance promising projects that have the potential to shape the future of technology, sustainability, and decentralized finance. This unique model ensures that WOW Token holders are directly connected to the success of these ventures when they stake their tokens.
 
 # Token standard
-The WOWToken is based on the ERC20 token standard and is using the OpenZeppelin implementation. All OpenZeppelin integrations are tested on their end and are approved. Our testing includes all functions added post implementation. Some internal functions such as **_authorizeUpgrade** or **_update** ar necesarry override functions when inheriting OpenZeppelin libraries.
+The WOWToken is based on the ERC20 token standard and is using the OpenZeppelin implementation. All OpenZeppelin integrations are tested on their end and are approved. Our testing includes all functions added post implementation. Some internal functions such as **_authorizeUpgrade** or **_update** are necessary override functions when inheriting OpenZeppelin libraries.
 
 # Deployment
 ### Main token contract code
