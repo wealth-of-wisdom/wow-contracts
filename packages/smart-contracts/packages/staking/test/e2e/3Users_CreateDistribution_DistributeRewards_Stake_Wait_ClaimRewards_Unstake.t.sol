@@ -50,10 +50,13 @@ contract Staking_E2E_Test is StakingAssertions {
         balances.carolPreStakingBalance = wowToken.balanceOf(carol);
         uint256 firstBandId = staking.getNextBandId();
 
+        vm.startPrank(admin);
+        staking.setSharesInMonth(SHARES_IN_MONTH);
+
         {
             vm.startPrank(alice);
             wowToken.approve(address(staking), BAND_2_PRICE);
-            staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_2, MONTH_0);
+            staking.stake(STAKING_TYPE_FIX, BAND_LEVEL_2, MONTH_1);
             vm.stopPrank();
         }
 
@@ -62,7 +65,7 @@ contract Staking_E2E_Test is StakingAssertions {
         {
             vm.startPrank(bob);
             wowToken.approve(address(staking), BAND_1_PRICE);
-            staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
+            staking.stake(STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_1);
             vm.stopPrank();
 
             assertStaked(alice, firstBandId, BAND_LEVEL_2, 1);
@@ -74,7 +77,7 @@ contract Staking_E2E_Test is StakingAssertions {
         {
             vm.startPrank(carol);
             wowToken.approve(address(staking), BAND_3_PRICE);
-            staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_3, MONTH_0);
+            staking.stake(STAKING_TYPE_FIX, BAND_LEVEL_3, MONTH_1);
             vm.stopPrank();
 
             assertStaked(alice, firstBandId, BAND_LEVEL_2, 1);

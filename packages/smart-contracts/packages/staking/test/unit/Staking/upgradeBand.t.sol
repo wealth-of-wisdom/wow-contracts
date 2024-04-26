@@ -63,28 +63,13 @@ contract Staking_UpgradeBand_Unit_Test is Unit_Test {
         staking.upgradeBand(BAND_ID_0, invalidLevel);
     }
 
-    function test_upgradeBand_RevertIf_FixTypeBand()
+    function test_upgradeBand_RevertIf_FlexiTypeBand()
         external
         setBandLevelData
         setSharesInMonth
         stakeTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_12)
     {
         vm.expectRevert(Errors.Staking__NotFlexiTypeBand.selector);
-        vm.prank(alice);
-        staking.upgradeBand(BAND_ID_0, BAND_LEVEL_7);
-    }
-
-    function test_upgradeBand_RevertIf_TokensAreVested()
-        external
-        setBandLevelData
-        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
-    {
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Errors.Staking__BandFromVestedTokens.selector,
-                true
-            )
-        );
         vm.prank(alice);
         staking.upgradeBand(BAND_ID_0, BAND_LEVEL_7);
     }

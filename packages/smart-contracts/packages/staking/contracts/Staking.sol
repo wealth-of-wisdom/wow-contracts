@@ -654,8 +654,8 @@ contract Staking is
         returns (uint256 bandId)
     {
         // Checks: only flexi type is allowed for vesting
-        if (StakingTypes.FLEXI != stakingType) {
-            revert Errors.Staking__OnlyFlexiTypeAllowed();
+        if (StakingTypes.FIX != stakingType) {
+            revert Errors.Staking__OnlyFixTypeAllowed();
         }
 
         // Effects: Create a new band and add it to the user

@@ -24,7 +24,7 @@ library Errors {
     error Staking__TotalAllocationExceedsMaximum(uint48 percentage);
     error Staking__InvalidBandsAmount();
     error Staking__UpgradesDisabled();
-    error Staking__OnlyFlexiTypeAllowed();
+    error Staking__OnlyFixTypeAllowed();
     error Staking__ZeroAmount();
     error Staking__ZeroAddress();
     error Staking__ZeroPoolShares();

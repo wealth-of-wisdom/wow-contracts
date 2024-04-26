@@ -19,9 +19,9 @@ contract Staking_E2E_Test is StakingAssertions {
     {
         /**
          * 1. Alice stakes to level 3 band
-         * 2. Bob stakes to level 6 band
-         * 3. Alice upgrades band
-         * 4. Bob downgrades band
+         * 2. Bob stakes to level 4 band
+         * 3. Alice upgrades band - removed due to FIX type
+         * 4. Bob downgrades band - removed due to FIX type
          * 5. Alice unstakes
          */
 
@@ -37,10 +37,13 @@ contract Staking_E2E_Test is StakingAssertions {
         balances.bobPreUnstakingBalance = wowToken.balanceOf(bob);
         uint256 firstBandId = staking.getNextBandId();
 
+        vm.startPrank(admin);
+        staking.setSharesInMonth(SHARES_IN_MONTH);
+
         {
             vm.startPrank(alice);
             wowToken.approve(address(staking), BAND_2_PRICE);
-            staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_2, MONTH_0);
+            staking.stake(STAKING_TYPE_FIX, BAND_LEVEL_2, MONTH_1);
             vm.stopPrank();
         }
 
@@ -49,16 +52,18 @@ contract Staking_E2E_Test is StakingAssertions {
         {
             vm.startPrank(bob);
             wowToken.approve(address(staking), BAND_4_PRICE);
-            staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0);
+            staking.stake(STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_1);
             vm.stopPrank();
 
-            vm.startPrank(alice);
-            wowToken.approve(address(staking), BAND_6_PRICE - BAND_2_PRICE);
-            staking.upgradeBand(firstBandId, BAND_LEVEL_6);
-            vm.stopPrank();
+            // vm.startPrank(alice);
+            // wowToken.approve(address(staking), BAND_6_PRICE - BAND_2_PRICE);
+            // staking.upgradeBand(firstBandId, BAND_LEVEL_6);
+            // vm.stopPrank();
 
-            vm.prank(bob);
-            staking.downgradeBand(secondBandId, BAND_LEVEL_1);
+            // vm.prank(bob);
+            // staking.downgradeBand(secondBandId, BAND_LEVEL_1);
+
+            vm.warp(MONTH * MONTH_2);
 
             vm.prank(alice);
             staking.unstake(firstBandId);
@@ -67,8 +72,8 @@ contract Staking_E2E_Test is StakingAssertions {
         balances.alicePostStakingBalance = wowToken.balanceOf(alice);
         balances.bobPostUnstakingBalance =
             wowToken.balanceOf(bob) +
-            BAND_1_PRICE;
-        balances.stakingPreUnstakingBalance = BAND_1_PRICE;
+            BAND_4_PRICE;
+        balances.stakingPreUnstakingBalance = BAND_4_PRICE;
         balances.stakingPostUnstakingBalance = wowToken.balanceOf(
             address(staking)
         );
@@ -85,7 +90,7 @@ contract Staking_E2E_Test is StakingAssertions {
             );
 
             assertUnstaked(firstBandId);
-            assertStaked(bob, secondBandId, BAND_LEVEL_1, 1);
+            assertStaked(bob, secondBandId, BAND_LEVEL_4, 1);
             assertStakerBandIds(alice, EMPTY_STAKER_BAND_IDS);
             assertStakerBandIds(bob, BOB_BAND_IDS);
             assertStateVariables(staking.getNextBandId(), true);
