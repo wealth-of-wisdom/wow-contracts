@@ -3,7 +3,7 @@
     "vestingAddress": "0xE4132f9334a6295e48a722F5B5Dc65B11CAe34F0",
     "stakingAddress": "0x2015745Ca6a4ccCE9E585fD6f0CD4E405899d4A9",
     "nftAddress": "0x03738351F0efEfD62bEc19dbA05842f96f9439dC",
-    "startBlock": 30559924,
+    "startBlock": 34607399,
     "includeVesting": true,
     "includeStaking": true,
     "includeNft": true
