@@ -1,7 +1,7 @@
 const { ethers, upgrades } = require("hardhat")
 require("dotenv").config()
 
-async function upgradeStaking(stakingImplementationAddress) {
+async function upgradeStaking() {
     /*//////////////////////////////////////////////////////////////////////////
                                   UPGRADE STAKING
     //////////////////////////////////////////////////////////////////////////*/

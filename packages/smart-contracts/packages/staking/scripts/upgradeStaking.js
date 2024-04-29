@@ -4,9 +4,9 @@ const deployStakingImplementation = require("./helpers/deployStakingImplementati
 require("dotenv").config()
 
 async function main() {
-    newStakingImplementation = await deployStakingImplementation()
+    await deployStakingImplementation()
 
-    await upgradeStaking(newStakingImplementation)
+    await upgradeStaking()
 }
 
 main().catch((error) => {
