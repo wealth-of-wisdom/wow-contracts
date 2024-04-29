@@ -73,6 +73,7 @@ export function handleInitialized(event: InitializedEvent): void {
     stakingContract.totalBandLevels = staking.getTotalBandLevels();
     stakingContract.lastSharesSyncDate = event.block.timestamp;
     stakingContract.periodDuration = staking.getPeriodDuration();
+
     stakingContract.save();
 }
 
