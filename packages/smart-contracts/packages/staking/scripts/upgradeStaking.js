@@ -1,4 +1,4 @@
-const upgradeStaking = require("./sub-tasks/upgradeStaking")
+const upgradeStaking = require("./helpers/upgradeStaking")
 const deployStakingImplementation = require("./helpers/deployStakingImplementation")
 require("dotenv").config()
 
