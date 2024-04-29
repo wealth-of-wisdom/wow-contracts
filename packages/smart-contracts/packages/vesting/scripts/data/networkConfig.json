@@ -2,25 +2,21 @@
     "ethereum": {
         "vesting_token": "",
         "staking_contract": "",
-        "listing_date": "",
-        "all_pools_token_amount_in_eth": ""
+        "listing_date": ""
     },
     "sepolia": {
         "vesting_token": "0x37ba7eEBa521c4a8998e0644Dd1ae5F524fB5670",
         "staking_contract": "",
-        "listing_date": "1900000000",
-        "all_pools_token_amount_in_eth": "100000000000"
+        "listing_date": ""
     },
     "arbitrumOne": {
         "vesting_token": "",
         "staking_contract": "",
-        "listing_date": "",
-        "all_pools_token_amount_in_eth": ""
+        "listing_date": ""
     },
     "arbitrumSepolia": {
         "vesting_token": "0x685C3D7C82cd55aEE06d5f1631bbd00c6D7b2539",
         "staking_contract": "",
-        "listing_date": "1900000000",
-        "all_pools_token_amount_in_eth": "100000000000"
+        "listing_date": ""
     }
 }
