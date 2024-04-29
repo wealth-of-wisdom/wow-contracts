@@ -1,8 +1,8 @@
 {
     "network": "arbitrum-sepolia",
-    "vestingAddress": "0x8ba2Cd611BbaC7E2792949c196258Be5BBf5E897",
-    "stakingAddress": "0x9688beDc40c26A7d6C515D9F58EF35990c70334e",
-    "nftAddress": "0x1E679F94b419236BfFC3fB1236926c97cA292eD1",
+    "vestingAddress": "0xE4132f9334a6295e48a722F5B5Dc65B11CAe34F0",
+    "stakingAddress": "0x2015745Ca6a4ccCE9E585fD6f0CD4E405899d4A9",
+    "nftAddress": "0x03738351F0efEfD62bEc19dbA05842f96f9439dC",
     "startBlock": 30559924,
     "includeVesting": true,
     "includeStaking": true,
