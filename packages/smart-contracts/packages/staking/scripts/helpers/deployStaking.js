@@ -1,4 +1,5 @@
-const { ethers, upgrades } = require("hardhat")
+const { ethers, upgrades, network } = require("hardhat")
+const { TESTNET_NETWORKS, MAINNET_NETWORKS } = require("./constants")
 
 async function deployStaking(
     usdtToken,
@@ -13,7 +14,16 @@ async function deployStaking(
                                   DEPLOY STAKING
     //////////////////////////////////////////////////////////////////////////*/
 
-    const Staking = await ethers.getContractFactory("Staking")
+    let StakingContractName = ""
+    if (TESTNET_NETWORKS.includes(network.name)) {
+        StakingContractName = "StakingMock"
+    } else if (MAINNET_NETWORKS.includes(network.name)) {
+        StakingContractName = "Staking"
+    } else {
+        throw new Error("Network not supported")
+    }
+
+    const Staking = await ethers.getContractFactory(StakingContractName)
     const staking = await upgrades.deployProxy(Staking, [
         usdtToken,
         usdcToken,
