@@ -219,7 +219,7 @@
     },
     {
         "inputs": [],
-        "name": "Staking__OnlyFixTypeAllowed",
+        "name": "Staking__OnlyFlexiTypeAllowed",
         "type": "error"
     },
     {

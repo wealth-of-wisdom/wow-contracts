@@ -1,16 +1,27 @@
-const { ethers } = require("hardhat")
-const poolsData = require("../data/vestingPools.json")
+const { network, ethers } = require("hardhat")
+const poolsDataDev = require("../data/dev/vestingPools.json")
+const poolsDataProd = require("../data/prod/vestingPools.json")
+const {
+    MAINNET_NETWORKS,
+    PERCENTAGE_DIVISOR,
+    WOW_TOKEN_DECIMALS,
+    DAILY_UNLOCK_TYPE_NUM,
+    MONTHLY_UNLOCK_TYPE_NUM,
+    DAILY_UNLOCK_TYPE_STR,
+} = require("./constants")
 
-async function addVestingPools(tokenAddress, vestingAddress, totalTokens) {
+async function addVestingPools(tokenAddress, vestingAddress) {
     const token = await ethers.getContractAt("WOWToken", tokenAddress)
     const vesting = await ethers.getContractAt("Vesting", vestingAddress)
-    const tokenDecimals = await token.decimals()
+    const poolsData = MAINNET_NETWORKS.includes(network.name)
+        ? poolsDataProd
+        : poolsDataDev
 
     /*//////////////////////////////////////////////////////////////////////////
                                 VALIDATE ALL THE DATA
     //////////////////////////////////////////////////////////////////////////*/
 
-    validateData(poolsData, totalTokens, tokenDecimals)
+    const totalTokens = await validateData(poolsData, WOW_TOKEN_DECIMALS)
 
     /*//////////////////////////////////////////////////////////////////////////
                         APPROVE VESTING TO SPEND TOKENS
@@ -25,28 +36,23 @@ async function addVestingPools(tokenAddress, vestingAddress, totalTokens) {
                                 ADD VESTING POOLS
     //////////////////////////////////////////////////////////////////////////*/
 
-    const DIVISOR = 100
-    const DAYS_IN_MONTH = 30
-    const DAILY_UNLOCK_TYPE = 0
-    const MONTHLY_UNLOCK_TYPE = 1
-
     for (let pool of poolsData) {
         const tokenAmountInWei = ethers.parseUnits(
             pool.tokens_amount_in_wow,
-            tokenDecimals,
+            WOW_TOKEN_DECIMALS,
         )
         const unlockType =
-            pool.unlock_type === "DAILY"
-                ? DAILY_UNLOCK_TYPE
-                : MONTHLY_UNLOCK_TYPE
+            pool.unlock_type === DAILY_UNLOCK_TYPE_STR
+                ? DAILY_UNLOCK_TYPE_NUM
+                : MONTHLY_UNLOCK_TYPE_NUM
 
         const tx2 = await vesting.addVestingPool(
             pool.name, // Name
             pool.listing_release_percentage, // Listing percentage dividend
-            DIVISOR, // Listing percentage divisor
-            pool.cliff_in_months * DAYS_IN_MONTH, // Cliff duration in days
+            PERCENTAGE_DIVISOR, // Listing percentage divisor
+            pool.cliff_in_days, // Cliff duration in days
             pool.cliff_release_percentage, // Cliff percentage dividend
-            DIVISOR, // Cliff percentage divisor
+            PERCENTAGE_DIVISOR, // Cliff percentage divisor
             pool.vesting_in_months, // Vesting duration in months
             unlockType, // Unlock type: DAILY or MONTHLY
             tokenAmountInWei, // Total token amount for vesting pool
@@ -57,7 +63,7 @@ async function addVestingPools(tokenAddress, vestingAddress, totalTokens) {
     }
 }
 
-async function validateData(data, totalTokens, tokenDecimals) {
+async function validateData(data, decimals) {
     let allPoolsTokens = BigInt(0)
 
     for (let pool of data) {
@@ -69,24 +75,21 @@ async function validateData(data, totalTokens, tokenDecimals) {
         if (
             typeof pool.listing_release_percentage !== "number" ||
             pool.listing_release_percentage < 0 ||
-            pool.listing_release_percentage > 100
+            pool.listing_release_percentage > PERCENTAGE_DIVISOR
         ) {
             throw new Error(
                 `Invalid listing percentage: ${pool.listing_release_percentage}`,
             )
         }
 
-        if (
-            typeof pool.cliff_in_months !== "number" ||
-            pool.cliff_in_months < 0
-        ) {
-            throw new Error(`Invalid cliff duration: ${pool.cliff_in_months}`)
+        if (typeof pool.cliff_in_days !== "number" || pool.cliff_in_days < 0) {
+            throw new Error(`Invalid cliff duration: ${pool.cliff_in_days}`)
         }
 
         if (
             typeof pool.cliff_release_percentage !== "number" ||
             pool.cliff_release_percentage < 0 ||
-            pool.cliff_release_percentage > 100
+            pool.cliff_release_percentage > PERCENTAGE_DIVISOR
         ) {
             throw new Error(
                 `Invalid cliff percentage: ${pool.cliff_release_percentage}`,
@@ -104,7 +107,8 @@ async function validateData(data, totalTokens, tokenDecimals) {
 
         if (
             typeof pool.unlock_type !== "string" ||
-            (pool.unlock_type !== "DAILY" && pool.unlock_type !== "MONTHLY")
+            (pool.unlock_type !== DAILY_UNLOCK_TYPE_STR &&
+                pool.unlock_type !== MONTHLY_UNLOCK_TYPE_STR)
         ) {
             throw new Error(`Invalid unlock type: ${pool.unlock_type}`)
         }
@@ -118,20 +122,13 @@ async function validateData(data, totalTokens, tokenDecimals) {
             )
         }
 
-        allPoolsTokens += ethers.parseUnits(
-            pool.tokens_amount_in_wow,
-            tokenDecimals,
-        )
+        allPoolsTokens += ethers.parseUnits(pool.tokens_amount_in_wow, decimals)
     }
 
-    // Validate that the total tokens amount matches the sum of all pools
-    if (allPoolsTokens !== BigInt(totalTokens)) {
-        throw new Error(
-            `Total tokens amount mismatch: ${allPoolsTokens.toString()} !== ${totalTokens}`,
-        )
-    }
-
+    console.log("Total tokens: ", allPoolsTokens.toString())
     console.log("Pools validated!")
+
+    return allPoolsTokens
 }
 
 module.exports = addVestingPools
