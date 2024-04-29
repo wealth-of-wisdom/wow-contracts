@@ -28,7 +28,7 @@ contract Staking_Unstake_Unit_Test is Unit_Test {
         external
         setBandLevelData
         setSharesInMonth
-        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_1)
     {
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -113,7 +113,6 @@ contract Staking_Unstake_Unit_Test is Unit_Test {
         assertEq(bandIds[0], BAND_ID_2, "Band id not removed");
         assertEq(bandIds[1], BAND_ID_1, "Band id not removed");
     }
-
 
     function test_unstake_FlexiType_DeletesSecondBandFrom3StakerBands()
         external

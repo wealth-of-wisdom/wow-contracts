@@ -39,15 +39,13 @@ contract Staking_E2E_Test is StakingAssertions {
         balances.bobPreUnstakingBalance = wowToken.balanceOf(bob);
         uint256 firstBandId = staking.getNextBandId();
 
+        vm.startPrank(admin);
+        staking.setSharesInMonth(SHARES_IN_MONTH);
+
         {
             vm.startPrank(alice);
             wowToken.approve(address(staking), BAND_2_PRICE);
-            staking.stakeVested(
-                alice,
-                STAKING_TYPE_FLEXI,
-                BAND_LEVEL_2,
-                MONTH_0
-            );
+            staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_2, MONTH_1);
             vm.stopPrank();
         }
         uint256 secondBandId = staking.getNextBandId();
@@ -55,10 +53,10 @@ contract Staking_E2E_Test is StakingAssertions {
         {
             vm.startPrank(bob);
             wowToken.approve(address(staking), BAND_4_PRICE);
-            staking.stakeVested(bob, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0);
+            staking.stakeVested(bob, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_1);
             vm.stopPrank();
 
-            skip(MONTH);
+            skip(MONTH * MONTH_2);
 
             vm.prank(alice);
             staking.unstakeVested(alice, firstBandId);

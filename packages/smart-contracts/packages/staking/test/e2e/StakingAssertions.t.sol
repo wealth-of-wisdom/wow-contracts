@@ -31,7 +31,7 @@ contract StakingAssertions is Base_Test {
 
         assertEq(
             uint8(stakingType),
-            uint8(STAKING_TYPE_FLEXI),
+            uint8(STAKING_TYPE_FIX),
             "Staking type not set"
         );
         assertEq(owner, staker, "Owner not set");

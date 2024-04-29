@@ -74,20 +74,22 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
         staking.downgradeBand(BAND_ID_0, BAND_LEVEL_1);
     }
 
-    function test_downgradeBand_RevertIf_TokensAreVested()
-        external
-        setBandLevelData
-        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
-    {
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Errors.Staking__BandFromVestedTokens.selector,
-                true
-            )
-        );
-        vm.prank(alice);
-        staking.downgradeBand(BAND_ID_0, BAND_LEVEL_1);
-    }
+    // CAN NOT DOWNGRADE FIX TYPE BAND
+    // function test_downgradeBand_RevertIf_TokensAreVested()
+    //     external
+    //     setBandLevelData
+    //     setSharesInMonth
+    //     stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_1)
+    // {
+    //     vm.expectRevert(
+    //         abi.encodeWithSelector(
+    //             Errors.Staking__BandFromVestedTokens.selector,
+    //             true
+    //         )
+    //     );
+    //     vm.prank(alice);
+    //     staking.downgradeBand(BAND_ID_0, BAND_LEVEL_1);
+    // }
 
     function test_downgradeBand_RevertIf_DistributionInProgress()
         external

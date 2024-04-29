@@ -11,9 +11,9 @@ contract Vesting_StakeVestedTokens_Unit_Test is Unit_Test {
         vm.expectRevert(Errors.Vesting__PoolDoesNotExist.selector);
         vm.prank(alice);
         vesting.stakeVestedTokens(
-            STAKING_TYPE_FLEXI,
+            STAKING_TYPE_FIX,
             BAND_LEVEL_2,
-            MONTH_0,
+            MONTH_1,
             PRIMARY_POOL
         );
     }
@@ -25,9 +25,9 @@ contract Vesting_StakeVestedTokens_Unit_Test is Unit_Test {
         vm.expectRevert(Errors.Vesting__NotBeneficiary.selector);
         vm.prank(alice);
         vesting.stakeVestedTokens(
-            STAKING_TYPE_FLEXI,
+            STAKING_TYPE_FIX,
             BAND_LEVEL_2,
-            MONTH_0,
+            MONTH_1,
             PRIMARY_POOL
         );
     }
@@ -42,9 +42,9 @@ contract Vesting_StakeVestedTokens_Unit_Test is Unit_Test {
         );
         vm.prank(alice);
         vesting.stakeVestedTokens(
-            STAKING_TYPE_FLEXI,
+            STAKING_TYPE_FIX,
             BAND_LEVEL_2,
-            MONTH_0,
+            MONTH_1,
             PRIMARY_POOL
         );
     }
@@ -56,9 +56,9 @@ contract Vesting_StakeVestedTokens_Unit_Test is Unit_Test {
     {
         vm.prank(alice);
         vesting.stakeVestedTokens(
-            STAKING_TYPE_FLEXI,
+            STAKING_TYPE_FIX,
             BAND_LEVEL_1,
-            MONTH_0,
+            MONTH_1,
             PRIMARY_POOL
         );
 
@@ -87,17 +87,17 @@ contract Vesting_StakeVestedTokens_Unit_Test is Unit_Test {
             address(vesting),
             abi.encodeWithSelector(
                 IVesting.stakeVestedTokens.selector,
-                STAKING_TYPE_FLEXI,
+                STAKING_TYPE_FIX,
                 BAND_LEVEL_1,
-                MONTH_0,
+                MONTH_1,
                 PRIMARY_POOL
             )
         );
         vm.prank(alice);
         vesting.stakeVestedTokens(
-            STAKING_TYPE_FLEXI,
+            STAKING_TYPE_FIX,
             BAND_LEVEL_1,
-            MONTH_0,
+            MONTH_1,
             PRIMARY_POOL
         );
     }

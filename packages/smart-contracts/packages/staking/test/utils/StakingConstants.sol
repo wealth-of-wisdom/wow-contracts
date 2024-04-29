@@ -118,6 +118,7 @@ abstract contract StakingConstants {
     uint48 internal constant MONTH = 30 days;
     uint8 internal constant MONTH_0 = 0;
     uint8 internal constant MONTH_1 = 1;
+    uint8 internal constant MONTH_2 = 2;
     uint8 internal constant MONTH_12 = 12;
     uint8 internal constant MONTH_24 = 24;
     uint8 internal constant MONTH_25 = 25;

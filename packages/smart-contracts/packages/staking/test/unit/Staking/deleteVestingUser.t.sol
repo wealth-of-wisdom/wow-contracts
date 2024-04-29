@@ -31,11 +31,11 @@ contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
                                     FLEXI STAKING
     //////////////////////////////////////////////////////////////////////////*/
 
-    function test_deleteVestingUser_FlexiType_Deletes1StakerBandData()
+    function test_deleteVestingUser_FixType_Deletes1StakerBandData()
         external
         setBandLevelData
         setSharesInMonth
-        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_1)
     {
         vm.prank(address(vesting));
         staking.deleteVestingUser(alice);
@@ -57,13 +57,13 @@ contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
         assertEq(areTokensVested, false, "Vesting status not removed");
     }
 
-    function test_deleteVestingUser_FlexiType_Deletes3StakerBandsData()
+    function test_deleteVestingUser_FixType_Deletes3StakerBandsData()
         external
         setBandLevelData
         setSharesInMonth
-        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0)
-        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_5, MONTH_0)
-        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_9, MONTH_0)
+        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_1)
+        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_5, MONTH_1)
+        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_9, MONTH_1)
     {
         vm.prank(address(vesting));
         staking.deleteVestingUser(alice);
@@ -117,11 +117,11 @@ contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
         assertEq(areTokensVested, false, "Vesting status not removed");
     }
 
-    function test_deleteVestingUser_FlexiType_DeletesStakerBandIdsArrayHolding1Id()
+    function test_deleteVestingUser_FixType_DeletesStakerBandIdsArrayHolding1Id()
         external
         setBandLevelData
         setSharesInMonth
-        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_1)
     {
         vm.prank(address(vesting));
         staking.deleteVestingUser(alice);
@@ -130,13 +130,13 @@ contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
         assertEq(bandIds.length, 0, "BandIds not removed");
     }
 
-    function test_deleteVestingUser_FlexiType_DeletesStakerBandIdsArrayHolding3Id()
+    function test_deleteVestingUser_FixType_DeletesStakerBandIdsArrayHolding3Id()
         external
         setBandLevelData
         setSharesInMonth
-        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0)
-        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_5, MONTH_0)
-        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_9, MONTH_0)
+        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_1)
+        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_5, MONTH_1)
+        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_9, MONTH_1)
     {
         vm.prank(address(vesting));
         staking.deleteVestingUser(alice);
@@ -145,13 +145,13 @@ contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
         assertEq(bandIds.length, 0, "BandIds not removed");
     }
 
-    function test_deleteVestingUser_FlexiType_DeletesStakerRewardsForUSDT()
+    function test_deleteVestingUser_FixType_DeletesStakerRewardsForUSDT()
         external
         setBandLevelData
         setSharesInMonth
         createDistribution(usdtToken)
         distributeRewards(usdtToken)
-        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_1)
     {
         vm.prank(address(vesting));
         staking.deleteVestingUser(alice);
@@ -165,13 +165,13 @@ contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
         assertEq(claimed, 0, "Rewards not removed");
     }
 
-    function test_deleteVestingUser_FlexiType_DeletesStakerRewardsForUSDC()
+    function test_deleteVestingUser_FixType_DeletesStakerRewardsForUSDC()
         external
         setBandLevelData
         setSharesInMonth
         createDistribution(usdcToken)
         distributeRewards(usdcToken)
-        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_1)
     {
         vm.prank(address(vesting));
         staking.deleteVestingUser(alice);
@@ -185,11 +185,11 @@ contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
         assertEq(claimed, 0, "Rewards not removed");
     }
 
-    function test_deleteVestingUser_FlexiType_RemovesUserFromAllUsers()
+    function test_deleteVestingUser_FixType_RemovesUserFromAllUsers()
         external
         setBandLevelData
         setSharesInMonth
-        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_1)
     {
         vm.prank(address(vesting));
         staking.deleteVestingUser(alice);
@@ -197,11 +197,11 @@ contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
         assertEq(staking.getTotalUsers(), 0, "User not removed");
     }
 
-    function test_deleteVestingUser_FlexiType_EmitsVestingUserDeletedEvent()
+    function test_deleteVestingUser_FixType_EmitsVestingUserDeletedEvent()
         external
         setBandLevelData
         setSharesInMonth
-        stakeVestedTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_1)
     {
         vm.expectEmit(address(staking));
         emit VestingUserDeleted(alice);

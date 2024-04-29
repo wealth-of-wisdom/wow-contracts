@@ -19,7 +19,7 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
             )
         );
         vm.prank(alice);
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_2, MONTH_0);
+        staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_2, MONTH_1);
     }
 
     function test_stakeVested_RevertIf_UserIsZeroAddress()
@@ -30,9 +30,9 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
         vm.prank(address(vesting));
         staking.stakeVested(
             ZERO_ADDRESS,
-            STAKING_TYPE_FLEXI,
+            STAKING_TYPE_FIX,
             BAND_LEVEL_4,
-            MONTH_0
+            MONTH_1
         );
     }
 
@@ -48,10 +48,10 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
             )
         );
         vm.prank(address(vesting));
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, invalidLevel, MONTH_0);
+        staking.stakeVested(alice, STAKING_TYPE_FIX, invalidLevel, MONTH_1);
     }
 
-    function test_stakeVested_RevertIf_InvalidMonthForFlexiType()
+    function test_stakeVested_RevertIf_InvalidMonthForFixType()
         external
         setBandLevelData
         setSharesInMonth
@@ -59,11 +59,11 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
         vm.expectRevert(
             abi.encodeWithSelector(
                 Errors.Staking__InvalidMonth.selector,
-                MONTH_1
+                MONTH_0
             )
         );
         vm.prank(address(vesting));
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_1);
+        staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_0);
     }
 
     function test_stakeVested_RevertIf_DistributionInProgress()
@@ -74,17 +74,17 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
     {
         vm.expectRevert(Errors.Staking__DistributionInProgress.selector);
         vm.prank(address(vesting));
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
+        staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_1);
     }
 
-    function test_stakeVested_RevertIf_StakingTypeNotFlexi()
+    function test_stakeVested_RevertIf_StakingTypeNotFix()
         external
         setBandLevelData
         setSharesInMonth
     {
-        vm.expectRevert(Errors.Staking__OnlyFlexiTypeAllowed.selector);
+        vm.expectRevert(Errors.Staking__OnlyFixTypeAllowed.selector);
         vm.prank(address(vesting));
-        staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_1);
+        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
     }
 
     // NOTE: no more FIX staking for vesting
@@ -96,11 +96,11 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
     //     vm.expectRevert(
     //         abi.encodeWithSelector(
     //             Errors.Staking__InvalidMonth.selector,
-    //             MONTH_0
+    //             MONTH_1
     //         )
     //     );
     //     vm.prank(address(vesting));
-    //     staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
+    //     staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_1);
     // }
 
     // NOTE: no more FIX staking for vesting
@@ -116,14 +116,14 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
     //         )
     //     );
     //     vm.prank(address(vesting));
-    //     staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
+    //     staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_1);
     // }
 
     /*//////////////////////////////////////////////////////////////////////////
                                     FLEXI STAKING
     //////////////////////////////////////////////////////////////////////////*/
 
-    function test_stakeVested_FlexiType_IncreasesNextBandId()
+    function test_stakeVested_FixType_IncreasesNextBandId()
         external
         setBandLevelData
         setSharesInMonth
@@ -131,7 +131,7 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
         uint256 nextBandIdBefore = staking.getNextBandId();
 
         vm.prank(address(vesting));
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_2, MONTH_0);
+        staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_2, MONTH_1);
 
         uint256 nextBandIdAfter = staking.getNextBandId();
         assertEq(
@@ -141,7 +141,7 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
         );
     }
 
-    function test_stakeVested_FlexiType_SetsBandData()
+    function test_stakeVested_FixType_SetsBandData()
         external
         setBandLevelData
         setSharesInMonth
@@ -150,7 +150,7 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
         vm.warp(currentTimestamp);
 
         vm.prank(address(vesting));
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_2, MONTH_0);
+        staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_2, MONTH_1);
 
         (
             address owner,
@@ -164,18 +164,18 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
         assertEq(owner, alice, "Owner not set");
         assertEq(stakingStartDate, currentTimestamp, "Timestamp not set");
         assertEq(bandLevel, BAND_LEVEL_2, "BandLevel Level not set");
-        assertEqStakingType(stakingType, STAKING_TYPE_FLEXI);
-        assertEq(fixedMonths, MONTH_0, "Fixed months not set");
+        assertEqStakingType(stakingType, STAKING_TYPE_FIX);
+        assertEq(fixedMonths, MONTH_1, "Fixed months not set");
         assertTrue(areTokensVested, "Tokens not vested");
     }
 
-    function test_stakeVested_FlexiType_Adds1BandToAllStakerBands()
+    function test_stakeVested_FixType_Adds1BandToAllStakerBands()
         external
         setBandLevelData
         setSharesInMonth
     {
         vm.prank(address(vesting));
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_2, MONTH_0);
+        staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_2, MONTH_1);
 
         uint256[] memory allStakerBands = staking.getStakerBandIds(alice);
         assertEq(allStakerBands.length, 1, "Band not added to allStakerBands");
@@ -186,15 +186,15 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
         );
     }
 
-    function test_stakeVested_FlexiType_Adds3BandsToAllStakerBands()
+    function test_stakeVested_FixType_Adds3BandsToAllStakerBands()
         external
         setBandLevelData
         setSharesInMonth
     {
         vm.startPrank(address(vesting));
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_5, MONTH_0);
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_9, MONTH_0);
+        staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_1);
+        staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_5, MONTH_1);
+        staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_9, MONTH_1);
         vm.stopPrank();
 
         uint256[] memory allStakerBands = staking.getStakerBandIds(alice);
@@ -216,16 +216,16 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
         );
     }
 
-    function test_stakeVested_FlexiType_Adds4BandsForDifferentUsers()
+    function test_stakeVested_FixType_Adds4BandsForDifferentUsers()
         external
         setBandLevelData
         setSharesInMonth
     {
         vm.startPrank(address(vesting));
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
-        staking.stakeVested(bob, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_9, MONTH_0);
-        staking.stakeVested(bob, STAKING_TYPE_FLEXI, BAND_LEVEL_9, MONTH_0);
+        staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_1);
+        staking.stakeVested(bob, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_1);
+        staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_9, MONTH_1);
+        staking.stakeVested(bob, STAKING_TYPE_FIX, BAND_LEVEL_9, MONTH_1);
         vm.stopPrank();
 
         uint256[] memory aliceBands = staking.getStakerBandIds(alice);
@@ -243,27 +243,27 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
         assertEq(bobBands[1], BAND_ID_3, "Band not added to array");
     }
 
-    function test_stakeVested_FlexiType_Adds1UserToEnumerableMap()
+    function test_stakeVested_FixType_Adds1UserToEnumerableMap()
         external
         setBandLevelData
         setSharesInMonth
     {
         vm.prank(address(vesting));
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
+        staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_1);
 
         assertEq(staking.getTotalUsers(), 1, "User count not incremented");
         assertEq(staking.getUser(0), alice, "Staker not added");
     }
 
-    function test_stakeVested_FlexiType_Adds3UsersToEnumerableMap()
+    function test_stakeVested_FixType_Adds3UsersToEnumerableMap()
         external
         setBandLevelData
         setSharesInMonth
     {
         vm.startPrank(address(vesting));
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
-        staking.stakeVested(bob, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
-        staking.stakeVested(carol, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
+        staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_1);
+        staking.stakeVested(bob, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_1);
+        staking.stakeVested(carol, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_1);
         vm.stopPrank();
 
         assertEq(staking.getTotalUsers(), 3, "User count not incremented");
@@ -272,16 +272,16 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
         assertEq(staking.getUser(2), carol, "Staker not added");
     }
 
-    function test_stakeVested_FlexiType_Adds2UsersWithMultipleBandsToEnumerableMap()
+    function test_stakeVested_FixType_Adds2UsersWithMultipleBandsToEnumerableMap()
         external
         setBandLevelData
         setSharesInMonth
     {
         vm.startPrank(address(vesting));
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
-        staking.stakeVested(bob, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_9, MONTH_0);
-        staking.stakeVested(bob, STAKING_TYPE_FLEXI, BAND_LEVEL_9, MONTH_0);
+        staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_1);
+        staking.stakeVested(bob, STAKING_TYPE_FIX, BAND_LEVEL_1, MONTH_1);
+        staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_9, MONTH_1);
+        staking.stakeVested(bob, STAKING_TYPE_FIX, BAND_LEVEL_9, MONTH_1);
         vm.stopPrank();
 
         assertEq(staking.getTotalUsers(), 2, "User count not incremented");
@@ -289,7 +289,7 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
         assertEq(staking.getUser(1), bob, "Staker not added");
     }
 
-    function test_stakeVested_FlexiType_EmitsStakedEvent()
+    function test_stakeVested_FixType_EmitsStakedEvent()
         external
         setBandLevelData
         setSharesInMonth
@@ -299,13 +299,13 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
             alice,
             BAND_LEVEL_2,
             BAND_ID_0,
-            MONTH_0,
-            STAKING_TYPE_FLEXI,
+            MONTH_1,
+            STAKING_TYPE_FIX,
             true
         );
 
         vm.prank(address(vesting));
-        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_2, MONTH_0);
+        staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_2, MONTH_1);
     }
 
     // NOTE: FIX type staking removed
