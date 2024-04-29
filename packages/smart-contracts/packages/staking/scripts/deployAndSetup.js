@@ -4,6 +4,7 @@ const setBandLevels = require("./helpers/setBandLevels")
 const setShares = require("./helpers/setShares")
 const verifyStaking = require("./helpers/verifyStaking")
 const getNetworkConfig = require("./helpers/getNetworkConfig")
+const setupStakingPermissions = require("./helpers/setupStakingPermissions")
 
 async function main() {
     const {
@@ -47,6 +48,12 @@ async function main() {
     //////////////////////////////////////////////////////////////////////////*/
 
     await setShares(stakingAddress)
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                SET PERMISSIONS
+    //////////////////////////////////////////////////////////////////////////*/
+
+    await setupStakingPermissions(stakingAddress, vestingContract)
 
     /*//////////////////////////////////////////////////////////////////////////
                                     VERIFY STAKING

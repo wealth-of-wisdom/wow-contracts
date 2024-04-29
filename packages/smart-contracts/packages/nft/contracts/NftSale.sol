@@ -144,7 +144,6 @@ contract NftSale is
         uint16 currentLevel = nftData.level;
 
         // Checks: data cannot be genesis or deactivated
-        // @todo When Staking contract is ready, check to see if extension is active
         if (
             nftData.isGenesis ||
             nftData.activityType == INft.ActivityType.DEACTIVATED ||
