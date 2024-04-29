@@ -40,8 +40,9 @@ export function getOrInitStakingContract(): StakingContract {
         stakingContract.areUpgradesEnabled = false;
         stakingContract.isDistributionInProgress = false;
         stakingContract.stakers = [];
-        stakingContract.lastSharesSyncDate = BIGINT_ZERO;
         stakingContract.totalStakedAmount = BIGINT_ZERO;
+        stakingContract.lastSharesSyncDate = BIGINT_ZERO;
+        stakingContract.periodDuration = BIGINT_ZERO;
 
         stakingContract.save();
     }
