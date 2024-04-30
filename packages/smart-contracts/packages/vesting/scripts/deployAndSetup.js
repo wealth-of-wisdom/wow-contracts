@@ -10,7 +10,7 @@ async function main() {
     await copyTokenContracts()
 
     // Get config for the current network
-    const { vestingToken, stakingContract, listingDate, totalTokens } =
+    const { vestingToken, stakingContract, listingDate } =
         await getNetworkConfig()
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -27,7 +27,7 @@ async function main() {
                                   ADD VESTING POOLS
     //////////////////////////////////////////////////////////////////////////*/
 
-    await addVestingPools(vestingToken, vestingAddress, totalTokens)
+    await addVestingPools(vestingToken, vestingAddress)
 
     /*//////////////////////////////////////////////////////////////////////////
                                   VERIFY VESTING

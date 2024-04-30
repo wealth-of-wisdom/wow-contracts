@@ -7,7 +7,7 @@ async function setupStakingPermissions(stakingContract, vestingContract) {
     }
 
     /*//////////////////////////////////////////////////////////////////////////
-                            GRANT PERMISSIONS IN VESTING
+                            GRANT PERMISSIONS IN STAKING
     //////////////////////////////////////////////////////////////////////////*/
 
     const Staking = await ethers.getContractFactory("Staking")

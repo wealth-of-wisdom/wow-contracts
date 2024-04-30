@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.4;
+pragma solidity 0.8.20;
 
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -1019,6 +1019,14 @@ contract Staking is
     }
 
     /*//////////////////////////////////////////////////////////////////////////
+                                PUBLIC FUNCTIONS
+    //////////////////////////////////////////////////////////////////////////*/
+
+    function getPeriodDuration() public pure virtual returns (uint32) {
+        return MONTH;
+    }
+
+    /*//////////////////////////////////////////////////////////////////////////
                                 INTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
@@ -1133,10 +1141,12 @@ contract Staking is
                             INTERNAL VIEW/PURE FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
-    function _validateFixedPeriodPassed(StakerBand storage band) internal view {
+    function _validateFixedPeriodPassed(
+        StakerBand storage band
+    ) internal view virtual {
         if (band.stakingType == StakingTypes.FIX) {
             uint32 monthsPassed = (uint32(block.timestamp) -
-                band.stakingStartDate) / MONTH;
+                band.stakingStartDate) / getPeriodDuration();
 
             // Checks: fixed staking can only be unstaked after the fixed period
             if (monthsPassed < band.fixedMonths) {

@@ -219,11 +219,14 @@ export function updateFlexiSharesDuringSync(staking: StakingContract, distributi
     // Leave as string because it is going to be used for calling function by gelato function
     const stakers: string[] = staking.stakers;
 
+    const periodDuration: BigInt = staking.periodDuration;
+
     // Add shares for each staker and pool
     const sharesData: StakerAndPoolShares = addPoolsAndStakersShares(
         stakers,
         totalPools,
         distributionDate,
+        periodDuration,
         bandLevelPoolIds,
         sharesInMonth,
     );
@@ -235,6 +238,7 @@ function addPoolsAndStakersShares(
     stakers: string[],
     totalPools: BigInt,
     distributionDate: BigInt,
+    periodDuration: BigInt,
     bandLevelPoolIds: BigInt[][],
     sharesInMonth: BigInt[],
 ): StakerAndPoolShares {
@@ -259,6 +263,7 @@ function addPoolsAndStakersShares(
             staker,
             totalPools,
             distributionDate,
+            periodDuration,
             bandLevelPoolIds,
             sharesInMonth,
         );
@@ -298,6 +303,7 @@ function addMultipleBandSharesToPools(
     staker: Staker,
     totalPools: BigInt,
     distributionDate: BigInt,
+    periodDuration: BigInt,
     bandLevelPoolIds: BigInt[][],
     sharesInMonth: BigInt[],
 ): StakerShares {
@@ -313,7 +319,7 @@ function addMultipleBandSharesToPools(
         const bandId: BigInt = BigInt.fromString(bandIds[bandIndex]);
 
         const band: Band = getOrInitBand(bandId);
-        const bandShares: BigInt = calculateBandShares(band, distributionDate, sharesInMonth);
+        const bandShares: BigInt = calculateBandShares(band, distributionDate, periodDuration, sharesInMonth);
 
         // No need to add shares if there is nothing to add
         if (bandShares.equals(BIGINT_ZERO)) {
@@ -363,20 +369,30 @@ function getBandLevelPoolIds(totalBandLevels: number): BigInt[][] {
     return allPoolIds;
 }
 
-function calculateCompletedMonths(startDateInSeconds: BigInt, endDateInSeconds: BigInt): BigInt {
-    // 60 seconds * 60 minutes * 24 hours * 30 days
-    // This is hardcoded because it's a constant value
-    const secondsInMonth: BigInt = BigInt.fromI32(60 * 60 * 24 * 30);
-    const completedMonths = endDateInSeconds.minus(startDateInSeconds).div(secondsInMonth);
+function calculateCompletedMonths(
+    startDateInSeconds: BigInt,
+    endDateInSeconds: BigInt,
+    periodDurationInSeconds: BigInt,
+): BigInt {
+    const completedMonths = endDateInSeconds.minus(startDateInSeconds).div(periodDurationInSeconds);
 
     return completedMonths;
 }
 
-function calculateBandShares(band: Band, endDateInSeconds: BigInt, sharesInMonth: BigInt[]): BigInt {
+function calculateBandShares(
+    band: Band,
+    endDateInSeconds: BigInt,
+    periodDurationInSeconds: BigInt,
+    sharesInMonth: BigInt[],
+): BigInt {
     let bandShares: BigInt = BIGINT_ZERO;
 
     // Calculate months that passed since staking started
-    const monthsPassed = calculateCompletedMonths(band.stakingStartDate, endDateInSeconds).toI32();
+    const monthsPassed = calculateCompletedMonths(
+        band.stakingStartDate,
+        endDateInSeconds,
+        periodDurationInSeconds,
+    ).toI32();
 
     // If at least 1 month passed, calculate shares based on months
     if (monthsPassed > 0) {

@@ -80,17 +80,7 @@
     },
     {
         "inputs": [],
-        "name": "Vesting__CanNotWithdrawVestedTokens",
-        "type": "error"
-    },
-    {
-        "inputs": [],
         "name": "Vesting__EmptyName",
-        "type": "error"
-    },
-    {
-        "inputs": [],
-        "name": "Vesting__InsufficientBalance",
         "type": "error"
     },
     {
@@ -1151,29 +1141,6 @@
             }
         ],
         "name": "unstakeVestedTokens",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "contract IERC20",
-                "name": "customToken",
-                "type": "address"
-            },
-            {
-                "internalType": "address",
-                "name": "recipient",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "tokenAmount",
-                "type": "uint256"
-            }
-        ],
-        "name": "withdrawContractTokens",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

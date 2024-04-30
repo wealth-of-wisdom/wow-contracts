@@ -1,5 +1,5 @@
 # Vesting for WOW platform
-![Vesting Schedule](Vesting-diagram.png?raw=true) <br />
+![Vesting Schedule](images/Vesting-diagram.png?raw=true) <br />
 This contract implements token vesting and claiming for the specified list of beneficiaries.
 Vested tokens unlocked: **daily / monthly** after the cliff period ended.
 
