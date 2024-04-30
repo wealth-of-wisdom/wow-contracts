@@ -81,9 +81,14 @@ export function handleInitialized(event: InitializedEvent): void {
     stakingContract.totalBandLevels = staking.getTotalBandLevels();
     stakingContract.lastSharesSyncDate = event.block.timestamp;
 
-    let durationValue = BIGINT_ZERO;
+    // We cannot be sure that getPeriodDuration function exists as it was added in the latest contract version
+    // So only the newest deployed contracts will have this value on the initialization event
+    // Older contracts that were upgraded will have the default value set
+    // If period duration in StakingMock contract for testing is changed, the default value for testnets should be updated
     const periodDuration: ethereum.CallResult<BigInt> = staking.try_getPeriodDuration();
+    let durationValue: BigInt = BIGINT_ZERO;
 
+    // If the function does not exist, set the default value
     if (periodDuration.reverted) {
         durationValue = TESTNET_NETWORKS.includes(networkName) ? TEN_MINUTES_IN_SECONDS : MONTH_IN_SECONDS;
     } else {
