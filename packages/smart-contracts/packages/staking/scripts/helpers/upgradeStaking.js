@@ -1,11 +1,11 @@
 const { ethers, upgrades } = require("hardhat")
 
-async function upgradeStaking(stakingProxyAddress) {
+async function upgradeStaking(stakingProxyAddress, stakingContractName) {
     /*//////////////////////////////////////////////////////////////////////////
                                   UPGRADE STAKING
     //////////////////////////////////////////////////////////////////////////*/
 
-    const Staking = await ethers.getContractFactory("Staking")
+    const Staking = await ethers.getContractFactory(stakingContractName)
     const staking = await upgrades.upgradeProxy(stakingProxyAddress, Staking)
     await staking.waitForDeployment()
 
