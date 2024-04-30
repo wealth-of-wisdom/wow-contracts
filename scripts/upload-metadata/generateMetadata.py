@@ -1,7 +1,7 @@
 import os
 import json
 
-def generate_metadata(name_prefix, description, image_urls, animation_urls, level, author, lifecycle, lifecycle_extension, prices, quantity):
+def generate_metadata(name_prefix, description, image_urls, animation_urls, level, author, lifecycle, prices, quantity):
     metadata_list = []
 
     for i in range(1, quantity + 1):
@@ -14,7 +14,6 @@ def generate_metadata(name_prefix, description, image_urls, animation_urls, leve
             "attributes": [
                 {"trait_type": "Author", "value": author},
                 {"trait_type": "Lifecycle", "value": str(lifecycle[level-1]) if level <= len(lifecycle) and lifecycle[level-1] not in ["Unavailable", "Unlimited"] else str(lifecycle[level-1])},
-                {"trait_type": "Lifecycle extension", "value": str(lifecycle_extension[level-1]) if level <= len(lifecycle_extension) and lifecycle_extension[level-1] not in ["Unavailable", "Unlimited"] else str(lifecycle_extension[level-1])},
                 {"trait_type": "Price", "value": f"{prices[level-1]:,}"}
             ]
         }
@@ -40,7 +39,6 @@ def generate_and_save_metadata(config, output_folder):
                 level,
                 value["author"],
                 value["lifecycle"],
-                value["lifecycle_extension"],
                 value["prices"],
                 quantity
             )
