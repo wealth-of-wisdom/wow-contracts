@@ -13,6 +13,10 @@ The WOWToken is based on the ERC20 token standard and is using the OpenZeppelin 
 - node  (version >= 18.12.0)
 - Ubuntu
 
+```bash
+cd packages/smart-contracts
+```
+
 Edit env file to set up network connection data:
 ```bash
 ETHEREUM_API_KEY=
@@ -28,6 +32,10 @@ ARBITRUM_SEPOLIA_API_KEY=
 ARBITRUM_SEPOLIA_HOST=
 
 PRIVATE_KEY=
+```
+
+```bash
+cd packages/smart-contracts
 ```
 
 Edit [config.json](../packages/smart-contracts/packages/token/scripts/data/config.json) file to set up contract deployment data:
