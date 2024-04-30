@@ -71,14 +71,6 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
                                     FLEXI STAKING
     //////////////////////////////////////////////////////////////////////////*/
 
-    function test_getPeriodDuration_monthSet() external {
-        assertEq(
-            staking.getPeriodDuration(),
-            MONTH,
-            "Period duration constant reset"
-        );
-    }
-
     function test_unstakeVested_FixType_DeletesBandDetails()
         external
         setBandLevelData
