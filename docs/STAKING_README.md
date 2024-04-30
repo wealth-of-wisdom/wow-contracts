@@ -31,7 +31,7 @@ PRIVATE_KEY=
 ```
 
 ```bash
-cd packages/smart-contracts
+cd packages/smart-contracts/packages/staking
 ```
 
 Set env variables for Staking initializer:
