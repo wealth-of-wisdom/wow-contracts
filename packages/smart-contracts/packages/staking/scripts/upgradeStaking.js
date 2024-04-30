@@ -1,11 +1,19 @@
 const upgradeStaking = require("./helpers/upgradeStaking")
-const deployStakingImplementation = require("./helpers/deployStakingImplementation")
+const verifyStaking = require("./helpers/verifyStaking")
 require("dotenv").config()
 
 async function main() {
-    await deployStakingImplementation()
+    /*//////////////////////////////////////////////////////////////////////////
+                                UPGRADE STAKING
+    //////////////////////////////////////////////////////////////////////////*/
 
     await upgradeStaking(process.env.STAKING_PROXY_ADDRESS)
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                      VERIFY STAKING
+    //////////////////////////////////////////////////////////////////////////*/
+
+    await verifyStaking(process.env.STAKING_PROXY_ADDRESS)
 }
 
 main().catch((error) => {
