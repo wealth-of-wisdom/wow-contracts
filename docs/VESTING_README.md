@@ -18,11 +18,15 @@ Example data for pools:
 
 # Deployment
 ### Main vesting contract code
-[Vesting.sol](packages/smart-contracts/packages/vesting/contracts/Vesting.sol)
+[Vesting.sol](../packages/smart-contracts/packages/vesting/contracts/Vesting.sol)
 
 ## Prerequisites:
 - node  (version >= 18.12.0)
 - Ubuntu
+
+```bash
+cd packages/smart-contracts
+```
 
 Edit env file to set up network connection data:
 ```bash
@@ -41,7 +45,11 @@ ARBITRUM_SEPOLIA_HOST=
 PRIVATE_KEY=
 ```
 
-Edit [networkConfig.json](packages/smart-contracts/packages/vesting/scripts/data/networkConfig.json) file to set up contract deployment data:
+```bash
+cd packages/smart-contracts/packages/vesting
+```
+
+Edit [networkConfig.json](../packages/smart-contracts/packages/vesting/scripts/data/networkConfig.json) file to set up contract deployment data:
 
 ```bash
 "ethereum": {
