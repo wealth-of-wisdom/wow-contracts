@@ -38,6 +38,8 @@ export const totalBandLevels: BigInt = BigInt.fromI32(9);
 export const usdDecimalsPrecision: BigInt = BigInt.fromI32(10).pow(6);
 export const wowDecimalsPrecision: BigInt = BigInt.fromI32(10).pow(18);
 
+export const periodDuration: BigInt = BigInt.fromI32(30 * 24 * 60 * 60); // 30 days
+
 /*//////////////////////////////////////////////////////////////////////////
                                 ARRAYS
 //////////////////////////////////////////////////////////////////////////*/

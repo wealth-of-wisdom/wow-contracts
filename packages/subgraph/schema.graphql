@@ -453,6 +453,15 @@ type StakingContract @entity {
     The last time when shares were synced by gelato or event
     """
     lastSharesSyncDate: BigInt!
+
+    """
+    The period duration for mainnet is 1 month converted to seconds
+    This is the time user needs to wait for single period to pass
+    For FLEXI bands this means the time user needs to wait to get additional shares
+    For FIX bands this means the time user needs to wait to reduce the lock duration
+    Returned in seconds
+    """
+    periodDuration: BigInt!
 }
 
 type Pool @entity {
