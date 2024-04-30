@@ -210,4 +210,12 @@ contract Staking_Initialize_Unit_Test is Unit_Test {
             "Total bands should be set correctly"
         );
     }
+
+    function test_getPeriodDuration_MonthSetCorrectly() external {
+        assertEq(
+            staking.getPeriodDuration(),
+            MONTH,
+            "Period duration constant reset"
+        );
+    }
 }

@@ -31,6 +31,7 @@ contract Base_Test is Test, StakingConstants, Events {
     TokenMock internal wowToken;
     VestingMock internal vesting;
     StakingMock internal staking;
+    StakingMock internal newStaking;
 
     /*//////////////////////////////////////////////////////////////////////////
                                   CONSTRUCTOR

@@ -55,7 +55,6 @@ contract Staking_Unstake_Unit_Test is Unit_Test {
     /*//////////////////////////////////////////////////////////////////////////
                                     FLEXI STAKING
     //////////////////////////////////////////////////////////////////////////*/
-
     function test_unstake_FlexiType_DeletesBandDetails()
         external
         setBandLevelData

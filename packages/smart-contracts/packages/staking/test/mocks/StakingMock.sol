@@ -10,4 +10,8 @@ contract StakingMock is Staking {
     ) external {
         s_bands[bandId].areTokensVested = areTokensVested;
     }
+
+    function mock_authorizeUpgrade(address newImplementation) external {
+        _authorizeUpgrade(newImplementation);
+    }
 }
