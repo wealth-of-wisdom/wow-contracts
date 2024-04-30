@@ -1,9 +1,5 @@
-# The WOW Wealth Protocol
-Tokens will be available for claiming in the [Wealth Of Wisdom platform](https://wealthofwisdom.io/wow-token/). 
-Every purchase of a WOW Token contributes directly to the wealth protocol, a pool of capital allocated to finance promising projects that have the potential to shape the future of technology, sustainability, and decentralized finance. This unique model ensures that WOW Token holders are directly connected to the success of these ventures when they stake their tokens.
-
-# Token standard
-The WOWToken is based on the ERC20 token standard and is using the OpenZeppelin implementation. All OpenZeppelin integrations are tested on their end and are approved. Our testing includes all functions added post implementation. Some internal functions such as **_authorizeUpgrade** or **_update** are necessary override functions when inheriting OpenZeppelin libraries.
+# Staking System Overview
+[STAKING_FLOW.md](STAKING_FLOW.md)
 
 # Deployment
 ### Main Staking contract code
@@ -13,10 +9,12 @@ The WOWToken is based on the ERC20 token standard and is using the OpenZeppelin 
 - node  (version >= 18.12.0)
 - Ubuntu
 
+```bash
+cd packages/smart-contracts
+```
+
 Edit env file to set up network connection data:
 ```bash
-GELATO_ADDRESS =
-
 ETHEREUM_API_KEY=
 ETHEREUM_HOST=
 
@@ -31,10 +29,20 @@ ARBITRUM_SEPOLIA_HOST=
 
 PRIVATE_KEY=
 ```
-NOTE: ```GELATO_ADDRESS``` (This address will execute rewards distribution and trigger shares sync process)
+
+```bash
+cd packages/smart-contracts
+```
+
+Set env variables for Staking initializer:
+```bash
+GELATO_ADDRESS =
+```
+
+**NOTE**: ```GELATO_ADDRESS``` (This address will execute rewards distribution and trigger shares sync process)
 Visit [Gelato App](https://app.gelato.network/settings) → Choose network → Copy dedicated msg.sender address
 
-Edit [networkConfig.json](packages/smart-contracts/packages/staking/scripts/data/networkConfig.json) file to set up contract deployment data:
+Edit [networkConfig.json](../packages/smart-contracts/packages/staking/scripts/data/networkConfig.json) file to set up contract deployment data:
 
 ```bash
   "ethereum": {
@@ -70,6 +78,8 @@ Edit [networkConfig.json](packages/smart-contracts/packages/staking/scripts/data
       "total_band_levels": 9
   }
 ```
+
+**NOTE**: If these variables are not script will use ```0x0000000000000000000000000000000000000000``` as default address, which will disable some features of Staking Contract
 
 ### 1: Install smart contract dependencies
 Enter the smart-contract directory (packages/smart-contractas) and run:
