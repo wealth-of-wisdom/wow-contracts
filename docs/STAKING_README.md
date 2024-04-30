@@ -7,7 +7,7 @@ The WOWToken is based on the ERC20 token standard and is using the OpenZeppelin 
 
 # Deployment
 ### Main Staking contract code
-[Staking.sol](packages/smart-contracts/packages/staking/contracts/Staking.sol)
+[Staking.sol](../packages/smart-contracts/packages/staking/contracts/Staking.sol)
 
 ## Prerequisites:
 - node  (version >= 18.12.0)
