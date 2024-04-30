@@ -245,4 +245,6 @@ interface IStaking is IStakingEvents {
     function areBandUpgradesEnabled() external view returns (bool enabled);
 
     function isDistributionInProgress() external view returns (bool inProgress);
+
+    function getPeriodDuration() external pure returns (uint32);
 }

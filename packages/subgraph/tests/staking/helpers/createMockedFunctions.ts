@@ -9,6 +9,7 @@ import {
     sharePrecision,
     totalPools,
     totalBandLevels,
+    periodDuration,
 } from "../../utils/data/constants";
 
 export function createMockedFunctions(): void {
@@ -19,6 +20,7 @@ export function createMockedFunctions(): void {
     createMockedFunction_SHARE();
     createMockedFunction_getTotalPools();
     createMockedFunction_getTotalBandLevels();
+    createMockedFunction_getPeriodDuration();
 }
 
 export function createMockedFunction_getTokenUSDT(): void {
@@ -61,4 +63,10 @@ export function createMockedFunction_getTotalBandLevels(): void {
     createMockedFunction(stakingAddress, "getTotalBandLevels", "getTotalBandLevels():(uint16)")
         .withArgs([])
         .returns([ethereum.Value.fromUnsignedBigInt(totalBandLevels)]);
+}
+
+export function createMockedFunction_getPeriodDuration(): void {
+    createMockedFunction(stakingAddress, "getPeriodDuration", "getPeriodDuration():(uint32)")
+        .withArgs([])
+        .returns([ethereum.Value.fromUnsignedBigInt(periodDuration)]);
 }

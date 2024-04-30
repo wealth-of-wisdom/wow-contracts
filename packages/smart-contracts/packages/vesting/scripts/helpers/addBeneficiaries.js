@@ -1,16 +1,25 @@
 const { ethers } = require("hardhat")
-const beneficiaries = require("../data/vestingBeneficiaries.json")
+const beneficiariesDataDev = require("../data/dev/vestingBeneficiaries.json")
+const beneficiariesDataProd = require("../data/prod/vestingBeneficiaries.json")
+const { MAINNET_NETWORKS, WOW_TOKEN_DECIMALS } = require("./constants")
 
-async function addBeneficiaries(tokenAddress, vestingAddress) {
+async function addBeneficiaries(vestingAddress) {
     const vesting = await ethers.getContractAt("Vesting", vestingAddress)
     const poolsCount = await vesting.getPoolCount()
-    const DECIMALS = 18
+    const beneficiaries = MAINNET_NETWORKS.includes(network.name)
+        ? beneficiariesDataProd
+        : beneficiariesDataDev
 
     /*//////////////////////////////////////////////////////////////////////////
                                 VALIDATE ALL THE DATA
     //////////////////////////////////////////////////////////////////////////*/
 
-    await validateData(vesting, beneficiaries, Number(poolsCount), DECIMALS)
+    await validateData(
+        vesting,
+        beneficiaries,
+        Number(poolsCount),
+        WOW_TOKEN_DECIMALS,
+    )
 
     /*//////////////////////////////////////////////////////////////////////////
                               ADD VESTING BENEFICIARIES
@@ -19,7 +28,7 @@ async function addBeneficiaries(tokenAddress, vestingAddress) {
     for (let user of beneficiaries) {
         const tokenAmountInWei = ethers.parseUnits(
             user.tokens_amount_in_wow,
-            DECIMALS,
+            WOW_TOKEN_DECIMALS,
         )
 
         const tx = await vesting.addBeneficiary(

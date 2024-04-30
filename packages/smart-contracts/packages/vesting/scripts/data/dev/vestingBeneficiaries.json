@@ -6,12 +6,12 @@
     },
     {
         "pool_id": 1,
-        "beneficiary_address": "0xD27027E344CFa27Ea1d3864b1fcE3B3C709Beda9",
+        "beneficiary_address": "0x089824E9EC1fAa51Dc65aa9d3D472ed2E3902e92",
         "tokens_amount_in_wow": "10000000000"
     },
     {
         "pool_id": 2,
-        "beneficiary_address": "0xD27027E344CFa27Ea1d3864b1fcE3B3C709Beda9",
+        "beneficiary_address": "0x64DBcd8Fb7870738A9c538bEEEe7ce6B8BfAd333",
         "tokens_amount_in_wow": "10000000000"
     }
 ]
