@@ -1,13 +1,13 @@
 # Metadata Generation Scripts
 
-These scripts are designed to generate metadata for WOW NFTs  based on a configuration file. The generated metadata includes information such as name, description, image URLs, and various attributes. Scripts organize the metadata into folders based on specified output paths.
+These scripts are designed to generate metadata for WOW NFTs based on a configuration file. The generated metadata includes information such as name, description, image URLs, and various attributes. Scripts organize the metadata into folders based on specified output paths.
 
 ## Prerequisites
 
 Before using these scripts, ensure you have the following:
 
--   Python installed on your system
--   Necessary Python libraries installed. You can install them using:
+- Python installed on your system
+- Necessary Python libraries installed. You can install them using:
 
 ```bash
 pip install requests requests-toolbelt
@@ -21,21 +21,19 @@ Example configuration:
 
 ```json
 {
-        "nft": {
-            "name_prefix": "WOW-LVL",
-        "description": "Description of NFT",
-        "image_urls": [
-            "https://ipfs.io/ipfs/image1.jpg",
-            "https://ipfs.io/ipfs/image2.jpg"
-        ],
-        "author": "Author",
-        "lifecycle": [12, 15, 24, 40, "Unlimited"],
-        "lifecycle_extension": ["Unavailable", 15, 18,"Unlimited" "Unavailable"],
-        "prices": [988, 4988, 9988, 32988, 999988],
-        "level_quantities": [15, 15, 15, 15, 15],
-        "output_folder": "test_metadata_level_nft"
-    },
-
+  "nft": {
+    "name_prefix": "WOW-LVL",
+    "description": "Description of NFT",
+    "image_urls": [
+      "https://ipfs.io/ipfs/image1.jpg",
+      "https://ipfs.io/ipfs/image2.jpg"
+    ],
+    "author": "Author",
+    "lifecycle": [12, 15, 24, 40, "Unlimited"],
+    "prices": [988, 4988, 9988, 32988, 999988],
+    "level_quantities": [15, 15, 15, 15, 15],
+    "output_folder": "test_metadata_level_nft"
+  }
 }
 ```
 
@@ -68,15 +66,15 @@ You can modify the pin_directory_to_pinata function in the script to upload the 
 
 1. Install required Python packages:
 
-    ```bash
-    pip install requests requests-toolbelt python-dotenv
-    ```
+   ```bash
+   pip install requests requests-toolbelt python-dotenv
+   ```
 
 2. Create a `.env` file in the same directory as your script and add your Pinata JWT token:
 
-    ```env
-    PINATA_JWT=PINATA_JWT=Bearer {pinata_jwt}
-    ```
+   ```env
+   PINATA_JWT=PINATA_JWT=Bearer {pinata_jwt}
+   ```
 
 ### Usage
 
@@ -97,4 +95,3 @@ The script consists of two main functions:
 ## Adjust Configuration
 
 Modify the `metadata_folder_base_path` and `folder_prefix` variables in the script to upload different sets of metadata folders.
-
