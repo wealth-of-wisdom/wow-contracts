@@ -7,7 +7,7 @@ The WOWToken is based on the ERC20 token standard and is using the OpenZeppelin 
 
 # Deployment
 ### Main token contract code
-[WOWToken.sol](packages/smart-contracts/packages/token/contracts/WOWToken.sol)
+[WOWToken.sol](../packages/smart-contracts/packages/token/contracts/WOWToken.sol)
 
 ## Prerequisites:
 - node  (version >= 18.12.0)
@@ -30,7 +30,7 @@ ARBITRUM_SEPOLIA_HOST=
 PRIVATE_KEY=
 ```
 
-Edit [config.json](packages/smart-contracts/packages/token/scripts/data/config.json) file to set up contract deployment data:
+Edit [config.json](../packages/smart-contracts/packages/token/scripts/data/config.json) file to set up contract deployment data:
 
 ```bash
 "name": "",
