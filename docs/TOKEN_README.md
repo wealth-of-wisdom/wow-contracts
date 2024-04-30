@@ -35,7 +35,7 @@ PRIVATE_KEY=
 ```
 
 ```bash
-cd packages/smart-contracts
+cd packages/smart-contracts/packages/token
 ```
 
 Edit [config.json](../packages/smart-contracts/packages/token/scripts/data/config.json) file to set up contract deployment data:
