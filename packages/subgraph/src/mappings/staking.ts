@@ -68,8 +68,7 @@ import {
 export function handleInitialized(event: InitializedEvent): void {
     const stakingContract: StakingContract = getOrInitStakingContract();
     const staking: Staking = Staking.bind(event.address);
-    const context = dataSource.context();
-    const networkName = context.getString("networkName");
+    const networkName = dataSource.network();
 
     stakingContract.stakingContractAddress = event.address;
     stakingContract.usdtToken = staking.getTokenUSDT();

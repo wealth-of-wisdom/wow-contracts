@@ -84,10 +84,6 @@ dataSources:
           address: "{{stakingAddress}}"
           abi: Staking
           startBlock: {{startBlock}}
-      context:
-          networkName:
-              type: String
-              data: "{{network}}"
       mapping:
           kind: ethereum/events
           apiVersion: 0.0.7
