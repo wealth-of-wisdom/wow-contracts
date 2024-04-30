@@ -17,4 +17,4 @@
 [VESTING_README.md](docs/VESTING_README.md)
 
 ### Documentation of Staking 
-[Staking System Overview](docs/STAKING_FLOW.md)
+[STAKING_README.md](docs/STAKING_README.md)
