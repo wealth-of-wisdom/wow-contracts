@@ -4,6 +4,10 @@ const upgradeStaking = require("./helpers/upgradeStaking")
 const verifyStaking = require("./helpers/verifyStaking")
 
 async function main() {
+    /*//////////////////////////////////////////////////////////////////////////
+                                CHECK NETWORK
+    //////////////////////////////////////////////////////////////////////////*/
+
     let stakingContractName = ""
     if (network.name === "sepolia" || network.name === "arbitrumSepolia") {
         stakingContractName = "StakingMock"
