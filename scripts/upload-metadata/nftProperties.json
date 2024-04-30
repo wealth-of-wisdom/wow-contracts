@@ -18,7 +18,7 @@
     ],
     "author": "Wealth Of Wisdom",
     "lifecycle": [12, 24, 42, 60, "Unlimited"],
-    "prices": [988, 4988, 9988, 32988, 999988],
+    "prices": [988, 4988, 9988, 32988, 99988],
     "level_quantities": [2000, 1000, 500, 200, 17]
   },
   "genesis_nft": {
@@ -46,7 +46,7 @@
       "Unlimited",
       "Unlimited"
     ],
-    "prices": [988, 4988, 9988, 32988, 999988],
+    "prices": [988, 4988, 9988, 32988, 99988],
     "level_quantities": [50, 21, 9, 3, 4]
   }
 }
