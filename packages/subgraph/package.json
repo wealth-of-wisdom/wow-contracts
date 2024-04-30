@@ -17,8 +17,8 @@
         "deploy:arbitrum-one": "graph deploy --product hosted-service wealth-of-wisdom/subgraph-arbitrum-one arbitrum-one.subgraph.yaml"
     },
     "devDependencies": {
-        "@graphprotocol/graph-cli": "^0.56.0",
-        "@graphprotocol/graph-ts": "^0.29.3",
+        "@graphprotocol/graph-cli": "^0.71.0",
+        "@graphprotocol/graph-ts": "^0.35.1",
         "@types/node": "^20.5.4",
         "assemblyscript": "^0.19.0",
         "assemblyscript-json": "^1.1.0",
