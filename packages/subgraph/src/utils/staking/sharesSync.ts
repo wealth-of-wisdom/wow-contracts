@@ -8,7 +8,7 @@ import {
     getOrInitStakingContract,
 } from "../../helpers/staking.helpers";
 import { stakingTypeFIX, StakerShares, StakerAndPoolShares, stakingTypeFLEXI } from "../utils";
-import { BIGINT_ZERO } from "../constants";
+import { BIGINT_ZERO, TWELVE_HOURS_IN_SECONDS } from "../constants";
 
 /*//////////////////////////////////////////////////////////////////////////
                             CALLED ON STAKE/UNSTAKE
@@ -154,7 +154,7 @@ export function syncFlexiSharesEvery12Hours(currentTime: BigInt): boolean {
     const staking: StakingContract = getOrInitStakingContract();
     const lastSyncDate: BigInt = staking.lastSharesSyncDate;
     const timePassed = currentTime.minus(lastSyncDate);
-    const minSyncInterval: BigInt = BigInt.fromI32(60 * 60 * 12); // 12 hours in seconds
+    const minSyncInterval: BigInt = TWELVE_HOURS_IN_SECONDS; // 12 hours in seconds
 
     // If at least 12 hours passed since last sync, update shares
     if (timePassed.ge(minSyncInterval)) {
