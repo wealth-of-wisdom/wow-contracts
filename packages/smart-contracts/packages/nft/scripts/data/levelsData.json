@@ -70,7 +70,7 @@
         "limited_projects_quantity": -1
     },
     {
-        "level": 6,
+        "level": 1,
         "isGenesis": true,
         "price_in_usd": "988",
         "vesting_rewards_in_wow": "0",
@@ -84,7 +84,7 @@
         "limited_projects_quantity": 0
     },
     {
-        "level": 7,
+        "level": 2,
         "isGenesis": true,
         "price_in_usd": "4988",
         "vesting_rewards_in_wow": "0",
@@ -98,7 +98,7 @@
         "limited_projects_quantity": 0
     },
     {
-        "level": 8,
+        "level": 3,
         "isGenesis": true,
         "price_in_usd": "9988",
         "vesting_rewards_in_wow": "0",
@@ -112,7 +112,7 @@
         "limited_projects_quantity": 0
     },
     {
-        "level": 9,
+        "level": 4,
         "isGenesis": true,
         "price_in_usd": "32988",
         "vesting_rewards_in_wow": "0",
@@ -126,7 +126,7 @@
         "limited_projects_quantity": -1
     },
     {
-        "level": 10,
+        "level": 5,
         "isGenesis": true,
         "price_in_usd": "99988",
         "vesting_rewards_in_wow": "0",
