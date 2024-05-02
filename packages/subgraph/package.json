@@ -3,22 +3,24 @@
     "license": "MIT",
     "version": "1.0.0",
     "scripts": {
-        "codegen": "graph codegen",
-        "build": "graph build",
-        "test": "graph test -d",
-        "gen-manifests": "npx ts-node ./scripts/generate-manifests.ts",
-        "prepare": "npm run gen-manifests && npm run codegen && npm run build",
-        "create-local": "graph create --node http://localhost:8020/ wealth-of-wisdom/vesting",
-        "remove-local": "graph remove --node http://localhost:8020/ wealth-of-wisdom/vesting",
-        "deploy-local": "graph deploy wow/subgraph --node https://deploy.stream.superhow.net --ipfs https://ipfs.stream.superhow.net --version-label 0.0.1 sepolia.subgraph.yaml",
-        "deploy:sepolia": "graph deploy --product hosted-service wealth-of-wisdom/subgraph-sepolia sepolia.subgraph.yaml",
-        "deploy:mainnet": "graph deploy --product hosted-service wealth-of-wisdom/subgraph-eth mainnet.subgraph.yaml",
-        "deploy:arbitrum-sepolia": "graph deploy --product hosted-service wealth-of-wisdom/subgraph-arbitrum-sepolia arbitrum-sepolia.subgraph.yaml",
-        "deploy:arbitrum-one": "graph deploy --product hosted-service wealth-of-wisdom/subgraph-arbitrum-one arbitrum-one.subgraph.yaml"
+        "codegen": "yarn graph codegen",
+        "build": "yarn graph build",
+        "test": "yarn graph test -d",
+        "gen-manifests": "yarn ts-node ./scripts/generate-manifests.ts",
+        "prepare": "yarn gen-manifests && yarn codegen && yarn build",
+        "create-local": "yarn graph create --node http://localhost:8020/ wealth-of-wisdom/vesting",
+        "remove-local": "yarn graph remove --node http://localhost:8020/ wealth-of-wisdom/vesting",
+        "deploy-local": "yarn graph deploy wow/subgraph --node https://deploy.stream.superhow.net --ipfs https://ipfs.stream.superhow.net --version-label 0.0.1 sepolia.subgraph.yaml",
+        "deploy:sepolia": "yarn graph deploy --product hosted-service wealth-of-wisdom/subgraph-sepolia sepolia.subgraph.yaml",
+        "deploy:mainnet": "yarn graph deploy --product hosted-service wealth-of-wisdom/subgraph-eth mainnet.subgraph.yaml",
+        "deploy:arbitrum-sepolia": "yarn graph deploy --product hosted-service wealth-of-wisdom/subgraph-arbitrum-sepolia arbitrum-sepolia.subgraph.yaml",
+        "deploy:arbitrum-one": "yarn graph deploy --product hosted-service wealth-of-wisdom/subgraph-arbitrum-one arbitrum-one.subgraph.yaml"
+    },
+    "dependencies": {
+        "@graphprotocol/graph-cli": "^0.71.0",
+        "@graphprotocol/graph-ts": "^0.35.1"
     },
     "devDependencies": {
-        "@graphprotocol/graph-cli": "^0.56.0",
-        "@graphprotocol/graph-ts": "^0.29.3",
         "@types/node": "^20.5.4",
         "assemblyscript": "^0.19.0",
         "assemblyscript-json": "^1.1.0",
