@@ -3,6 +3,7 @@ const addVestingPools = require("./helpers/addVestingPools")
 const verifyVesting = require("./helpers/verifyVesting")
 const copyTokenContracts = require("./helpers/copyTokenContracts")
 const removeTokenContracts = require("./helpers/removeTokenContracts")
+const setupVestingPermissions = require("./helpers/setupVestingPermissions")
 const getNetworkConfig = require("./helpers/getNetworkConfig")
 
 async function main() {
@@ -10,7 +11,7 @@ async function main() {
     await copyTokenContracts()
 
     // Get config for the current network
-    const { vestingToken, stakingContract, listingDate } =
+    const { vestingToken, stakingContract, nftContract, listingDate } =
         await getNetworkConfig()
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -28,6 +29,12 @@ async function main() {
     //////////////////////////////////////////////////////////////////////////*/
 
     await addVestingPools(vestingToken, vestingAddress)
+
+    /*//////////////////////////////////////////////////////////////////////////
+                          SETUP VESTING ROLES & PERMISSIONS
+    //////////////////////////////////////////////////////////////////////////*/
+
+    await setupVestingPermissions(vestingAddress, nftContract)
 
     /*//////////////////////////////////////////////////////////////////////////
                                   VERIFY VESTING

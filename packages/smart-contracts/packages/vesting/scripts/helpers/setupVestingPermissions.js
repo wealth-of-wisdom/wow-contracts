@@ -1,8 +1,8 @@
 const { ethers } = require("hardhat")
 
-async function setupVestingPermissions(vestingContract, nftAddress) {
-    if (vestingContract === ethers.ZeroAddress) {
-        console.log("No vesting contract provided. Skipping vesting setup.")
+async function setupVestingPermissions(vestingAddress, nftAddress) {
+    if (nftAddress === ethers.ZeroAddress) {
+        console.log("No nft contract provided. Skipping vesting setup.")
         return
     }
 
@@ -11,7 +11,7 @@ async function setupVestingPermissions(vestingContract, nftAddress) {
     //////////////////////////////////////////////////////////////////////////*/
 
     const Vesting = await ethers.getContractFactory("Vesting")
-    const vesting = Vesting.attach(vestingContract)
+    const vesting = Vesting.attach(vestingAddress)
 
     const BENEFICIARIES_MANAGER_ROLE =
         await vesting.BENEFICIARIES_MANAGER_ROLE()
