@@ -27,7 +27,7 @@
         "usdt_token": "0x0F7f537BF7115Bf7B8D583fFa284Db56F62C2fC7",
         "usdc_token": "0x67108Aa81C31724c4d818060bef842A5f7Ad8368",
         "wow_token": "0x685C3D7C82cd55aEE06d5f1631bbd00c6D7b2539",
-        "vesting_contract": "0x2a83519986106572cA26A8aB47245235BAE18Dba",
+        "vesting_contract": "0xaFadad2c4490c8c20BacfDafa93E01B76553A9a3",
         "total_pools": 9,
         "total_band_levels": 9
     }
