@@ -14,16 +14,16 @@ async function deployStaking(
                                   DEPLOY STAKING
     //////////////////////////////////////////////////////////////////////////*/
 
-    let StakingContractName = ""
+    let stakingContractName = ""
     if (TESTNET_NETWORKS.includes(network.name)) {
-        StakingContractName = "StakingMock"
+        stakingContractName = "StakingMock"
     } else if (MAINNET_NETWORKS.includes(network.name)) {
-        StakingContractName = "Staking"
+        stakingContractName = "Staking"
     } else {
         throw new Error("Network not supported")
     }
 
-    const Staking = await ethers.getContractFactory(StakingContractName)
+    const Staking = await ethers.getContractFactory(stakingContractName)
     const staking = await upgrades.deployProxy(Staking, [
         usdtToken,
         usdcToken,

@@ -1,4 +1,4 @@
-import { Address, BigInt, log, store } from "@graphprotocol/graph-ts";
+import { Address, BigInt, ethereum, dataSource, store, log } from "@graphprotocol/graph-ts";
 import {
     Initialized as InitializedEvent,
     PoolSet as PoolSetEvent,
@@ -57,12 +57,19 @@ import {
     removeFixedShares,
     removeFlexiShares,
 } from "../utils/staking/sharesSync";
-import { BIGINT_ZERO, BIGINT_ONE } from "../utils/constants";
+import {
+    BIGINT_ZERO,
+    BIGINT_ONE,
+    TESTNET_NETWORKS,
+    TEN_MINUTES_IN_SECONDS,
+    MONTH_IN_SECONDS,
+} from "../utils/constants";
 
 export function handleInitialized(event: InitializedEvent): void {
     const stakingContract: StakingContract = getOrInitStakingContract();
-
     const staking: Staking = Staking.bind(event.address);
+    const networkName = dataSource.network();
+
     stakingContract.stakingContractAddress = event.address;
     stakingContract.usdtToken = staking.getTokenUSDT();
     stakingContract.usdcToken = staking.getTokenUSDC();
@@ -72,8 +79,22 @@ export function handleInitialized(event: InitializedEvent): void {
     stakingContract.totalPools = staking.getTotalPools();
     stakingContract.totalBandLevels = staking.getTotalBandLevels();
     stakingContract.lastSharesSyncDate = event.block.timestamp;
-    stakingContract.periodDuration = staking.getPeriodDuration();
 
+    // We cannot be sure that getPeriodDuration function exists as it was added in the latest contract version
+    // So only the newest deployed contracts will have this value on the initialization event
+    // Older contracts that were upgraded will have the default value set
+    // If period duration in StakingMock contract for testing is changed, the default value for testnets should be updated
+    const periodDuration: ethereum.CallResult<BigInt> = staking.try_getPeriodDuration();
+    let durationValue: BigInt = BIGINT_ZERO;
+
+    // If the function does not exist, set the default value
+    if (periodDuration.reverted) {
+        durationValue = TESTNET_NETWORKS.includes(networkName) ? TEN_MINUTES_IN_SECONDS : MONTH_IN_SECONDS;
+    } else {
+        durationValue = periodDuration.value;
+    }
+
+    stakingContract.periodDuration = durationValue;
     stakingContract.save();
 }
 
