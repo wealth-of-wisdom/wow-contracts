@@ -1,6 +1,6 @@
 const { ethers, network } = require("hardhat")
 const networkConfig = require("../data/networkConfig.json")
-const { TESTNET_NETWORKS, WOW_TOKEN_DECIMALS } = require("./constants")
+const { TESTNET_NETWORKS } = require("./constants")
 
 async function getNetworkConfig() {
     const config = networkConfig[network.name]
@@ -20,12 +20,13 @@ async function getNetworkConfig() {
     // If staking is not provided using the config,
     // use a dummy address which will be replaced later
     const stakingContract = config.staking_contract || ethers.ZeroAddress
+    const nftContract = config.nft_contract || ethers.ZeroAddress
 
     if (!vestingToken || !listingDate) {
         throw new Error("ERROR: Invalid config")
     }
 
-    return { vestingToken, stakingContract, listingDate }
+    return { vestingToken, stakingContract, nftContract, listingDate }
 }
 
 module.exports = getNetworkConfig

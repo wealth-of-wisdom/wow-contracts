@@ -48,7 +48,7 @@ async function main() {
                             GRANT PERMISSIONS IN VESTING
     //////////////////////////////////////////////////////////////////////////*/
 
-    await setupVestingPermissions(nftSaleAddress, vestingContract)
+    await setupVestingPermissions(vestingContract, nftAddress)
 
     /*//////////////////////////////////////////////////////////////////////////
                               GRANT PERMISSIONS IN NFT

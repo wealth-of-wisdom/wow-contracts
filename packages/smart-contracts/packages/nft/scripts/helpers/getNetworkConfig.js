@@ -1,6 +1,5 @@
 const { network, ethers } = require("hardhat")
 const networkConfig = require("../data/networkConfig.json")
-require("dotenv").config()
 
 async function getNetworkConfig() {
     let config = networkConfig[network.name]
