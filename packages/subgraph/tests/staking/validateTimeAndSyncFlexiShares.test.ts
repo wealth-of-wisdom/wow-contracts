@@ -1,6 +1,6 @@
 import { Address, BigInt, log } from "@graphprotocol/graph-ts";
 import { describe, test, beforeAll, beforeEach, afterEach, clearStore, assert } from "matchstick-as/assembly/index";
-import { syncFlexiSharesEvery12Hours } from "../../src/utils/staking/sharesSync";
+import { validateTimeAndSyncFlexiShares } from "../../src/utils/staking/sharesSync";
 import { stakeStandardFlexi, initializeAndSetUp, stakeVestedFlexi } from "./helpers/helper";
 import { alice, bob, charlie, totalPools, ids, bandIds } from "../utils/data/constants";
 import { bandLevels, sharesInMonths } from "../utils/data/data";
@@ -23,7 +23,7 @@ let duration: BigInt;
 let allStakerFlexiShares: BigInt[][];
 let allStakerIsolatedFlexiShares: BigInt[][];
 
-describe("syncFlexiSharesEvery12Hours() tests", () => {
+describe("validateTimeAndSyncFlexiShares() tests", () => {
     beforeEach(() => {
         clearStore();
         initializeAndSetUp();
@@ -42,12 +42,12 @@ describe("syncFlexiSharesEvery12Hours() tests", () => {
                     });
 
                     test("Should not sync shares", () => {
-                        const synced = syncFlexiSharesEvery12Hours(syncDate.plus(duration));
+                        const synced = validateTimeAndSyncFlexiShares(syncDate.plus(duration));
                         assert.assertTrue(!synced);
                     });
 
                     test("Should not update last sync date", () => {
-                        syncFlexiSharesEvery12Hours(syncDate.plus(duration));
+                        validateTimeAndSyncFlexiShares(syncDate.plus(duration));
                         assert.fieldEquals("StakingContract", ids[0], "lastSharesSyncDate", syncDate.toString());
                     });
                 });
@@ -58,12 +58,12 @@ describe("syncFlexiSharesEvery12Hours() tests", () => {
                     });
 
                     test("Should not sync shares", () => {
-                        const synced = syncFlexiSharesEvery12Hours(syncDate.plus(duration));
+                        const synced = validateTimeAndSyncFlexiShares(syncDate.plus(duration));
                         assert.assertTrue(!synced);
                     });
 
                     test("Should not update last sync date", () => {
-                        syncFlexiSharesEvery12Hours(syncDate.plus(duration));
+                        validateTimeAndSyncFlexiShares(syncDate.plus(duration));
                         assert.fieldEquals("StakingContract", ids[0], "lastSharesSyncDate", syncDate.toString());
                     });
                 });
@@ -76,7 +76,7 @@ describe("syncFlexiSharesEvery12Hours() tests", () => {
                 });
 
                 beforeEach(() => {
-                    syncFlexiSharesEvery12Hours(syncDate);
+                    validateTimeAndSyncFlexiShares(syncDate);
                 });
 
                 describe("1 hour passed", () => {
@@ -85,12 +85,12 @@ describe("syncFlexiSharesEvery12Hours() tests", () => {
                     });
 
                     test("Should not sync shares", () => {
-                        const synced = syncFlexiSharesEvery12Hours(syncDate.plus(duration));
+                        const synced = validateTimeAndSyncFlexiShares(syncDate.plus(duration));
                         assert.assertTrue(!synced);
                     });
 
                     test("Should not update last sync date", () => {
-                        syncFlexiSharesEvery12Hours(syncDate.plus(duration));
+                        validateTimeAndSyncFlexiShares(syncDate.plus(duration));
                         assert.fieldEquals("StakingContract", ids[0], "lastSharesSyncDate", syncDate.toString());
                     });
                 });
@@ -101,12 +101,12 @@ describe("syncFlexiSharesEvery12Hours() tests", () => {
                     });
 
                     test("Should not sync shares", () => {
-                        const synced = syncFlexiSharesEvery12Hours(syncDate.plus(duration));
+                        const synced = validateTimeAndSyncFlexiShares(syncDate.plus(duration));
                         assert.assertTrue(!synced);
                     });
 
                     test("Should not update last sync date", () => {
-                        syncFlexiSharesEvery12Hours(syncDate.plus(duration));
+                        validateTimeAndSyncFlexiShares(syncDate.plus(duration));
                         assert.fieldEquals("StakingContract", ids[0], "lastSharesSyncDate", syncDate.toString());
                     });
                 });
@@ -125,12 +125,12 @@ describe("syncFlexiSharesEvery12Hours() tests", () => {
                     });
 
                     test("Should sync shares", () => {
-                        const synced = syncFlexiSharesEvery12Hours(syncDate.plus(duration));
+                        const synced = validateTimeAndSyncFlexiShares(syncDate.plus(duration));
                         assert.assertTrue(synced);
                     });
 
                     test("Should update last sync date", () => {
-                        syncFlexiSharesEvery12Hours(syncDate.plus(duration));
+                        validateTimeAndSyncFlexiShares(syncDate.plus(duration));
                         assert.fieldEquals(
                             "StakingContract",
                             ids[0],
@@ -146,12 +146,12 @@ describe("syncFlexiSharesEvery12Hours() tests", () => {
                     });
 
                     test("Should sync shares", () => {
-                        const synced = syncFlexiSharesEvery12Hours(syncDate.plus(duration));
+                        const synced = validateTimeAndSyncFlexiShares(syncDate.plus(duration));
                         assert.assertTrue(synced);
                     });
 
                     test("Should update last sync date", () => {
-                        syncFlexiSharesEvery12Hours(syncDate.plus(duration));
+                        validateTimeAndSyncFlexiShares(syncDate.plus(duration));
                         assert.fieldEquals(
                             "StakingContract",
                             ids[0],
@@ -169,7 +169,7 @@ describe("syncFlexiSharesEvery12Hours() tests", () => {
                 });
 
                 beforeEach(() => {
-                    syncFlexiSharesEvery12Hours(syncDate);
+                    validateTimeAndSyncFlexiShares(syncDate);
                 });
 
                 describe("12 hours passed", () => {
@@ -178,12 +178,12 @@ describe("syncFlexiSharesEvery12Hours() tests", () => {
                     });
 
                     test("Should sync shares", () => {
-                        const synced = syncFlexiSharesEvery12Hours(syncDate.plus(duration));
+                        const synced = validateTimeAndSyncFlexiShares(syncDate.plus(duration));
                         assert.assertTrue(synced);
                     });
 
                     test("Should update last sync date", () => {
-                        syncFlexiSharesEvery12Hours(syncDate.plus(duration));
+                        validateTimeAndSyncFlexiShares(syncDate.plus(duration));
                         assert.fieldEquals(
                             "StakingContract",
                             ids[0],
@@ -199,12 +199,12 @@ describe("syncFlexiSharesEvery12Hours() tests", () => {
                     });
 
                     test("Should sync shares", () => {
-                        const synced = syncFlexiSharesEvery12Hours(syncDate.plus(duration));
+                        const synced = validateTimeAndSyncFlexiShares(syncDate.plus(duration));
                         assert.assertTrue(synced);
                     });
 
                     test("Should update last sync date", () => {
-                        syncFlexiSharesEvery12Hours(syncDate.plus(duration));
+                        validateTimeAndSyncFlexiShares(syncDate.plus(duration));
                         assert.fieldEquals(
                             "StakingContract",
                             ids[0],
@@ -288,7 +288,7 @@ describe("syncFlexiSharesEvery12Hours() tests", () => {
                             }
 
                             // Try to sync and update the shares
-                            syncFlexiSharesEvery12Hours(monthsAfterInit[syncMonth]);
+                            validateTimeAndSyncFlexiShares(monthsAfterInit[syncMonth]);
                         });
 
                         describe("1 FLEXI band", () => {
@@ -508,7 +508,7 @@ describe("syncFlexiSharesEvery12Hours() tests", () => {
                             stakeStandardFlexi(alice, BigInt.fromI32(9), bandIds[2], initDate);
 
                             // Try to sync and update the shares
-                            syncFlexiSharesEvery12Hours(monthsAfterInit[syncMonth]);
+                            validateTimeAndSyncFlexiShares(monthsAfterInit[syncMonth]);
                         });
 
                         describe(`3 FLEXI bands`, () => {
@@ -615,7 +615,7 @@ describe("syncFlexiSharesEvery12Hours() tests", () => {
                             }
 
                             // Try to sync and update the shares
-                            syncFlexiSharesEvery12Hours(monthsAfterInit[syncMonth]);
+                            validateTimeAndSyncFlexiShares(monthsAfterInit[syncMonth]);
                         });
 
                         describe(`1 FLEXI band for each staker`, () => {
@@ -837,7 +837,7 @@ describe("syncFlexiSharesEvery12Hours() tests", () => {
                             }
 
                             // Try to sync and update the shares
-                            syncFlexiSharesEvery12Hours(monthsAfterInit[syncMonth]);
+                            validateTimeAndSyncFlexiShares(monthsAfterInit[syncMonth]);
                         });
 
                         describe(`3 FLEXI bands`, () => {
@@ -930,7 +930,7 @@ describe("syncFlexiSharesEvery12Hours() tests", () => {
                             }
 
                             // Try to sync and update the shares
-                            syncFlexiSharesEvery12Hours(monthsAfterInit[syncMonth]);
+                            validateTimeAndSyncFlexiShares(monthsAfterInit[syncMonth]);
                         });
 
                         describe("1 FLEXI band", () => {
@@ -1150,7 +1150,7 @@ describe("syncFlexiSharesEvery12Hours() tests", () => {
                             stakeVestedFlexi(alice, BigInt.fromI32(9), bandIds[2], initDate);
 
                             // Try to sync and update the shares
-                            syncFlexiSharesEvery12Hours(monthsAfterInit[syncMonth]);
+                            validateTimeAndSyncFlexiShares(monthsAfterInit[syncMonth]);
                         });
 
                         describe(`3 FLEXI bands`, () => {
@@ -1257,7 +1257,7 @@ describe("syncFlexiSharesEvery12Hours() tests", () => {
                             }
 
                             // Try to sync and update the shares
-                            syncFlexiSharesEvery12Hours(monthsAfterInit[syncMonth]);
+                            validateTimeAndSyncFlexiShares(monthsAfterInit[syncMonth]);
                         });
 
                         describe(`1 FLEXI band for each staker`, () => {
@@ -1479,7 +1479,7 @@ describe("syncFlexiSharesEvery12Hours() tests", () => {
                             }
 
                             // Try to sync and update the shares
-                            syncFlexiSharesEvery12Hours(monthsAfterInit[syncMonth]);
+                            validateTimeAndSyncFlexiShares(monthsAfterInit[syncMonth]);
                         });
 
                         describe(`3 FLEXI bands`, () => {
@@ -1539,7 +1539,7 @@ describe("syncFlexiSharesEvery12Hours() tests", () => {
                     }
 
                     const bandStakingDuration = BigInt.fromI32(9 * 24 * 3600);
-                    syncFlexiSharesEvery12Hours(monthsAfterInit[syncMonth].plus(bandStakingDuration));
+                    validateTimeAndSyncFlexiShares(monthsAfterInit[syncMonth].plus(bandStakingDuration));
 
                     const sharesX2 = shares.times(BigInt.fromI32(2));
                     const sharesX3 = shares.times(BigInt.fromI32(3));

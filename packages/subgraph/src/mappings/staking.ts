@@ -51,7 +51,7 @@ import {
 import { stakingTypeFIX, stringifyStakingType, StakerAndPoolShares } from "../utils/utils";
 import { calculateRewards } from "../utils/staking/rewardsCalculation";
 import {
-    syncFlexiSharesEvery12Hours,
+    validateTimeAndSyncFlexiShares,
     syncAndCalculateAllShares,
     addFixedShares,
     removeFixedShares,
@@ -68,7 +68,7 @@ import {
 export function handleInitialized(event: InitializedEvent): void {
     const stakingContract: StakingContract = getOrInitStakingContract();
     const staking: Staking = Staking.bind(event.address);
-    const networkName = dataSource.network();
+    const networkName: string = dataSource.network();
 
     stakingContract.stakingContractAddress = event.address;
     stakingContract.usdtToken = staking.getTokenUSDT();
@@ -251,12 +251,12 @@ export function handleRewardsDistributed(event: RewardsDistributedEvent): void {
 // Gelato will call triggerSharesSync() function
 // If more than 24 hours have passed since the last shares sync
 export function handleSharesSyncTriggered(event: SharesSyncTriggeredEvent): void {
-    syncFlexiSharesEvery12Hours(event.block.timestamp);
+    validateTimeAndSyncFlexiShares(event.block.timestamp);
 }
 
 export function handleStaked(event: StakedEvent): void {
     // Sync shares if needed
-    syncFlexiSharesEvery12Hours(event.block.timestamp);
+    validateTimeAndSyncFlexiShares(event.block.timestamp);
 
     const stakingContract: StakingContract = getOrInitStakingContract();
     const staker: Staker = getOrInitStaker(event.params.user);
@@ -316,7 +316,7 @@ export function handleUnstaked(event: UnstakedEvent): void {
 
     // Run full sync if 12 hours have passed since last sync
     // Else, update shares for the staker, band and the pools that changed
-    const syncExecuted: boolean = syncFlexiSharesEvery12Hours(event.block.timestamp);
+    const syncExecuted: boolean = validateTimeAndSyncFlexiShares(event.block.timestamp);
 
     // If the removed band is with type FIX, remove the fixed shares
     if (band.stakingType == stakingTypeFIX) {
@@ -348,7 +348,7 @@ export function handleVestingUserDeleted(event: VestingUserDeletedEvent): void {
  */
 export function handleBandUpgraded(event: BandUpgradedEvent): void {
     // Sync shares if needed
-    syncFlexiSharesEvery12Hours(event.block.timestamp);
+    validateTimeAndSyncFlexiShares(event.block.timestamp);
 
     changeBandLevel(
         event.params.user,
@@ -366,7 +366,7 @@ export function handleBandUpgraded(event: BandUpgradedEvent): void {
  */
 export function handleBandDowngraded(event: BandDowngradedEvent): void {
     // Sync shares if needed
-    syncFlexiSharesEvery12Hours(event.block.timestamp);
+    validateTimeAndSyncFlexiShares(event.block.timestamp);
 
     changeBandLevel(
         event.params.user,
