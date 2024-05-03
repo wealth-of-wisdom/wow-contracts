@@ -1,4 +1,4 @@
-import { Address, BigInt, log } from "@graphprotocol/graph-ts";
+import { Address, BigInt, dataSource, log } from "@graphprotocol/graph-ts";
 import { StakingContract, Band, BandLevel, Pool, Staker } from "../../../generated/schema";
 import {
     getOrInitPool,
@@ -8,7 +8,7 @@ import {
     getOrInitStakingContract,
 } from "../../helpers/staking.helpers";
 import { stakingTypeFIX, StakerShares, StakerAndPoolShares, stakingTypeFLEXI } from "../utils";
-import { BIGINT_ZERO } from "../constants";
+import { BIGINT_ZERO, TEN_MINUTES_IN_SECONDS, TWELVE_HOURS_IN_SECONDS, TESTNET_NETWORKS } from "../constants";
 
 /*//////////////////////////////////////////////////////////////////////////
                             CALLED ON STAKE/UNSTAKE
@@ -150,11 +150,15 @@ function reduceSharesForStaker(
 //////////////////////////////////////////////////////////////////////////*/
 
 // Sync all shares for stakers and pools each 12 hours
-export function syncFlexiSharesEvery12Hours(currentTime: BigInt): boolean {
+export function validateTimeAndSyncFlexiShares(currentTime: BigInt): boolean {
     const staking: StakingContract = getOrInitStakingContract();
     const lastSyncDate: BigInt = staking.lastSharesSyncDate;
     const timePassed = currentTime.minus(lastSyncDate);
-    const minSyncInterval: BigInt = BigInt.fromI32(60 * 60 * 12); // 12 hours in seconds
+
+    const networkName: string = dataSource.network();
+    const minSyncInterval: BigInt = TESTNET_NETWORKS.includes(networkName)
+        ? TEN_MINUTES_IN_SECONDS // 10 minutes for testnets
+        : TWELVE_HOURS_IN_SECONDS; // 12 hours for mainnet
 
     // If at least 12 hours passed since last sync, update shares
     if (timePassed.ge(minSyncInterval)) {
