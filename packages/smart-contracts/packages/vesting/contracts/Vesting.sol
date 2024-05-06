@@ -244,7 +244,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         pool.dedicatedPoolTokenAmount += tokenAmount;
 
         // Checks: User token amount should not exceed total pool amount
-        if (pool.totalPoolTokenAmount < (pool.dedicatedPoolTokenAmount)) {
+        if (pool.totalPoolTokenAmount < pool.dedicatedPoolTokenAmount) {
             revert Errors.Vesting__TokenAmountExeedsTotalPoolAmount();
         }
 
