@@ -39,7 +39,7 @@
         "nft_symbol": "WOWPASS",
         "vesting_contract": "",
         "vesting_pool_id": 0,
-        "max_level": 10,
+        "max_level": 5,
         "total_project_types": 3,
         "set_project_quantities": true
     }
