@@ -38,4 +38,5 @@ library Errors {
     error Staking__UnlockDateNotReached();
     error Staking__DistributionInProgress();
     error Staking__DistributionNotInProgress();
+    error Staking__BandLevelAlreadySet(uint16 bandLevel);
 }

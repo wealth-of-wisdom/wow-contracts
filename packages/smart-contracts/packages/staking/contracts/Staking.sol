@@ -303,6 +303,11 @@ contract Staking is
         mBandLevelExists(bandLevel)
         mAmountNotZero(price)
     {
+        // Checks: band level must not be set before
+        if (s_bandLevelData[bandLevel].price != 0) {
+            revert Errors.Staking__BandLevelAlreadySet(bandLevel);
+        }
+
         // Checks: amount must be in pool bounds
         if (accessiblePools.length > s_totalPools) {
             revert Errors.Staking__MaximumLevelExceeded();

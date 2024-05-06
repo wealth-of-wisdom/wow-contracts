@@ -552,6 +552,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         (, , uint16 bandLevel, , , ) = staking.getStakerBand(bandId);
         (uint256 bandPrice, ) = staking.getBandLevel(bandLevel);
 
+        // Checks: Enough staked tokens in the contract
         if (bandPrice > user.stakedTokenAmount) {
             revert Errors.Vesting__NotEnoughStakedTokensForUnstaking();
         }
