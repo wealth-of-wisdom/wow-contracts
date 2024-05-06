@@ -24,4 +24,6 @@ library Errors {
     error Vesting__BeneficiaryDoesNotExist();
     error Vesting__InsufficientBalance();
     error Vesting__NotEnoughTokens();
+    error Vesting__ListingDateNotChanged();
+    error Vesting__NotEnoughStakedTokensForUnstaking();
 }
