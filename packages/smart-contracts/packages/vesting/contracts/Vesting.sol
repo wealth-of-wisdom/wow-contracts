@@ -694,7 +694,12 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     function getUnlockedTokenAmount(
         uint16 pid,
         address beneficiary
-    ) public view returns (uint256 unlockedAmount) {
+    )
+        public
+        view
+        mBeneficiaryExists(pid, beneficiary)
+        returns (uint256 unlockedAmount)
+    {
         Pool storage pool = s_vestingPools[pid];
         Beneficiary storage user = pool.beneficiaries[beneficiary];
 

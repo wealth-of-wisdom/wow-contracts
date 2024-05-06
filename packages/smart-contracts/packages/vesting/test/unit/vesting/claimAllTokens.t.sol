@@ -337,11 +337,6 @@ contract Vesting_ClaimAllTokens_Unit_Test is Unit_Test {
         vm.warp(LISTING_DATE + 1 minutes);
         vm.startPrank(alice);
 
-        IVesting.Beneficiary memory tokenData = vesting.getBeneficiary(
-            SECONDARY_POOL,
-            alice
-        );
-
         vesting.claimTokens(SECONDARY_POOL);
         vesting.claimAllTokens();
         vm.stopPrank();
