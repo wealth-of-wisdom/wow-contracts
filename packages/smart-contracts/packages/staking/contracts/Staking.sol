@@ -725,10 +725,10 @@ contract Staking is
 
             // Effects: delete user from the map
             s_users.remove(user);
-        }
 
-        // Effects: emit event
-        emit VestingUserDeleted(user);
+            // Effects: emit event
+            emit VestingUserDeleted(user);
+        }
     }
 
     /**
