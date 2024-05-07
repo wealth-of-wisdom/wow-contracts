@@ -6,8 +6,20 @@ import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {Unit_Test} from "../Unit.t.sol";
 
 contract Vesting_GetUnlockedTokenAmount_Unit_Test is Unit_Test {
+    function test_getUnlockedTokenAmount_ReturnsZeroIfBeneficiaryNotAdded()
+        external
+        approveAndAddPool
+    {
+        uint256 unlockedAmount = vesting.getUnlockedTokenAmount(
+            PRIMARY_POOL,
+            bob
+        );
+
+        assertEq(unlockedAmount, 0, "Unlocked amount should be zero");
+    }
+
     // Current time is 1 minute before listing date
-    function test_getUnlockedTokenAmount_ReturnsZeroIfListingDateNotReaced()
+    function test_getUnlockedTokenAmount_ReturnsZeroIfListingDateNotReached()
         external
         approveAndAddPool
         addBeneficiary(alice)
