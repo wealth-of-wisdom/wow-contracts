@@ -6,6 +6,15 @@ import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {Unit_Test} from "../Unit.t.sol";
 
 contract Vesting_GetUnlockedTokenAmount_Unit_Test is Unit_Test {
+    function test_getUnlockedTokenAmount_RevertIf_BeneficiaryDoesNotExist()
+        external
+        approveAndAddPool
+    {
+        vm.expectRevert(Errors.Vesting__BeneficiaryDoesNotExist.selector);
+        vm.prank(admin);
+        vesting.removeBeneficiary(PRIMARY_POOL, alice);
+    }
+
     // Current time is 1 minute before listing date
     function test_getUnlockedTokenAmount_ReturnsZeroIfListingDateNotReaced()
         external

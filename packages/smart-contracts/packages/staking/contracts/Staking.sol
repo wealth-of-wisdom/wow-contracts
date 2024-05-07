@@ -707,26 +707,28 @@ contract Staking is
         uint256[] memory bandIds = s_stakerBands[user];
         uint256 bandsAmount = bandIds.length;
 
-        // Loop through all bands that user owns and delete data
-        for (uint256 bandIndex; bandIndex < bandsAmount; bandIndex++) {
-            // Effects: delete all band data
-            delete s_bands[bandIds[bandIndex]];
+        if (bandIds.length != 0) {
+            // Loop through all bands that user owns and delete data
+            for (uint256 bandIndex; bandIndex < bandsAmount; bandIndex++) {
+                // Effects: delete all band data
+                delete s_bands[bandIds[bandIndex]];
+            }
+
+            // Effects: delete user from the staker bands map
+            delete s_stakerBands[user];
+
+            // Effects: delete users all claimed and unclaimed rewards for USDT
+            delete s_stakerRewards[_getStakerAndTokenHash(user, s_usdtToken)];
+
+            // Effects: delete users all claimed and unclaimed rewards for USDC
+            delete s_stakerRewards[_getStakerAndTokenHash(user, s_usdcToken)];
+
+            // Effects: delete user from the map
+            s_users.remove(user);
+
+            // Effects: emit event
+            emit VestingUserDeleted(user);
         }
-
-        // Effects: delete user from the staker bands map
-        delete s_stakerBands[user];
-
-        // Effects: delete users all claimed and unclaimed rewards for USDT
-        delete s_stakerRewards[_getStakerAndTokenHash(user, s_usdtToken)];
-
-        // Effects: delete users all claimed and unclaimed rewards for USDC
-        delete s_stakerRewards[_getStakerAndTokenHash(user, s_usdcToken)];
-
-        // Effects: delete user from the map
-        s_users.remove(user);
-
-        // Effects: emit event
-        emit VestingUserDeleted(user);
     }
 
     /**
