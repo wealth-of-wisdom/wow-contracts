@@ -16,7 +16,7 @@ interface IStakingEvents {
         uint16 totalBandLevels
     );
 
-    event PoolSet(uint16 indexed poolId, uint48 distributionPercentage);
+    event PoolSet(uint16 indexed poolId, uint32 distributionPercentage);
 
     event BandLevelSet(
         uint16 indexed bandLevel,
@@ -134,7 +134,7 @@ interface IStaking is IStakingEvents {
 
     function setPoolDistributionPercentage(
         uint16 poolId,
-        uint48 distributionPercentage
+        uint32 distributionPercentage
     ) external;
 
     function setBandLevel(
@@ -216,7 +216,7 @@ interface IStaking is IStakingEvents {
 
     function getPoolDistributionPercentage(
         uint16 poolId
-    ) external view returns (uint48 distributionPercentage);
+    ) external view returns (uint32 distributionPercentage);
 
     function getBandLevel(
         uint16 bandLevel

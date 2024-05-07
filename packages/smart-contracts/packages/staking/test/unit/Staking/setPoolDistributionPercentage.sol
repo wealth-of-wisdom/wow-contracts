@@ -17,10 +17,7 @@ contract Staking_SetPool_Unit_Test is Unit_Test {
             )
         );
         vm.prank(alice);
-        staking.setPoolDistributionPercentageDistributionPercentage(
-            POOL_ID_1,
-            POOL_1_PERCENTAGE
-        );
+        staking.setPoolDistributionPercentage(POOL_ID_1, POOL_1_PERCENTAGE);
     }
 
     function test_setPoolDistributionPercentage_RevertIf_PoolIdIsZero()
@@ -30,10 +27,7 @@ contract Staking_SetPool_Unit_Test is Unit_Test {
             abi.encodeWithSelector(Errors.Staking__InvalidPoolId.selector, 0)
         );
         vm.prank(admin);
-        staking.setPoolDistributionPercentageDistributionPercentage(
-            0,
-            POOL_1_PERCENTAGE
-        );
+        staking.setPoolDistributionPercentage(0, POOL_1_PERCENTAGE);
     }
 
     function test_setPoolDistributionPercentage_RevertIf_PoolIdIsGreaterThanMaxPools()
@@ -46,7 +40,7 @@ contract Staking_SetPool_Unit_Test is Unit_Test {
             )
         );
         vm.prank(admin);
-        staking.setPoolDistributionPercentageDistributionPercentage(
+        staking.setPoolDistributionPercentage(
             TOTAL_POOLS + 1,
             POOL_1_PERCENTAGE
         );
@@ -62,7 +56,7 @@ contract Staking_SetPool_Unit_Test is Unit_Test {
             )
         );
         vm.prank(admin);
-        staking.setPoolDistributionPercentageDistributionPercentage(
+        staking.setPoolDistributionPercentage(
             POOL_ID_1,
             PERCENTAGE_PRECISION + 1
         );
@@ -72,10 +66,7 @@ contract Staking_SetPool_Unit_Test is Unit_Test {
         external
     {
         vm.prank(admin);
-        staking.setPoolDistributionPercentageDistributionPercentage(
-            POOL_ID_1,
-            POOL_1_PERCENTAGE
-        );
+        staking.setPoolDistributionPercentage(POOL_ID_1, POOL_1_PERCENTAGE);
 
         uint48 percentage = staking.getPoolDistributionPercentage(POOL_ID_1);
         assertEq(
@@ -90,9 +81,6 @@ contract Staking_SetPool_Unit_Test is Unit_Test {
         emit PoolSet(POOL_ID_1, POOL_1_PERCENTAGE);
 
         vm.prank(admin);
-        staking.setPoolDistributionPercentageDistributionPercentage(
-            POOL_ID_1,
-            POOL_1_PERCENTAGE
-        );
+        staking.setPoolDistributionPercentage(POOL_ID_1, POOL_1_PERCENTAGE);
     }
 }

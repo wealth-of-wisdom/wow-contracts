@@ -19,7 +19,7 @@ library Errors {
         uint256 contractBalance,
         uint256 requiredAmount
     );
-    error Staking__InvalidDistributionPercentage(uint48 percentage);
+    error Staking__InvalidDistributionPercentage(uint32 percentage);
     error Staking__BandAllocationExceedsMaximum(uint48 percentage);
     error Staking__TotalAllocationExceedsMaximum(uint48 percentage);
     error Staking__InvalidBandsAmount();

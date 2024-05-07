@@ -62,7 +62,7 @@ contract Staking is
     mapping(uint256 bandId => StakerBand) internal s_bands;
 
     // Map pool id (1-9) => pool distribution percentage in 10^6 integrals, for divident calculation
-    mapping(uint16 poolId => uint48 distributionPercentage)
+    mapping(uint16 poolId => uint32 distributionPercentage)
         internal s_poolDistributionPercentages;
 
     // Map band level (1-9) => band data
@@ -280,7 +280,7 @@ contract Staking is
      */
     function setPoolDistributionPercentage(
         uint16 poolId,
-        uint48 distributionPercentage
+        uint32 distributionPercentage
     ) external onlyRole(DEFAULT_ADMIN_ROLE) mPoolExists(poolId) {
         // Checks: distribution percentage should not exceed 100%
         if (distributionPercentage > uint48(PERCENTAGE_PRECISION)) {
@@ -919,7 +919,7 @@ contract Staking is
      */
     function getPoolDistributionPercentage(
         uint16 poolId
-    ) external view returns (uint48 distributionPercentage) {
+    ) external view returns (uint32 distributionPercentage) {
         distributionPercentage = s_poolDistributionPercentages[poolId];
     }
 
