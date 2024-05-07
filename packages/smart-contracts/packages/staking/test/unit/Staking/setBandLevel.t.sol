@@ -91,15 +91,22 @@ contract Staking_SetBandLevel_Unit_Test is Unit_Test {
             BAND_1_ACCESSIBLE_POOLS
         );
 
-        (uint256 price, uint16[] memory accessiblePools) = staking.getBandLevel(
-            BAND_LEVEL_1
-        );
+        (
+            uint256 price,
+            uint16[] memory accessiblePools,
+            bool isDeprecated
+        ) = staking.getBandLevel(BAND_LEVEL_1);
         uint256 poolsAmount = accessiblePools.length;
 
-        assertEq(price, BAND_1_PRICE);
+        assertEq(price, BAND_1_PRICE, "Price not set correctly");
+        assertFalse(isDeprecated, "Band is deprecated");
 
         for (uint256 i = 0; i < poolsAmount; i++) {
-            assertEq(accessiblePools[i], BAND_1_ACCESSIBLE_POOLS[i]);
+            assertEq(
+                accessiblePools[i],
+                BAND_1_ACCESSIBLE_POOLS[i],
+                "Pool not set correctly"
+            );
         }
     }
 

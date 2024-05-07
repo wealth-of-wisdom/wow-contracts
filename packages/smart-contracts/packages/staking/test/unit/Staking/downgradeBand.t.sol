@@ -133,6 +133,24 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
         staking.downgradeBand(BAND_ID_0, BAND_LEVEL_7);
     }
 
+    function test_stakeVested_RevertIf_BandLevelAlreadyDeprecated()
+        external
+        setBandLevelData
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+    {
+        vm.prank(admin);
+        staking.updateBandLevelDeprecationStatus(BAND_LEVEL_2, true);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.Staking__BandLevelDeprecated.selector,
+                BAND_LEVEL_2
+            )
+        );
+        vm.prank(alice);
+        staking.downgradeBand(BAND_ID_0, BAND_LEVEL_2);
+    }
+
     function test_downgradeBand_UpdatesBandLevel()
         external
         setBandLevelData

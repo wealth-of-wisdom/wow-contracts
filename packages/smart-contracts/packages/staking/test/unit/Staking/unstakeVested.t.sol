@@ -55,7 +55,7 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
         staking.unstakeVested(alice, BAND_ID_0);
     }
 
-    function test_stakeVested_RevertIf_DistributionInProgress()
+    function test_unstakeVested_RevertIf_DistributionInProgress()
         external
         setBandLevelData
         setSharesInMonth
@@ -63,6 +63,20 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
         setDistributionInProgress(true)
     {
         vm.expectRevert(Errors.Staking__DistributionInProgress.selector);
+        vm.prank(address(vesting));
+        staking.unstakeVested(alice, BAND_ID_0);
+    }
+
+    function test_unstakeVested_AllowsToUnstakeForDeprecatedBandLevels()
+        external
+        setBandLevelData
+        setSharesInMonth
+        stakeVestedTokens(alice, STAKING_TYPE_FIX, BAND_LEVEL_4, MONTH_1)
+    {
+        vm.prank(admin);
+        staking.updateBandLevelDeprecationStatus(BAND_LEVEL_4, true);
+
+        skip(MONTH);
         vm.prank(address(vesting));
         staking.unstakeVested(alice, BAND_ID_0);
     }

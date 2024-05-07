@@ -185,7 +185,7 @@ contract Base_Test is Test, StakingConstants, Events {
             vm.prank(address(vesting));
             staking.stakeVested(_user, _stakingType, _bandLevel, _month);
         } else {
-            (uint256 price, ) = staking.getBandLevel(_bandLevel);
+            (uint256 price, , ) = staking.getBandLevel(_bandLevel);
 
             vm.startPrank(_user);
             wowToken.approve(address(staking), price);

@@ -87,6 +87,24 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
         staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
     }
 
+    function test_stakeVested_RevertIf_BandLevelAlreadyDeprecated()
+        external
+        setBandLevelData
+        setSharesInMonth
+    {
+        vm.prank(admin);
+        staking.updateBandLevelDeprecationStatus(BAND_LEVEL_1, true);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.Staking__BandLevelDeprecated.selector,
+                BAND_LEVEL_1
+            )
+        );
+        vm.prank(address(vesting));
+        staking.stakeVested(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
+    }
+
     // NOTE: no more FIX staking for vesting
     // function test_stakeVested_RevertIf_MonthForFixTypeIsZero()
     //     external

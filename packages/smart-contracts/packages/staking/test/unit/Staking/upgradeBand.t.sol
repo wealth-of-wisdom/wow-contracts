@@ -116,6 +116,26 @@ contract Staking_UpgradeBand_Unit_Test is Unit_Test {
         staking.upgradeBand(BAND_ID_0, BAND_LEVEL_2);
     }
 
+    function test_stakeVested_RevertIf_BandLevelAlreadyDeprecated()
+        external
+        setBandLevelData
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+    {
+        vm.prank(admin);
+        staking.updateBandLevelDeprecationStatus(BAND_LEVEL_7, true);
+
+        vm.startPrank(alice);
+        wowToken.approve(address(staking), BAND_7_PRICE - BAND_4_PRICE);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.Staking__BandLevelDeprecated.selector,
+                BAND_LEVEL_7
+            )
+        );
+        staking.upgradeBand(BAND_ID_0, BAND_LEVEL_7);
+        vm.stopPrank();
+    }
+
     function test_upgradeBand_UpdatesBandLevel()
         external
         setBandLevelData

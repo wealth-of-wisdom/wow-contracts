@@ -52,6 +52,20 @@ contract Staking_Unstake_Unit_Test is Unit_Test {
         staking.unstake(BAND_ID_0);
     }
 
+    function test_unstake_AllowsToUnstakeForDeprecatedBandLevels()
+        external
+        setBandLevelData
+        setSharesInMonth
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+    {
+        vm.prank(admin);
+        staking.updateBandLevelDeprecationStatus(BAND_LEVEL_4, true);
+
+        skip(MONTH);
+        vm.prank(alice);
+        staking.unstake(BAND_ID_0);
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                     FLEXI STAKING
     //////////////////////////////////////////////////////////////////////////*/

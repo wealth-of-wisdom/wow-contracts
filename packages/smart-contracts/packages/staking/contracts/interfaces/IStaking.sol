@@ -75,6 +75,11 @@ interface IStakingEvents {
     );
 
     event RewardsClaimed(address user, IERC20 token, uint256 totalRewards);
+
+    event BandLevelDeprecationStatusUpdated(
+        uint16 bandLevel,
+        bool isDeprecated
+    );
 }
 
 interface IStaking is IStakingEvents {
@@ -108,6 +113,7 @@ interface IStaking is IStakingEvents {
     struct BandLevel {
         uint256 price; // price in WOW tokens
         uint16[] accessiblePools; // pool ids (1-9)
+        bool isDeprecated; // true if stakers can no longer stake in this band (only unstake is allowed)
     }
 
     struct Pool {
@@ -151,6 +157,11 @@ interface IStaking is IStakingEvents {
     function setBandUpgradesEnabled(bool enabled) external;
 
     function setDistributionInProgress(bool inProgress) external;
+
+    function updateBandLevelDeprecationStatus(
+        uint16 bandLevel,
+        bool isDeprecated
+    ) external;
 
     function withdrawTokens(IERC20 token, uint256 amount) external;
 
@@ -213,7 +224,14 @@ interface IStaking is IStakingEvents {
 
     function getBandLevel(
         uint16 bandLevel
-    ) external view returns (uint256 price, uint16[] memory accessiblePools);
+    )
+        external
+        view
+        returns (
+            uint256 price,
+            uint16[] memory accessiblePools,
+            bool isDeprecated
+        );
 
     function getStakerBand(
         uint256 bandId

@@ -132,6 +132,13 @@ contract Staking is
         _;
     }
 
+    modifier mBandLevelNotDeprecated(uint16 bandLevel) {
+        if (s_bandLevelData[bandLevel].isDeprecated) {
+            revert Errors.Staking__BandLevelDeprecated(bandLevel);
+        }
+        _;
+    }
+
     modifier mBandOwner(address user, uint256 bandId) {
         if (s_bands[bandId].owner != user) {
             revert Errors.Staking__NotBandOwner(bandId, user);
@@ -303,8 +310,10 @@ contract Staking is
         mBandLevelExists(bandLevel)
         mAmountNotZero(price)
     {
+        BandLevel storage bandLevelData = s_bandLevelData[bandLevel];
+
         // Checks: band level must not be set before
-        if (s_bandLevelData[bandLevel].price != 0) {
+        if (bandLevelData.price != 0) {
             revert Errors.Staking__BandLevelAlreadySet(bandLevel);
         }
 
@@ -314,10 +323,9 @@ contract Staking is
         }
 
         // Effects: set band storage
-        s_bandLevelData[bandLevel] = BandLevel({
-            price: price,
-            accessiblePools: accessiblePools
-        });
+        // isDeprecated is set to false by default
+        bandLevelData.price = price;
+        bandLevelData.accessiblePools = accessiblePools;
 
         // Effects: emit event
         emit BandLevelSet(bandLevel, price, accessiblePools);
@@ -439,6 +447,23 @@ contract Staking is
 
         // Effects: emit event
         emit DistributionStatusSet(inProgress);
+    }
+
+    /**
+     * @notice  Update deprecation parameter for the band level
+     * @notice  If band is deprecated, stakers can only unstake
+     * @notice  If band is not deprecated, stakers can stake and unstake as usual
+     * @param   bandLevel  band level number (from 1 to n)
+     */
+    function updateBandLevelDeprecationStatus(
+        uint16 bandLevel,
+        bool isDeprecated
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        // Effects: set band deprecation status
+        s_bandLevelData[bandLevel].isDeprecated = isDeprecated;
+
+        // Effects: emit event
+        emit BandLevelDeprecationStatusUpdated(bandLevel, isDeprecated);
     }
 
     /**
@@ -572,6 +597,7 @@ contract Staking is
 
     /**
      * @notice  Stake and lock tokens to earn rewards
+     * @notice  Only if the band is not deprecated stakers can stake
      * @param   stakingType  enumerable type for flexi or fixed staking
      * @param   bandLevel  band level number
      * @param   month  fixed staking period in months (if not fixed, set to 0)
@@ -583,6 +609,7 @@ contract Staking is
     )
         external
         mBandLevelExists(bandLevel)
+        mBandLevelNotDeprecated(bandLevel)
         mValidMonth(stakingType, month)
         mDistributionNotInProgress
     {
@@ -606,6 +633,7 @@ contract Staking is
 
     /**
      * @notice  Unstake tokens at any time and claim earned rewards
+     * @notice  Even if the band is deprecated, stakers can still unstake
      * @param   bandId  Id of the band (0-max uint)
      */
     function unstake(
@@ -639,6 +667,7 @@ contract Staking is
 
     /**
      * @notice  Stakes vesting contract tokens to ear rewards
+     * @notice  Only if the band is not deprecated stakers can stake
      * @param   user  address of user staking vested tokens
      * @param   stakingType  enumerable type for flexi or fixed staking
      * @param   bandLevel  band level number
@@ -654,6 +683,7 @@ contract Staking is
         onlyRole(VESTING_ROLE)
         mAddressNotZero(user)
         mBandLevelExists(bandLevel)
+        mBandLevelNotDeprecated(bandLevel)
         mValidMonth(stakingType, month)
         mDistributionNotInProgress
         returns (uint256 bandId)
@@ -672,6 +702,7 @@ contract Staking is
 
     /**
      * @notice  Unstake tokens at any time and claim earned rewards
+     * @notice  Even if the band is deprecated, stakers can still unstake
      * @notice  This function can only be called by the vesting contract
      * @param   user  address of user staking vested tokens
      * @param   bandId  Id of the band (0-max uint)
@@ -737,7 +768,8 @@ contract Staking is
     }
 
     /**
-     * @notice  Upgradea any owned band to a new level
+     * @notice  Upgrade any owned band to a new level
+     * @notice  Band level which is deprecated can't be used for upgrades
      * @param   bandId  BandLevel Id being upgraded
      * @param   newBandLevel  New band level being upgraded to
      */
@@ -753,6 +785,12 @@ contract Staking is
         mBandFromVestedTokens(bandId, false)
         mDistributionNotInProgress
     {
+        // Checks: Band level is not deprecated
+        // Not using modifier to avoid `Stack too deep` error
+        if (s_bandLevelData[newBandLevel].isDeprecated) {
+            revert Errors.Staking__BandLevelDeprecated(newBandLevel);
+        }
+
         uint16 oldBandLevel = s_bands[bandId].bandLevel;
 
         // Checks: new band level must be higher than the old one
@@ -776,6 +814,7 @@ contract Staking is
 
     /**
      * @notice  Downgrade any owned band to a new level
+     * @notice  Band level which is deprecated can't be used for downgrades
      * @param   bandId  BandLevel Id being downgraded
      * @param   newBandLevel  New band level being downgraded to
      */
@@ -791,6 +830,12 @@ contract Staking is
         mBandFromVestedTokens(bandId, false)
         mDistributionNotInProgress
     {
+        // Checks: Band level is not deprecated
+        // Not using modifier to avoid `Stack too deep` error
+        if (s_bandLevelData[newBandLevel].isDeprecated) {
+            revert Errors.Staking__BandLevelDeprecated(newBandLevel);
+        }
+
         uint16 oldBandLevel = s_bands[bandId].bandLevel;
 
         // Checks: new band level must be higher than the old one
@@ -918,10 +963,19 @@ contract Staking is
      */
     function getBandLevel(
         uint16 bandLevel
-    ) external view returns (uint256 price, uint16[] memory accessiblePools) {
+    )
+        external
+        view
+        returns (
+            uint256 price,
+            uint16[] memory accessiblePools,
+            bool isDeprecated
+        )
+    {
         BandLevel memory band = s_bandLevelData[bandLevel];
         price = band.price;
         accessiblePools = band.accessiblePools;
+        isDeprecated = band.isDeprecated;
     }
 
     /**

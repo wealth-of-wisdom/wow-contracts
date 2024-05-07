@@ -79,6 +79,24 @@ contract Staking_Stake_Unit_Test is Unit_Test {
         staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
     }
 
+    function test_stake_RevertIf_BandLevelAlreadyDeprecated()
+        external
+        setBandLevelData
+        setSharesInMonth
+    {
+        vm.prank(admin);
+        staking.updateBandLevelDeprecationStatus(BAND_LEVEL_1, true);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.Staking__BandLevelDeprecated.selector,
+                BAND_LEVEL_1
+            )
+        );
+        vm.prank(alice);
+        staking.stake(STAKING_TYPE_FLEXI, BAND_LEVEL_1, MONTH_0);
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                     FLEXI STAKING
     //////////////////////////////////////////////////////////////////////////*/
