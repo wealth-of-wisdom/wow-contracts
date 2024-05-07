@@ -3,7 +3,7 @@
         "name": "NFT Holders",
         "listing_release_percentage": 10,
         "cliff_in_days": 1,
-        "cliff_release_percentage": 15,
+        "cliff_release_percentage": 0,
         "vesting_in_months": 1,
         "unlock_type": "DAILY",
         "tokens_amount_in_wow": "80000000000"
@@ -21,7 +21,7 @@
         "name": "Whitelist Sale 0.001",
         "listing_release_percentage": 55,
         "cliff_in_days": 1,
-        "cliff_release_percentage": 10,
+        "cliff_release_percentage": 0,
         "vesting_in_months": 1,
         "unlock_type": "DAILY",
         "tokens_amount_in_wow": "10000000000"
