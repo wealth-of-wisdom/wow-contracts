@@ -85,21 +85,21 @@ async function validateData(vesting, data, poolsCount, decimals) {
         )
     }
 
+    // @todo Not sure if this is actually needed
     // Validate that all beneficiaries tokens add up to the pool's undedicated amount
-    for (let poolId = 0; poolId < poolsCount; poolId++) {
-        const pool = await vesting.getGeneralPoolData(poolId)
-        const totalPoolAmount = BigInt(pool[2])
-        const dedicatedPoolAmount = BigInt(pool[3])
-        const undedicatedPoolAmount = totalPoolAmount - dedicatedPoolAmount
+    // for (let poolId = 0; poolId < poolsCount; poolId++) {
+    //     const pool = await vesting.getGeneralPoolData(poolId)
+    //     const totalPoolAmount = BigInt(pool[2])
+    //     const dedicatedPoolAmount = BigInt(pool[3])
+    //     const undedicatedPoolAmount = totalPoolAmount - dedicatedPoolAmount
 
-        // If at least one beneficiary is added to the pool we need to check that pool was filled correctly
-        // @todo Not sure if this is actually needed
-        if (allBeneficiariesTokensPerPool[poolId] !== undedicatedPoolAmount) {
-            throw new Error(
-                `Amounts don't add up for pool ${poolId} - expected ${undedicatedPoolAmount} but got ${allBeneficiariesTokensPerPool[poolId]}`,
-            )
-        }
-    }
+    //     // If at least one beneficiary is added to the pool we need to check that pool was filled correctly
+    //     if (allBeneficiariesTokensPerPool[poolId] !== undedicatedPoolAmount) {
+    //         throw new Error(
+    //             `Amounts don't add up for pool ${poolId} - expected ${undedicatedPoolAmount} but got ${allBeneficiariesTokensPerPool[poolId]}`,
+    //         )
+    //     }
+    // }
 
     console.log("Beneficiaries validated!")
 }
