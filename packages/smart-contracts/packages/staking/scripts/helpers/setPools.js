@@ -9,7 +9,10 @@ async function setPools(stakingAddress) {
     //////////////////////////////////////////////////////////////////////////*/
 
     for (let pool of poolData) {
-        const tx = await staking.setPool(pool.id, pool.distribution_percentage)
+        const tx = await staking.setPoolDistributionPercentage(
+            pool.id,
+            pool.distribution_percentage,
+        )
         await tx.wait()
 
         console.log(`Pool ${pool.id} data set`)

@@ -63,7 +63,7 @@ contract Staking is
 
     // Map pool id (1-9) => pool distribution percentage in 10^6 integrals, for divident calculation
     mapping(uint16 poolId => uint48 distributionPercentage)
-        internal poolDistributionPercentage;
+        internal s_poolDistributionPercentages;
 
     // Map band level (1-9) => band data
     mapping(uint16 bandLevel => BandLevel) internal s_bandLevelData;
@@ -278,7 +278,7 @@ contract Staking is
      * @param poolId Id of the pool (1-9)
      * @param distributionPercentage Percentage of the total rewards to be distributed to this pool
      */
-    function setPool(
+    function setPoolDistributionPercentage(
         uint16 poolId,
         uint48 distributionPercentage
     ) external onlyRole(DEFAULT_ADMIN_ROLE) mPoolExists(poolId) {
@@ -289,7 +289,7 @@ contract Staking is
             );
         }
         // Effects: set the storage
-        poolDistributionPercentage[poolId] = distributionPercentage;
+        s_poolDistributionPercentages[poolId] = distributionPercentage;
 
         // Effects: emit event
         emit PoolSet(poolId, distributionPercentage);
@@ -334,7 +334,9 @@ contract Staking is
 
     /**
      * @notice  Sets the total amount of shares that user is going to have
-     *          at the end of each month of staking
+     *          at the end of each month of staking. Shares in month
+     *          will be used for FIX and FLEXI types. All calculations will be
+     *          conducted on the subgraph for FIX and FLEXI types
      * @param   totalSharesInMonth  array of shares for each month
      */
     function setSharesInMonth(
@@ -915,10 +917,10 @@ contract Staking is
      * @param   poolId  Pool Id
      * @return  distributionPercentage  Percentage in 10**6 precision
      */
-    function getPool(
+    function getPoolDistributionPercentage(
         uint16 poolId
     ) external view returns (uint48 distributionPercentage) {
-        distributionPercentage = poolDistributionPercentage[poolId];
+        distributionPercentage = s_poolDistributionPercentages[poolId];
     }
 
     /**
