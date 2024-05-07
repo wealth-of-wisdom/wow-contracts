@@ -700,12 +700,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     function getUnlockedTokenAmount(
         uint16 pid,
         address beneficiary
-    )
-        public
-        view
-        mBeneficiaryExists(pid, beneficiary)
-        returns (uint256 unlockedAmount)
-    {
+    ) public view returns (uint256 unlockedAmount) {
         if (!_isBeneficiaryAdded(pid, beneficiary)) {
             return 0;
         }
