@@ -104,6 +104,10 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      * @notice Checks whether the listing date is not in the past.
      */
     modifier mValidListingDate(uint32 listingDate) {
+        if (listingDate == s_listingDate) {
+            revert Errors.Vesting__ListingDateNotChanged();
+        }
+
         if (listingDate < block.timestamp) {
             revert Errors.Vesting__ListingDateNotInFuture();
         }
@@ -351,7 +355,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         // Effects: update cliff and vesting end dates for all pools
         for (uint16 i; i < poolCount; i++) {
             Pool storage pool = s_vestingPools[i];
-            pool.cliffEndDate = s_listingDate + (pool.cliffInDays * DAY);
+            pool.cliffEndDate = newListingDate + (pool.cliffInDays * DAY);
             pool.vestingEndDate =
                 pool.cliffEndDate +
                 (pool.vestingDurationInDays * DAY);
@@ -544,6 +548,11 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
 
         (, , uint16 bandLevel, , , ) = staking.getStakerBand(bandId);
         (uint256 bandPrice, ) = staking.getBandLevel(bandLevel);
+
+        // Checks: Enough staked tokens in the contract
+        if (bandPrice > user.stakedTokenAmount) {
+            revert Errors.Vesting__NotEnoughStakedTokensForUnstaking();
+        }
 
         // Effects: Unstake tokens
         user.stakedTokenAmount -= bandPrice;
@@ -781,10 +790,11 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         }
 
         uint16 poolCount = s_poolCount;
+        bytes32 nameHash = keccak256(abi.encodePacked(name));
+
         for (uint16 i; i < poolCount; i++) {
             if (
-                keccak256(abi.encodePacked(s_vestingPools[i].name)) ==
-                keccak256(abi.encodePacked(name))
+                keccak256(abi.encodePacked(s_vestingPools[i].name)) == nameHash
             ) {
                 revert Errors.Vesting__PoolWithThisNameExists();
             }
