@@ -25,6 +25,15 @@ contract Vesting_ChangeListingDate_Unit_Test is Unit_Test {
         vesting.changeListingDate(NEW_LISTING_DATE);
     }
 
+    function test_changeListingDate_RevertIf_ListingDateAlreadyTheSame()
+        external
+    {
+        vm.warp(LISTING_DATE - 1 seconds);
+        vm.expectRevert(Errors.Vesting__ListingDateNotChanged.selector);
+        vm.prank(admin);
+        vesting.changeListingDate(LISTING_DATE);
+    }
+
     function test_changeListingDate_RevertIf_InvalidListingDate() external {
         vm.warp(NEW_LISTING_DATE);
         vm.expectRevert(Errors.Vesting__ListingDateNotInFuture.selector);

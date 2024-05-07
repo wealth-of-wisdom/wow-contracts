@@ -5,8 +5,8 @@ import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol"
 import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {Unit_Test} from "../Unit.t.sol";
 
-contract Staking_SetBand_Unit_Test is Unit_Test {
-    function test_setBand_RevertIf_CallerNotDefaultAdmin() external {
+contract Staking_SetBandLevel_Unit_Test is Unit_Test {
+    function test_setBandLevel_RevertIf_CallerNotDefaultAdmin() external {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
@@ -22,7 +22,29 @@ contract Staking_SetBand_Unit_Test is Unit_Test {
         );
     }
 
-    function test_setBand_RevertIf_BandLevelIsZero() external {
+    function test_setBandLevel_RevertIf_LevelAlreadySet() external {
+        vm.startPrank(admin);
+        staking.setBandLevel(
+            BAND_LEVEL_1,
+            BAND_1_PRICE,
+            BAND_1_ACCESSIBLE_POOLS
+        );
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.Staking__BandLevelAlreadySet.selector,
+                BAND_LEVEL_1
+            )
+        );
+        staking.setBandLevel(
+            BAND_LEVEL_1,
+            BAND_2_PRICE,
+            BAND_2_ACCESSIBLE_POOLS
+        );
+        vm.stopPrank();
+    }
+
+    function test_setBandLevel_RevertIf_BandLevelIsZero() external {
         vm.expectRevert(
             abi.encodeWithSelector(Errors.Staking__InvalidBandLevel.selector, 0)
         );
@@ -30,7 +52,9 @@ contract Staking_SetBand_Unit_Test is Unit_Test {
         staking.setBandLevel(0, BAND_1_PRICE, BAND_1_ACCESSIBLE_POOLS);
     }
 
-    function test_setBand_RevertIf_BandLevelIsGreaterThanMaxBands() external {
+    function test_setBandLevel_RevertIf_BandLevelIsGreaterThanMaxBands()
+        external
+    {
         vm.expectRevert(
             abi.encodeWithSelector(
                 Errors.Staking__InvalidBandLevel.selector,
@@ -45,19 +69,21 @@ contract Staking_SetBand_Unit_Test is Unit_Test {
         );
     }
 
-    function test_setBand_RevertIf_BandPriceIsZero() external {
+    function test_setBandLevel_RevertIf_BandPriceIsZero() external {
         vm.expectRevert(Errors.Staking__ZeroAmount.selector);
         vm.prank(admin);
         staking.setBandLevel(BAND_LEVEL_1, 0, BAND_1_ACCESSIBLE_POOLS);
     }
 
-    function test_setBand_RevertIf_AccessiblePoolsArrayIsTooLarge() external {
+    function test_setBandLevel_RevertIf_AccessiblePoolsArrayIsTooLarge()
+        external
+    {
         vm.expectRevert(Errors.Staking__MaximumLevelExceeded.selector);
         vm.prank(admin);
         staking.setBandLevel(BAND_LEVEL_1, BAND_1_PRICE, new uint16[](10));
     }
 
-    function test_setBand_SetsBandData() external {
+    function test_setBandLevel_SetsBandData() external {
         vm.prank(admin);
         staking.setBandLevel(
             BAND_LEVEL_1,
@@ -77,7 +103,7 @@ contract Staking_SetBand_Unit_Test is Unit_Test {
         }
     }
 
-    function test_setBand_EmitsBandLevelSetEvent() external {
+    function test_setBandLevel_EmitsBandLevelSetEvent() external {
         vm.expectEmit(address(staking));
         emit BandLevelSet(BAND_LEVEL_1, BAND_1_PRICE, BAND_1_ACCESSIBLE_POOLS);
 
