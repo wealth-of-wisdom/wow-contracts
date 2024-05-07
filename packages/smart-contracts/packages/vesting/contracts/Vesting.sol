@@ -240,16 +240,13 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     {
         Pool storage pool = s_vestingPools[pid];
 
-        // Checks: User token amount should not exceed total pool amount
-        if (
-            pool.totalPoolTokenAmount <
-            (pool.dedicatedPoolTokenAmount + tokenAmount)
-        ) {
-            revert Errors.Vesting__TokenAmountExeedsTotalPoolAmount();
-        }
-
         // Effects: Increase locked pool token amount
         pool.dedicatedPoolTokenAmount += tokenAmount;
+
+        // Checks: User token amount should not exceed total pool amount
+        if (pool.totalPoolTokenAmount < pool.dedicatedPoolTokenAmount) {
+            revert Errors.Vesting__TokenAmountExeedsTotalPoolAmount();
+        }
 
         // Effects: update user token amounts
         Beneficiary storage user = pool.beneficiaries[beneficiary];
