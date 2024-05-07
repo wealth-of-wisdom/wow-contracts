@@ -706,6 +706,10 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         mBeneficiaryExists(pid, beneficiary)
         returns (uint256 unlockedAmount)
     {
+        if (!_isBeneficiaryAdded(pid, beneficiary)) {
+            return 0;
+        }
+
         Pool storage pool = s_vestingPools[pid];
         Beneficiary storage user = pool.beneficiaries[beneficiary];
 
