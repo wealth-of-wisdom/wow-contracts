@@ -8,6 +8,14 @@ interface IStakingEvents {
                                        EVENTS
     //////////////////////////////////////////////////////////////////////////*/
 
+    event InitializedContractData(
+        IERC20 usdtToken,
+        IERC20 usdcToken,
+        IERC20 wowToken,
+        uint16 totalPools,
+        uint16 totalBandLevels
+    );
+
     event PoolSet(uint16 indexed poolId, uint48 distributionPercentage);
 
     event BandLevelSet(
@@ -108,10 +116,6 @@ interface IStaking is IStakingEvents {
     struct BandLevel {
         uint256 price; // price in WOW tokens
         uint16[] accessiblePools; // pool ids (1-9)
-    }
-
-    struct Pool {
-        uint48 distributionPercentage; // in 10^6 integrals, for divident calculation
     }
 
     /*//////////////////////////////////////////////////////////////////////////

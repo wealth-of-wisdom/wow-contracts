@@ -113,7 +113,7 @@ abstract contract StakingConstants {
 
     uint16 internal constant TOTAL_POOLS = 9;
     uint16 internal constant TOTAL_BAND_LEVELS = 9;
-    uint48 internal constant PERCENTAGE_PRECISION = 1e8;
+    uint32 internal constant PERCENTAGE_PRECISION = 1e8;
 
     uint48 internal constant MONTH = 30 days;
     uint8 internal constant MONTH_0 = 0;
@@ -150,6 +150,7 @@ abstract contract StakingConstants {
         (SHARE * 9625) / 1000,
         SHARE * 12
     ];
+    uint48[] internal NEW_SHARES_IN_MONTH = [SHARE];
 
     /*//////////////////////////////////////////////////////////////////////////
                                 STAKING POOL DATA
@@ -178,23 +179,23 @@ abstract contract StakingConstants {
     ];
 
     uint48 internal constant POOL_1_PERCENTAGE =
-        (13 * PERCENTAGE_PRECISION) / 1000; // 1.3%
+        (13 * uint48(PERCENTAGE_PRECISION)) / 1000; // 1.3%
     uint48 internal constant POOL_2_PERCENTAGE =
-        (17 * PERCENTAGE_PRECISION) / 1000; // 1.7%
+        (17 * uint48(PERCENTAGE_PRECISION)) / 1000; // 1.7%
     uint48 internal constant POOL_3_PERCENTAGE =
-        (34 * PERCENTAGE_PRECISION) / 1000; // 3.4%
+        (34 * uint48(PERCENTAGE_PRECISION)) / 1000; // 3.4%
     uint48 internal constant POOL_4_PERCENTAGE =
-        (64 * PERCENTAGE_PRECISION) / 1000; // 6.4%
+        (64 * uint48(PERCENTAGE_PRECISION)) / 1000; // 6.4%
     uint48 internal constant POOL_5_PERCENTAGE =
-        (156 * PERCENTAGE_PRECISION) / 1000; // 15.6%
+        (156 * uint48(PERCENTAGE_PRECISION)) / 1000; // 15.6%
     uint48 internal constant POOL_6_PERCENTAGE =
-        (146 * PERCENTAGE_PRECISION) / 1000; // 14.6%
+        (146 * uint48(PERCENTAGE_PRECISION)) / 1000; // 14.6%
     uint48 internal constant POOL_7_PERCENTAGE =
-        (24 * PERCENTAGE_PRECISION) / 100; // 24%
+        (24 * uint48(PERCENTAGE_PRECISION)) / 100; // 24%
     uint48 internal constant POOL_8_PERCENTAGE =
-        (19 * PERCENTAGE_PRECISION) / 100; // 19%
+        (19 * uint48(PERCENTAGE_PRECISION)) / 100; // 19%
     uint48 internal constant POOL_9_PERCENTAGE =
-        (14 * PERCENTAGE_PRECISION) / 100; // 14%
+        (14 * uint48(PERCENTAGE_PRECISION)) / 100; // 14%
 
     uint48[] internal POOL_PERCENTAGES = [
         POOL_1_PERCENTAGE,

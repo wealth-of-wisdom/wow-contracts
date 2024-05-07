@@ -29,6 +29,7 @@ contract Staking is
     //////////////////////////////////////////////////////////////////////////*/
 
     uint32 private constant MONTH = 30 days;
+    uint16 private constant SHARES_IN_MONTH_LENGTH = 24;
 
     /*//////////////////////////////////////////////////////////////////////////
                                 PUBLIC CONSTANTS
@@ -39,8 +40,7 @@ contract Staking is
     bytes32 public constant GELATO_EXECUTOR_ROLE =
         keccak256("GELATO_EXECUTOR_ROLE");
 
-    uint48 public constant SHARE = 1e6; // 1 share = 10^6
-    uint48 public constant PERCENTAGE_PRECISION = 1e8; // 100% = 10^8
+    uint32 public constant PERCENTAGE_PRECISION = 1e8; // 100% = 10^8
 
     /*//////////////////////////////////////////////////////////////////////////
                                 INTERNAL STORAGE
@@ -61,8 +61,9 @@ contract Staking is
     // Map single band id => band data
     mapping(uint256 bandId => StakerBand) internal s_bands;
 
-    // Map pool id (1-9) => pool data
-    mapping(uint16 poolId => Pool) internal s_poolData;
+    // Map pool id (1-9) => pool distribution percentage in 10^6 integrals, for divident calculation
+    mapping(uint16 poolId => uint48 distributionPercentage)
+        internal poolDistributionPercentage;
 
     // Map band level (1-9) => band data
     mapping(uint16 bandLevel => BandLevel) internal s_bandLevelData;
@@ -255,6 +256,14 @@ contract Staking is
         s_wowToken = wowToken;
         s_totalPools = totalPools;
         s_totalBandLevels = totalBandLevels;
+
+        emit InitializedContractData(
+            s_usdtToken,
+            s_usdcToken,
+            s_wowToken,
+            s_totalPools,
+            s_totalBandLevels
+        );
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -274,13 +283,13 @@ contract Staking is
         uint48 distributionPercentage
     ) external onlyRole(DEFAULT_ADMIN_ROLE) mPoolExists(poolId) {
         // Checks: distribution percentage should not exceed 100%
-        if (distributionPercentage > PERCENTAGE_PRECISION) {
+        if (distributionPercentage > uint48(PERCENTAGE_PRECISION)) {
             revert Errors.Staking__InvalidDistributionPercentage(
                 distributionPercentage
             );
         }
         // Effects: set the storage
-        s_poolData[poolId].distributionPercentage = distributionPercentage;
+        poolDistributionPercentage[poolId] = distributionPercentage;
 
         // Effects: emit event
         emit PoolSet(poolId, distributionPercentage);
@@ -325,12 +334,15 @@ contract Staking is
 
     /**
      * @notice  Sets the total amount of shares that user is going to have
-     *          at the end of each month of staking. Used for FLEXI staking
+     *          at the end of each month of staking
      * @param   totalSharesInMonth  array of shares for each month
      */
     function setSharesInMonth(
         uint48[] calldata totalSharesInMonth
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (totalSharesInMonth.length != SHARES_IN_MONTH_LENGTH) {
+            revert Errors.Staking__ShareLengthMismatch();
+        }
         // Effects: set the shares array
         s_sharesInMonth = totalSharesInMonth;
 
@@ -714,7 +726,7 @@ contract Staking is
 
         if (bandIds.length != 0) {
             // Loop through all bands that user owns and delete data
-            for (uint256 bandIndex; bandIndex < bandsAmount; bandIndex++) {
+            for (uint256 bandIndex = 0; bandIndex < bandsAmount; bandIndex++) {
                 // Effects: delete all band data
                 delete s_bands[bandIds[bandIndex]];
             }
@@ -906,8 +918,7 @@ contract Staking is
     function getPool(
         uint16 poolId
     ) external view returns (uint48 distributionPercentage) {
-        Pool memory pool = s_poolData[poolId];
-        distributionPercentage = pool.distributionPercentage;
+        distributionPercentage = poolDistributionPercentage[poolId];
     }
 
     /**
@@ -1116,7 +1127,7 @@ contract Staking is
         // Effects: loop trough bandIds and remove required Id
         uint256[] storage bandIds = s_stakerBands[user];
         uint256 bandsIdsAmount = bandIds.length;
-        for (uint256 i; i < bandsIdsAmount; i++) {
+        for (uint256 i = 0; i < bandsIdsAmount; i++) {
             if (bandIds[i] == bandId) {
                 bandIds[i] = bandIds[bandsIdsAmount - 1];
                 bandIds.pop();
