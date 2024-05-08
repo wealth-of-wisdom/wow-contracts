@@ -211,6 +211,28 @@ contract Staking_Initialize_Unit_Test is Unit_Test {
         );
     }
 
+    function test_initialize_EmitsInitializedContractData() external {
+        vm.expectEmit(address(staking));
+        emit InitializedContractData(
+            usdtToken,
+            usdcToken,
+            wowToken,
+            TOTAL_POOLS,
+            TOTAL_BAND_LEVELS
+        );
+
+        vm.prank(admin);
+        staking.initialize(
+            usdtToken,
+            usdcToken,
+            wowToken,
+            address(vesting),
+            GELATO_EXECUTOR_ADDRESS,
+            TOTAL_POOLS,
+            TOTAL_BAND_LEVELS
+        );
+    }
+
     function test_getPeriodDuration_MonthSetCorrectly() external {
         assertEq(
             staking.getPeriodDuration(),

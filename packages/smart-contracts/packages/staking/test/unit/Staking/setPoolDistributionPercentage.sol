@@ -6,7 +6,9 @@ import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {Unit_Test} from "../Unit.t.sol";
 
 contract Staking_SetPool_Unit_Test is Unit_Test {
-    function test_setPool_RevertIf_CallerNotDefaultAdmin() external {
+    function test_setPoolDistributionPercentage_RevertIf_CallerNotDefaultAdmin()
+        external
+    {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
@@ -15,18 +17,22 @@ contract Staking_SetPool_Unit_Test is Unit_Test {
             )
         );
         vm.prank(alice);
-        staking.setPool(POOL_ID_1, POOL_1_PERCENTAGE);
+        staking.setPoolDistributionPercentage(POOL_ID_1, POOL_1_PERCENTAGE);
     }
 
-    function test_setPool_RevertIf_PoolIdIsZero() external {
+    function test_setPoolDistributionPercentage_RevertIf_PoolIdIsZero()
+        external
+    {
         vm.expectRevert(
             abi.encodeWithSelector(Errors.Staking__InvalidPoolId.selector, 0)
         );
         vm.prank(admin);
-        staking.setPool(0, POOL_1_PERCENTAGE);
+        staking.setPoolDistributionPercentage(0, POOL_1_PERCENTAGE);
     }
 
-    function test_setPool_RevertIf_PoolIdIsGreaterThanMaxPools() external {
+    function test_setPoolDistributionPercentage_RevertIf_PoolIdIsGreaterThanMaxPools()
+        external
+    {
         vm.expectRevert(
             abi.encodeWithSelector(
                 Errors.Staking__InvalidPoolId.selector,
@@ -34,10 +40,15 @@ contract Staking_SetPool_Unit_Test is Unit_Test {
             )
         );
         vm.prank(admin);
-        staking.setPool(TOTAL_POOLS + 1, POOL_1_PERCENTAGE);
+        staking.setPoolDistributionPercentage(
+            TOTAL_POOLS + 1,
+            POOL_1_PERCENTAGE
+        );
     }
 
-    function test_setPool_RevertIf_PoolPercentageExeeds100Percent() external {
+    function test_setPoolDistributionPercentage_RevertIf_PoolPercentageExeeds100Percent()
+        external
+    {
         vm.expectRevert(
             abi.encodeWithSelector(
                 Errors.Staking__InvalidDistributionPercentage.selector,
@@ -45,14 +56,19 @@ contract Staking_SetPool_Unit_Test is Unit_Test {
             )
         );
         vm.prank(admin);
-        staking.setPool(POOL_ID_1, PERCENTAGE_PRECISION + 1);
+        staking.setPoolDistributionPercentage(
+            POOL_ID_1,
+            PERCENTAGE_PRECISION + 1
+        );
     }
 
-    function test_setPool_SetsPoolDistributionPercentage() external {
+    function test_setPoolDistributionPercentage_SetsPoolDistributionPercentage()
+        external
+    {
         vm.prank(admin);
-        staking.setPool(POOL_ID_1, POOL_1_PERCENTAGE);
+        staking.setPoolDistributionPercentage(POOL_ID_1, POOL_1_PERCENTAGE);
 
-        uint48 percentage = staking.getPool(POOL_ID_1);
+        uint48 percentage = staking.getPoolDistributionPercentage(POOL_ID_1);
         assertEq(
             percentage,
             POOL_1_PERCENTAGE,
@@ -60,11 +76,11 @@ contract Staking_SetPool_Unit_Test is Unit_Test {
         );
     }
 
-    function test_setPool_EmitsPoolSetEvent() external {
+    function test_setPoolDistributionPercentage_EmitsPoolSetEvent() external {
         vm.expectEmit(address(staking));
         emit PoolSet(POOL_ID_1, POOL_1_PERCENTAGE);
 
         vm.prank(admin);
-        staking.setPool(POOL_ID_1, POOL_1_PERCENTAGE);
+        staking.setPoolDistributionPercentage(POOL_ID_1, POOL_1_PERCENTAGE);
     }
 }

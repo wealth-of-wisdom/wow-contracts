@@ -8,7 +8,15 @@ interface IStakingEvents {
                                        EVENTS
     //////////////////////////////////////////////////////////////////////////*/
 
-    event PoolSet(uint16 indexed poolId, uint48 distributionPercentage);
+    event InitializedContractData(
+        IERC20 usdtToken,
+        IERC20 usdcToken,
+        IERC20 wowToken,
+        uint16 totalPools,
+        uint16 totalBandLevels
+    );
+
+    event PoolSet(uint16 indexed poolId, uint32 distributionPercentage);
 
     event BandLevelSet(
         uint16 indexed bandLevel,
@@ -108,15 +116,6 @@ interface IStaking is IStakingEvents {
         uint256 claimedAmount; // amount of tokens that have been claimed
     }
 
-    struct BandLevel {
-        uint256 price; // price in WOW tokens
-        uint16[] accessiblePools; // pool ids (1-9)
-    }
-
-    struct Pool {
-        uint48 distributionPercentage; // in 10^6 integrals, for divident calculation
-    }
-
     /*//////////////////////////////////////////////////////////////////////////
                                        FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
@@ -131,7 +130,10 @@ interface IStaking is IStakingEvents {
         uint16 totalBandLevels
     ) external;
 
-    function setPool(uint16 poolId, uint48 distributionPercentage) external;
+    function setPoolDistributionPercentage(
+        uint16 poolId,
+        uint32 distributionPercentage
+    ) external;
 
     function setBandLevel(
         uint16 bandLevel,
@@ -210,13 +212,13 @@ interface IStaking is IStakingEvents {
         uint256 index
     ) external view returns (uint48 shares);
 
-    function getPool(
+    function getPoolDistributionPercentage(
         uint16 poolId
-    ) external view returns (uint48 distributionPercentage);
+    ) external view returns (uint32 distributionPercentage);
 
     function getBandLevel(
         uint16 bandLevel
-    ) external view returns (uint256 price, uint16[] memory accessiblePools);
+    ) external view returns (uint256 price);
 
     function getStakerBand(
         uint256 bandId

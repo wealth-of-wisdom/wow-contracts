@@ -501,7 +501,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         // Cache staking contract
         IStaking staking = s_staking;
 
-        (uint256 bandPrice, ) = staking.getBandLevel(bandLevel);
+        uint256 bandPrice = staking.getBandLevel(bandLevel);
 
         // Checks: Enough unstaked tokens in the contract
         if (

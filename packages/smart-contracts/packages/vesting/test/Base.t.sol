@@ -210,7 +210,10 @@ contract Base_Test is
         vm.startPrank(admin);
 
         for (uint16 i; i < TOTAL_POOLS; i++) {
-            staking.setPool(POOL_IDS[i], POOL_PERCENTAGES[i]);
+            staking.setPoolDistributionPercentage(
+                POOL_IDS[i],
+                POOL_PERCENTAGES[i]
+            );
         }
 
         vm.stopPrank();
