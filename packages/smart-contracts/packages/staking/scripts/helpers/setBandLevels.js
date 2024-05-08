@@ -17,11 +17,7 @@ async function setBandLevels(stakingAddress) {
             WOW_DECIMALS,
         )
 
-        const tx = await staking.setBandLevel(
-            band.level,
-            priceInWoWTokens,
-            band.accessible_pools,
-        )
+        const tx = await staking.setBandLevel(band.level, priceInWoWTokens)
         await tx.wait()
 
         console.log(`Band level ${band.level} data set`)

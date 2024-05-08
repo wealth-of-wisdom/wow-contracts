@@ -15,20 +15,12 @@ contract Staking_SetBandLevel_Unit_Test is Unit_Test {
             )
         );
         vm.prank(alice);
-        staking.setBandLevel(
-            BAND_LEVEL_1,
-            BAND_1_PRICE,
-            BAND_1_ACCESSIBLE_POOLS
-        );
+        staking.setBandLevel(BAND_LEVEL_1, BAND_1_PRICE);
     }
 
     function test_setBandLevel_RevertIf_LevelAlreadySet() external {
         vm.startPrank(admin);
-        staking.setBandLevel(
-            BAND_LEVEL_1,
-            BAND_1_PRICE,
-            BAND_1_ACCESSIBLE_POOLS
-        );
+        staking.setBandLevel(BAND_LEVEL_1, BAND_1_PRICE);
 
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -36,11 +28,7 @@ contract Staking_SetBandLevel_Unit_Test is Unit_Test {
                 BAND_LEVEL_1
             )
         );
-        staking.setBandLevel(
-            BAND_LEVEL_1,
-            BAND_2_PRICE,
-            BAND_2_ACCESSIBLE_POOLS
-        );
+        staking.setBandLevel(BAND_LEVEL_1, BAND_2_PRICE);
         vm.stopPrank();
     }
 
@@ -49,7 +37,7 @@ contract Staking_SetBandLevel_Unit_Test is Unit_Test {
             abi.encodeWithSelector(Errors.Staking__InvalidBandLevel.selector, 0)
         );
         vm.prank(admin);
-        staking.setBandLevel(0, BAND_1_PRICE, BAND_1_ACCESSIBLE_POOLS);
+        staking.setBandLevel(0, BAND_1_PRICE);
     }
 
     function test_setBandLevel_RevertIf_BandLevelIsGreaterThanMaxBands()
@@ -62,56 +50,29 @@ contract Staking_SetBandLevel_Unit_Test is Unit_Test {
             )
         );
         vm.prank(admin);
-        staking.setBandLevel(
-            TOTAL_BAND_LEVELS + 1,
-            BAND_1_PRICE,
-            BAND_1_ACCESSIBLE_POOLS
-        );
+        staking.setBandLevel(TOTAL_BAND_LEVELS + 1, BAND_1_PRICE);
     }
 
     function test_setBandLevel_RevertIf_BandPriceIsZero() external {
         vm.expectRevert(Errors.Staking__ZeroAmount.selector);
         vm.prank(admin);
-        staking.setBandLevel(BAND_LEVEL_1, 0, BAND_1_ACCESSIBLE_POOLS);
+        staking.setBandLevel(BAND_LEVEL_1, 0);
     }
 
-    function test_setBandLevel_RevertIf_AccessiblePoolsArrayIsTooLarge()
-        external
-    {
-        vm.expectRevert(Errors.Staking__MaximumLevelExceeded.selector);
+    function test_setBandLevel_SetsBandLevelData() external {
         vm.prank(admin);
-        staking.setBandLevel(BAND_LEVEL_1, BAND_1_PRICE, new uint16[](10));
-    }
+        staking.setBandLevel(BAND_LEVEL_1, BAND_1_PRICE);
 
-    function test_setBandLevel_SetsBandData() external {
-        vm.prank(admin);
-        staking.setBandLevel(
-            BAND_LEVEL_1,
-            BAND_1_PRICE,
-            BAND_1_ACCESSIBLE_POOLS
-        );
-
-        (uint256 price, uint16[] memory accessiblePools) = staking.getBandLevel(
-            BAND_LEVEL_1
-        );
-        uint256 poolsAmount = accessiblePools.length;
+        uint256 price = staking.getBandLevel(BAND_LEVEL_1);
 
         assertEq(price, BAND_1_PRICE);
-
-        for (uint256 i = 0; i < poolsAmount; i++) {
-            assertEq(accessiblePools[i], BAND_1_ACCESSIBLE_POOLS[i]);
-        }
     }
 
     function test_setBandLevel_EmitsBandLevelSetEvent() external {
         vm.expectEmit(address(staking));
-        emit BandLevelSet(BAND_LEVEL_1, BAND_1_PRICE, BAND_1_ACCESSIBLE_POOLS);
+        emit BandLevelSet(BAND_LEVEL_1, BAND_1_PRICE);
 
         vm.prank(admin);
-        staking.setBandLevel(
-            BAND_LEVEL_1,
-            BAND_1_PRICE,
-            BAND_1_ACCESSIBLE_POOLS
-        );
+        staking.setBandLevel(BAND_LEVEL_1, BAND_1_PRICE);
     }
 }

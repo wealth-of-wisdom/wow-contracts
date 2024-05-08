@@ -11,7 +11,6 @@ library Errors {
     error Staking__NotFlexiTypeBand();
     error Staking__NotBandOwner(uint256 bandId, address owner);
     error Staking__InvalidStakingType();
-    error Staking__MaximumLevelExceeded();
     error Staking__NonExistantToken();
     error Staking__InvalidStakingTimespan(uint256 stakingTimespan);
     error Staking__InvalidPoolId(uint16 poolId);

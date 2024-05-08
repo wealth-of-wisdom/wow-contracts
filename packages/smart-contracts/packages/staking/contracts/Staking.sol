@@ -65,8 +65,8 @@ contract Staking is
     mapping(uint16 poolId => uint32 distributionPercentage)
         internal s_poolDistributionPercentages;
 
-    // Map band level (1-9) => band data
-    mapping(uint16 bandLevel => BandLevel) internal s_bandLevelData;
+    // Map band level (1-9) => band level price
+    mapping(uint16 bandLevel => uint256 price) internal s_bandLevelPrice;
 
     // Array of 24 integers, each representing the amount of shares
     // User owns in the pool for each month. Used for FLEXI staking
@@ -299,13 +299,11 @@ contract Staking is
      * @notice  Sets data of the selected band
      * @param   bandLevel  band level number
      * @param   price  band purchase price
-     * @param   accessiblePools  list of pools that become
      *          accessible after band purchase
      */
     function setBandLevel(
         uint16 bandLevel,
-        uint256 price,
-        uint16[] calldata accessiblePools
+        uint256 price
     )
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
@@ -313,23 +311,15 @@ contract Staking is
         mAmountNotZero(price)
     {
         // Checks: band level must not be set before
-        if (s_bandLevelData[bandLevel].price != 0) {
+        if (s_bandLevelPrice[bandLevel] != 0) {
             revert Errors.Staking__BandLevelAlreadySet(bandLevel);
         }
 
-        // Checks: amount must be in pool bounds
-        if (accessiblePools.length > s_totalPools) {
-            revert Errors.Staking__MaximumLevelExceeded();
-        }
-
         // Effects: set band storage
-        s_bandLevelData[bandLevel] = BandLevel({
-            price: price,
-            accessiblePools: accessiblePools
-        });
+        s_bandLevelPrice[bandLevel] = price;
 
         // Effects: emit event
-        emit BandLevelSet(bandLevel, price, accessiblePools);
+        emit BandLevelSet(bandLevel, price);
     }
 
     /**
@@ -609,7 +599,7 @@ contract Staking is
             false
         );
 
-        uint256 price = s_bandLevelData[bandLevel].price;
+        uint256 price = s_bandLevelPrice[bandLevel];
 
         // Interaction: transfer transaction funds to contract
         s_wowToken.safeTransferFrom(msg.sender, address(this), price);
@@ -636,7 +626,7 @@ contract Staking is
         _validateFixedPeriodPassed(band);
 
         // Get amount before deleting band data
-        uint256 stakedAmount = s_bandLevelData[band.bandLevel].price;
+        uint256 stakedAmount = s_bandLevelPrice[band.bandLevel];
 
         // Effects: delete band data
         _unstakeBand(msg.sender, bandId);
@@ -774,8 +764,8 @@ contract Staking is
             revert Errors.Staking__InvalidBandLevel(newBandLevel);
         }
 
-        uint256 oldPrice = s_bandLevelData[oldBandLevel].price;
-        uint256 newPrice = s_bandLevelData[newBandLevel].price;
+        uint256 oldPrice = s_bandLevelPrice[oldBandLevel];
+        uint256 newPrice = s_bandLevelPrice[newBandLevel];
         uint256 priceDifference = newPrice - oldPrice;
 
         // Effects: update band level
@@ -812,8 +802,8 @@ contract Staking is
             revert Errors.Staking__InvalidBandLevel(newBandLevel);
         }
 
-        uint256 oldPrice = s_bandLevelData[oldBandLevel].price;
-        uint256 newPrice = s_bandLevelData[newBandLevel].price;
+        uint256 oldPrice = s_bandLevelPrice[oldBandLevel];
+        uint256 newPrice = s_bandLevelPrice[newBandLevel];
         uint256 priceDifference = oldPrice - newPrice;
 
         // Effects: update band level
@@ -927,14 +917,11 @@ contract Staking is
      * @notice  Returns band data such as band price, accessible pools and timespan
      * @param   bandLevel  BandLevel level
      * @return  price  BandLevel price in WOW tokens
-     * @return  accessiblePools  List of accessible pools after purchase
      */
     function getBandLevel(
         uint16 bandLevel
-    ) external view returns (uint256 price, uint16[] memory accessiblePools) {
-        BandLevel memory band = s_bandLevelData[bandLevel];
-        price = band.price;
-        accessiblePools = band.accessiblePools;
+    ) external view returns (uint256 price) {
+        price = s_bandLevelPrice[bandLevel];
     }
 
     /**

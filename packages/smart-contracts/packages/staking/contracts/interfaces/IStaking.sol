@@ -18,11 +18,7 @@ interface IStakingEvents {
 
     event PoolSet(uint16 indexed poolId, uint32 distributionPercentage);
 
-    event BandLevelSet(
-        uint16 indexed bandLevel,
-        uint256 price,
-        uint16[] accessiblePools
-    );
+    event BandLevelSet(uint16 indexed bandLevel, uint256 price);
 
     event SharesInMonthSet(uint48[] totalSharesInMonth);
 
@@ -113,11 +109,6 @@ interface IStaking is IStakingEvents {
         uint256 claimedAmount; // amount of tokens that have been claimed
     }
 
-    struct BandLevel {
-        uint256 price; // price in WOW tokens
-        uint16[] accessiblePools; // pool ids (1-9)
-    }
-
     /*//////////////////////////////////////////////////////////////////////////
                                        FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
@@ -137,11 +128,7 @@ interface IStaking is IStakingEvents {
         uint32 distributionPercentage
     ) external;
 
-    function setBandLevel(
-        uint16 bandLevel,
-        uint256 price,
-        uint16[] calldata accessiblePools
-    ) external;
+    function setBandLevel(uint16 bandLevel, uint256 price) external;
 
     function setSharesInMonth(uint48[] calldata totalSharesInMonth) external;
 
@@ -220,7 +207,7 @@ interface IStaking is IStakingEvents {
 
     function getBandLevel(
         uint16 bandLevel
-    ) external view returns (uint256 price, uint16[] memory accessiblePools);
+    ) external view returns (uint256 price);
 
     function getStakerBand(
         uint256 bandId

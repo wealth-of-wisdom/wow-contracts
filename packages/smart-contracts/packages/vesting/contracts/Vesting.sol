@@ -501,7 +501,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         // Cache staking contract
         IStaking staking = s_staking;
 
-        (uint256 bandPrice, ) = staking.getBandLevel(bandLevel);
+        uint256 bandPrice = staking.getBandLevel(bandLevel);
 
         // Checks: Enough unstaked tokens in the contract
         if (
@@ -547,7 +547,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         Beneficiary storage user = pool.beneficiaries[msg.sender];
 
         (, , uint16 bandLevel, , , ) = staking.getStakerBand(bandId);
-        (uint256 bandPrice, ) = staking.getBandLevel(bandLevel);
+        uint256 bandPrice = staking.getBandLevel(bandLevel);
 
         // Checks: Enough staked tokens in the contract
         if (bandPrice > user.stakedTokenAmount) {
