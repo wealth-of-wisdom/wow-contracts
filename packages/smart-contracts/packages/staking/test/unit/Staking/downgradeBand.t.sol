@@ -22,7 +22,7 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
                                         TESTS
     //////////////////////////////////////////////////////////////////////////*/
 
-    function test_upgradeBand_RevertIf_BandUpgradesDisabled() external {
+    function test_downgradeBand_RevertIf_BandUpgradesDisabled() external {
         vm.prank(admin);
         staking.setBandUpgradesEnabled(false);
 
@@ -213,6 +213,118 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
             aliceBalanceBefore + bandPriceDifference,
             aliceBalanceAfter,
             "Tokens not transfered to staker"
+        );
+    }
+
+    function test_downgradeBand_TransferTokensToStaker_AfterPriceChanges()
+        external
+        setBandLevelData
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+    {
+        uint16[] memory emptyArray;
+
+        vm.startPrank(admin);
+        staking.setBandLevel(BAND_LEVEL_4, BAND_5_PRICE, emptyArray);
+        staking.setBandLevel(BAND_LEVEL_2, BAND_3_PRICE, emptyArray);
+        vm.stopPrank();
+
+        uint256 bandPriceDifference = BAND_4_PRICE - BAND_3_PRICE;
+        uint256 aliceBalanceBefore = wowToken.balanceOf(alice);
+
+        vm.prank(alice);
+        staking.downgradeBand(BAND_ID_0, BAND_LEVEL_2);
+
+        uint256 aliceBalanceAfter = wowToken.balanceOf(alice);
+
+        assertEq(
+            aliceBalanceBefore + bandPriceDifference,
+            aliceBalanceAfter,
+            "Tokens not transfered from staker"
+        );
+    }
+
+    function test_downgradeBand_TransferTokensFromStaking_AfterPriceChanges()
+        external
+        setBandLevelData
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+    {
+        uint16[] memory emptyArray;
+
+        vm.startPrank(admin);
+        staking.setBandLevel(BAND_LEVEL_4, BAND_5_PRICE, emptyArray);
+        staking.setBandLevel(BAND_LEVEL_2, BAND_3_PRICE, emptyArray);
+        vm.stopPrank();
+
+        uint256 bandPriceDifference = BAND_4_PRICE - BAND_3_PRICE;
+        uint256 contractBalanceBefore = wowToken.balanceOf(address(staking));
+
+        vm.prank(alice);
+        staking.downgradeBand(BAND_ID_0, BAND_LEVEL_2);
+
+        uint256 contractBalanceAfter = wowToken.balanceOf(address(staking));
+
+        assertEq(
+            contractBalanceBefore - bandPriceDifference,
+            contractBalanceAfter,
+            "Tokens not transfered to staking"
+        );
+    }
+
+    function test_downgradeBand_TransferTokensFromStaker_AfterPriceChanges()
+        external
+        setBandLevelData
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+    {
+        uint16[] memory emptyArray;
+
+        vm.startPrank(admin);
+        staking.setBandLevel(BAND_LEVEL_4, BAND_1_PRICE, emptyArray);
+        staking.setBandLevel(BAND_LEVEL_2, BAND_6_PRICE, emptyArray);
+        vm.stopPrank();
+
+        uint256 bandPriceDifference = BAND_6_PRICE - BAND_4_PRICE;
+        uint256 aliceBalanceBefore = wowToken.balanceOf(alice);
+
+        vm.startPrank(alice);
+        wowToken.approve(address(staking), bandPriceDifference);
+        staking.downgradeBand(BAND_ID_0, BAND_LEVEL_2);
+        vm.stopPrank();
+
+        uint256 aliceBalanceAfter = wowToken.balanceOf(alice);
+
+        assertEq(
+            aliceBalanceBefore - bandPriceDifference,
+            aliceBalanceAfter,
+            "Tokens not transfered from staker"
+        );
+    }
+
+    function test_downgradeBand_TransferTokensToStaking_AfterPriceChanges()
+        external
+        setBandLevelData
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+    {
+        uint16[] memory emptyArray;
+
+        vm.startPrank(admin);
+        staking.setBandLevel(BAND_LEVEL_4, BAND_1_PRICE, emptyArray);
+        staking.setBandLevel(BAND_LEVEL_2, BAND_6_PRICE, emptyArray);
+        vm.stopPrank();
+
+        uint256 bandPriceDifference = BAND_6_PRICE - BAND_4_PRICE;
+        uint256 contractBalanceBefore = wowToken.balanceOf(address(staking));
+
+        vm.startPrank(alice);
+        wowToken.approve(address(staking), bandPriceDifference);
+        staking.downgradeBand(BAND_ID_0, BAND_LEVEL_2);
+        vm.stopPrank();
+
+        uint256 contractBalanceAfter = wowToken.balanceOf(address(staking));
+
+        assertEq(
+            contractBalanceBefore + bandPriceDifference,
+            contractBalanceAfter,
+            "Tokens not transfered to staking"
         );
     }
 

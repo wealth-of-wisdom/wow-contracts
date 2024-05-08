@@ -46,6 +46,81 @@ contract Vesting_UnstakeVestedTokens_Unit_Test is Unit_Test {
         );
     }
 
+    function test_unstakeVestedTokens_UpdatesTokensData_AfterPriceChanges()
+        external
+        approveAndAddPool
+    {
+        uint16[] memory emptyArray;
+
+        vm.prank(admin);
+        vesting.addBeneficiary(PRIMARY_POOL, alice, BAND_9_PRICE);
+
+        vm.prank(alice);
+        vesting.stakeVestedTokens(
+            STAKING_TYPE_FIX,
+            BAND_LEVEL_1,
+            MONTH_1,
+            PRIMARY_POOL
+        );
+
+        skip(MONTH);
+
+        vm.prank(admin);
+        staking.setBandLevel(BAND_LEVEL_1, BAND_2_PRICE, emptyArray);
+
+        vm.prank(alice);
+        vesting.unstakeVestedTokens(BAND_ID_0);
+
+        IVesting.Beneficiary memory user = vesting.getBeneficiary(
+            PRIMARY_POOL,
+            alice
+        );
+        assertEq(user.stakedTokenAmount, 0, "Staked tokens not set");
+        assertEq(user.totalTokenAmount, BAND_9_PRICE, "Token amount changed");
+    }
+
+    function test_stakeVestedTokens_UpdatesTokensData_BeforeAndAfterPriceChanges()
+        external
+        approveAndAddPool
+    {
+        uint16[] memory emptyArray;
+
+        vm.prank(admin);
+        vesting.addBeneficiary(PRIMARY_POOL, alice, BAND_9_PRICE);
+
+        vm.startPrank(alice);
+        vesting.stakeVestedTokens(
+            STAKING_TYPE_FIX,
+            BAND_LEVEL_1,
+            MONTH_1,
+            PRIMARY_POOL
+        );
+        vesting.stakeVestedTokens(
+            STAKING_TYPE_FIX,
+            BAND_LEVEL_1,
+            MONTH_2,
+            PRIMARY_POOL
+        );
+
+        skip(MONTH);
+        vesting.unstakeVestedTokens(BAND_ID_0);
+        vm.stopPrank();
+
+        vm.prank(admin);
+        staking.setBandLevel(BAND_LEVEL_1, BAND_2_PRICE, emptyArray);
+
+        skip(MONTH);
+        vm.prank(alice);
+        vesting.unstakeVestedTokens(BAND_ID_1);
+
+        IVesting.Beneficiary memory user = vesting.getBeneficiary(
+            PRIMARY_POOL,
+            alice
+        );
+        assertEq(user.stakedTokenAmount, 0, "Staked tokens not set");
+        assertEq(user.totalTokenAmount, BAND_9_PRICE, "Token amount changed");
+    }
+
     function test_unstakeVestedTokens_EmitsVestedTokensUnstaked()
         external
         approveAndAddPool
