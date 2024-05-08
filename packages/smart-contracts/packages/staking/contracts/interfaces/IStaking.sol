@@ -72,14 +72,16 @@ interface IStakingEvents {
         address user,
         uint256 bandId,
         uint16 oldBandLevel,
-        uint16 newBandLevel
+        uint16 newBandLevel,
+        uint256 newPurchasePrice
     );
 
     event BandDowngraded(
         address user,
         uint256 bandId,
         uint16 oldBandLevel,
-        uint16 newBandLevel
+        uint16 newBandLevel,
+        uint256 newPurchasePrice
     );
 
     event RewardsClaimed(address user, IERC20 token, uint256 totalRewards);
@@ -100,6 +102,7 @@ interface IStaking is IStakingEvents {
     //////////////////////////////////////////////////////////////////////////*/
 
     struct StakerBand {
+        uint256 purchasePrice; // The price in WOW tokens at the time of purchase (stake/downgrade/upgrade) the band
         address owner; // staker who owns the band
         uint32 stakingStartDate; // timestamp for initial band creation
         uint16 bandLevel; // band levels (1-9)
@@ -223,6 +226,7 @@ interface IStaking is IStakingEvents {
         external
         view
         returns (
+            uint256 purchasePrice,
             address owner,
             uint32 stakingStartDate,
             uint16 bandLevel,

@@ -55,6 +55,7 @@ contract Staking_Unstake_Unit_Test is Unit_Test {
     /*//////////////////////////////////////////////////////////////////////////
                                     FLEXI STAKING
     //////////////////////////////////////////////////////////////////////////*/
+
     function test_unstake_FlexiType_DeletesBandDetails()
         external
         setBandLevelData
@@ -65,6 +66,7 @@ contract Staking_Unstake_Unit_Test is Unit_Test {
         staking.unstake(BAND_ID_0);
 
         (
+            uint256 purchasePrice,
             address owner,
             uint32 stakingStartDate,
             uint16 bandLevel,
@@ -73,6 +75,7 @@ contract Staking_Unstake_Unit_Test is Unit_Test {
             bool areTokensVested
         ) = staking.getStakerBand(BAND_ID_0);
 
+        assertEq(purchasePrice, 0, "Purchase price not removed");
         assertEq(owner, ZERO_ADDRESS, "Owner not removed");
         assertEq(stakingStartDate, 0, "Timestamp not removed");
         assertEq(uint8(stakingType), 0, "Staking type not removed");
@@ -299,6 +302,56 @@ contract Staking_Unstake_Unit_Test is Unit_Test {
         );
     }
 
+    function test_unstake_FlexiType_TransfersStakedAmountFromStaking_AfterPriceChanges()
+        external
+        setBandLevelData
+        setSharesInMonth
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+    {
+        uint16[] memory emptyArray;
+
+        vm.prank(admin);
+        staking.setBandLevel(BAND_LEVEL_4, BAND_5_PRICE, emptyArray);
+
+        uint256 stakingBalanceBefore = wowToken.balanceOf(address(staking));
+
+        vm.prank(alice);
+        staking.unstake(BAND_ID_0);
+
+        uint256 stakingBalanceAfter = wowToken.balanceOf(address(staking));
+
+        assertEq(
+            stakingBalanceBefore - BAND_4_PRICE,
+            stakingBalanceAfter,
+            "Tokens not transfered from staking"
+        );
+    }
+
+    function test_unstake_FlexiType_TransfersStakedAmountToStaker_AfterPriceChanges()
+        external
+        setBandLevelData
+        setSharesInMonth
+        stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
+    {
+        uint16[] memory emptyArray;
+
+        vm.prank(admin);
+        staking.setBandLevel(BAND_LEVEL_4, BAND_5_PRICE, emptyArray);
+
+        uint256 stakerBalanceBefore = wowToken.balanceOf(alice);
+
+        vm.prank(alice);
+        staking.unstake(BAND_ID_0);
+
+        uint256 stakerBalanceAfter = wowToken.balanceOf(alice);
+
+        assertEq(
+            stakerBalanceBefore + BAND_4_PRICE,
+            stakerBalanceAfter,
+            "Tokens not transfered to staker"
+        );
+    }
+
     function test_unstake_FlexiType_EmitsUnstakedEvent()
         external
         setBandLevelData
@@ -340,6 +393,7 @@ contract Staking_Unstake_Unit_Test is Unit_Test {
         staking.unstake(BAND_ID_0);
 
         (
+            uint256 purchasePrice,
             address owner,
             uint32 stakingStartDate,
             uint16 bandLevel,
@@ -348,6 +402,7 @@ contract Staking_Unstake_Unit_Test is Unit_Test {
             bool areTokensVested
         ) = staking.getStakerBand(BAND_ID_0);
 
+        assertEq(purchasePrice, 0, "Purchase price not removed");
         assertEq(owner, ZERO_ADDRESS, "Owner not removed");
         assertEq(stakingStartDate, 0, "Timestamp not removed");
         assertEq(uint8(stakingType), 0, "Staking type not removed");

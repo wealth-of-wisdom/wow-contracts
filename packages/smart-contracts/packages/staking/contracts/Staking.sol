@@ -604,16 +604,17 @@ contract Staking is
         mValidMonth(stakingType, month)
         mDistributionNotInProgress
     {
+        uint256 price = s_bandLevelPrice[bandLevel];
+
         // Effects: Create a new band and add it to the user
         uint256 bandId = _stakeBand(
+            price,
             msg.sender,
             stakingType,
             bandLevel,
             month,
             false
         );
-
-        uint256 price = s_bandLevelPrice[bandLevel];
 
         // Interaction: transfer transaction funds to contract
         s_wowToken.safeTransferFrom(msg.sender, address(this), price);
@@ -639,8 +640,8 @@ contract Staking is
         // Checks: if band is FIX, the fixed months period should be passed
         _validateFixedPeriodPassed(band);
 
-        // Get amount before deleting band data
-        uint256 stakedAmount = s_bandLevelPrice[band.bandLevel];
+        // Get purchase price before deleting band data
+        uint256 purchasePrice = band.purchasePrice;
 
         // Effects: delete band data
         _unstakeBand(msg.sender, bandId);
@@ -649,7 +650,7 @@ contract Staking is
         _claimAllRewards(msg.sender);
 
         // Interraction: transfer staked tokens
-        s_wowToken.safeTransfer(msg.sender, stakedAmount);
+        s_wowToken.safeTransfer(msg.sender, purchasePrice);
 
         // Effects: emit event
         emit Unstaked(msg.sender, bandId, false);
@@ -681,8 +682,10 @@ contract Staking is
             revert Errors.Staking__OnlyFixTypeAllowed();
         }
 
+        uint256 price = s_bandLevelPrice[bandLevel];
+
         // Effects: Create a new band and add it to the user
-        bandId = _stakeBand(user, stakingType, bandLevel, month, true);
+        bandId = _stakeBand(price, user, stakingType, bandLevel, month, true);
 
         // Effects: emit event
         emit Staked(user, bandLevel, bandId, month, stakingType, true);
@@ -771,25 +774,28 @@ contract Staking is
         mBandFromVestedTokens(bandId, false)
         mDistributionNotInProgress
     {
-        uint16 oldBandLevel = s_bands[bandId].bandLevel;
+        StakerBand storage band = s_bands[bandId];
+        uint16 oldBandLevel = band.bandLevel;
 
         // Checks: new band level must be higher than the old one
         if (newBandLevel <= oldBandLevel) {
             revert Errors.Staking__InvalidBandLevel(newBandLevel);
         }
 
-        uint256 oldPrice = s_bandLevelPrice[oldBandLevel];
-        uint256 newPrice = s_bandLevelPrice[newBandLevel];
-        uint256 priceDifference = newPrice - oldPrice;
-
-        // Effects: update band level
-        s_bands[bandId].bandLevel = newBandLevel;
-
-        // Interaction: transfer transaction funds to contract
-        s_wowToken.safeTransferFrom(msg.sender, address(this), priceDifference);
+        uint256 newPurchasePrice = _updateBandAndTransferTokens(
+            band,
+            msg.sender,
+            newBandLevel
+        );
 
         // Effects: emit event
-        emit BandUpgraded(msg.sender, bandId, oldBandLevel, newBandLevel);
+        emit BandUpgraded(
+            msg.sender,
+            bandId,
+            oldBandLevel,
+            newBandLevel,
+            newPurchasePrice
+        );
     }
 
     /**
@@ -809,25 +815,28 @@ contract Staking is
         mBandFromVestedTokens(bandId, false)
         mDistributionNotInProgress
     {
-        uint16 oldBandLevel = s_bands[bandId].bandLevel;
+        StakerBand storage band = s_bands[bandId];
+        uint16 oldBandLevel = band.bandLevel;
 
         // Checks: new band level must be higher than the old one
         if (newBandLevel >= oldBandLevel) {
             revert Errors.Staking__InvalidBandLevel(newBandLevel);
         }
 
-        uint256 oldPrice = s_bandLevelPrice[oldBandLevel];
-        uint256 newPrice = s_bandLevelPrice[newBandLevel];
-        uint256 priceDifference = oldPrice - newPrice;
-
-        // Effects: update band level
-        s_bands[bandId].bandLevel = newBandLevel;
-
-        // Interaction: transfer transaction funds to contract
-        s_wowToken.safeTransfer(msg.sender, priceDifference);
+        uint256 newPurchasePrice = _updateBandAndTransferTokens(
+            band,
+            msg.sender,
+            newBandLevel
+        );
 
         // Effects: emit event
-        emit BandDowngraded(msg.sender, bandId, oldBandLevel, newBandLevel);
+        emit BandDowngraded(
+            msg.sender,
+            bandId,
+            oldBandLevel,
+            newBandLevel,
+            newPurchasePrice
+        );
     }
 
     /**
@@ -941,6 +950,7 @@ contract Staking is
     /**
      * @notice  Returns staker data on each band they purchased
      * @param   bandId  BandLevel Id
+     * @return  purchasePrice  Band purchase price (changes only when upgrading/downgrading)
      * @return  owner  Staker address
      * @return  stakingStartDate  Timestamp of staking start
      * @return  bandLevel  BandLevel level
@@ -954,6 +964,7 @@ contract Staking is
         external
         view
         returns (
+            uint256 purchasePrice,
             address owner,
             uint32 stakingStartDate,
             uint16 bandLevel,
@@ -963,6 +974,7 @@ contract Staking is
         )
     {
         StakerBand memory band = s_bands[bandId];
+        purchasePrice = band.purchasePrice;
         owner = band.owner;
         stakingStartDate = band.stakingStartDate;
         bandLevel = band.bandLevel;
@@ -1087,6 +1099,7 @@ contract Staking is
     }
 
     function _stakeBand(
+        uint256 purchasePrice,
         address user,
         StakingTypes stakingType,
         uint16 bandLevel,
@@ -1098,6 +1111,7 @@ contract Staking is
 
         // Effects: set staker band data
         StakerBand storage band = s_bands[bandId];
+        band.purchasePrice = purchasePrice;
         band.owner = user;
         band.stakingStartDate = uint32(block.timestamp);
         band.bandLevel = bandLevel;
@@ -1142,6 +1156,39 @@ contract Staking is
         if (bandsIdsAmount == 1) {
             // Effects: remove user from the map
             s_users.remove(user);
+        }
+    }
+
+    function _updateBandAndTransferTokens(
+        StakerBand storage band,
+        address staker,
+        uint16 newBandLevel
+    ) internal returns (uint256 newPrice) {
+        // Use the band purchase price and not the old band level price
+        // Because band level price might change and be different from the purchase price
+        uint256 oldPrice = band.purchasePrice;
+        newPrice = s_bandLevelPrice[newBandLevel];
+
+        // Effects: update band level
+        band.bandLevel = newBandLevel;
+
+        // Early exit if the price is the same
+        if (oldPrice == newPrice) {
+            return newPrice;
+        }
+
+        // Effects: update purchase price
+        band.purchasePrice = newPrice;
+
+        // Transfer tokens corresponding to the price difference
+        if (newPrice > oldPrice) {
+            uint256 priceDifference = newPrice - oldPrice;
+            // Interaction: transfer transaction funds to contract
+            s_wowToken.safeTransferFrom(staker, address(this), priceDifference);
+        } else if (newPrice < oldPrice) {
+            uint256 priceDifference = oldPrice - newPrice;
+            // Interaction: transfer transaction funds from contract
+            s_wowToken.safeTransfer(staker, priceDifference);
         }
     }
 
