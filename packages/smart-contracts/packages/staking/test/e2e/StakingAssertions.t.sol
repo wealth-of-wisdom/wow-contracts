@@ -21,6 +21,7 @@ contract StakingAssertions is Base_Test {
         uint256 timestamp
     ) internal {
         (
+            ,
             address owner,
             uint256 stakingStartDate,
             uint16 bandLevel,
@@ -41,6 +42,7 @@ contract StakingAssertions is Base_Test {
 
     function assertUnstaked(uint256 bandId) internal {
         (
+            ,
             address owner,
             uint256 stakingStartDate,
             uint16 bandLevel,

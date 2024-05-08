@@ -130,6 +130,7 @@ contract Staking_UpgradeBand_Unit_Test is Unit_Test {
         vm.stopPrank();
 
         (
+            uint256 purchasePrice,
             address owner,
             uint32 stakingStartDate,
             uint16 bandLevel,
@@ -138,6 +139,7 @@ contract Staking_UpgradeBand_Unit_Test is Unit_Test {
             bool areTokensVested
         ) = staking.getStakerBand(BAND_ID_0);
 
+        assertEq(purchasePrice, BAND_7_PRICE, "Purchase price not removed");
         assertEq(owner, alice, "Owner incorrect");
         assertEq(stakingStartDate, startDate, "Timestamp incorrect");
         assertEq(bandLevel, BAND_LEVEL_7, "BandLevel Level not set");
@@ -215,7 +217,13 @@ contract Staking_UpgradeBand_Unit_Test is Unit_Test {
         wowToken.approve(address(staking), bandPriceDifference);
 
         vm.expectEmit(address(staking));
-        emit BandUpgraded(alice, BAND_ID_0, BAND_LEVEL_4, BAND_LEVEL_7);
+        emit BandUpgraded(
+            alice,
+            BAND_ID_0,
+            BAND_LEVEL_4,
+            BAND_LEVEL_7,
+            BAND_7_PRICE
+        );
 
         staking.upgradeBand(BAND_ID_0, BAND_LEVEL_7);
         vm.stopPrank();

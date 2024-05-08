@@ -145,6 +145,7 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
         staking.downgradeBand(BAND_ID_0, BAND_LEVEL_2);
 
         (
+            uint256 purchasePrice,
             address owner,
             uint32 stakingStartDate,
             uint16 bandLevel,
@@ -153,6 +154,7 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
             bool areTokensVested
         ) = staking.getStakerBand(BAND_ID_0);
 
+        assertEq(purchasePrice, BAND_2_PRICE, "Purchase price incorrect");
         assertEq(owner, alice, "Owner incorrect");
         assertEq(stakingStartDate, startDate, "Timestamp incorrect");
         assertEq(bandLevel, BAND_LEVEL_2, "BandLevel Level not set");
@@ -220,7 +222,13 @@ contract Staking_DowngradeBand_Unit_Test is Unit_Test {
         stakeTokens(alice, STAKING_TYPE_FLEXI, BAND_LEVEL_4, MONTH_0)
     {
         vm.expectEmit(address(staking));
-        emit BandDowngraded(alice, BAND_ID_0, BAND_LEVEL_4, BAND_LEVEL_2);
+        emit BandDowngraded(
+            alice,
+            BAND_ID_0,
+            BAND_LEVEL_4,
+            BAND_LEVEL_2,
+            BAND_2_PRICE
+        );
 
         vm.prank(alice);
         staking.downgradeBand(BAND_ID_0, BAND_LEVEL_2);

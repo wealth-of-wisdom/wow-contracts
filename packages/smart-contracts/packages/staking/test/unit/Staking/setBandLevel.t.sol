@@ -22,28 +22,6 @@ contract Staking_SetBandLevel_Unit_Test is Unit_Test {
         );
     }
 
-    function test_setBandLevel_RevertIf_LevelAlreadySet() external {
-        vm.startPrank(admin);
-        staking.setBandLevel(
-            BAND_LEVEL_1,
-            BAND_1_PRICE,
-            BAND_1_ACCESSIBLE_POOLS
-        );
-
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Errors.Staking__BandLevelAlreadySet.selector,
-                BAND_LEVEL_1
-            )
-        );
-        staking.setBandLevel(
-            BAND_LEVEL_1,
-            BAND_2_PRICE,
-            BAND_2_ACCESSIBLE_POOLS
-        );
-        vm.stopPrank();
-    }
-
     function test_setBandLevel_RevertIf_BandLevelIsZero() external {
         vm.expectRevert(
             abi.encodeWithSelector(Errors.Staking__InvalidBandLevel.selector, 0)

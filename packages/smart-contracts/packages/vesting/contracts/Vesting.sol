@@ -546,16 +546,15 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         Pool storage pool = s_vestingPools[pid];
         Beneficiary storage user = pool.beneficiaries[msg.sender];
 
-        (, , uint16 bandLevel, , , ) = staking.getStakerBand(bandId);
-        (uint256 bandPrice, ) = staking.getBandLevel(bandLevel);
+        (uint256 purchasePrice, , , , , , ) = staking.getStakerBand(bandId);
 
         // Checks: Enough staked tokens in the contract
-        if (bandPrice > user.stakedTokenAmount) {
+        if (purchasePrice > user.stakedTokenAmount) {
             revert Errors.Vesting__NotEnoughStakedTokensForUnstaking();
         }
 
         // Effects: Unstake tokens
-        user.stakedTokenAmount -= bandPrice;
+        user.stakedTokenAmount -= purchasePrice;
 
         // Effects: Delete staked info
         delete s_stakedPools[bandId];
@@ -564,7 +563,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         staking.unstakeVested(msg.sender, bandId);
 
         // Effects: Emit event
-        emit VestedTokensUnstaked(pid, msg.sender, bandPrice, bandId);
+        emit VestedTokensUnstaked(pid, msg.sender, purchasePrice, bandId);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
