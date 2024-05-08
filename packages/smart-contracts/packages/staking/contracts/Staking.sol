@@ -283,11 +283,12 @@ contract Staking is
         uint32 distributionPercentage
     ) external onlyRole(DEFAULT_ADMIN_ROLE) mPoolExists(poolId) {
         // Checks: distribution percentage should not exceed 100%
-        if (distributionPercentage > uint48(PERCENTAGE_PRECISION)) {
+        if (distributionPercentage > PERCENTAGE_PRECISION) {
             revert Errors.Staking__InvalidDistributionPercentage(
                 distributionPercentage
             );
         }
+
         // Effects: set the storage
         s_poolDistributionPercentages[poolId] = distributionPercentage;
 
@@ -296,30 +297,43 @@ contract Staking is
     }
 
     /**
-     * @notice  Sets data of the selected band
+     * @notice  Sets data of the selected band.
+     *          This is used to set the price and accessible pools for the first time.
+     *          Function can be used to update the price,
+     *          but accessible pools cannot be updated.
      * @param   bandLevel  band level number
      * @param   price  band purchase price
      *          accessible after band purchase
+     * @param   accessiblePools  list of pools that become
+     *          accessible after band purchase
+     *          This array is only used in subgraph, so it
+     *          is not stored on chain
      */
     function setBandLevel(
         uint16 bandLevel,
-        uint256 price
+        uint256 price,
+        uint16[] calldata accessiblePools
     )
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
         mBandLevelExists(bandLevel)
         mAmountNotZero(price)
     {
-        // Checks: band level must not be set before
-        if (s_bandLevelPrice[bandLevel] != 0) {
+        // Checks: if price is set, accessible pools must be empty array
+        if (s_bandLevelPrice[bandLevel] > 0 && accessiblePools.length > 0) {
             revert Errors.Staking__BandLevelAlreadySet(bandLevel);
+        }
+
+        // Checks: pools array must not exceed the total amount of pools
+        if (accessiblePools.length > s_totalPools) {
+            revert Errors.Staking__MaximumLevelExceeded();
         }
 
         // Effects: set band storage
         s_bandLevelPrice[bandLevel] = price;
 
         // Effects: emit event
-        emit BandLevelSet(bandLevel, price);
+        emit BandLevelSet(bandLevel, price, accessiblePools);
     }
 
     /**

@@ -18,7 +18,11 @@ interface IStakingEvents {
 
     event PoolSet(uint16 indexed poolId, uint32 distributionPercentage);
 
-    event BandLevelSet(uint16 indexed bandLevel, uint256 price);
+    event BandLevelSet(
+        uint16 indexed bandLevel,
+        uint256 price,
+        uint16[] accessiblePools
+    );
 
     event SharesInMonthSet(uint48[] totalSharesInMonth);
 
@@ -128,7 +132,11 @@ interface IStaking is IStakingEvents {
         uint32 distributionPercentage
     ) external;
 
-    function setBandLevel(uint16 bandLevel, uint256 price) external;
+    function setBandLevel(
+        uint16 bandLevel,
+        uint256 price,
+        uint16[] calldata accessiblePools
+    ) external;
 
     function setSharesInMonth(uint48[] calldata totalSharesInMonth) external;
 
