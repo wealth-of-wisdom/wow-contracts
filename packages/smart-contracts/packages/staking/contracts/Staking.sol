@@ -640,7 +640,7 @@ contract Staking is
         // Checks: if band is FIX, the fixed months period should be passed
         _validateFixedPeriodPassed(band);
 
-        // Get amount before deleting band data
+        // Get purchase price before deleting band data
         uint256 purchasePrice = band.purchasePrice;
 
         // Effects: delete band data
@@ -1169,8 +1169,15 @@ contract Staking is
         uint256 oldPrice = band.purchasePrice;
         newPrice = s_bandLevelPrice[newBandLevel];
 
-        // Effects: update band level and purchase price
+        // Effects: update band level
         band.bandLevel = newBandLevel;
+
+        // Early exit if the price is the same
+        if (oldPrice == newPrice) {
+            return newPrice;
+        }
+
+        // Effects: update purchase price
         band.purchasePrice = newPrice;
 
         // Transfer tokens corresponding to the price difference
