@@ -6,6 +6,19 @@ import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {Unit_Test} from "../Unit.t.sol";
 
 contract Staking_SetBandLevel_Unit_Test is Unit_Test {
+    uint16[] internal INVALID_ACCESSIBLE_POOLS = [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+    ];
+
     function test_setBandLevel_RevertIf_CallerNotDefaultAdmin() external {
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -75,15 +88,17 @@ contract Staking_SetBandLevel_Unit_Test is Unit_Test {
         staking.setBandLevel(BAND_LEVEL_1, 0, BAND_1_ACCESSIBLE_POOLS);
     }
 
-    function test_setBandLevel_RevertIf_AccessiblePoolsArrayIsTooLarge()
-        external
-    {
+    function test_setBandLevel_RevertIf_MaximumLevelExceeded() external {
         vm.expectRevert(Errors.Staking__MaximumLevelExceeded.selector);
         vm.prank(admin);
-        staking.setBandLevel(BAND_LEVEL_1, BAND_1_PRICE, new uint16[](10));
+        staking.setBandLevel(
+            BAND_LEVEL_1,
+            BAND_1_PRICE,
+            INVALID_ACCESSIBLE_POOLS
+        );
     }
 
-    function test_setBandLevel_SetsBandData() external {
+    function test_setBandLevel_SetsBandLevelData() external {
         vm.prank(admin);
         staking.setBandLevel(
             BAND_LEVEL_1,
@@ -91,16 +106,25 @@ contract Staking_SetBandLevel_Unit_Test is Unit_Test {
             BAND_1_ACCESSIBLE_POOLS
         );
 
-        (uint256 price, uint16[] memory accessiblePools) = staking.getBandLevel(
-            BAND_LEVEL_1
-        );
-        uint256 poolsAmount = accessiblePools.length;
+        uint256 price = staking.getBandLevel(BAND_LEVEL_1);
 
         assertEq(price, BAND_1_PRICE);
+    }
 
-        for (uint256 i = 0; i < poolsAmount; i++) {
-            assertEq(accessiblePools[i], BAND_1_ACCESSIBLE_POOLS[i]);
-        }
+    function test_setBandLevel_UpdatesBandLevelPrice() external {
+        uint16[] memory emptyArray;
+        vm.startPrank(admin);
+        staking.setBandLevel(
+            BAND_LEVEL_1,
+            BAND_1_PRICE,
+            BAND_1_ACCESSIBLE_POOLS
+        );
+        staking.setBandLevel(BAND_LEVEL_1, BAND_2_PRICE, emptyArray);
+        vm.stopPrank();
+
+        uint256 price = staking.getBandLevel(BAND_LEVEL_1);
+
+        assertEq(price, BAND_2_PRICE);
     }
 
     function test_setBandLevel_EmitsBandLevelSetEvent() external {

@@ -11,7 +11,6 @@ library Errors {
     error Staking__NotFlexiTypeBand();
     error Staking__NotBandOwner(uint256 bandId, address owner);
     error Staking__InvalidStakingType();
-    error Staking__MaximumLevelExceeded();
     error Staking__NonExistantToken();
     error Staking__InvalidStakingTimespan(uint256 stakingTimespan);
     error Staking__InvalidPoolId(uint16 poolId);
@@ -19,7 +18,7 @@ library Errors {
         uint256 contractBalance,
         uint256 requiredAmount
     );
-    error Staking__InvalidDistributionPercentage(uint48 percentage);
+    error Staking__InvalidDistributionPercentage(uint32 percentage);
     error Staking__BandAllocationExceedsMaximum(uint48 percentage);
     error Staking__TotalAllocationExceedsMaximum(uint48 percentage);
     error Staking__InvalidBandsAmount();
@@ -39,4 +38,6 @@ library Errors {
     error Staking__DistributionInProgress();
     error Staking__DistributionNotInProgress();
     error Staking__BandLevelAlreadySet(uint16 bandLevel);
+    error Staking__ShareLengthMismatch();
+    error Staking__MaximumLevelExceeded();
 }

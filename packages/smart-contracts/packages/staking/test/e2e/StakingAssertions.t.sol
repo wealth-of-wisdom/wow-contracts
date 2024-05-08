@@ -177,17 +177,9 @@ contract StakingAssertions is Base_Test {
         uint256 totalPools = staking.getTotalPools();
         uint256 totalBandLevels = staking.getTotalBandLevels();
         for (uint16 i = 1; i < totalBandLevels; i++) {
-            (uint256 price, uint16[] memory accessiblePools) = staking
-                .getBandLevel(i);
+            uint256 price = staking.getBandLevel(i);
 
             assertEq(price, BAND_PRICES[i - 1], "Band level price switched");
-            for (uint16 j = 0; j < accessiblePools.length; j++) {
-                assertEq(
-                    accessiblePools[j],
-                    BAND_ACCESSIBLE_POOLS[i][j],
-                    "Band level accessible pools switched"
-                );
-            }
         }
 
         assertEq(

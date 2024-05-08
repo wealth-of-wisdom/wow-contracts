@@ -18,6 +18,14 @@ contract Staking_SetSharesInMonth_Unit_Test is Unit_Test {
         staking.setSharesInMonth(SHARES_IN_MONTH);
     }
 
+    function test_setSharesInMonth_RevertIf_ShareLengthMismatch() external {
+        vm.expectRevert(
+            abi.encodeWithSelector(Errors.Staking__ShareLengthMismatch.selector)
+        );
+        vm.prank(admin);
+        staking.setSharesInMonth(NEW_SHARES_IN_MONTH);
+    }
+
     function test_setSharesInMonth_SetsSharesInMonth() external {
         vm.prank(admin);
         staking.setSharesInMonth(SHARES_IN_MONTH);
