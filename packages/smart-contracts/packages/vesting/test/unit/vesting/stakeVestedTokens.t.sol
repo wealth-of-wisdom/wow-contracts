@@ -78,6 +78,72 @@ contract Vesting_StakeVestedTokens_Unit_Test is Unit_Test {
         );
     }
 
+    function test_stakeVestedTokens_UpdatesTokensData_AfterPriceChanges()
+        external
+        approveAndAddPool
+    {
+        uint16[] memory emptyArray;
+
+        vm.startPrank(admin);
+        vesting.addBeneficiary(PRIMARY_POOL, alice, BAND_9_PRICE);
+        staking.setBandLevel(BAND_LEVEL_1, BAND_2_PRICE, emptyArray);
+        vm.stopPrank();
+
+        vm.prank(alice);
+        vesting.stakeVestedTokens(
+            STAKING_TYPE_FIX,
+            BAND_LEVEL_1,
+            MONTH_1,
+            PRIMARY_POOL
+        );
+
+        IVesting.Beneficiary memory user = vesting.getBeneficiary(
+            PRIMARY_POOL,
+            alice
+        );
+        assertEq(user.stakedTokenAmount, BAND_2_PRICE, "Staked tokens not set");
+        assertEq(user.totalTokenAmount, BAND_9_PRICE, "Token amount changed");
+    }
+
+    function test_stakeVestedTokens_UpdatesTokensData_BeforeAndAfterPriceChanges()
+        external
+        approveAndAddPool
+    {
+        uint16[] memory emptyArray;
+        vm.prank(admin);
+        vesting.addBeneficiary(PRIMARY_POOL, alice, BAND_9_PRICE);
+
+        vm.prank(alice);
+        vesting.stakeVestedTokens(
+            STAKING_TYPE_FIX,
+            BAND_LEVEL_1,
+            MONTH_1,
+            PRIMARY_POOL
+        );
+
+        vm.prank(admin);
+        staking.setBandLevel(BAND_LEVEL_1, BAND_2_PRICE, emptyArray);
+
+        vm.prank(alice);
+        vesting.stakeVestedTokens(
+            STAKING_TYPE_FIX,
+            BAND_LEVEL_1,
+            MONTH_1,
+            PRIMARY_POOL
+        );
+
+        IVesting.Beneficiary memory user = vesting.getBeneficiary(
+            PRIMARY_POOL,
+            alice
+        );
+        assertEq(
+            user.stakedTokenAmount,
+            BAND_1_PRICE + BAND_2_PRICE,
+            "Staked tokens not set"
+        );
+        assertEq(user.totalTokenAmount, BAND_9_PRICE, "Token amount changed");
+    }
+
     function test_stakeVestedTokens_CallsStakingContractToStakeVestedTokens()
         external
         approveAndAddPool
