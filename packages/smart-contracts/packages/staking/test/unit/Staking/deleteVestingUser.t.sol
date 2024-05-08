@@ -41,6 +41,7 @@ contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
         staking.deleteVestingUser(alice);
 
         (
+            uint256 purchasePrice,
             address owner,
             uint32 stakingStartDate,
             uint16 bandLevel,
@@ -49,6 +50,7 @@ contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
             bool areTokensVested
         ) = staking.getStakerBand(BAND_ID_0);
 
+        assertEq(purchasePrice, 0, "Purchase price not removed");
         assertEq(owner, ZERO_ADDRESS, "Owner not removed");
         assertEq(stakingStartDate, 0, "Timestamp not removed");
         assertEq(uint8(stakingType), 0, "Staking type not removed");
@@ -69,6 +71,7 @@ contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
         staking.deleteVestingUser(alice);
 
         (
+            uint256 purchasePrice,
             address owner,
             uint32 stakingStartDate,
             uint16 bandLevel,
@@ -77,6 +80,7 @@ contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
             bool areTokensVested
         ) = staking.getStakerBand(BAND_ID_0);
 
+        assertEq(purchasePrice, 0, "Purchase price not removed");
         assertEq(owner, ZERO_ADDRESS, "Owner not removed");
         assertEq(stakingStartDate, 0, "Timestamp not removed");
         assertEq(uint8(stakingType), 0, "Staking type not removed");
@@ -85,6 +89,7 @@ contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
         assertEq(areTokensVested, false, "Vesting status not removed");
 
         (
+            purchasePrice,
             owner,
             stakingStartDate,
             bandLevel,
@@ -93,6 +98,7 @@ contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
             areTokensVested
         ) = staking.getStakerBand(BAND_ID_1);
 
+        assertEq(purchasePrice, 0, "Purchase price not removed");
         assertEq(owner, ZERO_ADDRESS, "Owner not removed");
         assertEq(stakingStartDate, 0, "Timestamp not removed");
         assertEq(uint8(stakingType), 0, "Staking type not removed");
@@ -101,6 +107,7 @@ contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
         assertEq(areTokensVested, false, "Vesting status not removed");
 
         (
+            purchasePrice,
             owner,
             stakingStartDate,
             bandLevel,
@@ -109,6 +116,7 @@ contract Staking_DeleteVestingUser_Unit_Test is Unit_Test {
             areTokensVested
         ) = staking.getStakerBand(BAND_ID_2);
 
+        assertEq(purchasePrice, 0, "Purchase price not removed");
         assertEq(owner, ZERO_ADDRESS, "Owner not removed");
         assertEq(stakingStartDate, 0, "Timestamp not removed");
         assertEq(uint8(stakingType), 0, "Staking type not removed");

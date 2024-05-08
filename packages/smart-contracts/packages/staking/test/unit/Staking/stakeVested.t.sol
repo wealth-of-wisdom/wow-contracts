@@ -153,6 +153,7 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
         staking.stakeVested(alice, STAKING_TYPE_FIX, BAND_LEVEL_2, MONTH_1);
 
         (
+            uint256 purchasePrice,
             address owner,
             uint32 stakingStartDate,
             uint16 bandLevel,
@@ -161,6 +162,7 @@ contract Staking_StakeVested_Unit_Test is Unit_Test {
             bool areTokensVested
         ) = staking.getStakerBand(BAND_ID_0);
 
+        assertEq(purchasePrice, BAND_2_PRICE, "Purchase price not set");
         assertEq(owner, alice, "Owner not set");
         assertEq(stakingStartDate, currentTimestamp, "Timestamp not set");
         assertEq(bandLevel, BAND_LEVEL_2, "BandLevel Level not set");

@@ -82,6 +82,7 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
         staking.unstakeVested(alice, BAND_ID_0);
 
         (
+            uint256 purchasePrice,
             address owner,
             uint32 stakingStartDate,
             uint16 bandLevel,
@@ -90,6 +91,7 @@ contract Staking_UnstakeVested_Unit_Test is Unit_Test {
             bool areTokensVested
         ) = staking.getStakerBand(BAND_ID_0);
 
+        assertEq(purchasePrice, 0, "Purchase price not removed");
         assertEq(owner, ZERO_ADDRESS, "Owner not removed");
         assertEq(stakingStartDate, 0, "Timestamp not removed");
         assertEq(uint8(stakingType), 0, "Staking type not removed");
