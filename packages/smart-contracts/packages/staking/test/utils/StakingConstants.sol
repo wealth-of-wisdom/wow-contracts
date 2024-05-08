@@ -178,6 +178,7 @@ abstract contract StakingConstants {
         POOL_ID_9
     ];
 
+    // Multiplication after division is used to prevent overflow
     uint32 internal constant POOL_1_PERCENTAGE =
         (PERCENTAGE_PRECISION / 1000) * 13; // 1.3%
     uint32 internal constant POOL_2_PERCENTAGE =

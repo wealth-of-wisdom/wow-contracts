@@ -39,4 +39,5 @@ library Errors {
     error Staking__DistributionNotInProgress();
     error Staking__BandLevelAlreadySet(uint16 bandLevel);
     error Staking__ShareLengthMismatch();
+    error Staking__MaximumLevelExceeded();
 }
