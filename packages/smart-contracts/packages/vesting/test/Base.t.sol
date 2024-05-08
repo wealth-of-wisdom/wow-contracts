@@ -196,7 +196,11 @@ contract Base_Test is
         vm.startPrank(admin);
 
         for (uint16 i; i < TOTAL_BAND_LEVELS; i++) {
-            staking.setBandLevel(BAND_LEVELS[i], BAND_PRICES[i]);
+            staking.setBandLevel(
+                BAND_LEVELS[i],
+                BAND_PRICES[i],
+                BAND_ACCESSIBLE_POOLS[i]
+            );
         }
 
         vm.stopPrank();
