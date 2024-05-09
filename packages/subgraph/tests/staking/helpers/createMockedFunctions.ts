@@ -6,7 +6,6 @@ import {
     usdcToken,
     wowToken,
     percentagePrecision,
-    sharePrecision,
     totalPools,
     totalBandLevels,
     periodDuration,
@@ -41,7 +40,7 @@ export function createMockedFunction_getTokenWOW(): void {
 }
 
 export function createMockedFunction_PERCENTAGE_PRECISION(): void {
-    createMockedFunction(stakingAddress, "PERCENTAGE_PRECISION", "PERCENTAGE_PRECISION():(uint48)")
+    createMockedFunction(stakingAddress, "PERCENTAGE_PRECISION", "PERCENTAGE_PRECISION():(uint32)")
         .withArgs([])
         .returns([ethereum.Value.fromUnsignedBigInt(percentagePrecision)]);
 }

@@ -196,25 +196,29 @@ export function handleDistributionCreated(event: DistributionCreatedEvent): void
     const stakingContract: StakingContract = getOrInitStakingContract();
     const distributionId: BigInt = stakingContract.nextDistributionId;
 
-    // Increase distribution id
-    stakingContract.nextDistributionId = distributionId.plus(BIGINT_ONE);
-    stakingContract.isDistributionInProgress = true;
-    stakingContract.save();
-
     // Update shares for stakers and pools
     const sharesData: StakerAndPoolShares = syncAndCalculateAllShares(stakingContract, event.block.timestamp);
 
     // Calculate rewards for stakers
     const stakerRewards: BigInt[] = calculateRewards(stakingContract, event.params.amount, sharesData);
 
-    // Create new distribution data which will be used for rewards distribution by gelato
-    const distribution: FundsDistribution = getOrInitFundsDistribution(distributionId);
-    distribution.token = event.params.token;
-    distribution.amount = event.params.amount;
-    distribution.createdAt = event.block.timestamp;
-    distribution.stakers = sharesData.stakers;
-    distribution.rewards = stakerRewards;
-    distribution.save();
+    // If null is returned, there was an error with distribution size
+    // We should not create a new distribution in this case
+    if (stakerRewards.length > 0) {
+        // Increase distribution id
+        stakingContract.nextDistributionId = distributionId.plus(BIGINT_ONE);
+        stakingContract.isDistributionInProgress = true;
+        stakingContract.save();
+
+        // Create new distribution data which will be used for rewards distribution by gelato
+        const distribution: FundsDistribution = getOrInitFundsDistribution(distributionId);
+        distribution.token = event.params.token;
+        distribution.amount = event.params.amount;
+        distribution.createdAt = event.block.timestamp;
+        distribution.stakers = sharesData.stakers;
+        distribution.rewards = stakerRewards;
+        distribution.save();
+    }
 }
 
 export function handleRewardsDistributed(event: RewardsDistributedEvent): void {
