@@ -17,7 +17,6 @@ async function mintGenesisNfts(nftSaleAddress) {
 
         console.log(`Receiver ${data.wallet} - level ${data.level} data pushed`)
     }
-
     const tx = await nftSale.mintGenesisNfts(wallets, levels)
 
     await tx.wait()
