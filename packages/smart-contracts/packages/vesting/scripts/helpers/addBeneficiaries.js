@@ -28,7 +28,7 @@ async function addBeneficiaries(vestingAddress) {
 
     for (let user of beneficiaries) {
         const tokenAmountInWei = ethers.parseUnits(
-            user.tokens_amount_in_wow,
+            user.tokens_amount_in_wow.toString(),
             WOW_TOKEN_DECIMALS,
         )
 
@@ -70,10 +70,7 @@ async function validateData(vesting, data, poolsCount, decimals) {
             )
         }
 
-        if (
-            typeof user.tokens_amount_in_wow !== "string" ||
-            isNaN(user.tokens_amount_in_wow)
-        ) {
+        if (typeof user.tokens_amount_in_wow !== "number") {
             throw new Error(
                 `Invalid tokens amount: ${user.tokens_amount_in_wow}`,
             )
@@ -81,7 +78,7 @@ async function validateData(vesting, data, poolsCount, decimals) {
 
         // Validate token amount
         allBeneficiariesTokensPerPool[user.pool_id] += ethers.parseUnits(
-            user.tokens_amount_in_wow,
+            user.tokens_amount_in_wow.toString(),
             decimals,
         )
     }
