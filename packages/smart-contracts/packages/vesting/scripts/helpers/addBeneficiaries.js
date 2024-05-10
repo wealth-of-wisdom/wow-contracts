@@ -2,6 +2,7 @@ const { ethers } = require("hardhat")
 const beneficiariesDataDev = require("../data/dev/vestingBeneficiaries.json")
 const beneficiariesDataProd = require("../data/prod/vestingBeneficiaries.json")
 const { MAINNET_NETWORKS, WOW_TOKEN_DECIMALS } = require("./constants")
+require("dotenv").config()
 
 async function addBeneficiaries(vestingAddress) {
     const vesting = await ethers.getContractAt("Vesting", vestingAddress)
@@ -85,21 +86,25 @@ async function validateData(vesting, data, poolsCount, decimals) {
         )
     }
 
-    // @todo Not sure if this is actually needed
     // Validate that all beneficiaries tokens add up to the pool's undedicated amount
-    // for (let poolId = 0; poolId < poolsCount; poolId++) {
-    //     const pool = await vesting.getGeneralPoolData(poolId)
-    //     const totalPoolAmount = BigInt(pool[2])
-    //     const dedicatedPoolAmount = BigInt(pool[3])
-    //     const undedicatedPoolAmount = totalPoolAmount - dedicatedPoolAmount
+    if (process.env.SHOULD_FILL_VESTING_POOLS === "true") {
+        console.log("Checking if all tokens in pools where used")
+        for (let poolId = 0; poolId < poolsCount; poolId++) {
+            const pool = await vesting.getGeneralPoolData(poolId)
+            const totalPoolAmount = BigInt(pool[2])
+            const dedicatedPoolAmount = BigInt(pool[3])
+            const undedicatedPoolAmount = totalPoolAmount - dedicatedPoolAmount
 
-    //     // If at least one beneficiary is added to the pool we need to check that pool was filled correctly
-    //     if (allBeneficiariesTokensPerPool[poolId] !== undedicatedPoolAmount) {
-    //         throw new Error(
-    //             `Amounts don't add up for pool ${poolId} - expected ${undedicatedPoolAmount} but got ${allBeneficiariesTokensPerPool[poolId]}`,
-    //         )
-    //     }
-    // }
+            // If at least one beneficiary is added to the pool we need to check that pool was filled correctly
+            if (
+                allBeneficiariesTokensPerPool[poolId] !== undedicatedPoolAmount
+            ) {
+                throw new Error(
+                    `Amounts don't add up for pool ${poolId} - expected ${undedicatedPoolAmount} but got ${allBeneficiariesTokensPerPool[poolId]}`,
+                )
+            }
+        }
+    }
 
     console.log("Beneficiaries validated!")
 }
