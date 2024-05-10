@@ -19,8 +19,8 @@
     },
     "arbitrumSepolia": {
         "vesting_token": "0x685C3D7C82cd55aEE06d5f1631bbd00c6D7b2539",
-        "staking_contract": "",
-        "nft_contract": "0x03738351F0efEfD62bEc19dbA05842f96f9439dC",
+        "staking_contract": "0xbb75F25945478a923E1b33E91904325ccBC672aF",
+        "nft_contract": "0xb6014650BC235Ea71B0a0F0698520487aebeE4b8",
         "listing_date": ""
     }
 }

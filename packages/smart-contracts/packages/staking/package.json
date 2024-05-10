@@ -40,10 +40,10 @@
         "upgrade:sepolia": "npx hardhat run scripts/upgradeStaking.js --network sepolia",
         "upgrade:arbitrum-one": "npx hardhat run scripts/upgradeStaking.js --network arbitrumOne",
         "upgrade:arbitrum-sepolia": "npx hardhat run scripts/upgradeStaking.js --network arbitrumSepolia",
-        "setup-vesting-permissions:ethereum": "npx hardhat run scripts/sub-tasks/setupVestingPermissions.js --network ethereum",
-        "setup-vesting-permissions:sepolia": "npx hardhat run scripts/sub-tasks/setupVestingPermissions.js --network sepolia",
-        "setup-vesting-permissions:arbitrum-one": "npx hardhat run scripts/sub-tasks/setupVestingPermissions.js --network arbitrumOne",
-        "setup-vesting-permissions:arbitrum-sepolia": "npx hardhat run scripts/sub-tasks/setupVestingPermissions.js --network arbitrumSepolia"
+        "setup-staking-permissions:ethereum": "npx hardhat run scripts/sub-tasks/setupStakingPermissions.js --network ethereum",
+        "setup-staking-permissions:sepolia": "npx hardhat run scripts/sub-tasks/setupStakingPermissions.js --network sepolia",
+        "setup-staking-permissions:arbitrum-one": "npx hardhat run scripts/sub-tasks/setupStakingPermissions.js --network arbitrumOne",
+        "setup-staking-permissions:arbitrum-sepolia": "npx hardhat run scripts/sub-tasks/setupStakingPermissions.js --network arbitrumSepolia"
     },
     "dependencies": {},
     "devDependencies": {}

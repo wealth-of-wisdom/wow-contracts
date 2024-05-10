@@ -12,7 +12,12 @@ async function setProjectQuantities(nftAddress, totalProjectTypes) {
         return
     }
 
-    const projectsQuantities = Array.from(
+    const standardProjectsQuantities = Array.from(
+        { length: totalProjectTypes },
+        () => [],
+    )
+
+    const genesisProjectsQuantities = Array.from(
         { length: totalProjectTypes },
         () => [],
     )
@@ -31,9 +36,15 @@ async function setProjectQuantities(nftAddress, totalProjectTypes) {
                 ? MAX_UINT16
                 : data.limited_projects_quantity
 
-        projectsQuantities[0].push(standardQuantity) // standard
-        projectsQuantities[1].push(premiumQuantity) // premium
-        projectsQuantities[2].push(limitedQuantity) // limited
+        if (data.isGenesis) {
+            genesisProjectsQuantities[0].push(standardQuantity) // standard
+            genesisProjectsQuantities[1].push(premiumQuantity) // premium
+            genesisProjectsQuantities[2].push(limitedQuantity) // limited
+        } else {
+            standardProjectsQuantities[0].push(standardQuantity) // standard
+            standardProjectsQuantities[1].push(premiumQuantity) // premium
+            standardProjectsQuantities[2].push(limitedQuantity) // limited
+        }
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -41,11 +52,19 @@ async function setProjectQuantities(nftAddress, totalProjectTypes) {
     //////////////////////////////////////////////////////////////////////////*/
 
     for (let i = 0; i < totalProjectTypes; i++) {
-        const quantities = projectsQuantities[i]
+        const quantities = standardProjectsQuantities[i]
         const tx = await nft.setMultipleProjectsQuantity(false, i, quantities)
         await tx.wait()
 
-        console.log(`Project type ${i} quantities set`)
+        console.log(`Project type ${i} quantities set for standard levels`)
+    }
+
+    for (let i = 0; i < totalProjectTypes; i++) {
+        const quantities = genesisProjectsQuantities[i]
+        const tx = await nft.setMultipleProjectsQuantity(true, i, quantities)
+        await tx.wait()
+
+        console.log(`Project type ${i} quantities set for genesis levels`)
     }
 }
 
