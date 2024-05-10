@@ -50,7 +50,9 @@
         "set-vesting:ethereum": "npx hardhat run scripts/sub-tasks/setVestingContract.js --network ethereum",
         "set-vesting:sepolia": "npx hardhat run scripts/sub-tasks/setVestingContract.js --network sepolia",
         "set-vesting:arbitrum-one": "npx hardhat run scripts/sub-tasks/setVestingContract.js --network arbitrumOne",
-        "set-vesting:arbitrum-sepolia": "npx hardhat run scripts/sub-tasks/setVestingContract.js --network arbitrumSepolia"
+        "set-vesting:arbitrum-sepolia": "npx hardhat run scripts/sub-tasks/setVestingContract.js --network arbitrumSepolia",
+        "update-nft-uri:arbitrum-one": "npx hardhat run scripts/sub-tasks/updateTokenUris.js --network arbitrumOne",
+        "update-nft-uri:arbitrum-sepolia": "npx hardhat run scripts/sub-tasks/updateTokenUris.js --network arbitrumSepolia"
     },
     "dependencies": {},
     "devDependencies": {}
