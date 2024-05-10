@@ -23,7 +23,7 @@ async function updateTokenUris(nftAddress) {
         const baseUri = levelToUriMap[token.level];
         const fullUri = `${baseUri}/${token.idInLevel}.json`;
 
-        console.log(`Updating token ID ${token.id} at level ${token.level} to new URI ${uri}`);
+        console.log(`Updating token ID ${token.id} at level ${token.level} to new URI ${fullUri}`);
 
         try {
             const tx = await nft.setTokenURI(token.id, fullUri);

@@ -1,19 +1,9 @@
 {
     "tokens": [
-        {
-            "id": "85",
-            "idInLevel": "9",
-            "level": "3"
-          },
           {
             "id": "86",
             "idInLevel": "3",
             "level": "4"
-          },
-          {
-            "id": "87",
-            "idInLevel": "44",
-            "level": "1"
           }
     ],
     "levels": [
@@ -24,3 +14,4 @@
         {"level": 5, "uri": "https://ipfs.io/ipfs/QmTSLWHgUUtRNMgBvLEb7FiXXxHU5vo9p8vUbxEnRigciz"}
     ]
 }
+
