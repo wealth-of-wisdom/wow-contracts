@@ -1,0 +1,17 @@
+{
+    "tokens": [
+          {
+            "id": "86",
+            "idInLevel": "3",
+            "level": "4"
+          }
+    ],
+    "levels": [
+        {"level": 1, "uri": "https://ipfs.io/ipfs/QmZqRt7r6FVg2UpoYLzJE4YDDH2HmHUvfzY5vydzDqmrMw"},
+        {"level": 2, "uri": "https://ipfs.io/ipfs/QmdgTkNTJR4TwZFR7fWiC3gH2D7PhTrW83sKuVVNfBCock"},
+        {"level": 3, "uri": "https://ipfs.io/ipfs/QmRxUMgi8hFaWn5QySXxgGKGBRUGJ2dgBbmsSG5T8nBTkR"},
+        {"level": 4, "uri": "https://ipfs.io/ipfs/QmYu2MAUTZGsCg4LPF3oAfAY9mnyeuKfzUnnMKKqEZspqn"},
+        {"level": 5, "uri": "https://ipfs.io/ipfs/QmTSLWHgUUtRNMgBvLEb7FiXXxHU5vo9p8vUbxEnRigciz"}
+    ]
+}
+
