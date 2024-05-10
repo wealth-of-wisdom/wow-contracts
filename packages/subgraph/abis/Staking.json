@@ -96,6 +96,17 @@
         "type": "error"
     },
     {
+        "inputs": [
+            {
+                "internalType": "uint16",
+                "name": "bandLevel",
+                "type": "uint16"
+            }
+        ],
+        "name": "Staking__BandLevelAlreadySet",
+        "type": "error"
+    },
+    {
         "inputs": [],
         "name": "Staking__DistributionInProgress",
         "type": "error"
@@ -135,9 +146,9 @@
     {
         "inputs": [
             {
-                "internalType": "uint48",
+                "internalType": "uint32",
                 "name": "percentage",
-                "type": "uint48"
+                "type": "uint32"
             }
         ],
         "name": "Staking__InvalidDistributionPercentage",
@@ -224,6 +235,11 @@
     },
     {
         "inputs": [],
+        "name": "Staking__ShareLengthMismatch",
+        "type": "error"
+    },
+    {
+        "inputs": [],
         "name": "Staking__UnlockDateNotReached",
         "type": "error"
     },
@@ -284,6 +300,12 @@
                 "internalType": "uint16",
                 "name": "newBandLevel",
                 "type": "uint16"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "newPurchasePrice",
+                "type": "uint256"
             }
         ],
         "name": "BandDowngraded",
@@ -353,6 +375,12 @@
                 "internalType": "uint16",
                 "name": "newBandLevel",
                 "type": "uint16"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "newPurchasePrice",
+                "type": "uint256"
             }
         ],
         "name": "BandUpgraded",
@@ -431,6 +459,43 @@
         "anonymous": false,
         "inputs": [
             {
+                "indexed": false,
+                "internalType": "contract IERC20",
+                "name": "usdtToken",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "contract IERC20",
+                "name": "usdcToken",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "contract IERC20",
+                "name": "wowToken",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint16",
+                "name": "totalPools",
+                "type": "uint16"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint16",
+                "name": "totalBandLevels",
+                "type": "uint16"
+            }
+        ],
+        "name": "InitializedContractData",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
                 "indexed": true,
                 "internalType": "uint16",
                 "name": "poolId",
@@ -438,9 +503,9 @@
             },
             {
                 "indexed": false,
-                "internalType": "uint48",
+                "internalType": "uint32",
                 "name": "distributionPercentage",
-                "type": "uint48"
+                "type": "uint32"
             }
         ],
         "name": "PoolSet",
@@ -793,22 +858,9 @@
         "name": "PERCENTAGE_PRECISION",
         "outputs": [
             {
-                "internalType": "uint48",
+                "internalType": "uint32",
                 "name": "",
-                "type": "uint48"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "SHARE",
-        "outputs": [
-            {
-                "internalType": "uint48",
-                "name": "",
-                "type": "uint48"
+                "type": "uint32"
             }
         ],
         "stateMutability": "view",
@@ -972,11 +1024,6 @@
                 "internalType": "uint256",
                 "name": "price",
                 "type": "uint256"
-            },
-            {
-                "internalType": "uint16[]",
-                "name": "accessiblePools",
-                "type": "uint16[]"
             }
         ],
         "stateMutability": "view",
@@ -1016,12 +1063,12 @@
                 "type": "uint16"
             }
         ],
-        "name": "getPool",
+        "name": "getPoolDistributionPercentage",
         "outputs": [
             {
-                "internalType": "uint48",
+                "internalType": "uint32",
                 "name": "distributionPercentage",
-                "type": "uint48"
+                "type": "uint32"
             }
         ],
         "stateMutability": "view",
@@ -1088,6 +1135,11 @@
         ],
         "name": "getStakerBand",
         "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "purchasePrice",
+                "type": "uint256"
+            },
             {
                 "internalType": "address",
                 "name": "owner",
@@ -1471,12 +1523,12 @@
                 "type": "uint16"
             },
             {
-                "internalType": "uint48",
+                "internalType": "uint32",
                 "name": "distributionPercentage",
-                "type": "uint48"
+                "type": "uint32"
             }
         ],
-        "name": "setPool",
+        "name": "setPoolDistributionPercentage",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

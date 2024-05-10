@@ -191,9 +191,10 @@ export function upgradeBand(
     bandId: BigInt,
     oldBandLevel: BigInt,
     newBandLevel: BigInt,
+    newPurchasePrice: BigInt,
     date: BigInt,
 ): void {
-    handleBandUpgraded(createBandUpgradedEvent(staker, bandId, oldBandLevel, newBandLevel, date));
+    handleBandUpgraded(createBandUpgradedEvent(staker, bandId, oldBandLevel, newBandLevel, newPurchasePrice, date));
 }
 
 export function downgradeBand(
@@ -201,9 +202,10 @@ export function downgradeBand(
     bandId: BigInt,
     oldBandLevel: BigInt,
     newBandLevel: BigInt,
+    newPurchasePrice: BigInt,
     date: BigInt,
 ): void {
-    handleBandDowngraded(createBandDowngradedEvent(staker, bandId, oldBandLevel, newBandLevel, date));
+    handleBandDowngraded(createBandDowngradedEvent(staker, bandId, oldBandLevel, newBandLevel, newPurchasePrice, date));
 }
 
 export function claimRewards(staker: Address, token: Address, amount: BigInt, date: BigInt): void {

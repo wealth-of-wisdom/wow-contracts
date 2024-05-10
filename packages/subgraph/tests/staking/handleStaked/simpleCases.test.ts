@@ -79,6 +79,7 @@ describe("handleStaked()", () => {
 
                     log.debug("Should set band values correctly", []);
                     for (let i = 0; i < bandsCount; i++) {
+                        assert.fieldEquals("Band", ids[i], "purchasePrice", bandLevelPrices[bandLevel - 1].toString());
                         assert.fieldEquals("Band", ids[i], "owner", alice.toHex());
                         assert.fieldEquals("Band", ids[i], "stakingStartDate", monthsAfterInit[1].toString());
                         assert.fieldEquals("Band", ids[i], "bandLevel", bandLevel.toString());

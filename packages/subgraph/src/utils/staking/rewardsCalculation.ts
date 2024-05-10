@@ -1,4 +1,4 @@
-import { BigInt } from "@graphprotocol/graph-ts";
+import { BigInt, log } from "@graphprotocol/graph-ts";
 import { StakingContract, Pool } from "../../../generated/schema";
 import { getOrInitPool } from "../../helpers/staking.helpers";
 import { StakerAndPoolShares } from "../utils";
@@ -8,7 +8,6 @@ import { BIGINT_ZERO } from "../constants";
                                   MAIN FUNCTION
 //////////////////////////////////////////////////////////////////////////*/
 
-// @todo add the FIX type shares
 export function calculateRewards(staking: StakingContract, amount: BigInt, sharesData: StakerAndPoolShares): BigInt[] {
     // Get amount of pools (cache value)
     const totalPools: BigInt = BigInt.fromI32(staking.totalPools);
@@ -21,23 +20,30 @@ export function calculateRewards(staking: StakingContract, amount: BigInt, share
         sharesData.sharesForStakers,
         sharesData.sharesForPools,
         poolAllocations,
+        amount,
     );
 
     return stakerRewards;
 }
 
 /*//////////////////////////////////////////////////////////////////////////
-                                HELPER FUNCTIONs
+                                HELPER FUNCTIONS
 //////////////////////////////////////////////////////////////////////////*/
 
-function addStakerRewards(sharesForStakers: BigInt[][], sharesForPools: BigInt[], poolAllocations: BigInt[]): BigInt[] {
+function addStakerRewards(
+    sharesForStakers: BigInt[][],
+    sharesForPools: BigInt[],
+    poolAllocations: BigInt[],
+    distributionAmount: BigInt,
+): BigInt[] {
     const stakersCount: number = sharesForStakers.length;
+    const poolsCount: number = poolAllocations.length;
     const stakerRewards: BigInt[] = [];
+    let distributedAmount: BigInt = BIGINT_ZERO;
 
     // Loop through each staker and distribute funds
     for (let stakerIndex = 0; stakerIndex < stakersCount; stakerIndex++) {
         const stakerShares = sharesForStakers[stakerIndex];
-        const poolsCount: number = poolAllocations.length;
         let allocation: BigInt = BIGINT_ZERO;
 
         // Loop through all pools and distribute funds to the staker
@@ -55,6 +61,19 @@ function addStakerRewards(sharesForStakers: BigInt[][], sharesForPools: BigInt[]
         }
 
         stakerRewards.push(allocation);
+        distributedAmount = distributedAmount.plus(allocation);
+    }
+
+    // Check if algorithm distributed the correct amount of tokens
+    // If not, log an error and return null to indicate that distribution
+    // should not be created in the subgraph for gelato to handle it
+    if (distributedAmount.gt(distributionAmount)) {
+        log.error("Distributed amount ({}) is greater than the distribution size ({}).", [
+            distributedAmount.toString(),
+            distributionAmount.toString(),
+        ]);
+
+        return [];
     }
 
     return stakerRewards;

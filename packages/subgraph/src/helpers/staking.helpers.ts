@@ -34,7 +34,7 @@ export function getOrInitStakingContract(): StakingContract {
         stakingContract.nextBandId = BIGINT_ZERO;
         stakingContract.nextDistributionId = BIGINT_ZERO;
         stakingContract.percentagePrecision = 0;
-        stakingContract.sharePrecision = 0;
+        stakingContract.sharePrecision = BIGINT_ZERO;
         stakingContract.totalPools = 0;
         stakingContract.totalBandLevels = 0;
         stakingContract.areUpgradesEnabled = false;
@@ -157,6 +157,7 @@ export function getOrInitBand(bandId: BigInt): Band {
 
     if (!band) {
         band = new Band(id);
+        band.purchasePrice = BIGINT_ZERO;
         band.owner = ADDRESS_ZERO.toHex();
         band.stakingStartDate = BIGINT_ZERO;
         band.bandLevel = getOrInitBandLevel(BIGINT_ONE).id; // Use BandLevel 1 as default
@@ -311,7 +312,13 @@ export function removeAllStakerRewards(stakingContract: StakingContract, staker:
     store.remove("StakerRewards", usdcRewards.id);
 }
 
-export function changeBandLevel(stakerAddress: Address, bandId: BigInt, oldBandLvl: BigInt, newBandLvl: BigInt): void {
+export function changeBandLevel(
+    stakerAddress: Address,
+    bandId: BigInt,
+    oldBandLvl: BigInt,
+    newBandLvl: BigInt,
+    newPurchasePrice: BigInt,
+): void {
     const oldBandLevel: BandLevel = getOrInitBandLevel(oldBandLvl);
     const newBandLevel: BandLevel = getOrInitBandLevel(newBandLvl);
 
@@ -329,5 +336,6 @@ export function changeBandLevel(stakerAddress: Address, bandId: BigInt, oldBandL
 
     const band: Band = getOrInitBand(bandId);
     band.bandLevel = newBandLevel.id;
+    band.purchasePrice = newPurchasePrice;
     band.save();
 }

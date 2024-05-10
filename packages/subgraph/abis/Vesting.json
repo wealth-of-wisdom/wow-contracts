@@ -90,6 +90,11 @@
     },
     {
         "inputs": [],
+        "name": "Vesting__ListingDateNotChanged",
+        "type": "error"
+    },
+    {
+        "inputs": [],
         "name": "Vesting__ListingDateNotInFuture",
         "type": "error"
     },
@@ -101,6 +106,11 @@
     {
         "inputs": [],
         "name": "Vesting__NotBeneficiary",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "Vesting__NotEnoughStakedTokensForUnstaking",
         "type": "error"
     },
     {
