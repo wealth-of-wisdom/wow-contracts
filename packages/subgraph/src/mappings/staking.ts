@@ -1,6 +1,6 @@
 import { Address, BigInt, ethereum, dataSource, store, log } from "@graphprotocol/graph-ts";
 import {
-    Initialized as InitializedEvent,
+    InitializedContractData as InitializedContractDataEvent,
     PoolSet as PoolSetEvent,
     BandLevelSet as BandLevelSetEvent,
     SharesInMonthSet as SharesInMonthSetEvent,
@@ -65,19 +65,19 @@ import {
     MONTH_IN_SECONDS,
 } from "../utils/constants";
 
-export function handleInitialized(event: InitializedEvent): void {
+export function handleInitialized(event: InitializedContractDataEvent): void {
     const stakingContract: StakingContract = getOrInitStakingContract();
     const staking: Staking = Staking.bind(event.address);
     const networkName: string = dataSource.network();
 
     stakingContract.stakingContractAddress = event.address;
-    stakingContract.usdtToken = staking.getTokenUSDT();
-    stakingContract.usdcToken = staking.getTokenUSDC();
-    stakingContract.wowToken = staking.getTokenWOW();
+    stakingContract.usdtToken = event.params.usdtToken;
+    stakingContract.usdcToken = event.params.usdcToken;
+    stakingContract.wowToken = event.params.wowToken;
     stakingContract.percentagePrecision = staking.PERCENTAGE_PRECISION().toI32();
-    stakingContract.sharePrecision = staking.SHARE().toI32();
-    stakingContract.totalPools = staking.getTotalPools();
-    stakingContract.totalBandLevels = staking.getTotalBandLevels();
+    stakingContract.sharePrecision = BigInt.fromI32(1_000_000); // 10 ^ 6
+    stakingContract.totalPools = event.params.totalPools;
+    stakingContract.totalBandLevels = event.params.totalBandLevels;
     stakingContract.lastSharesSyncDate = event.block.timestamp;
 
     // We cannot be sure that getPeriodDuration function exists as it was added in the latest contract version
@@ -196,25 +196,29 @@ export function handleDistributionCreated(event: DistributionCreatedEvent): void
     const stakingContract: StakingContract = getOrInitStakingContract();
     const distributionId: BigInt = stakingContract.nextDistributionId;
 
-    // Increase distribution id
-    stakingContract.nextDistributionId = distributionId.plus(BIGINT_ONE);
-    stakingContract.isDistributionInProgress = true;
-    stakingContract.save();
-
     // Update shares for stakers and pools
     const sharesData: StakerAndPoolShares = syncAndCalculateAllShares(stakingContract, event.block.timestamp);
 
     // Calculate rewards for stakers
     const stakerRewards: BigInt[] = calculateRewards(stakingContract, event.params.amount, sharesData);
 
-    // Create new distribution data which will be used for rewards distribution by gelato
-    const distribution: FundsDistribution = getOrInitFundsDistribution(distributionId);
-    distribution.token = event.params.token;
-    distribution.amount = event.params.amount;
-    distribution.createdAt = event.block.timestamp;
-    distribution.stakers = sharesData.stakers;
-    distribution.rewards = stakerRewards;
-    distribution.save();
+    // If null is returned, there was an error with distribution size
+    // We should not create a new distribution in this case
+    if (stakerRewards.length > 0) {
+        // Increase distribution id
+        stakingContract.nextDistributionId = distributionId.plus(BIGINT_ONE);
+        stakingContract.isDistributionInProgress = true;
+        stakingContract.save();
+
+        // Create new distribution data which will be used for rewards distribution by gelato
+        const distribution: FundsDistribution = getOrInitFundsDistribution(distributionId);
+        distribution.token = event.params.token;
+        distribution.amount = event.params.amount;
+        distribution.createdAt = event.block.timestamp;
+        distribution.stakers = sharesData.stakers;
+        distribution.rewards = stakerRewards;
+        distribution.save();
+    }
 }
 
 export function handleRewardsDistributed(event: RewardsDistributedEvent): void {
@@ -264,6 +268,7 @@ export function handleStaked(event: StakedEvent): void {
     const bandLevel: BandLevel = getOrInitBandLevel(BigInt.fromI32(event.params.bandLevel));
     const band: Band = getOrInitBand(event.params.bandId);
 
+    band.purchasePrice = bandLevel.price;
     band.owner = staker.id;
     band.stakingStartDate = event.block.timestamp;
     band.bandLevel = bandLevel.id;
@@ -355,6 +360,7 @@ export function handleBandUpgraded(event: BandUpgradedEvent): void {
         event.params.bandId,
         BigInt.fromI32(event.params.oldBandLevel),
         BigInt.fromI32(event.params.newBandLevel),
+        event.params.newPurchasePrice,
     );
 }
 
@@ -373,6 +379,7 @@ export function handleBandDowngraded(event: BandDowngradedEvent): void {
         event.params.bandId,
         BigInt.fromI32(event.params.oldBandLevel),
         BigInt.fromI32(event.params.newBandLevel),
+        event.params.newPurchasePrice,
     );
 }
 

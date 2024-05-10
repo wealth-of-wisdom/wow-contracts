@@ -72,104 +72,61 @@ describe("handleDistributionCreated() tests", () => {
                     createDistribution(usdtToken, usd100k, monthsAfterInit[1]);
                 });
 
-                test("Should update distribution status", () => {
-                    assert.fieldEquals("StakingContract", ids[0], "isDistributionInProgress", "true");
+                test("Should not update distribution status", () => {
+                    assert.fieldEquals("StakingContract", ids[0], "isDistributionInProgress", "false");
                 });
 
-                test("Should increase next distribution id", () => {
-                    assert.fieldEquals("StakingContract", ids[0], "nextDistributionId", ids[1]);
+                test("Should not increase next distribution id", () => {
+                    assert.fieldEquals("StakingContract", ids[0], "nextDistributionId", ids[0]);
                 });
 
-                test("Should create new distribution", () => {
-                    assert.fieldEquals("FundsDistribution", ids[0], "id", ids[0]);
-                    assert.entityCount("FundsDistribution", 1);
-                });
-
-                test("Should set distribution values correctly", () => {
-                    assert.fieldEquals("FundsDistribution", ids[0], "token", usdtToken.toHex());
-                    assert.fieldEquals("FundsDistribution", ids[0], "amount", usd100k.toString());
-                    assert.fieldEquals("FundsDistribution", ids[0], "createdAt", monthsAfterInit[1].toString());
-                    assert.fieldEquals("FundsDistribution", ids[0], "distributedAt", "0");
-                    assert.fieldEquals("FundsDistribution", ids[0], "stakers", "[]");
-                    assert.fieldEquals("FundsDistribution", ids[0], "rewards", "[]");
+                test("Should not create new distribution", () => {
+                    assert.notInStore("FundsDistribution", ids[0]);
+                    assert.entityCount("FundsDistribution", 0);
                 });
             });
 
             describe("Create 2 distributions with single token", () => {
                 beforeEach(() => {
                     createDistribution(usdtToken, usd100k, monthsAfterInit[1]);
-                    distributeRewards(usdtToken, monthsAfterInit[1]);
 
                     createDistribution(usdtToken, usd100k, monthsAfterInit[3]);
                 });
 
-                test("Should update distribution status", () => {
-                    assert.fieldEquals("StakingContract", ids[0], "isDistributionInProgress", "true");
+                test("Should not update distribution status", () => {
+                    assert.fieldEquals("StakingContract", ids[0], "isDistributionInProgress", "false");
                 });
 
-                test("Should increase next distribution id", () => {
-                    assert.fieldEquals("StakingContract", ids[0], "nextDistributionId", ids[2]);
+                test("Should not increase next distribution id", () => {
+                    assert.fieldEquals("StakingContract", ids[0], "nextDistributionId", ids[0]);
                 });
 
-                test("Should create new distribution", () => {
-                    assert.fieldEquals("FundsDistribution", ids[0], "id", ids[0]);
-                    assert.fieldEquals("FundsDistribution", ids[1], "id", ids[1]);
-                    assert.entityCount("FundsDistribution", 2);
-                });
-
-                test("Should set distribution values correctly", () => {
-                    assert.fieldEquals("FundsDistribution", ids[0], "token", usdtToken.toHex());
-                    assert.fieldEquals("FundsDistribution", ids[0], "amount", usd100k.toString());
-                    assert.fieldEquals("FundsDistribution", ids[0], "createdAt", monthsAfterInit[1].toString());
-                    assert.fieldEquals("FundsDistribution", ids[0], "distributedAt", monthsAfterInit[1].toString());
-                    assert.fieldEquals("FundsDistribution", ids[0], "stakers", "[]");
-                    assert.fieldEquals("FundsDistribution", ids[0], "rewards", "[]");
-
-                    assert.fieldEquals("FundsDistribution", ids[1], "token", usdtToken.toHex());
-                    assert.fieldEquals("FundsDistribution", ids[1], "amount", usd100k.toString());
-                    assert.fieldEquals("FundsDistribution", ids[1], "createdAt", monthsAfterInit[3].toString());
-                    assert.fieldEquals("FundsDistribution", ids[1], "distributedAt", "0");
-                    assert.fieldEquals("FundsDistribution", ids[1], "stakers", "[]");
-                    assert.fieldEquals("FundsDistribution", ids[1], "rewards", "[]");
+                test("Should not create new distribution", () => {
+                    assert.notInStore("FundsDistribution", ids[0]);
+                    assert.notInStore("FundsDistribution", ids[1]);
+                    assert.entityCount("FundsDistribution", 0);
                 });
             });
 
             describe("Create 2 distributions with different tokens", () => {
                 beforeEach(() => {
                     createDistribution(usdtToken, usd100k, monthsAfterInit[1]);
-                    distributeRewards(usdtToken, monthsAfterInit[1]);
 
                     createDistribution(usdcToken, usd100k, monthsAfterInit[3]);
                 });
 
-                test("Should update distribution status", () => {
-                    assert.fieldEquals("StakingContract", ids[0], "isDistributionInProgress", "true");
+                test("Should not update distribution status", () => {
+                    assert.fieldEquals("StakingContract", ids[0], "isDistributionInProgress", "false");
                 });
 
-                test("Should increase next distribution id", () => {
-                    assert.fieldEquals("StakingContract", ids[0], "nextDistributionId", ids[2]);
+                test("Should not increase next distribution id", () => {
+                    assert.fieldEquals("StakingContract", ids[0], "nextDistributionId", ids[0]);
                 });
 
-                test("Should create new distribution", () => {
-                    assert.fieldEquals("FundsDistribution", ids[0], "id", ids[0]);
-                    assert.fieldEquals("FundsDistribution", ids[1], "id", ids[1]);
-                    assert.entityCount("FundsDistribution", 2);
-                });
-
-                test("Should set distribution values correctly", () => {
-                    assert.fieldEquals("FundsDistribution", ids[0], "token", usdtToken.toHex());
-                    assert.fieldEquals("FundsDistribution", ids[0], "amount", usd100k.toString());
-                    assert.fieldEquals("FundsDistribution", ids[0], "createdAt", monthsAfterInit[1].toString());
-                    assert.fieldEquals("FundsDistribution", ids[0], "distributedAt", monthsAfterInit[1].toString());
-                    assert.fieldEquals("FundsDistribution", ids[0], "stakers", "[]");
-                    assert.fieldEquals("FundsDistribution", ids[0], "rewards", "[]");
-
-                    assert.fieldEquals("FundsDistribution", ids[1], "token", usdcToken.toHex());
-                    assert.fieldEquals("FundsDistribution", ids[1], "amount", usd100k.toString());
-                    assert.fieldEquals("FundsDistribution", ids[1], "createdAt", monthsAfterInit[3].toString());
-                    assert.fieldEquals("FundsDistribution", ids[1], "distributedAt", "0");
-                    assert.fieldEquals("FundsDistribution", ids[1], "stakers", "[]");
-                    assert.fieldEquals("FundsDistribution", ids[1], "rewards", "[]");
+                test("Should not create new distribution", () => {
+                    assert.notInStore("FundsDistribution", ids[0]);
+                    assert.notInStore("FundsDistribution", ids[1]);
+                    assert.entityCount("FundsDistribution", 0);
                 });
             });
         });

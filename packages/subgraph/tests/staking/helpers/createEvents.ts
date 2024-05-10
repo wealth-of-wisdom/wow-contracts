@@ -1,7 +1,7 @@
 import { BigInt, Address, ethereum } from "@graphprotocol/graph-ts";
 import { newMockEvent } from "matchstick-as";
 import {
-    Initialized as InitializedEvent,
+    InitializedContractData as InitializedContractDataEvent,
     PoolSet as PoolSetEvent,
     BandLevelSet as BandLevelSetEvent,
     SharesInMonthSet as SharesInMonthSetEvent,
@@ -24,17 +24,41 @@ import {
     RewardsClaimed as RewardsClaimedEvent,
 } from "../../../generated/Staking/Staking";
 import { BIGINT_ZERO, StakingType } from "../../../src/utils/constants";
-import { stakingAddress } from "../../utils/data/constants";
+import {
+    stakingAddress,
+    usdtToken,
+    usdcToken,
+    wowToken,
+    totalPools,
+    totalBandLevels,
+} from "../../utils/data/constants";
 import { initDate } from "../../utils/data/dates";
 import { createMockedFunctions } from "./createMockedFunctions";
 
-export function createInitializedEvent(): InitializedEvent {
+export function createInitializedEvent(): InitializedContractDataEvent {
     createMockedFunctions();
 
     // @ts-ignore
-    const newEvent = changetype<InitializedEvent>(newMockEvent());
+    const newEvent = changetype<InitializedContractDataEvent>(newMockEvent());
+
+    const usdtTokenParam = new ethereum.EventParam("usdtToken", ethereum.Value.fromAddress(usdtToken));
+    const usdcTokenParam = new ethereum.EventParam("usdcToken", ethereum.Value.fromAddress(usdcToken));
+    const wowTokenParam = new ethereum.EventParam("wowToken", ethereum.Value.fromAddress(wowToken));
+    const totalPoolsParam = new ethereum.EventParam("totalPools", ethereum.Value.fromUnsignedBigInt(totalPools));
+    const totalBandLevelsParam = new ethereum.EventParam(
+        "totalBandLevels",
+        ethereum.Value.fromUnsignedBigInt(totalBandLevels),
+    );
+
     newEvent.address = stakingAddress;
     newEvent.block.timestamp = initDate;
+
+    newEvent.parameters = new Array();
+    newEvent.parameters.push(usdtTokenParam);
+    newEvent.parameters.push(usdcTokenParam);
+    newEvent.parameters.push(wowTokenParam);
+    newEvent.parameters.push(totalPoolsParam);
+    newEvent.parameters.push(totalBandLevelsParam);
 
     return newEvent;
 }
@@ -326,6 +350,7 @@ export function createBandUpgradedEvent(
     bandId: BigInt,
     oldBandLevel: BigInt,
     newBandLevel: BigInt,
+    newPurchasePrice: BigInt,
     date: BigInt,
 ): BandUpgradedEvent {
     // @ts-ignore
@@ -335,6 +360,10 @@ export function createBandUpgradedEvent(
     const bandIdParam = new ethereum.EventParam("bandId", ethereum.Value.fromUnsignedBigInt(bandId));
     const oldBandLevelParam = new ethereum.EventParam("oldBandLevel", ethereum.Value.fromUnsignedBigInt(oldBandLevel));
     const newBandLevelParam = new ethereum.EventParam("newBandLevel", ethereum.Value.fromUnsignedBigInt(newBandLevel));
+    const newPurchasePriceParam = new ethereum.EventParam(
+        "newPurchasePrice",
+        ethereum.Value.fromUnsignedBigInt(newPurchasePrice),
+    );
 
     newEvent.block.timestamp = date;
 
@@ -343,6 +372,7 @@ export function createBandUpgradedEvent(
     newEvent.parameters.push(bandIdParam);
     newEvent.parameters.push(oldBandLevelParam);
     newEvent.parameters.push(newBandLevelParam);
+    newEvent.parameters.push(newPurchasePriceParam);
 
     return newEvent;
 }
@@ -352,6 +382,7 @@ export function createBandDowngradedEvent(
     bandId: BigInt,
     oldBandLevel: BigInt,
     newBandLevel: BigInt,
+    newPurchasePrice: BigInt,
     date: BigInt,
 ): BandDowngradedEvent {
     // @ts-ignore
@@ -361,6 +392,10 @@ export function createBandDowngradedEvent(
     const bandIdParam = new ethereum.EventParam("bandId", ethereum.Value.fromUnsignedBigInt(bandId));
     const oldBandLevelParam = new ethereum.EventParam("oldBandLevel", ethereum.Value.fromUnsignedBigInt(oldBandLevel));
     const newBandLevelParam = new ethereum.EventParam("newBandLevel", ethereum.Value.fromUnsignedBigInt(newBandLevel));
+    const newPurchasePriceParam = new ethereum.EventParam(
+        "newPurchasePrice",
+        ethereum.Value.fromUnsignedBigInt(newPurchasePrice),
+    );
 
     newEvent.block.timestamp = date;
 
@@ -369,6 +404,7 @@ export function createBandDowngradedEvent(
     newEvent.parameters.push(bandIdParam);
     newEvent.parameters.push(oldBandLevelParam);
     newEvent.parameters.push(newBandLevelParam);
+    newEvent.parameters.push(newPurchasePriceParam);
 
     return newEvent;
 }

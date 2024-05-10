@@ -416,7 +416,7 @@ type StakingContract @entity {
     """
     Share precision used to format shares in FE
     """
-    sharePrecision: Int!
+    sharePrecision: BigInt!
 
     """
     Number of total pools
@@ -636,6 +636,14 @@ type Band @entity {
     id: ID!
 
     # Contract fields
+
+    """
+    The price of the band in WOW tokens. This is the amount of WOW tokens
+    that the staker has staked to purchase the band. On downgrade/upgrade
+    the purchase price will be recalculated based on the current band level price.
+    """
+    purchasePrice: BigInt!
+
     """
     Staker address who owns the band
     """

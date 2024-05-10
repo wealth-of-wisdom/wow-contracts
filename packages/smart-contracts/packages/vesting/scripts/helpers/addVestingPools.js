@@ -8,6 +8,7 @@ const {
     DAILY_UNLOCK_TYPE_NUM,
     MONTHLY_UNLOCK_TYPE_NUM,
     DAILY_UNLOCK_TYPE_STR,
+    MONTHLY_UNLOCK_TYPE_STR,
 } = require("./constants")
 
 async function addVestingPools(tokenAddress, vestingAddress) {
