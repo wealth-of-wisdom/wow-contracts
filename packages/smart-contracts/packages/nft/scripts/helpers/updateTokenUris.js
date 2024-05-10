@@ -9,9 +9,6 @@ const levelToUriMap = levels.reduce((map, levelInfo) => {
 }, {});
 
 async function updateTokenUris(nftAddress) {
-    if (!nftAddress) {
-        throw new Error("ERROR: NFT proxy address not found");
-    }
 
     const Nft = await ethers.getContractFactory("Nft");
     const nft = Nft.attach(nftAddress);
@@ -24,7 +21,7 @@ async function updateTokenUris(nftAddress) {
 
 
         const baseUri = levelToUriMap[token.level];
-        const fullUri = `${baseUri}/${token.id}.json`;
+        const fullUri = `${baseUri}/${token.idInLevel}.json`;
 
         console.log(`Updating token ID ${token.id} at level ${token.level} to new URI ${uri}`);
 
