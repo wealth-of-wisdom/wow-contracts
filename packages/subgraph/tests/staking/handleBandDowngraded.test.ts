@@ -24,6 +24,7 @@ describe("handleBandDowngraded() tests", () => {
                 BigInt.fromString(ids[0]),
                 BigInt.fromI32(starterLevel),
                 BigInt.fromI32(firstDowngradeLevel),
+                bandLevelPrices[8],
                 initDate,
             );
         });
@@ -60,6 +61,7 @@ describe("handleBandDowngraded() tests", () => {
                 BigInt.fromString(ids[0]),
                 BigInt.fromI32(starterLevel),
                 BigInt.fromI32(firstDowngradeLevel),
+                bandLevelPrices[8],
                 initDate,
             );
             downgradeBand(
@@ -67,6 +69,7 @@ describe("handleBandDowngraded() tests", () => {
                 BigInt.fromString(ids[0]),
                 BigInt.fromI32(firstDowngradeLevel),
                 BigInt.fromI32(secondDowngradeLevel),
+                bandLevelPrices[7],
                 initDate,
             );
         });

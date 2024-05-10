@@ -24,6 +24,7 @@ describe("Create StakingContract, stake and upgrade band two times", () => {
                 BigInt.fromString(ids[0]),
                 BigInt.fromI32(starterLevel),
                 BigInt.fromI32(firstUpgradeLevel),
+                bandLevelPrices[8],
                 initDate,
             );
         });
@@ -60,6 +61,7 @@ describe("Create StakingContract, stake and upgrade band two times", () => {
                 BigInt.fromString(ids[0]),
                 BigInt.fromI32(starterLevel),
                 BigInt.fromI32(firstUpgradeLevel),
+                bandLevelPrices[7],
                 initDate,
             );
             upgradeBand(
@@ -67,6 +69,7 @@ describe("Create StakingContract, stake and upgrade band two times", () => {
                 BigInt.fromString(ids[0]),
                 BigInt.fromI32(firstUpgradeLevel),
                 BigInt.fromI32(secondUpgradeLevel),
+                bandLevelPrices[8],
                 initDate,
             );
         });

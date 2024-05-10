@@ -138,6 +138,7 @@ describe("calculateRewards", () => {
                         monthsAfterInit[2],
                     );
                     stakerRewards = calculateRewards(stakingContract, usd100k, sharesData);
+                    stakerRewards = stakerRewards as BigInt[];
                 });
 
                 /*//////////////////////////////////////////////////////////////////////////

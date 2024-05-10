@@ -101,9 +101,9 @@ dataSources:
               - name: Staking
                 file: ./abis/Staking.json
           eventHandlers:
-              - event: Initialized(uint64)
+              - event: InitializedContractData(address,address,address,uint16,uint16)
                 handler: handleInitialized
-              - event: PoolSet(indexed uint16,uint48)
+              - event: PoolSet(indexed uint16,uint32)
                 handler: handlePoolSet
               - event: BandLevelSet(indexed uint16,uint256,uint16[])
                 handler: handleBandLevelSet
@@ -137,9 +137,9 @@ dataSources:
                 handler: handleUnstaked
               - event: VestingUserDeleted(address)
                 handler: handleVestingUserDeleted
-              - event: BandUpgraded(address,uint256,uint16,uint16)
+              - event: BandUpgraded(address,uint256,uint16,uint16,uint256)
                 handler: handleBandUpgraded
-              - event: BandDowngraded(address,uint256,uint16,uint16)
+              - event: BandDowngraded(address,uint256,uint16,uint16,uint256)
                 handler: handleBandDowngraded
               - event: RewardsClaimed(address,address,uint256)
                 handler: handleRewardsClaimed
