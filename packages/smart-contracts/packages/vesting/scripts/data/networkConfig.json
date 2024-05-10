@@ -12,10 +12,10 @@
         "listing_date": ""
     },
     "arbitrumOne": {
-        "vesting_token": "",
+        "vesting_token": "0x2ED05DD348e13eE51Ca589D1282e008ad942Cf27",
         "staking_contract": "",
-        "nft_contract": "",
-        "listing_date": ""
+        "nft_contract": "0x241AaFfE0c386b795c0041D16BddAC2e59643718",
+        "listing_date": "1715770800"
     },
     "arbitrumSepolia": {
         "vesting_token": "0x685C3D7C82cd55aEE06d5f1631bbd00c6D7b2539",

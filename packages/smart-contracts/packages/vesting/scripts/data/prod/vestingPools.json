@@ -1,1 +1,164 @@
-[]
+[
+    {
+        "name": "NFT Airdrops",
+        "listing_release_percentage": 0,
+        "cliff_in_days": 720,
+        "cliff_release_percentage": 0,
+        "vesting_in_months": 18,
+        "unlock_type": "DAILY",
+        "tokens_amount_in_wow": "87200000"
+    },
+    {
+        "name": "Community",
+        "listing_release_percentage": 0,
+        "cliff_in_days": 720,
+        "cliff_release_percentage": 0,
+        "vesting_in_months": 18,
+        "unlock_type": "DAILY",
+        "tokens_amount_in_wow": "114000000"
+    },
+    {
+        "name": "Seed",
+        "listing_release_percentage": 5,
+        "cliff_in_days": 540,
+        "cliff_release_percentage": 0,
+        "vesting_in_months": 12,
+        "unlock_type": "DAILY",
+        "tokens_amount_in_wow": "1300000"
+    },
+    {
+        "name": "Private",
+        "listing_release_percentage": 0,
+        "cliff_in_days": 720,
+        "cliff_release_percentage": 0,
+        "vesting_in_months": 18,
+        "unlock_type": "DAILY",
+        "tokens_amount_in_wow": "50000000"
+    },
+    {
+        "name": "BOS Private Sale",
+        "listing_release_percentage": 0,
+        "cliff_in_days": 540,
+        "cliff_release_percentage": 0,
+        "vesting_in_months": 18,
+        "unlock_type": "DAILY",
+        "tokens_amount_in_wow": "62500000"
+    },
+    {
+        "name": "Pre-Sale",
+        "listing_release_percentage": 20,
+        "cliff_in_days": 360,
+        "cliff_release_percentage": 0,
+        "vesting_in_months": 15,
+        "unlock_type": "DAILY",
+        "tokens_amount_in_wow": "11000000"
+    },
+    {
+        "name": "Team",
+        "listing_release_percentage": 0,
+        "cliff_in_days": 450,
+        "cliff_release_percentage": 0,
+        "vesting_in_months": 24,
+        "unlock_type": "DAILY",
+        "tokens_amount_in_wow": "336000000"
+    },
+    {
+        "name": "Advisors",
+        "listing_release_percentage": 0,
+        "cliff_in_days": 450,
+        "cliff_release_percentage": 0,
+        "vesting_in_months": 24,
+        "unlock_type": "DAILY",
+        "tokens_amount_in_wow": "63000000"
+    },
+    {
+        "name": "Contingency",
+        "listing_release_percentage": 0,
+        "cliff_in_days": 450,
+        "cliff_release_percentage": 0,
+        "vesting_in_months": 24,
+        "unlock_type": "DAILY",
+        "tokens_amount_in_wow": "42000000"
+    },
+    {
+        "name": "Charity",
+        "listing_release_percentage": 0,
+        "cliff_in_days": 450,
+        "cliff_release_percentage": 0,
+        "vesting_in_months": 24,
+        "unlock_type": "DAILY",
+        "tokens_amount_in_wow": "42000000"
+    },
+    {
+        "name": "Exchange Liquidity",
+        "listing_release_percentage": 15,
+        "cliff_in_days": 90,
+        "cliff_release_percentage": 0,
+        "vesting_in_months": 12,
+        "unlock_type": "DAILY",
+        "tokens_amount_in_wow": "210000000"
+    },
+    {
+        "name": "Treasury",
+        "listing_release_percentage": 5,
+        "cliff_in_days": 90,
+        "cliff_release_percentage": 0,
+        "vesting_in_months": 12,
+        "unlock_type": "DAILY",
+        "tokens_amount_in_wow": "262000000"
+    },
+    {
+        "name": "Marketing",
+        "listing_release_percentage": 4,
+        "cliff_in_days": 360,
+        "cliff_release_percentage": 0,
+        "vesting_in_months": 24,
+        "unlock_type": "DAILY",
+        "tokens_amount_in_wow": "252000000"
+    },
+    {
+        "name": "Development",
+        "listing_release_percentage": 4,
+        "cliff_in_days": 360,
+        "cliff_release_percentage": 0,
+        "vesting_in_months": 24,
+        "unlock_type": "DAILY",
+        "tokens_amount_in_wow": "168000000"
+    },
+    {
+        "name": "Stakers",
+        "listing_release_percentage": 0,
+        "cliff_in_days": 360,
+        "cliff_release_percentage": 0,
+        "vesting_in_months": 24,
+        "unlock_type": "DAILY",
+        "tokens_amount_in_wow": "126000000"
+    },
+    {
+        "name": "Legal",
+        "listing_release_percentage": 10,
+        "cliff_in_days": 360,
+        "cliff_release_percentage": 0,
+        "vesting_in_months": 24,
+        "unlock_type": "DAILY",
+        "tokens_amount_in_wow": "84000000"
+    },
+    {
+        "name": "Partnerships",
+        "listing_release_percentage": 10,
+        "cliff_in_days": 540,
+        "cliff_release_percentage": 0,
+        "vesting_in_months": 12,
+        "unlock_type": "DAILY",
+        "tokens_amount_in_wow": "84000000"
+    },
+    {
+        "name": "Rewards & Incentives",
+        "listing_release_percentage": 10,
+        "cliff_in_days": 720,
+        "cliff_release_percentage": 0,
+        "vesting_in_months": 18,
+        "unlock_type": "DAILY",
+        "tokens_amount_in_wow": "105000000"
+    }
+]
