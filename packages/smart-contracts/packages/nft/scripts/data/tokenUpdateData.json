@@ -1,0 +1,23 @@
+{
+    "tokens": [
+        {"id": 1, "level": 1},
+        {"id": 2, "level": 2},
+        {"id": 3, "level": 3},
+        {"id": 4, "level": 4},
+        {"id": 5, "level": 5},
+        {"id": 10, "level": 1},
+        {"id": 11, "level": 5},
+        {"id": 70, "level": 2},
+        {"id": 50, "level": 1},
+        {"id": 13, "level": 4},
+        {"id": 14, "level": 3},
+        {"id": 15, "level": 3}
+    ],
+    "levels": [
+        {"level": 1, "uri": "https://ipfs.io/ipfs/a"},
+        {"level": 2, "uri": "https://ipfs.io/ipfs/b"},
+        {"level": 3, "uri": "https://ipfs.io/ipfs/c"},
+        {"level": 4, "uri": "https://ipfs.io/ipfs/d"},
+        {"level": 5, "uri": "https://ipfs.io/ipfs/e"}
+    ]
+}
