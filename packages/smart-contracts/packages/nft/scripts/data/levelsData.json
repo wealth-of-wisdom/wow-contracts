@@ -10,8 +10,8 @@
         "supply_cap": -1,
         "base_uri": "https://ipfs.io/ipfs/QmcakFRug8qYzfjC4rzsgXiuu75YhUk2yqYai1WvaayCuY/",
         "standard_projects_quantity": -1,
-        "premium_projects_quantity": -1,
-        "limited_projects_quantity": -1
+        "premium_projects_quantity": 0,
+        "limited_projects_quantity": 0
     },
     {
         "level": 2,
@@ -25,7 +25,7 @@
         "base_uri": "https://ipfs.io/ipfs/QmZNN6oVDVf9BPTaQCQVwdTguEQyVABjZjkFnhKBMN1wwx/",
         "standard_projects_quantity": -1,
         "premium_projects_quantity": -1,
-        "limited_projects_quantity": -1
+        "limited_projects_quantity": 0
     },
     {
         "level": 3,
@@ -39,7 +39,7 @@
         "base_uri": "https://ipfs.io/ipfs/QmT4wv99aCjwPE4k3iF964KgTeFEBeggJUYKZr7YCRxwiW/",
         "standard_projects_quantity": -1,
         "premium_projects_quantity": -1,
-        "limited_projects_quantity": -1
+        "limited_projects_quantity": 0
     },
     {
         "level": 4,
@@ -80,8 +80,8 @@
         "supply_cap": -1,
         "base_uri": "https://ipfs.io/ipfs/QmPoii7N1Ddn8dRg8915wMnd7VdedvS4PkivzU5KAJRRpm/",
         "standard_projects_quantity": -1,
-        "premium_projects_quantity": -1,
-        "limited_projects_quantity": -1
+        "premium_projects_quantity": 0,
+        "limited_projects_quantity": 0
     },
     {
         "level": 2,
@@ -95,7 +95,7 @@
         "base_uri": "https://ipfs.io/ipfs/QmfEETHAkA2ZPjaGtdQ94Znqa5YzFGVKa3TjfvGfHh1Aaf/",
         "standard_projects_quantity": -1,
         "premium_projects_quantity": -1,
-        "limited_projects_quantity": -1
+        "limited_projects_quantity": 0
     },
     {
         "level": 3,
@@ -109,7 +109,7 @@
         "base_uri": "https://ipfs.io/ipfs/QmY4BqEkikuSmQUe3xXecEgthgzAB8TZqmU7MnxbYnZEyv/",
         "standard_projects_quantity": -1,
         "premium_projects_quantity": -1,
-        "limited_projects_quantity": -1
+        "limited_projects_quantity": 0
     },
     {
         "level": 4,
