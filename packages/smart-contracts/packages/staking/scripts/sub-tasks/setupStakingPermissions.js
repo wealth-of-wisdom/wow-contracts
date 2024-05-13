@@ -1,10 +1,10 @@
-const setupVestingPermissions = require("../helpers/setupStakingPermissions")
+const setupStakingPermissions = require("../helpers/setupStakingPermissions")
 require("dotenv").config()
 
 async function main() {
-    await setupVestingPermissions(
-        process.env.STAKING_CONTRACT,
-        process.env.VESTING_CONTRACT,
+    await setupStakingPermissions(
+        process.env.STAKING_ADDRESS,
+        process.env.VESTING_ADDRESS,
     )
 }
 
