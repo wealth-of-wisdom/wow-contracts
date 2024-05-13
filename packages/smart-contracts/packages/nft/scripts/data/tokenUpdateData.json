@@ -11,6 +11,46 @@
             "idInLevel": "0"
         },
         {
+            "id": "2",
+            "level": "1",
+            "idInLevel": "1"
+        },
+        {
+            "id": "3",
+            "level": "1",
+            "idInLevel": "2"
+        },
+        {
+            "id": "4",
+            "level": "2",
+            "idInLevel": "0"
+        },
+        {
+            "id": "5",
+            "level": "2",
+            "idInLevel": "1"
+        },
+        {
+            "id": "6",
+            "level": "1",
+            "idInLevel": "3"
+        },
+        {
+            "id": "7",
+            "level": "3",
+            "idInLevel": "1"
+        },
+        {
+            "id": "8",
+            "level": "5",
+            "idInLevel": "0"
+        },
+        {
+            "id": "9",
+            "level": "1",
+            "idInLevel": "4"
+        },
+        {
             "id": "10",
             "level": "1",
             "idInLevel": "5"
@@ -59,11 +99,6 @@
             "id": "19",
             "level": "1",
             "idInLevel": "14"
-        },
-        {
-            "id": "2",
-            "level": "1",
-            "idInLevel": "1"
         },
         {
             "id": "20",
@@ -115,11 +150,7 @@
             "level": "3",
             "idInLevel": "2"
         },
-        {
-            "id": "3",
-            "level": "1",
-            "idInLevel": "2"
-        },
+
         {
             "id": "30",
             "level": "1",
@@ -170,11 +201,7 @@
             "level": "1",
             "idInLevel": "29"
         },
-        {
-            "id": "4",
-            "level": "2",
-            "idInLevel": "0"
-        },
+
         {
             "id": "40",
             "level": "1",
@@ -226,11 +253,6 @@
             "idInLevel": "36"
         },
         {
-            "id": "5",
-            "level": "2",
-            "idInLevel": "1"
-        },
-        {
             "id": "50",
             "level": "3",
             "idInLevel": "5"
@@ -244,26 +266,6 @@
             "id": "52",
             "level": "2",
             "idInLevel": "8"
-        },
-        {
-            "id": "6",
-            "level": "1",
-            "idInLevel": "3"
-        },
-        {
-            "id": "7",
-            "level": "3",
-            "idInLevel": "1"
-        },
-        {
-            "id": "8",
-            "level": "5",
-            "idInLevel": "0"
-        },
-        {
-            "id": "9",
-            "level": "1",
-            "idInLevel": "4"
         }
     ],
     "levels": [
