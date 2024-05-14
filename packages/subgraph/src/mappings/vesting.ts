@@ -142,8 +142,8 @@ export function handleBeneficiaryAdded(event: BeneficiaryAddedEvent): void {
         .minus(poolAllocation.vestedTokens)
         .plus(data.vestedTokenAmount);
 
-    beneficiary.totalUnstakedTokens = beneficiary.totalTokens.minus(beneficiary.totalStakedTokens);
-    beneficiary.totalUnclaimedTokens = beneficiary.totalTokens.minus(beneficiary.totalClaimedTokens);
+    beneficiary.totalUnstakedTokens = beneficiary.totalUnstakedTokens.plus(addedAmount);
+    beneficiary.totalUnclaimedTokens = beneficiary.totalUnclaimedTokens.plus(addedAmount);
     beneficiary.totalAllocations = totalAllocations;
     beneficiary.save();
 
