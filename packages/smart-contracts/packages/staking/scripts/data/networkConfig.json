@@ -16,10 +16,10 @@
         "total_band_levels": 9
     },
     "arbitrumOne": {
-        "usdt_token": "",
-        "usdc_token": "",
-        "wow_token": "",
-        "vesting_contract": "",
+        "usdt_token": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+        "usdc_token": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+        "wow_token": "0x2ED05DD348e13eE51Ca589D1282e008ad942Cf27",
+        "vesting_contract": "0xeD6B3E5DB3cd4E893AF2c7413425840414e42502",
         "total_pools": 9,
         "total_band_levels": 9
     },

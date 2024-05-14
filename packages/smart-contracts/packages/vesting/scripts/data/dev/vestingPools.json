@@ -5,7 +5,7 @@
         "cliff_in_days": 720,
         "cliff_release_percentage": 0,
         "vesting_in_months": 18,
-        "unlock_type": "DAILY",
+        "unlock_type": "MONTHLY",
         "tokens_amount_in_wow": "87200000"
     },
     {
@@ -14,7 +14,7 @@
         "cliff_in_days": 720,
         "cliff_release_percentage": 0,
         "vesting_in_months": 18,
-        "unlock_type": "DAILY",
+        "unlock_type": "MONTHLY",
         "tokens_amount_in_wow": "114000000"
     },
     {
@@ -23,7 +23,7 @@
         "cliff_in_days": 540,
         "cliff_release_percentage": 0,
         "vesting_in_months": 12,
-        "unlock_type": "DAILY",
+        "unlock_type": "MONTHLY",
         "tokens_amount_in_wow": "1300000"
     },
     {
@@ -32,7 +32,7 @@
         "cliff_in_days": 720,
         "cliff_release_percentage": 0,
         "vesting_in_months": 18,
-        "unlock_type": "DAILY",
+        "unlock_type": "MONTHLY",
         "tokens_amount_in_wow": "50000000"
     },
     {
@@ -41,7 +41,7 @@
         "cliff_in_days": 540,
         "cliff_release_percentage": 0,
         "vesting_in_months": 18,
-        "unlock_type": "DAILY",
+        "unlock_type": "MONTHLY",
         "tokens_amount_in_wow": "62500000"
     },
     {
@@ -50,7 +50,7 @@
         "cliff_in_days": 360,
         "cliff_release_percentage": 0,
         "vesting_in_months": 15,
-        "unlock_type": "DAILY",
+        "unlock_type": "MONTHLY",
         "tokens_amount_in_wow": "11000000"
     },
     {
@@ -59,7 +59,7 @@
         "cliff_in_days": 450,
         "cliff_release_percentage": 0,
         "vesting_in_months": 24,
-        "unlock_type": "DAILY",
+        "unlock_type": "MONTHLY",
         "tokens_amount_in_wow": "336000000"
     },
     {
@@ -68,7 +68,7 @@
         "cliff_in_days": 450,
         "cliff_release_percentage": 0,
         "vesting_in_months": 24,
-        "unlock_type": "DAILY",
+        "unlock_type": "MONTHLY",
         "tokens_amount_in_wow": "63000000"
     },
     {
@@ -77,7 +77,7 @@
         "cliff_in_days": 450,
         "cliff_release_percentage": 0,
         "vesting_in_months": 24,
-        "unlock_type": "DAILY",
+        "unlock_type": "MONTHLY",
         "tokens_amount_in_wow": "42000000"
     },
     {
@@ -86,7 +86,7 @@
         "cliff_in_days": 450,
         "cliff_release_percentage": 0,
         "vesting_in_months": 24,
-        "unlock_type": "DAILY",
+        "unlock_type": "MONTHLY",
         "tokens_amount_in_wow": "42000000"
     },
     {
@@ -95,7 +95,7 @@
         "cliff_in_days": 90,
         "cliff_release_percentage": 0,
         "vesting_in_months": 12,
-        "unlock_type": "DAILY",
+        "unlock_type": "MONTHLY",
         "tokens_amount_in_wow": "210000000"
     },
     {
@@ -104,7 +104,7 @@
         "cliff_in_days": 90,
         "cliff_release_percentage": 0,
         "vesting_in_months": 12,
-        "unlock_type": "DAILY",
+        "unlock_type": "MONTHLY",
         "tokens_amount_in_wow": "262000000"
     },
     {
@@ -113,7 +113,7 @@
         "cliff_in_days": 360,
         "cliff_release_percentage": 0,
         "vesting_in_months": 24,
-        "unlock_type": "DAILY",
+        "unlock_type": "MONTHLY",
         "tokens_amount_in_wow": "252000000"
     },
     {
@@ -122,7 +122,7 @@
         "cliff_in_days": 360,
         "cliff_release_percentage": 0,
         "vesting_in_months": 24,
-        "unlock_type": "DAILY",
+        "unlock_type": "MONTHLY",
         "tokens_amount_in_wow": "168000000"
     },
     {
@@ -131,7 +131,7 @@
         "cliff_in_days": 360,
         "cliff_release_percentage": 0,
         "vesting_in_months": 24,
-        "unlock_type": "DAILY",
+        "unlock_type": "MONTHLY",
         "tokens_amount_in_wow": "126000000"
     },
     {
@@ -140,7 +140,7 @@
         "cliff_in_days": 360,
         "cliff_release_percentage": 0,
         "vesting_in_months": 24,
-        "unlock_type": "DAILY",
+        "unlock_type": "MONTHLY",
         "tokens_amount_in_wow": "84000000"
     },
     {
@@ -149,7 +149,7 @@
         "cliff_in_days": 540,
         "cliff_release_percentage": 0,
         "vesting_in_months": 12,
-        "unlock_type": "DAILY",
+        "unlock_type": "MONTHLY",
         "tokens_amount_in_wow": "84000000"
     },
     {
@@ -158,7 +158,7 @@
         "cliff_in_days": 720,
         "cliff_release_percentage": 0,
         "vesting_in_months": 18,
-        "unlock_type": "DAILY",
+        "unlock_type": "MONTHLY",
         "tokens_amount_in_wow": "105000000"
     }
 ]

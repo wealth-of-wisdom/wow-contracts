@@ -13,7 +13,7 @@
     },
     "arbitrumOne": {
         "vesting_token": "0x2ED05DD348e13eE51Ca589D1282e008ad942Cf27",
-        "staking_contract": "",
+        "staking_contract": "0xfF441106225c180DafAf59C830B4930A99f2fdD7",
         "nft_contract": "0x241AaFfE0c386b795c0041D16BddAC2e59643718",
         "listing_date": "1715770800"
     },
