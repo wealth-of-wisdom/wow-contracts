@@ -8,7 +8,7 @@
         "subgraphUrl": ""
     },
     "arbitrumSepolia": {
-        "stakingAddress": "0x9B899acE73e737f1f3E0657Ba6Ea1F90c6076cED",
+        "stakingAddress": "0xbb75F25945478a923E1b33E91904325ccBC672aF",
         "subgraphUrl": "https://api.thegraph.com/subgraphs/name/wealth-of-wisdom/subgraph-arbitrum-sepolia",
         "blockConfirmations": 100
     },
