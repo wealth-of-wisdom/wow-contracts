@@ -13,8 +13,8 @@
         "blockConfirmations": 100
     },
     "arbitrumOne": {
-        "stakingAddress": "",
-        "subgraphUrl": "",
+        "stakingAddress": "0xfF441106225c180DafAf59C830B4930A99f2fdD7",
+        "subgraphUrl": "https://api.thegraph.com/subgraphs/name/wealth-of-wisdom/subgraph-arbitrum-one",
         "blockConfirmations": 100
     }
 }

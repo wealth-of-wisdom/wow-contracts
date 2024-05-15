@@ -3,11 +3,11 @@
     "name_prefix": "WOW-LVL",
     "description": "WOW Access Pass NFT: Your key to the world of exclusive crypto opportunities. The WOW Access Pass NFT embodies empowerment, knowledge, trust, and community, offering unparalleled access to high-potential early-stage crypto and NFT projects.\nEnhance your financial journey with curated insights, direct access to expertly vetted ventures, and tailored educational content. With the WOW Access Pass, you're not just participating in crypto; you're joining a movement towards informed and empowered digital asset ownership.",
     "image_urls": [
-      "https://ipfs.io/ipfs/QmVSJGEpFR7WSsxAh4PjtpvLksmXXtSUBTZac3JD53M3Ng",
-      "https://ipfs.io/ipfs/QmYKNwPHxuAABsMnSbYprbQMTPPpS81ynan3Frw1GZRBQy",
-      "https://ipfs.io/ipfs/QmcjsXcLrk7KQTFbgV4AfVDyvJF528Jr5RrWGLAinS5jTn",
-      "https://ipfs.io/ipfs/QmXiRy1AirvyRVJdfB5W3BoKMwbGFgzpdTFJB7paTJproi",
-      "https://ipfs.io/ipfs/QmXpfKNykwQjoCE1RvFqFxHwb7Mm3PNCx6SGwKdBA3E6M3"
+      "https://ipfs.io/ipfs/Qmep59ioUWgPK8PCgXcozj9yxyoKcJiC2qfJreT2VrMbmU",
+      "https://ipfs.io/ipfs/QmcyG2LTwqVgiASpBPX97c85HoX9cXzbk6M2Dtjbx1sKTY",
+      "https://ipfs.io/ipfs/QmUSoBottA8hHY195F9e4MtpLGReoz75CVA227W41yCmDa",
+      "https://ipfs.io/ipfs/QmbPNYbUwUsdFiYXZFyT75YQa5o76f8Roctj4BaRxgnuV7",
+      "https://ipfs.io/ipfs/QmQPYZtiqvH8urazEwgU3pYXKEhpyqVbcoJBzwnzhdYB6U"
     ],
     "animation_urls": [
       "https://ipfs.io/ipfs/QmaSMoes9Qmf8uGACqzwmiVktbBFEXcS8dXF5mLyd1ag7z",
@@ -25,11 +25,11 @@
     "name_prefix": "WOW-OG-LVL",
     "description": "WOW Access Pass NFT: Your key to the world of exclusive crypto opportunities. The WOW Access Pass NFT embodies empowerment, knowledge, trust, and community, offering unparalleled access to high-potential early-stage crypto and NFT projects.\nEnhance your financial journey with curated insights, direct access to expertly vetted ventures, and tailored educational content. With the WOW Access Pass, you're not just participating in crypto; you're joining a movement towards informed and empowered digital asset ownership.",
     "image_urls": [
-      "https://ipfs.io/ipfs/QmVphPGV64pMhp6wGwtYRT72WmmupRjW6o2u62Cz23N9Zh",
-      "https://ipfs.io/ipfs/QmRCwubTg3pduPC3MLFqD4BSjsKGBYXmNJKqdfTnMa393f",
-      "https://ipfs.io/ipfs/QmPUTQb5M4gQeyLJpSqRqn5GigayWugqdkC4y8uKpHxAGz",
-      "https://ipfs.io/ipfs/QmaGN6pDrFJAbepmfoHhgcuPSANaStLXNgvHxeskVTmHHp",
-      "https://ipfs.io/ipfs/QmcF4iQu8t2ejPfZ72dCdheLCKi6RbBQJ4ko7wYBwAa5TB"
+      "https://ipfs.io/ipfs/QmYx1EJs5hNGgMzwymFVBWtpJvRw3TzEDTtLN4fj6pbvkZ",
+      "https://ipfs.io/ipfs/QmcZmPEHRTRmGbJY2YzZMA8CG99iFfg2pwzocLzu4JTxqB",
+      "https://ipfs.io/ipfs/QmXSsA3PTyKL8NXWzScsXnT96aVPWNCh65GrpCx6r5pVDk",
+      "https://ipfs.io/ipfs/QmY3chP9fKHd2rjSC4crsbTdj8dGs6iuRb8VKmTbDD3mpv",
+      "https://ipfs.io/ipfs/QmW4gEELziGLhHPNawQNqb149bgf2SowXHYN4swNYUbgc8"
     ],
     "animation_urls": [
       "https://ipfs.io/ipfs/QmRBxggcVoKiaQw7KcuPLjxAFuCPiuTpNhp1LvLyrGf1w4",
@@ -47,6 +47,6 @@
       "Unlimited"
     ],
     "prices": [988, 4988, 9988, 32988, 99988],
-    "level_quantities": [50, 21, 9, 3, 4]
+    "level_quantities": [51, 24, 9, 3, 4]
   }
 }

@@ -10,7 +10,7 @@ def generate_metadata(name_prefix, description, image_urls, animation_urls, leve
             "name": current_name,
             "description": description,
             "image": image_urls[level-1],  # Use the corresponding image URL for the level
-            "animation": animation_urls[level-1],  # Use the corresponding animation URL for the level
+            "animation_url": animation_urls[level-1],  # Use the corresponding animation URL for the level
             "attributes": [
                 {"trait_type": "Author", "value": author},
                 {"trait_type": "Lifecycle", "value": str(lifecycle[level-1]) if level <= len(lifecycle) and lifecycle[level-1] not in ["Unavailable", "Unlimited"] else str(lifecycle[level-1])},
