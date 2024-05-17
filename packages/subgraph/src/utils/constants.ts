@@ -1,4 +1,6 @@
-import { Address, BigDecimal, BigInt, Bytes } from "@graphprotocol/graph-ts";
+import { Address, BigDecimal, BigInt } from "@graphprotocol/graph-ts";
+import { UnlockType, StakingType, ActivityStatus } from "./enums";
+import { stringifyUnlockType, stringifyStakingType, stringifyActivityStatus } from "./utils";
 
 export const BIGINT_ZERO: BigInt = BigInt.zero();
 export const BIGINT_ONE: BigInt = BigInt.fromI32(1);
@@ -18,14 +20,14 @@ export const MONTH_IN_SECONDS: BigInt = BigInt.fromI32(30 * 24 * 60 * 60); // 30
 export const TEN_MINUTES_IN_SECONDS: BigInt = BigInt.fromI32(10 * 60); // 10 minutes
 export const TWELVE_HOURS_IN_SECONDS: BigInt = BigInt.fromI32(12 * 60 * 60); // 12 hours
 
-// UnlockType represents vesting token time release
-export enum UnlockType {
-    DAILY,
-    MONTHLY,
-}
-// Fixed - user gets shares inmediately, however stake is locks for that selected period
-// Flexi - user earns shares over the time, but stake and be unlocked anytime
-export enum StakingType {
-    FIX,
-    FLEXI,
-}
+// Enum values
+
+export const UNLOCK_TYPE_DAILY: string = stringifyUnlockType(UnlockType.DAILY);
+export const UNLOCK_TYPE_MONTHLY: string = stringifyUnlockType(UnlockType.MONTHLY);
+
+export const STAKING_TYPE_FIX: string = stringifyStakingType(StakingType.FIX);
+export const STAKING_TYPE_FLEXI: string = stringifyStakingType(StakingType.FLEXI);
+
+export const ACTIVITY_STATUS_NOT_ACTIVATED: string = stringifyActivityStatus(ActivityStatus.NOT_ACTIVATED);
+export const ACTIVITY_STATUS_ACTIVATED: string = stringifyActivityStatus(ActivityStatus.ACTIVATED);
+export const ACTIVITY_STATUS_DEACTIVATED: string = stringifyActivityStatus(ActivityStatus.DEACTIVATED);

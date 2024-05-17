@@ -1,7 +1,6 @@
-import { Address, BigInt, log, Bytes } from "@graphprotocol/graph-ts";
-import { BIGINT_ZERO, ADDRESS_ZERO, UnlockType, BIGDEC_ZERO } from "../utils/constants";
+import { Address, BigInt } from "@graphprotocol/graph-ts";
+import { BIGINT_ZERO, BIGDEC_ZERO, UNLOCK_TYPE_DAILY } from "../utils/constants";
 import { VestingContract, VestingPool, VestingPoolAllocation, Beneficiary } from "../../generated/schema";
-import { stringifyUnlockType } from "../utils/utils";
 
 /**
  * Retrieves or initializes a VestingContract entity.
@@ -48,7 +47,7 @@ export function getOrInitVestingPool(poolId: BigInt): VestingPool {
         vestingPool.vestingDuration = BIGINT_ZERO;
         vestingPool.vestingEndDate = BIGINT_ZERO;
         vestingPool.vestingPercentage = BIGDEC_ZERO;
-        vestingPool.unlockType = stringifyUnlockType(UnlockType.DAILY);
+        vestingPool.unlockType = UNLOCK_TYPE_DAILY;
         vestingPool.dedicatedPoolTokens = BIGINT_ZERO;
         vestingPool.totalPoolTokens = BIGINT_ZERO;
 

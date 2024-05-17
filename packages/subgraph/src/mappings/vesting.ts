@@ -13,23 +13,16 @@ import {
     Vesting,
 } from "../../generated/Vesting/Vesting";
 import { getOrInitBand } from "../helpers/staking.helpers";
-import {
-    VestingContract,
-    Beneficiary,
-    Band,
-    VestingPool,
-    VestingPoolAllocationLoader,
-    VestingPoolAllocation,
-} from "../../generated/schema";
+import { VestingContract, Beneficiary, Band, VestingPool, VestingPoolAllocation } from "../../generated/schema";
 import {
     getOrInitBeneficiary,
     getOrInitVestingContract,
     getOrInitVestingPool,
     getOrInitVestingPoolAllocation,
 } from "../helpers/vesting.helpers";
-import { getUnlockTypeFromBigInt, stringifyUnlockType } from "../utils/utils";
+import { stringifyUnlockType } from "../utils/utils";
 import { Address, BigDecimal, BigInt, store } from "@graphprotocol/graph-ts";
-import { BIGDEC_HUNDRED, BIGDEC_ZERO, BIGINT_ZERO, UnlockType } from "../utils/constants";
+import { BIGDEC_HUNDRED, BIGDEC_ZERO, BIGINT_ZERO } from "../utils/constants";
 
 /**
  * Handles the Initialized event triggered when the contract is initialized.
@@ -61,8 +54,8 @@ export function handleVestingPoolAdded(event: VestingPoolAddedEvent): void {
 
     // Extract data from Vesting contract getters
     const poolName: string = generalData.getValue0();
-    const unlockTypeNum: BigInt = BigInt.fromI32(generalData.getValue1());
-    const unlockTypeStr: string = stringifyUnlockType(getUnlockTypeFromBigInt(unlockTypeNum));
+    const unlockTypeNum = generalData.getValue1();
+    const unlockTypeStr: string = stringifyUnlockType(unlockTypeNum);
     const totalPoolTokensAmount: BigInt = generalData.getValue2();
     const dedicatedPoolTokensAmount: BigInt = generalData.getValue3();
 

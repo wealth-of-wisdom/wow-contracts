@@ -71,6 +71,8 @@ dataSources:
           eventHandlers:
               - event: Initialized(uint64)
                 handler: handleInitialized
+              - event: NftDataSet(indexed uint256,uint16,bool,uint256,uint256,uint256)
+                handler: handleNftDataSet
               - event: NftMinted(indexed address,indexed uint256,uint16,bool,uint256)
                 handler: handleNftMinted
               - event: NftDataActivated(indexed address,indexed uint256,uint16,bool,uint256,uint256)

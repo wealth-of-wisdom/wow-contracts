@@ -1,6 +1,6 @@
 import { Address, BigInt } from "@graphprotocol/graph-ts";
 import { NftContract, Nft, User } from "../../generated/schema"; // Adjust the import path as necessary
-import { BIGINT_ZERO } from "../utils/constants";
+import { BIGINT_ZERO, ACTIVITY_STATUS_NOT_ACTIVATED } from "../utils/constants";
 
 /**
  * Retrieves or initializes an NFTContract entity.
@@ -34,7 +34,7 @@ export function getOrInitNft(tokenId: BigInt): Nft {
         nft.idInLevel = BIGINT_ZERO;
         nft.level = BIGINT_ZERO;
         nft.isGenesis = false;
-        nft.isActive = false;
+        nft.activityStatus = ACTIVITY_STATUS_NOT_ACTIVATED;
         nft.activityEndTimestamp = BIGINT_ZERO;
         nft.extendedActivityEndTimestamp = BIGINT_ZERO;
         nft.owner = Address.zero().toString();

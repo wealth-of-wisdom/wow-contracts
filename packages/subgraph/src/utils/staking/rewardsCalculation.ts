@@ -1,7 +1,7 @@
 import { BigInt, log } from "@graphprotocol/graph-ts";
 import { StakingContract, Pool } from "../../../generated/schema";
 import { getOrInitPool } from "../../helpers/staking.helpers";
-import { StakerAndPoolShares } from "../utils";
+import { StakerAndPoolShares } from "../classes";
 import { BIGINT_ZERO } from "../constants";
 
 /*//////////////////////////////////////////////////////////////////////////

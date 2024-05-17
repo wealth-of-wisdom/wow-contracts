@@ -1,4 +1,4 @@
-import { Address, BigInt, dataSource, log } from "@graphprotocol/graph-ts";
+import { Address, BigInt, dataSource } from "@graphprotocol/graph-ts";
 import { StakingContract, Band, BandLevel, Pool, Staker } from "../../../generated/schema";
 import {
     getOrInitPool,
@@ -7,8 +7,15 @@ import {
     getOrInitBand,
     getOrInitStakingContract,
 } from "../../helpers/staking.helpers";
-import { stakingTypeFIX, StakerShares, StakerAndPoolShares, stakingTypeFLEXI } from "../utils";
-import { BIGINT_ZERO, TEN_MINUTES_IN_SECONDS, TWELVE_HOURS_IN_SECONDS, TESTNET_NETWORKS } from "../constants";
+import { StakerShares, StakerAndPoolShares } from "../classes";
+import {
+    BIGINT_ZERO,
+    TEN_MINUTES_IN_SECONDS,
+    TWELVE_HOURS_IN_SECONDS,
+    TESTNET_NETWORKS,
+    STAKING_TYPE_FIX,
+    STAKING_TYPE_FLEXI,
+} from "../constants";
 
 /*//////////////////////////////////////////////////////////////////////////
                             CALLED ON STAKE/UNSTAKE
@@ -16,7 +23,7 @@ import { BIGINT_ZERO, TEN_MINUTES_IN_SECONDS, TWELVE_HOURS_IN_SECONDS, TESTNET_N
 
 export function addFixedShares(staker: Staker, band: Band, sharesInMonths: BigInt[], accessiblePools: string[]): void {
     // Update shares if band is FIX type
-    if (band.stakingType != stakingTypeFIX) {
+    if (band.stakingType != STAKING_TYPE_FIX) {
         return;
     }
 
@@ -54,7 +61,7 @@ export function addFixedShares(staker: Staker, band: Band, sharesInMonths: BigIn
 }
 
 export function removeFixedShares(staker: Staker | null, band: Band, accessiblePools: string[]): void {
-    if (band.stakingType == stakingTypeFIX) {
+    if (band.stakingType == STAKING_TYPE_FIX) {
         const totalAccessiblePools = accessiblePools.length;
         const bandShares: BigInt = band.sharesAmount;
 
@@ -91,7 +98,7 @@ export function removeFixedShares(staker: Staker | null, band: Band, accessibleP
 }
 
 export function removeFlexiShares(staker: Staker | null, band: Band, accessiblePools: string[]): void {
-    if (band.stakingType == stakingTypeFLEXI) {
+    if (band.stakingType == STAKING_TYPE_FLEXI) {
         const totalAccessiblePools = accessiblePools.length;
         const bandShares: BigInt = band.sharesAmount;
 

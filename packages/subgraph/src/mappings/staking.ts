@@ -1,4 +1,4 @@
-import { Address, BigInt, ethereum, dataSource, store, log } from "@graphprotocol/graph-ts";
+import { Address, BigInt, ethereum, dataSource, store } from "@graphprotocol/graph-ts";
 import {
     InitializedContractData as InitializedContractDataEvent,
     PoolSet as PoolSetEvent,
@@ -48,7 +48,7 @@ import {
     removeAllStakerRewards,
     changeBandLevel,
 } from "../helpers/staking.helpers";
-import { stakingTypeFIX, stringifyStakingType, StakerAndPoolShares } from "../utils/utils";
+import { stringifyStakingType } from "../utils/utils";
 import { calculateRewards } from "../utils/staking/rewardsCalculation";
 import {
     validateTimeAndSyncFlexiShares,
@@ -63,7 +63,9 @@ import {
     TESTNET_NETWORKS,
     TEN_MINUTES_IN_SECONDS,
     MONTH_IN_SECONDS,
+    STAKING_TYPE_FIX,
 } from "../utils/constants";
+import { StakerAndPoolShares } from "../utils/classes";
 
 export function handleInitialized(event: InitializedContractDataEvent): void {
     const stakingContract: StakingContract = getOrInitStakingContract();
@@ -324,7 +326,7 @@ export function handleUnstaked(event: UnstakedEvent): void {
     const syncExecuted: boolean = validateTimeAndSyncFlexiShares(event.block.timestamp);
 
     // If the removed band is with type FIX, remove the fixed shares
-    if (band.stakingType == stakingTypeFIX) {
+    if (band.stakingType == STAKING_TYPE_FIX) {
         removeFixedShares(isStakerRemoved ? null : staker, band, bandLevel.accessiblePools);
     }
     // Else if type is FLEXI and sync was not executed, update shares
