@@ -223,6 +223,8 @@ contract Nft is
             revert Errors.Nft__GenesisNftNotUpdatable();
         }
 
+        uint256 newTokenId = s_nextTokenId;
+
         // Effects: deactivate the old NFT
         s_nftData[oldTokenId].activityType = ActivityType.DEACTIVATED;
 
@@ -241,7 +243,7 @@ contract Nft is
         // Effects: mint the token and set metadata URI
         safeMint(receiver, newLevel, false);
 
-        emit NftUpdated(receiver, newLevel, oldTokenId, s_nextTokenId);
+        emit NftUpdated(receiver, newLevel, oldTokenId, newTokenId);
     }
 
     /**
