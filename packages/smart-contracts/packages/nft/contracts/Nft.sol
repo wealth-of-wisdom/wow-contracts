@@ -232,6 +232,8 @@ contract Nft is
             ActivityType.ACTIVATION_TRIGGERED
         ) {
             delete s_activeNft[receiver];
+
+            emit ActiveNftUpdated(receiver, 0);
         }
 
         // Effects: deactivate the old NFT
@@ -690,8 +692,12 @@ contract Nft is
             // Effects: Update the active NFT for the sender
             delete s_activeNft[from];
 
+            emit ActiveNftUpdated(from, 0);
+
             // Effects: Update the active NFT for the receiver
             s_activeNft[to] = tokenId;
+
+            emit ActiveNftUpdated(to, tokenId);
         }
         // Else if nft is not active, we can transfer it without any additional checks
 
@@ -843,6 +849,8 @@ contract Nft is
         }
 
         s_activeNft[user] = tokenId;
+
+        emit ActiveNftUpdated(user, tokenId);
 
         // Effects: update nft data
         newNftData.activityType = ActivityType.ACTIVATION_TRIGGERED;

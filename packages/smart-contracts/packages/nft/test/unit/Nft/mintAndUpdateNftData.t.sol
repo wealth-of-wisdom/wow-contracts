@@ -152,7 +152,7 @@ contract Nft_MintAndUpdateNftData_Unit_Test is Unit_Test {
         assertEq(nftData.extendedActivityEndTimestamp, 0);
     }
 
-    function test_mintAndUpdateNftData_DeletesPreviousNft()
+    function test_mintAndUpdateNftData_DeactivatesPreviousNft()
         external
         mintLevel2NftForAlice
         mintLevel2NftForAlice
@@ -163,7 +163,7 @@ contract Nft_MintAndUpdateNftData_Unit_Test is Unit_Test {
         assertEq(nft.getActiveNft(alice), 0, "Active NFT ID is incorrect");
     }
 
-    function test_mintAndUpdateNftData_DeletesPreviousActiveNft()
+    function test_mintAndUpdateNftData_DeactivatesPreviousActiveNft()
         external
         mintLevel2NftForAlice
     {
@@ -176,7 +176,7 @@ contract Nft_MintAndUpdateNftData_Unit_Test is Unit_Test {
         assertEq(nft.getActiveNft(alice), 0, "Active NFT ID is incorrect");
     }
 
-    function test_mintAndUpdateNftData_DeletesPreviousNftFromBatch()
+    function test_mintAndUpdateNftData_DeactivatesPreviousNftFromBatch()
         external
         mintLevel2NftForAlice
         mintLevel2NftForAlice
@@ -195,7 +195,7 @@ contract Nft_MintAndUpdateNftData_Unit_Test is Unit_Test {
         );
     }
 
-    function test_mintAndUpdateNftData_DeletesPreviousActiveNftFromBatch()
+    function test_mintAndUpdateNftData_DeactivatesPreviousActiveNftFromBatch()
         external
         mintLevel2NftForAlice
         mintLevel2NftForAlice
