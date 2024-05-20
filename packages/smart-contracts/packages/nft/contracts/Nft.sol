@@ -833,7 +833,7 @@ contract Nft is
             oldNftData.activityType == ActivityType.ACTIVATION_TRIGGERED
         ) {
             oldNftData.activityType = ActivityType.DEACTIVATED;
-            emit NftDeactivated(oldTokenId);
+            emit NftDeactivated(activeNftId);
         }
 
         s_activeNft[user] = tokenId;
