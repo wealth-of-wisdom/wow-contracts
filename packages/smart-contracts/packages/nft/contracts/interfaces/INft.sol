@@ -62,6 +62,10 @@ interface INftEvents {
         uint8 project,
         uint16 quantity
     );
+
+    event NftDeactivated(uint256 oldTokenId);
+
+    event NftUpdated(uint256 oldTokenId, uint256 newTokenId);
 }
 
 interface INft is INftEvents {

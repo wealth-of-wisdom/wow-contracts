@@ -224,6 +224,8 @@ contract Nft is
         // Effects: deactivate the old NFT
         s_nftData[oldTokenId].activityType = ActivityType.DEACTIVATED;
 
+        emit NftDeactivated(oldTokenId);
+
         // Effects: set nft data with next token id
         setNftData(
             s_nextTokenId,
@@ -236,6 +238,8 @@ contract Nft is
 
         // Effects: mint the token and set metadata URI
         safeMint(receiver, newLevel, false);
+
+        emit NftUpdated(oldTokenId, s_nextTokenId);
     }
 
     /**
