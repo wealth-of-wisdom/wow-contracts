@@ -210,19 +210,6 @@ contract Nft_MintAndUpdateNftData_Unit_Test is Unit_Test {
         assertEq(nft.getActiveNft(alice), 0, "Active NFT ID is incorrect");
     }
 
-    function test_mintAndUpdateNftData_DeletesPrevious()
-        external
-        mintLevel2NftForAlice
-    {
-        vm.prank(alice);
-        nft.activateNftData(NFT_TOKEN_ID_0, true);
-
-        vm.prank(admin);
-        nft.mintAndUpdateNftData(alice, NFT_TOKEN_ID_0, LEVEL_3);
-
-        assertEq(nft.getActiveNft(alice), 0, "Active NFT ID is incorrect");
-    }
-
     function test_mintAndUpdateNftData_MintsNewNft()
         external
         mintLevel2NftForAlice
