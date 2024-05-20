@@ -228,6 +228,9 @@ contract Nft is
         // Effects: deactivate the old NFT
         s_nftData[oldTokenId].activityType = ActivityType.DEACTIVATED;
 
+        // Effects: Update the active NFT for the sender
+        delete s_activeNft[receiver];
+
         emit NftDeactivated(oldTokenId);
 
         // Effects: set nft data with next token id
