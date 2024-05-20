@@ -19,8 +19,10 @@ contract Nft_MintAndUpdateNftData_Unit_Test is Unit_Test {
         nft.grantRole(NFT_DATA_MANAGER_ROLE, nftDataManager);
         vm.stopPrank();
     }
-    
-    function test_mintAndUpdateNftData_RevertIf_NotNftDataManagerAndMinter() external {
+
+    function test_mintAndUpdateNftData_RevertIf_NotNftDataManagerAndMinter()
+        external
+    {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
@@ -32,7 +34,7 @@ contract Nft_MintAndUpdateNftData_Unit_Test is Unit_Test {
         nft.mintAndUpdateNftData(alice, NFT_TOKEN_ID_0, LEVEL_3);
     }
 
-        function test_mintAndSetNftData_RevertIf_SenderIsOnlyMinter() external {
+    function test_mintAndSetNftData_RevertIf_SenderIsOnlyMinter() external {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
@@ -102,7 +104,10 @@ contract Nft_MintAndUpdateNftData_Unit_Test is Unit_Test {
 
     function test_mintAndUpdateNftData_RevertIf_NftDoesNotExist() external {
         vm.expectRevert(
-            abi.encodeWithSelector(IERC721Errors.ERC721NonexistentToken.selector, NFT_TOKEN_ID_0)
+            abi.encodeWithSelector(
+                IERC721Errors.ERC721NonexistentToken.selector,
+                NFT_TOKEN_ID_0
+            )
         );
         vm.prank(admin);
         nft.mintAndUpdateNftData(bob, NFT_TOKEN_ID_0, LEVEL_3);
@@ -145,6 +150,64 @@ contract Nft_MintAndUpdateNftData_Unit_Test is Unit_Test {
         assertEq(uint8(nftData.activityType), uint8(NFT_NOT_ACTIVATED));
         assertEq(nftData.activityEndTimestamp, 0);
         assertEq(nftData.extendedActivityEndTimestamp, 0);
+    }
+
+    function test_mintAndUpdateNftData_DeactivatesPreviousNft()
+        external
+        mintLevel2NftForAlice
+        mintLevel2NftForAlice
+    {
+        vm.prank(admin);
+        nft.mintAndUpdateNftData(alice, NFT_TOKEN_ID_1, LEVEL_3);
+
+        assertEq(nft.getActiveNft(alice), 0, "Active NFT ID is incorrect");
+    }
+
+    function test_mintAndUpdateNftData_DeactivatesPreviousActiveNft()
+        external
+        mintLevel2NftForAlice
+    {
+        vm.prank(alice);
+        nft.activateNftData(NFT_TOKEN_ID_0, true);
+
+        vm.prank(admin);
+        nft.mintAndUpdateNftData(alice, NFT_TOKEN_ID_0, LEVEL_3);
+
+        assertEq(nft.getActiveNft(alice), 0, "Active NFT ID is incorrect");
+    }
+
+    function test_mintAndUpdateNftData_DeactivatesPreviousNftFromBatch()
+        external
+        mintLevel2NftForAlice
+        mintLevel2NftForAlice
+        mintLevel2NftForAlice
+    {
+        vm.prank(alice);
+        nft.activateNftData(NFT_TOKEN_ID_1, true);
+
+        vm.prank(admin);
+        nft.mintAndUpdateNftData(alice, NFT_TOKEN_ID_0, LEVEL_3);
+
+        assertEq(
+            nft.getActiveNft(alice),
+            NFT_TOKEN_ID_1,
+            "Active NFT ID is incorrect"
+        );
+    }
+
+    function test_mintAndUpdateNftData_DeactivatesPreviousActiveNftFromBatch()
+        external
+        mintLevel2NftForAlice
+        mintLevel2NftForAlice
+        mintLevel2NftForAlice
+    {
+        vm.prank(alice);
+        nft.activateNftData(NFT_TOKEN_ID_1, true);
+
+        vm.prank(admin);
+        nft.mintAndUpdateNftData(alice, NFT_TOKEN_ID_1, LEVEL_3);
+
+        assertEq(nft.getActiveNft(alice), 0, "Active NFT ID is incorrect");
     }
 
     function test_mintAndUpdateNftData_MintsNewNft()

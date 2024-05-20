@@ -78,6 +78,8 @@ interface INftEvents {
         bool isGenesis,
         uint256 tokenId
     );
+
+    event ActiveNftUpdated(address owner, uint256 tokenId);
 }
 
 interface INft is INftEvents {
