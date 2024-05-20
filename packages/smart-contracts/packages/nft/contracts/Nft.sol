@@ -225,13 +225,19 @@ contract Nft is
 
         uint256 newTokenId = s_nextTokenId;
 
+        // Effects: Update the active NFT for the sender
+        if (
+            s_activeNft[receiver] == oldTokenId &&
+            s_nftData[oldTokenId].activityType ==
+            ActivityType.ACTIVATION_TRIGGERED
+        ) {
+            delete s_activeNft[receiver];
+        }
+
         // Effects: deactivate the old NFT
         s_nftData[oldTokenId].activityType = ActivityType.DEACTIVATED;
 
         emit NftDeactivated(oldTokenId);
-
-        // Effects: Update the active NFT for the sender
-        delete s_activeNft[receiver];
 
         // Effects: set nft data with next token id
         setNftData(
