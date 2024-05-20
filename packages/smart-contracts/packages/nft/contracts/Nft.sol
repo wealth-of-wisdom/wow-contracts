@@ -197,6 +197,8 @@ contract Nft is
 
         // Effects: mint the token and set metadata URI
         safeMint(receiver, level, isGenesis);
+
+        emit MintedAndSetNftData(receiver, level, isGenesis, tokenId);
     }
 
     /**
@@ -239,7 +241,7 @@ contract Nft is
         // Effects: mint the token and set metadata URI
         safeMint(receiver, newLevel, false);
 
-        emit NftUpdated(oldTokenId, s_nextTokenId);
+        emit NftUpdated(receiver, newLevel, oldTokenId, s_nextTokenId);
     }
 
     /**
@@ -774,6 +776,8 @@ contract Nft is
         // Effects: increment the token quantity in the level
         nftLevel.nftAmount++;
 
+        emit NftMinted(to, tokenId, level, isGenesis, nftAmount);
+
         // Concatenate base URI, id in level and suffix to get the full URI
         string memory uri = string.concat(
             nftLevel.baseURI,
@@ -787,8 +791,6 @@ contract Nft is
         if (isGenesis) {
             _activateNftData(tokenId, false, to);
         }
-
-        emit NftMinted(to, tokenId, level, isGenesis, nftAmount);
     }
 
     /**
