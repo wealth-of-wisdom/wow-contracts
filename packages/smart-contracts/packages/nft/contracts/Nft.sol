@@ -232,7 +232,7 @@ contract Nft is
 
         // Effects: set nft data with next token id
         setNftData(
-            s_nextTokenId,
+            newTokenId,
             newLevel,
             false,
             INft.ActivityType.NOT_ACTIVATED,
