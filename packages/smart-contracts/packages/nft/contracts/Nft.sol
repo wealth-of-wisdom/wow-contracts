@@ -197,6 +197,8 @@ contract Nft is
 
         // Effects: mint the token and set metadata URI
         safeMint(receiver, level, isGenesis);
+
+        emit MintedAndSetNftData(receiver, level, isGenesis, tokenId);
     }
 
     /**
@@ -221,12 +223,16 @@ contract Nft is
             revert Errors.Nft__GenesisNftNotUpdatable();
         }
 
+        uint256 newTokenId = s_nextTokenId;
+
         // Effects: deactivate the old NFT
         s_nftData[oldTokenId].activityType = ActivityType.DEACTIVATED;
 
+        emit NftDeactivated(oldTokenId);
+
         // Effects: set nft data with next token id
         setNftData(
-            s_nextTokenId,
+            newTokenId,
             newLevel,
             false,
             INft.ActivityType.NOT_ACTIVATED,
@@ -236,6 +242,8 @@ contract Nft is
 
         // Effects: mint the token and set metadata URI
         safeMint(receiver, newLevel, false);
+
+        emit NftUpdated(receiver, newLevel, oldTokenId, newTokenId);
     }
 
     /**
@@ -770,6 +778,8 @@ contract Nft is
         // Effects: increment the token quantity in the level
         nftLevel.nftAmount++;
 
+        emit NftMinted(to, tokenId, level, isGenesis, nftAmount);
+
         // Concatenate base URI, id in level and suffix to get the full URI
         string memory uri = string.concat(
             nftLevel.baseURI,
@@ -783,8 +793,6 @@ contract Nft is
         if (isGenesis) {
             _activateNftData(tokenId, false, to);
         }
-
-        emit NftMinted(to, tokenId, level, isGenesis, nftAmount);
     }
 
     /**
