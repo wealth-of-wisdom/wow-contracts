@@ -9,9 +9,9 @@ enum StakingType {
 }
 
 enum ActivityStatus {
+    DEACTIVATED # NFT is expired
     NOT_ACTIVATED # NFT is inactive
     ACTIVATED # NFT is active
-    DEACTIVATED # NFT is expired
 }
 
 ############################################################

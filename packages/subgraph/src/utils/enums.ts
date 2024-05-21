@@ -11,7 +11,7 @@ export enum StakingType {
 }
 
 export enum ActivityStatus {
+    DEACTIVATED,
     NOT_ACTIVATED,
     ACTIVATED,
-    DEACTIVATED,
 }

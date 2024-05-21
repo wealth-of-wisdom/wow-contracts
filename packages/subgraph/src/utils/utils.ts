@@ -42,12 +42,12 @@ export const stringifyStakingType = (type: StakingType): string => {
  */
 export const stringifyActivityStatus = (type: ActivityStatus): string => {
     switch (type) {
+        case ActivityStatus.DEACTIVATED:
+            return "DEACTIVATED";
         case ActivityStatus.NOT_ACTIVATED:
             return "NOT_ACTIVATED";
         case ActivityStatus.ACTIVATED:
             return "ACTIVATED";
-        case ActivityStatus.DEACTIVATED:
-            return "DEACTIVATED";
         default:
             throw new Error("Invalid activity status");
     }

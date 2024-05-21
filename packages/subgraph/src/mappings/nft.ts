@@ -1,13 +1,14 @@
+import { BigInt, dataSource } from "@graphprotocol/graph-ts";
 import {
     Initialized as InitializedEvent,
     NftDataSet as NftDataSetEvent,
     NftMinted as NftMintedEvent,
+    NftDeactivated as NftDeactivatedEvent,
     NftDataActivated as NftDataActivatedEvent,
 } from "../../generated/Nft/Nft";
 import { Nft, NftContract, User } from "../../generated/schema";
 import { getOrInitNftContract, getOrInitNft, getOrInitUser } from "../helpers/nft.helpers";
-import { BigInt } from "@graphprotocol/graph-ts";
-import { ACTIVITY_STATUS_ACTIVATED, ACTIVITY_STATUS_DEACTIVATED } from "../utils/constants";
+import { ACTIVITY_STATUS_ACTIVATED, ACTIVITY_STATUS_DEACTIVATED, ARBITRUM_ONE_NETWORK } from "../utils/constants";
 import { stringifyActivityStatus } from "../utils/utils";
 
 export function handleInitialized(event: InitializedEvent): void {
@@ -28,6 +29,12 @@ export function handleNftDataSet(event: NftDataSetEvent): void {
     nft.save();
 }
 
+export function handleNftDeactivated(event: NftDeactivatedEvent): void {
+    const nft: Nft = getOrInitNft(event.params.tokenId);
+    nft.activityStatus = ACTIVITY_STATUS_DEACTIVATED;
+    nft.save();
+}
+
 export function handleNftMinted(event: NftMintedEvent): void {
     const user: User = getOrInitUser(event.params.receiver);
     const nft: Nft = getOrInitNft(event.params.tokenId);
@@ -36,6 +43,25 @@ export function handleNftMinted(event: NftMintedEvent): void {
     nft.level = BigInt.fromI32(event.params.level);
     nft.isGenesis = event.params.isGenesis;
     nft.owner = user.id;
+
+    // This is hardcoded values for the Arbitrum One network to deactivate the old NFTs
+    // Because old NFT contract didn't have the NftDeactivated event
+    if (dataSource.network() == ARBITRUM_ONE_NETWORK) {
+        let oldNft: Nft | null = null;
+
+        if (user.id == "0xdc8d7f971bef8457b00f0d26a7666fa243045cf2" && nft.id == "50") {
+            oldNft = getOrInitNft(BigInt.fromString("28"));
+        } else if (user.id == "0x6a34916648f981b0ce228b47fb913b4ed9b84b83" && nft.id == "51") {
+            oldNft = getOrInitNft(BigInt.fromString("9"));
+        } else if (user.id == "0x5adb3f2103df1ee4372001f7829c78683defef94" && nft.id == "52") {
+            oldNft = getOrInitNft(BigInt.fromString("3"));
+        }
+
+        if (oldNft && oldNft.activityStatus != ACTIVITY_STATUS_DEACTIVATED) {
+            oldNft.activityStatus = ACTIVITY_STATUS_DEACTIVATED;
+            oldNft.save();
+        }
+    }
 
     nft.save();
 }

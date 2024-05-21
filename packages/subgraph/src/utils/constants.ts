@@ -13,8 +13,13 @@ export const BIGDEC_HUNDRED: BigDecimal = BigDecimal.fromString("100");
 
 export const ADDRESS_ZERO: Address = Address.zero();
 
-export const TESTNET_NETWORKS: string[] = ["sepolia", "arbitrum-sepolia"];
-export const MAINNET_NETWORKS: string[] = ["mainnet", "arbitrum-one"];
+export const SEPOLIA_NETWORK: string = "sepolia";
+export const ARBITRUM_SEPOLIA_NETWORK: string = "arbitrum-sepolia";
+export const ETH_MAINNET_NETWORK: string = "mainnet";
+export const ARBITRUM_ONE_NETWORK: string = "arbitrum-one";
+
+export const TESTNET_NETWORKS: string[] = [SEPOLIA_NETWORK, ARBITRUM_SEPOLIA_NETWORK];
+export const MAINNET_NETWORKS: string[] = [ETH_MAINNET_NETWORK, ARBITRUM_ONE_NETWORK];
 
 export const MONTH_IN_SECONDS: BigInt = BigInt.fromI32(30 * 24 * 60 * 60); // 30 days
 export const TEN_MINUTES_IN_SECONDS: BigInt = BigInt.fromI32(10 * 60); // 10 minutes
