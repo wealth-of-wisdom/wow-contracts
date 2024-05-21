@@ -518,7 +518,7 @@ contract Nft is
         // Effects: set active user nft
         s_activeNft[user] = newId;
 
-        emit ActiveNftSet(user, newId);
+        emit ActiveNftUpdated(user, newId);
     }
 
     /**
