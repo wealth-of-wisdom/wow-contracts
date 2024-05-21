@@ -268,6 +268,11 @@
     },
     {
         "inputs": [],
+        "name": "Nft__UserOwnsActiveNft",
+        "type": "error"
+    },
+    {
+        "inputs": [],
         "name": "Nft__ZeroAddress",
         "type": "error"
     },
@@ -296,6 +301,25 @@
         ],
         "name": "UUPSUnsupportedProxiableUUID",
         "type": "error"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "tokenId",
+                "type": "uint256"
+            }
+        ],
+        "name": "ActiveNftUpdated",
+        "type": "event"
     },
     {
         "anonymous": false,
@@ -471,6 +495,37 @@
         "inputs": [
             {
                 "indexed": false,
+                "internalType": "address",
+                "name": "receiver",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint16",
+                "name": "level",
+                "type": "uint16"
+            },
+            {
+                "indexed": false,
+                "internalType": "bool",
+                "name": "isGenesis",
+                "type": "bool"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "tokenId",
+                "type": "uint256"
+            }
+        ],
+        "name": "MintedAndSetNftData",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
                 "internalType": "uint256",
                 "name": "nextTokenId",
                 "type": "uint256"
@@ -569,6 +624,19 @@
         "anonymous": false,
         "inputs": [
             {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "oldTokenId",
+                "type": "uint256"
+            }
+        ],
+        "name": "NftDeactivated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
                 "indexed": true,
                 "internalType": "address",
                 "name": "receiver",
@@ -600,6 +668,37 @@
             }
         ],
         "name": "NftMinted",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "receiver",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint16",
+                "name": "newLevel",
+                "type": "uint16"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "oldTokenId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "newTokenId",
+                "type": "uint256"
+            }
+        ],
+        "name": "NftUpdated",
         "type": "event"
     },
     {

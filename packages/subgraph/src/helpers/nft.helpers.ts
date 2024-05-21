@@ -1,6 +1,11 @@
-import { Address, BigInt } from "@graphprotocol/graph-ts";
+import { Address, BigInt, dataSource } from "@graphprotocol/graph-ts";
 import { NftContract, Nft, User } from "../../generated/schema"; // Adjust the import path as necessary
-import { BIGINT_ZERO, ACTIVITY_STATUS_NOT_ACTIVATED } from "../utils/constants";
+import {
+    BIGINT_ZERO,
+    ACTIVITY_STATUS_NOT_ACTIVATED,
+    ACTIVITY_STATUS_DEACTIVATED,
+    ARBITRUM_ONE_NETWORK,
+} from "../utils/constants";
 
 /**
  * Retrieves or initializes an NFTContract entity.
@@ -61,4 +66,25 @@ export function getOrInitUser(userAddress: Address): User {
     }
 
     return user;
+}
+
+export function updateNftStatusForEdgeCases(userAddress: string, nftId: string): void {
+    // This is hardcoded values for the Arbitrum One network to deactivate the old NFTs
+    // Because old NFT contract didn't have the NftDeactivated event
+    if (dataSource.network() == ARBITRUM_ONE_NETWORK) {
+        let oldNft: Nft | null = null;
+
+        if (userAddress == "0xdc8d7f971bef8457b00f0d26a7666fa243045cf2" && nftId == "50") {
+            oldNft = getOrInitNft(BigInt.fromString("28"));
+        } else if (userAddress == "0x6a34916648f981b0ce228b47fb913b4ed9b84b83" && nftId == "51") {
+            oldNft = getOrInitNft(BigInt.fromString("9"));
+        } else if (userAddress == "0x5adb3f2103df1ee4372001f7829c78683defef94" && nftId == "52") {
+            oldNft = getOrInitNft(BigInt.fromString("3"));
+        }
+
+        if (oldNft && oldNft.activityStatus != ACTIVITY_STATUS_DEACTIVATED) {
+            oldNft.activityStatus = ACTIVITY_STATUS_DEACTIVATED;
+            oldNft.save();
+        }
+    }
 }
