@@ -68,6 +68,17 @@ export function getOrInitUser(userAddress: Address): User {
     return user;
 }
 
+export function updateActiveNft(userAddress: Address, newTokenId: BigInt): void {
+    const user: User = getOrInitUser(userAddress);
+    const newNftId: string = newTokenId.toString();
+
+    if (newNftId != user.activeNft) {
+        // Update the user's active NFT
+        user.activeNft = newNftId;
+        user.save();
+    }
+}
+
 export function updateNftStatusForEdgeCases(userAddress: string, nftId: string): void {
     // This is hardcoded values for the Arbitrum One network to deactivate the old NFTs
     // Because old NFT contract didn't have the NftDeactivated event

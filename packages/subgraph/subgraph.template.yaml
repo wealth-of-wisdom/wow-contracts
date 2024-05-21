@@ -77,6 +77,10 @@ dataSources:
                 handler: handleNftMinted
               - event: NftDeactivated(uint256)
                 handler: handleNftDeactivated
+              - event: ActiveNftUpdated(address,uint256)
+                handler: handleActiveNftUpdated
+              - event: ActiveNftSet(address,uint256)
+                handler: handleActiveNftSet
               - event: NftDataActivated(indexed address,indexed uint256,uint16,bool,uint256,uint256)
                 handler: handleNftDataActivated
 {{/includeNft}}

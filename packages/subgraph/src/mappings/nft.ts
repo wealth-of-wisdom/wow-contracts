@@ -4,13 +4,15 @@ import {
     NftDataSet as NftDataSetEvent,
     NftMinted as NftMintedEvent,
     NftDeactivated as NftDeactivatedEvent,
+    ActiveNftSet as ActiveNftSetEvent,
+    ActiveNftUpdated as ActiveNftUpdatedEvent,
     NftDataActivated as NftDataActivatedEvent,
 } from "../../generated/Nft/Nft";
 import { Nft, NftContract, User } from "../../generated/schema";
 import { getOrInitNftContract, getOrInitNft, getOrInitUser } from "../helpers/nft.helpers";
 import { ACTIVITY_STATUS_ACTIVATED, ACTIVITY_STATUS_DEACTIVATED, ARBITRUM_ONE_NETWORK } from "../utils/constants";
 import { stringifyActivityStatus } from "../utils/utils";
-import { updateNftStatusForEdgeCases } from "../helpers/nft.helpers";
+import { updateActiveNft, updateNftStatusForEdgeCases } from "../helpers/nft.helpers";
 
 export function handleInitialized(event: InitializedEvent): void {
     const nftContract: NftContract = getOrInitNftContract();
@@ -30,10 +32,21 @@ export function handleNftDataSet(event: NftDataSetEvent): void {
     nft.save();
 }
 
+export function handleActiveNftSet(event: ActiveNftSetEvent): void {
+    updateActiveNft(event.params.user, event.params.newId);
+}
+
+export function handleActiveNftUpdated(event: ActiveNftUpdatedEvent): void {
+    updateActiveNft(event.params.owner, event.params.tokenId);
+}
+
 export function handleNftDeactivated(event: NftDeactivatedEvent): void {
     const nft: Nft = getOrInitNft(event.params.oldTokenId);
-    nft.activityStatus = ACTIVITY_STATUS_DEACTIVATED;
-    nft.save();
+
+    if (nft.activityStatus != ACTIVITY_STATUS_DEACTIVATED) {
+        nft.activityStatus = ACTIVITY_STATUS_DEACTIVATED;
+        nft.save();
+    }
 }
 
 export function handleNftMinted(event: NftMintedEvent): void {
