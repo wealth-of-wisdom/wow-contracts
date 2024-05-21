@@ -511,14 +511,14 @@ contract Nft is
      * @param   user  wallet address of user
      * @param   newId id replacing old active nft id
      */
-    function setActiveUserNft(
+    function setActiveNft(
         address user,
         uint256 newId
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         // Effects: set active user nft
         s_activeNft[user] = newId;
 
-        emit ActiveUserNftSet(user, newId);
+        emit ActiveNftSet(user, newId);
     }
 
     /**
