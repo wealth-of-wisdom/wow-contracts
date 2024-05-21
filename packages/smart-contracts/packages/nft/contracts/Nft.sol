@@ -507,21 +507,6 @@ contract Nft is
     }
 
     /**
-     * @notice  Sets active user nft with new id
-     * @param   user  wallet address of user
-     * @param   newId id replacing old active nft id
-     */
-    function setActiveNft(
-        address user,
-        uint256 newId
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        // Effects: set active user nft
-        s_activeNft[user] = newId;
-
-        emit ActiveNftSet(user, newId);
-    }
-
-    /**
      * @notice  Sets the new vesting contract address
      * @param   newContract  new vesting contract address
      */
