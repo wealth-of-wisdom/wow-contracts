@@ -308,6 +308,25 @@
             {
                 "indexed": false,
                 "internalType": "address",
+                "name": "user",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "newId",
+                "type": "uint256"
+            }
+        ],
+        "name": "ActiveNftSet",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
                 "name": "owner",
                 "type": "address"
             },
@@ -1651,6 +1670,24 @@
             }
         ],
         "name": "safeTransferFrom",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "newId",
+                "type": "uint256"
+            }
+        ],
+        "name": "setActiveNft",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
