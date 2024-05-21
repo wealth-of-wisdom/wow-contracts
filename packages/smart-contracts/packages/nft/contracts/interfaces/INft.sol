@@ -40,7 +40,7 @@ interface INftEvents {
 
     event PromotionalVestingPIDSet(uint16 newPID);
 
-    event ActiveNftUpdated(address user, uint256 newId);
+    event ActiveNftSet(address user, uint256 newId);
 
     event VestingContractSet(IVesting newContract);
 
