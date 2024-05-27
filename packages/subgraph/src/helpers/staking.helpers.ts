@@ -8,8 +8,7 @@ import {
     Band,
     FundsDistribution,
 } from "../../generated/schema";
-import { ADDRESS_ZERO, BIGINT_ONE, BIGINT_ZERO } from "../utils/constants";
-import { stakingTypeFIX } from "../utils/utils";
+import { ADDRESS_ZERO, BIGINT_ONE, BIGINT_ZERO, STAKING_TYPE_FIX } from "../utils/constants";
 
 /*//////////////////////////////////////////////////////////////////////////
                             GET OR INIT FUNCTIONS
@@ -162,7 +161,7 @@ export function getOrInitBand(bandId: BigInt): Band {
         band.stakingStartDate = BIGINT_ZERO;
         band.bandLevel = getOrInitBandLevel(BIGINT_ONE).id; // Use BandLevel 1 as default
         band.fixedMonths = 0;
-        band.stakingType = stakingTypeFIX;
+        band.stakingType = STAKING_TYPE_FIX;
         band.areTokensVested = false;
         band.sharesAmount = BIGINT_ZERO;
         band.save();
@@ -238,7 +237,7 @@ export function removeStakerFromStakingContract(stakingContract: StakingContract
 /// @notice This function does not save the staker entity.
 export function addBandToStakerBands(staker: Staker, band: Band): void {
     // Update array corresponding to the staking type of the band
-    if (band.stakingType == stakingTypeFIX) {
+    if (band.stakingType == STAKING_TYPE_FIX) {
         const fixedBands = staker.fixedBands;
         fixedBands.push(band.id);
 
@@ -252,7 +251,7 @@ export function addBandToStakerBands(staker: Staker, band: Band): void {
 }
 
 export function removeBandFromStakerBands(staker: Staker, band: Band, stakedAmount: BigInt): void {
-    const stakerBandIds: string[] = band.stakingType == stakingTypeFIX ? staker.fixedBands : staker.flexiBands;
+    const stakerBandIds: string[] = band.stakingType == STAKING_TYPE_FIX ? staker.fixedBands : staker.flexiBands;
     const bandsCount = stakerBandIds.length;
 
     for (let i = 0; i < bandsCount; i++) {
@@ -263,7 +262,7 @@ export function removeBandFromStakerBands(staker: Staker, band: Band, stakedAmou
             stakerBandIds[i] = stakerBandIds[bandsCount - 1];
             stakerBandIds.pop();
 
-            if (band.stakingType == stakingTypeFIX) {
+            if (band.stakingType == STAKING_TYPE_FIX) {
                 staker.fixedBands = stakerBandIds;
             } else {
                 staker.flexiBands = stakerBandIds;

@@ -1,16 +1,52 @@
+import { BigInt, dataSource } from "@graphprotocol/graph-ts";
 import {
     Initialized as InitializedEvent,
+    NftDataSet as NftDataSetEvent,
     NftMinted as NftMintedEvent,
+    NftDeactivated as NftDeactivatedEvent,
+    ActiveNftSet as ActiveNftSetEvent,
+    ActiveNftUpdated as ActiveNftUpdatedEvent,
     NftDataActivated as NftDataActivatedEvent,
 } from "../../generated/Nft/Nft";
 import { Nft, NftContract, User } from "../../generated/schema";
 import { getOrInitNftContract, getOrInitNft, getOrInitUser } from "../helpers/nft.helpers";
-import { BigInt } from "@graphprotocol/graph-ts";
+import { ACTIVITY_STATUS_ACTIVATED, ACTIVITY_STATUS_DEACTIVATED, ARBITRUM_ONE_NETWORK } from "../utils/constants";
+import { stringifyActivityStatus } from "../utils/utils";
+import { updateActiveNft, updateNftStatusForEdgeCases } from "../helpers/nft.helpers";
 
 export function handleInitialized(event: InitializedEvent): void {
     const nftContract: NftContract = getOrInitNftContract();
     nftContract.nftContractAddress = event.address;
     nftContract.save();
+}
+
+export function handleNftDataSet(event: NftDataSetEvent): void {
+    const nft: Nft = getOrInitNft(event.params.tokenId);
+
+    nft.level = BigInt.fromI32(event.params.level);
+    nft.isGenesis = event.params.isGenesis;
+    nft.activityStatus = stringifyActivityStatus(event.params.activityType.toI32());
+    nft.activityEndTimestamp = event.params.activityEndTimestamp;
+    nft.extendedActivityEndTimestamp = event.params.extendedActivityEndTimestamp;
+
+    nft.save();
+}
+
+export function handleActiveNftSet(event: ActiveNftSetEvent): void {
+    updateActiveNft(event.params.user, event.params.newId);
+}
+
+export function handleActiveNftUpdated(event: ActiveNftUpdatedEvent): void {
+    updateActiveNft(event.params.owner, event.params.tokenId);
+}
+
+export function handleNftDeactivated(event: NftDeactivatedEvent): void {
+    const nft: Nft = getOrInitNft(event.params.oldTokenId);
+
+    if (nft.activityStatus != ACTIVITY_STATUS_DEACTIVATED) {
+        nft.activityStatus = ACTIVITY_STATUS_DEACTIVATED;
+        nft.save();
+    }
 }
 
 export function handleNftMinted(event: NftMintedEvent): void {
@@ -21,8 +57,9 @@ export function handleNftMinted(event: NftMintedEvent): void {
     nft.level = BigInt.fromI32(event.params.level);
     nft.isGenesis = event.params.isGenesis;
     nft.owner = user.id;
-
     nft.save();
+
+    updateNftStatusForEdgeCases(user.id, nft.id);
 }
 
 export function handleNftDataActivated(event: NftDataActivatedEvent): void {
@@ -33,13 +70,13 @@ export function handleNftDataActivated(event: NftDataActivatedEvent): void {
     // If the user already has an active NFT, deactivate it
     if (oldNftId != null) {
         const oldNft: Nft = getOrInitNft(BigInt.fromString(oldNftId as string));
-        oldNft.isActive = false;
+        oldNft.activityStatus = ACTIVITY_STATUS_DEACTIVATED;
         oldNft.save();
     }
 
     // Activate the new NFT
     const newNft: Nft = getOrInitNft(newNftId);
-    newNft.isActive = true;
+    newNft.activityStatus = ACTIVITY_STATUS_ACTIVATED;
     newNft.activityEndTimestamp = event.params.activityEndTimestamp;
     newNft.extendedActivityEndTimestamp = event.params.extendedActivityEndTimestamp;
     newNft.save();

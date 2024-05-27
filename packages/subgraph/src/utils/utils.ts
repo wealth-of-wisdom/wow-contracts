@@ -1,21 +1,4 @@
-import { BigInt } from "@graphprotocol/graph-ts";
-import { BIGINT_ONE, BIGINT_ZERO, UnlockType, StakingType } from "./constants";
-
-/**
- * Converts a BigInt unlock type to UnlockType enum.
- * @param unlockType - BigInt representing the unlock type.
- * @returns Corresponding UnlockType enum value.
- * @throws Error if the input is not a valid unlock type.
- */
-export const getUnlockTypeFromBigInt = (unlockType: BigInt): UnlockType => {
-    if (unlockType.equals(BIGINT_ZERO)) {
-        return UnlockType.DAILY;
-    } else if (unlockType.equals(BIGINT_ONE)) {
-        return UnlockType.MONTHLY;
-    } else {
-        throw new Error("Invalid unlock type value");
-    }
-};
+import { UnlockType, StakingType, ActivityStatus } from "./enums";
 
 /**
  * Converts an UnlockType enum value to its string representation.
@@ -51,24 +34,21 @@ export const stringifyStakingType = (type: StakingType): string => {
     }
 };
 
-export const stakingTypeFIX: string = stringifyStakingType(StakingType.FIX);
-export const stakingTypeFLEXI: string = stringifyStakingType(StakingType.FLEXI);
-
-/*//////////////////////////////////////////////////////////////////////////
-                            CLASSES TO RETURN VALUES
-//////////////////////////////////////////////////////////////////////////*/
-
-export class StakerAndPoolShares {
-    constructor(
-        public stakers: string[],
-        public sharesForStakers: BigInt[][],
-        public sharesForPools: BigInt[],
-    ) {}
-}
-
-export class StakerShares {
-    constructor(
-        public sharesPerPool: BigInt[],
-        public isolatedSharesPerPool: BigInt[],
-    ) {}
-}
+/**
+ * Converts an ActivityStatus enum value to its string representation.
+ * @param type - ActivityStatus enum value.
+ * @returns String representation of the activity status.
+ * @throws Error if the input is not a valid activity status.
+ */
+export const stringifyActivityStatus = (type: ActivityStatus): string => {
+    switch (type) {
+        case ActivityStatus.DEACTIVATED:
+            return "DEACTIVATED";
+        case ActivityStatus.NOT_ACTIVATED:
+            return "NOT_ACTIVATED";
+        case ActivityStatus.ACTIVATED:
+            return "ACTIVATED";
+        default:
+            throw new Error("Invalid activity status");
+    }
+};

@@ -8,6 +8,12 @@ enum StakingType {
     FLEXI # Staking type for flexible months where band is unlocked and shares increase
 }
 
+enum ActivityStatus {
+    DEACTIVATED # NFT is expired
+    NOT_ACTIVATED # NFT is inactive
+    ACTIVATED # NFT is active
+}
+
 ############################################################
 #                          Vesting
 ############################################################
@@ -319,10 +325,9 @@ type Nft @entity {
     isGenesis: Boolean!
 
     """
-    Shows if the NFT is active or not
-    There can only be one active NFT per user
+    Shows if the NFT is inactive, active or deactivated
     """
-    isActive: Boolean!
+    activityStatus: ActivityStatus
 
     """
     Date when the NFT will be deactivated
