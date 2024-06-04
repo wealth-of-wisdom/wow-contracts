@@ -45,7 +45,8 @@ import {
     createBandDowngradedEvent,
     createRewardsClaimedEvent,
 } from "../helpers/createEvents";
-import { BIGINT_ZERO, StakingType } from "../../../src/utils/constants";
+import { BIGINT_ZERO } from "../../../src/utils/constants";
+import { StakingType } from "../../../src/utils/enums";
 import { totalPools, totalBandLevels, percentagePrecision } from "../../utils/data/constants";
 import {
     poolDistributionPercentages,

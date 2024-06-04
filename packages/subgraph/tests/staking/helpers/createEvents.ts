@@ -23,7 +23,8 @@ import {
     BandUpgraded as BandUpgradedEvent,
     RewardsClaimed as RewardsClaimedEvent,
 } from "../../../generated/Staking/Staking";
-import { BIGINT_ZERO, StakingType } from "../../../src/utils/constants";
+import { BIGINT_ZERO } from "../../../src/utils/constants";
+import { StakingType } from "../../../src/utils/enums";
 import {
     stakingAddress,
     usdtToken,
