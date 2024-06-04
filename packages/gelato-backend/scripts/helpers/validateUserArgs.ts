@@ -1,7 +1,6 @@
 import { createClient, fetchExchange, cacheExchange, gql } from "@urql/core"
 
 export async function validateUserArgs(
-    subgraphUrl: string,
     stakingAddress: string,
     blockConfirmations: number | undefined,
 ) {
@@ -11,7 +10,7 @@ export async function validateUserArgs(
 
     // Create a new client for querying the subgraph
     const client = createClient({
-        url: subgraphUrl,
+        url: process.env.SUBGRAPH_URL as string,
         exchanges: [cacheExchange, fetchExchange],
     })
 

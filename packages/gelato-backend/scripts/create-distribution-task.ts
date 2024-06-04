@@ -33,8 +33,7 @@ const main = async () => {
         name: `Distribute rewards (cid: ${cid}) (staking: ${userArgs.stakingAddress})`,
         web3FunctionHash: cid,
         web3FunctionArgs: {
-            stakingAddress: userArgs.stakingAddress as string,
-            subgraphUrl: userArgs.subgraphUrl as string,
+            stakingAddress: userArgs.stakingAddress as string
         },
         trigger: {
             type: TriggerType.EVENT,

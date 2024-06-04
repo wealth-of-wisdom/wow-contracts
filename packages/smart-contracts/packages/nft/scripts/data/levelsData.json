@@ -31,7 +31,7 @@
         "level": 3,
         "isGenesis": false,
         "price_in_usd": "9988",
-        "vesting_rewards_in_wow": "50000",
+        "vesting_rewards_in_wow": "100000",
         "lifecycle_duration_in_months": 42,
         "extension_duration_in_months": 18,
         "allocation_per_project_in_usd": "25000",

@@ -4,7 +4,6 @@ import { validateUserArgs } from "./validateUserArgs"
 
 type UserArgs = {
     stakingAddress: string
-    subgraphUrl: string
     blockConfirmations?: number
 }
 
@@ -29,17 +28,7 @@ export const getUserArgs = async () => {
         )
     }
 
-    if (!args.subgraphUrl) {
-        throw new Error(
-            `getUserArgs ERROR: No subgraphUrl found for network: ${network.name}`,
-        )
-    }
-
-    await validateUserArgs(
-        args.subgraphUrl,
-        args.stakingAddress,
-        args.blockConfirmations,
-    )
+    await validateUserArgs(args.stakingAddress, args.blockConfirmations)
 
     return args
 }

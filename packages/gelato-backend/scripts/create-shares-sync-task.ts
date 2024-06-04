@@ -31,7 +31,6 @@ const main = async () => {
         web3FunctionHash: cid,
         web3FunctionArgs: {
             stakingAddress: userArgs.stakingAddress as string,
-            subgraphUrl: userArgs.subgraphUrl as string,
         },
         trigger: {
             interval: 60 * 60 * 1000, // 1 hour in milliseconds
