@@ -9,14 +9,13 @@ import stakingABI from "../web3-functions/stakingABI.json"
 const main = async () => {
     const distributionTask = w3f.get("distribution-task")
 
-    const cid: string = await deployToIPFS(distributionTask)
-
     const userArgs: UserArgs = await getUserArgs()
     const { automate, signer, chainId } = getAutomateConfig()
 
-    console.log("Creating task...")
-
+    const cid: string = await deployToIPFS(distributionTask)
     const stakingInterface = new ethers.utils.Interface(stakingABI)
+
+    console.log("Creating task...")
 
     // Create task using automate sdk
     const { taskId, tx } = await automate.createBatchExecTask({

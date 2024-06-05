@@ -7,10 +7,11 @@ import { setSecrets } from "./helpers/setSecrets"
 
 const main = async () => {
     const syncSharesTask = w3f.get("sync-shares-task")
-    const cid: string = await deployToIPFS(syncSharesTask)
 
     const userArgs: UserArgs = await getUserArgs()
     const { automate, signer, chainId } = getAutomateConfig()
+
+    const cid: string = await deployToIPFS(syncSharesTask)
 
     console.log("Creating task...")
 

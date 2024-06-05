@@ -8,9 +8,12 @@ export const validateUserArgs = async (
         throw new Error("Block confirmations not provided")
     }
 
+    const subgraphUrl: string | undefined = process.env.SUBGRAPH_URL
+    if (!subgraphUrl) throw new Error("Subgraph URL not provided")
+
     // Create a new client for querying the subgraph
     const client = createClient({
-        url: process.env.SUBGRAPH_URL as string,
+        url: subgraphUrl,
         exchanges: [cacheExchange, fetchExchange],
     })
 
