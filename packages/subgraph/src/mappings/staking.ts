@@ -339,6 +339,9 @@ export function handleVestingUserDeleted(event: VestingUserDeletedEvent): void {
     const stakingContract: StakingContract = getOrInitStakingContract();
     const staker: Staker = getOrInitStaker(event.params.user);
 
+    stakingContract.totalStakedAmount = stakingContract.totalStakedAmount.minus(staker.stakedAmount);
+    stakingContract.save();
+
     // Remove staker from the contract
     removeStakerFromStakingContract(stakingContract, staker);
 

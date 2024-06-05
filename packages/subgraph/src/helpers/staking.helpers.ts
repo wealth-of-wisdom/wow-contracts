@@ -8,6 +8,7 @@ import {
     Band,
     FundsDistribution,
 } from "../../generated/schema";
+import { removeFixedShares, removeFlexiShares } from "../utils/staking/sharesSync";
 import { ADDRESS_ZERO, BIGINT_ONE, BIGINT_ZERO, STAKING_TYPE_FIX } from "../utils/constants";
 
 /*//////////////////////////////////////////////////////////////////////////
@@ -284,6 +285,10 @@ export function removeAllBands(staker: Staker): void {
     // Remove fixed bands
     for (let i = 0; i < fixedBandsCount; i++) {
         const band: Band = getOrInitBand(BigInt.fromString(fixedBands[i]));
+        const bandLevel: BandLevel = getOrInitBandLevel(BigInt.fromString(band.bandLevel));
+
+        // No need to pas staker because at this point it should be already removed
+        removeFixedShares(null, band, bandLevel.accessiblePools);
         store.remove("Band", band.id);
     }
 
@@ -293,6 +298,10 @@ export function removeAllBands(staker: Staker): void {
     // Remove flexi bands
     for (let i = 0; i < flexiBandsCount; i++) {
         const band: Band = getOrInitBand(BigInt.fromString(flexiBands[i]));
+        const bandLevel: BandLevel = getOrInitBandLevel(BigInt.fromString(band.bandLevel));
+
+        // No need to pas staker because at this point it should be already removed
+        removeFlexiShares(null, band, bandLevel.accessiblePools);
         store.remove("Band", band.id);
     }
 }
