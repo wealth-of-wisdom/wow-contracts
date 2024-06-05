@@ -1,9 +1,9 @@
 import { createClient, fetchExchange, cacheExchange, gql } from "@urql/core"
 
-export async function validateUserArgs(
+export const validateUserArgs = async (
     stakingAddress: string,
     blockConfirmations: number | undefined,
-) {
+): Promise<void> => {
     if (!blockConfirmations) {
         throw new Error("Block confirmations not provided")
     }

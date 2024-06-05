@@ -32,7 +32,7 @@ Web3Function.onFail(async (context: Web3FunctionFailContext) => {
 // Main function which will be executed by the gelato
 Web3Function.onRun(async (context: Web3FunctionContext) => {
     // Get data from the context
-    const { userArgs } = context
+    const { userArgs, secrets } = context
     const stakingInterface = new Interface(stakingABI)
 
     try {
@@ -40,14 +40,31 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
         const stakingAddress: string = (
             userArgs.stakingAddress as string
         ).toLowerCase()
-        const subgraphUrl: string = userArgs.subgraphUrl as string
+
+        // Get URL from secrets because it contains the API key which should not be exposed
+        const subgraphUrl: string | undefined = await secrets.get(
+            "SUBGRAPH_URL",
+        )
+
+        if (!subgraphUrl) {
+            return {
+                canExec: false,
+                message: `SUBGRAPH_URL not set in secrets`,
+            }
+        }
 
         // We will trigger the shares sync if ~24 hours have passed since the last sync
         // Update interval is not exactly 24 hours
         // That's because if we set it to 24 hours and no events are executed in SC
         // Automation will try to execute it each hour, but it will return false if few seconds are left
         // This would cause the automation to execute the function every 25 hours and not 24
-        const updateInterval: number = 85800 // (23 hours) + (50 minutes)
+        const defaultUpdateInterval: number = 85800 // (23 hours) + (50 minutes)
+        const envUpdateInterval: string | undefined = await secrets.get(
+            "UPDATE_INTERVAL_SECONDS",
+        )
+        const updateInterval: number = envUpdateInterval
+            ? Number(envUpdateInterval)
+            : defaultUpdateInterval
 
         // Create a new client for querying the subgraph
         const client = createClient({

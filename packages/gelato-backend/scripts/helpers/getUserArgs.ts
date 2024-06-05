@@ -2,7 +2,7 @@ import { network } from "hardhat"
 import config from "../config.json"
 import { validateUserArgs } from "./validateUserArgs"
 
-type UserArgs = {
+export type UserArgs = {
     stakingAddress: string
     blockConfirmations?: number
 }
@@ -11,7 +11,7 @@ type NetworkConfig = {
     [key: string]: UserArgs
 }
 
-export const getUserArgs = async () => {
+export const getUserArgs = async (): Promise<UserArgs> => {
     const networkConfig: NetworkConfig = config
 
     let args: UserArgs = networkConfig[network.name]

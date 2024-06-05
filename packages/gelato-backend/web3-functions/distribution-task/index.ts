@@ -33,7 +33,7 @@ Web3Function.onFail(async (context: Web3FunctionFailContext) => {
 // Main function which will be executed by the gelato
 Web3Function.onRun(async (context: Web3FunctionEventContext) => {
     // Get data from the context
-    const { userArgs, storage, log } = context
+    const { userArgs, storage, secrets, log } = context
     const stakingInterface = new Interface(stakingABI)
 
     try {
@@ -46,7 +46,15 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
         const stakingAddress: string = (
             userArgs.stakingAddress as string
         ).toLowerCase()
-        const subgraphUrl: string = userArgs.subgraphUrl as string
+
+        // Get URL from secrets because it contains the API key which should not be exposed
+        const subgraphUrl = await secrets.get("SUBGRAPH_URL")
+        if (!subgraphUrl) {
+            return {
+                canExec: false,
+                message: `SUBGRAPH_URL not set in secrets`,
+            }
+        }
 
         // Create a new client for querying the subgraph
         const client = createClient({
