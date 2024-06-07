@@ -2,8 +2,6 @@ import { HardhatUserConfig } from "hardhat/config"
 
 // PLUGINS
 import "@gelatonetwork/web3-functions-sdk/hardhat-plugin"
-// import "@matterlabs/hardhat-zksync-solc"
-// import "@matterlabs/hardhat-zksync-verify"
 import "@nomiclabs/hardhat-ethers"
 import "@nomiclabs/hardhat-waffle"
 import "@typechain/hardhat"
@@ -14,9 +12,11 @@ import * as dotenv from "dotenv"
 dotenv.config({ path: __dirname + "/.env" })
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY as string
+const ACCOUNTS = PRIVATE_KEY ? [PRIVATE_KEY] : []
+
 const ETHEREUM_RPC_URL = process.env.ETHEREUM_RPC_URL as string
 const SEPOLIA_RPC_URL = process.env.SEPOLIA_RPC_URL as string
-const ARBITURM_ONE_RPC_URL = process.env.ARBITURM_ONE_RPC_URL as string
+const ARBITRUM_ONE_RPC_URL = process.env.ARBITRUM_ONE_RPC_URL as string
 const ARBITRUM_SEPOLIA_RPC_URL = process.env.ARBITRUM_SEPOLIA_RPC_URL as string
 
 /*//////////////////////////////////////////////////////////////////////////
@@ -54,22 +54,22 @@ const config: HardhatUserConfig = {
         ethereum: {
             chainId: 1,
             url: ETHEREUM_RPC_URL,
-            accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
+            accounts: ACCOUNTS,
         },
         sepolia: {
             chainId: 11155111,
             url: SEPOLIA_RPC_URL,
-            accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
+            accounts: ACCOUNTS,
         },
         arbitrumSepolia: {
             chainId: 421614,
-            url: process.env.ARBITRUM_SEPOLIA_RPC_URL,
-            accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
+            url: ARBITRUM_SEPOLIA_RPC_URL,
+            accounts: ACCOUNTS,
         },
         arbitrumOne: {
             chainId: 42161,
-            url: process.env.ARBITRUM_ONE_RPC_URL,
-            accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
+            url: ARBITRUM_ONE_RPC_URL,
+            accounts: ACCOUNTS,
         },
     },
 

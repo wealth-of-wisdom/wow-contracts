@@ -2,9 +2,8 @@ import { network } from "hardhat"
 import config from "../config.json"
 import { validateUserArgs } from "./validateUserArgs"
 
-type UserArgs = {
+export type UserArgs = {
     stakingAddress: string
-    subgraphUrl: string
     blockConfirmations?: number
 }
 
@@ -12,7 +11,7 @@ type NetworkConfig = {
     [key: string]: UserArgs
 }
 
-export const getUserArgs = async () => {
+export const getUserArgs = async (): Promise<UserArgs> => {
     const networkConfig: NetworkConfig = config
 
     let args: UserArgs = networkConfig[network.name]
@@ -29,17 +28,7 @@ export const getUserArgs = async () => {
         )
     }
 
-    if (!args.subgraphUrl) {
-        throw new Error(
-            `getUserArgs ERROR: No subgraphUrl found for network: ${network.name}`,
-        )
-    }
-
-    await validateUserArgs(
-        args.subgraphUrl,
-        args.stakingAddress,
-        args.blockConfirmations,
-    )
+    await validateUserArgs(args.stakingAddress, args.blockConfirmations)
 
     return args
 }

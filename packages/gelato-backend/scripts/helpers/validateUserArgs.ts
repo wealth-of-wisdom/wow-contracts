@@ -1,13 +1,15 @@
 import { createClient, fetchExchange, cacheExchange, gql } from "@urql/core"
 
-export async function validateUserArgs(
-    subgraphUrl: string,
+export const validateUserArgs = async (
     stakingAddress: string,
     blockConfirmations: number | undefined,
-) {
+): Promise<void> => {
     if (!blockConfirmations) {
         throw new Error("Block confirmations not provided")
     }
+
+    const subgraphUrl: string | undefined = process.env.SUBGRAPH_URL
+    if (!subgraphUrl) throw new Error("Subgraph URL not provided")
 
     // Create a new client for querying the subgraph
     const client = createClient({
