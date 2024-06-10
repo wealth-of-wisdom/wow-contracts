@@ -209,31 +209,60 @@ interface IVesting is IVestingEvents {
     function getBeneficiary(
         uint16 pid,
         address user
-    ) external view returns (Beneficiary memory);
+    ) external view returns (Beneficiary memory beneficiary);
 
-    function getListingDate() external view returns (uint32);
+    function getListingDate() external view returns (uint32 listingDate);
 
-    function getPoolCount() external view returns (uint16);
+    function getPoolCount() external view returns (uint16 poolCount);
 
-    function getToken() external view returns (IERC20);
+    function getToken() external view returns (IERC20 token);
 
-    function getStakingContract() external view returns (IStaking);
+    function getStakingContract() external view returns (IStaking staking);
 
     function getGeneralPoolData(
         uint16 pid
-    ) external view returns (string memory, UnlockTypes, uint256, uint256);
+    )
+        external
+        view
+        returns (
+            string memory name,
+            UnlockTypes unlockType,
+            uint256 totalTokensAmount,
+            uint256 dedicatedTokensAmount
+        );
 
     function getPoolListingData(
         uint16 pid
-    ) external view returns (uint16, uint16);
+    )
+        external
+        view
+        returns (
+            uint16 listingPercentageDividend,
+            uint16 listingPercentageDivisor
+        );
 
     function getPoolCliffData(
         uint16 pid
-    ) external view returns (uint32, uint16, uint16, uint16);
+    )
+        external
+        view
+        returns (
+            uint32 cliffEndDate,
+            uint16 cliffInDays,
+            uint16 cliffPercentageDividend,
+            uint16 cliffPercentageDivisor
+        );
 
     function getPoolVestingData(
         uint16 pid
-    ) external view returns (uint32, uint16, uint16);
+    )
+        external
+        view
+        returns (
+            uint32 vestingEndDate,
+            uint16 vestingDurationInMonths,
+            uint16 vestingDurationInDays
+        );
 
     function getUnlockedTokenAmount(
         uint16 pid,

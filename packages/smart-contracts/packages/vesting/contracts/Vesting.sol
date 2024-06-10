@@ -769,58 +769,67 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      * @notice Get user details for pool.
      * @param pid Index that refers to vesting pool object.
      * @param user Address of the beneficiary wallet.
-     * @return Beneficiary structure information.
+     * @return beneficiary Beneficiary structure information.
      */
     function getBeneficiary(
         uint16 pid,
         address user
-    ) external view returns (Beneficiary memory) {
-        return s_vestingPools[pid].beneficiaries[user];
+    ) external view returns (Beneficiary memory beneficiary) {
+        beneficiary = s_vestingPools[pid].beneficiaries[user];
     }
 
     /**
      * @notice Return global listing date value (in epoch timestamp format).
-     * @return listing date.
+     * @return listingDate Listing date, when vesting starts.
      */
-    function getListingDate() external view returns (uint32) {
-        return s_listingDate;
+    function getListingDate() external view returns (uint32 listingDate) {
+        listingDate = s_listingDate;
     }
 
     /**
      * @notice Return number of pools in contract.
-     * @return pool count.
+     * @return poolCount Number of active pools.
      */
-    function getPoolCount() external view returns (uint16) {
-        return s_poolCount;
+    function getPoolCount() external view returns (uint16 poolCount) {
+        poolCount = s_poolCount;
     }
 
     /**
      * @notice Return claimable token address
-     * @return IERC20 token.
+     * @return token IERC20 token.
      */
-    function getToken() external view returns (IERC20) {
-        return s_token;
+    function getToken() external view returns (IERC20 token) {
+        token = s_token;
     }
 
     /**
      * @notice Return staking contract address
      * @return staking contract address.
      */
-    function getStakingContract() external view returns (IStaking) {
-        return s_staking;
+    function getStakingContract() external view returns (IStaking staking) {
+        staking = s_staking;
     }
 
     /**
      * @notice Return pool data.
      * @param pid Index that refers to vesting pool object.
-     * @return Pool name
-     * @return Unlock type
-     * @return Total pool token amount
-     * @return Locked pool token amount
+     * @return name Pool name
+     * @return unlockType Unlock type (DAILY or MONTHLY)
+     * @return totalTokensAmount Total pool tokens amount
+     * @return dedicatedTokensAmount Allocated pool tokens amount
      */
     function getGeneralPoolData(
         uint16 pid
-    ) external view returns (string memory, UnlockTypes, uint256, uint256) {
+    )
+        external
+        view
+        returns (
+            string memory name,
+            UnlockTypes unlockType,
+            uint256 totalTokensAmount,
+            uint256 dedicatedTokensAmount
+        )
+    {
         Pool storage pool = s_vestingPools[pid];
         return (
             pool.name,
@@ -833,12 +842,19 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     /**
      * @notice Return pool listing data.
      * @param pid Index that refers to vesting pool object.
-     * @return listing percentage dividend
-     * @return listing percentage divisor
+     * @return listingPercentageDividend Listing percentage dividend
+     * @return listingPercentageDivisor Listing percentage divisor
      */
     function getPoolListingData(
         uint16 pid
-    ) external view returns (uint16, uint16) {
+    )
+        external
+        view
+        returns (
+            uint16 listingPercentageDividend,
+            uint16 listingPercentageDivisor
+        )
+    {
         Pool storage pool = s_vestingPools[pid];
         return (pool.listingPercentageDividend, pool.listingPercentageDivisor);
     }
@@ -846,14 +862,23 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     /**
      * @notice Return pool cliff data.
      * @param pid Index that refers to vesting pool object.
-     * @return cliff end date
-     * @return cliff in days
-     * @return cliff percentage dividend
-     * @return cliff percentage divisor
+     * @return cliffEndDate Cliff end date
+     * @return cliffInDays Cliff in days
+     * @return cliffPercentageDividend Cliff percentage dividend
+     * @return cliffPercentageDivisor Cliff percentage divisor
      */
     function getPoolCliffData(
         uint16 pid
-    ) external view returns (uint32, uint16, uint16, uint16) {
+    )
+        external
+        view
+        returns (
+            uint32 cliffEndDate,
+            uint16 cliffInDays,
+            uint16 cliffPercentageDividend,
+            uint16 cliffPercentageDivisor
+        )
+    {
         Pool storage pool = s_vestingPools[pid];
         return (
             pool.cliffEndDate,
@@ -866,13 +891,21 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     /**
      * @notice Return pool vesting data.
      * @param pid Index that refers to vesting pool object.
-     * @return vesting end date
-     * @return vesting duration in months
-     * @return vesting duration in days
+     * @return vestingEndDate Vesting end date
+     * @return vestingDurationInMonths Vesting duration in months
+     * @return vestingDurationInDays Vesting duration in days
      */
     function getPoolVestingData(
         uint16 pid
-    ) external view returns (uint32, uint16, uint16) {
+    )
+        external
+        view
+        returns (
+            uint32 vestingEndDate,
+            uint16 vestingDurationInMonths,
+            uint16 vestingDurationInDays
+        )
+    {
         Pool storage pool = s_vestingPools[pid];
         return (
             pool.vestingEndDate,
@@ -1077,12 +1110,12 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      * @notice Checks whether the beneficiary exists in the pool.
      * @param pid Index that refers to vesting pool object.
      * @param beneficiary Address of the user wallet.
-     * @return true if beneficiary exists in the pool, else false.
+     * @return exists True if beneficiary exists in the pool, else false.
      */
     function _isBeneficiaryAdded(
         uint16 pid,
         address beneficiary
-    ) internal view returns (bool) {
+    ) internal view returns (bool exists) {
         return
             s_vestingPools[pid].beneficiaries[beneficiary].totalTokenAmount !=
             0;
@@ -1093,12 +1126,13 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      * @param totalAmount Token amount which will be used for percentage calculation.
      * @param dividend The number from which total amount will be multiplied.
      * @param divisor The number from which total amount will be divided.
+     * @return amount Calculated token amount part.
      */
     function _getTokensByPercentage(
         uint256 totalAmount,
         uint16 dividend,
         uint16 divisor
-    ) internal pure returns (uint256) {
+    ) internal pure returns (uint256 amount) {
         // Checks: Prevent division by zero
         if (divisor == 0) {
             revert Errors.Vesting__PercentageDivisorZero();
