@@ -17,6 +17,34 @@ interface IVestingEvents {
         uint256 totalPoolTokenAmount
     );
 
+    event GeneralPoolDataUpdated(
+        uint16 indexed poolIndex,
+        string name,
+        IVesting.UnlockTypes unlockType,
+        uint256 totalPoolTokenAmount
+    );
+
+    event PoolListingDataUpdated(
+        uint16 indexed poolIndex,
+        uint16 listingPercentageDividend,
+        uint16 listingPercentageDivisor
+    );
+
+    event PoolCliffDataUpdated(
+        uint16 indexed poolIndex,
+        uint32 cliffEndDate,
+        uint16 cliffInDays,
+        uint16 cliffPercentageDividend,
+        uint16 cliffPercentageDivisor
+    );
+
+    event PoolVestingDataUpdated(
+        uint16 indexed poolIndex,
+        uint32 vestingEndDate,
+        uint16 vestingDurationInMonths,
+        uint16 vestingDurationInDays
+    );
+
     event BeneficiaryAdded(
         uint16 indexed poolIndex,
         address indexed beneficiary,
@@ -122,6 +150,31 @@ interface IVesting is IVestingEvents {
         uint256 totalPoolTokenAmount
     ) external;
 
+    function updateGeneralPoolData(
+        uint16 pid,
+        string calldata name,
+        UnlockTypes unlockType,
+        uint256 totalPoolTokenAmount
+    ) external;
+
+    function updatePoolListingData(
+        uint16 pid,
+        uint16 listingPercentageDividend,
+        uint16 listingPercentageDivisor
+    ) external;
+
+    function updatePoolCliffData(
+        uint16 pid,
+        uint16 cliffInDays,
+        uint16 cliffPercentageDividend,
+        uint16 cliffPercentageDivisor
+    ) external;
+
+    function updatePoolVestingData(
+        uint16 pid,
+        uint16 vestingDurationInMonths
+    ) external;
+
     function addBeneficiary(
         uint16 pid,
         address beneficiary,
@@ -156,31 +209,60 @@ interface IVesting is IVestingEvents {
     function getBeneficiary(
         uint16 pid,
         address user
-    ) external view returns (Beneficiary memory);
+    ) external view returns (Beneficiary memory beneficiary);
 
-    function getListingDate() external view returns (uint32);
+    function getListingDate() external view returns (uint32 listingDate);
 
-    function getPoolCount() external view returns (uint16);
+    function getPoolCount() external view returns (uint16 poolCount);
 
-    function getToken() external view returns (IERC20);
+    function getToken() external view returns (IERC20 token);
 
-    function getStakingContract() external view returns (IStaking);
+    function getStakingContract() external view returns (IStaking staking);
 
     function getGeneralPoolData(
         uint16 pid
-    ) external view returns (string memory, UnlockTypes, uint256, uint256);
+    )
+        external
+        view
+        returns (
+            string memory name,
+            UnlockTypes unlockType,
+            uint256 totalTokensAmount,
+            uint256 dedicatedTokensAmount
+        );
 
     function getPoolListingData(
         uint16 pid
-    ) external view returns (uint16, uint16);
+    )
+        external
+        view
+        returns (
+            uint16 listingPercentageDividend,
+            uint16 listingPercentageDivisor
+        );
 
     function getPoolCliffData(
         uint16 pid
-    ) external view returns (uint32, uint16, uint16, uint16);
+    )
+        external
+        view
+        returns (
+            uint32 cliffEndDate,
+            uint16 cliffInDays,
+            uint16 cliffPercentageDividend,
+            uint16 cliffPercentageDivisor
+        );
 
     function getPoolVestingData(
         uint16 pid
-    ) external view returns (uint32, uint16, uint16);
+    )
+        external
+        view
+        returns (
+            uint32 vestingEndDate,
+            uint16 vestingDurationInMonths,
+            uint16 vestingDurationInDays
+        );
 
     function getUnlockedTokenAmount(
         uint16 pid,

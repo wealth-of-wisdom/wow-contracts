@@ -100,6 +100,13 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         _;
     }
 
+    modifier mZeroBeneficiaries(uint16 pid) {
+        if (s_vestingPools[pid].dedicatedPoolTokenAmount > 0) {
+            revert Errors.Vesting__PoolHasBeneficiaries();
+        }
+        _;
+    }
+
     /**
      * @notice Checks whether the listing date is not in the past.
      */
@@ -160,7 +167,9 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      * @param cliffInDays Period of the first lock (cliff) in days.
      * @param cliffPercentageDividend Percentage fractional form dividend part.
      * @param cliffPercentageDivisor Percentage fractional form divisor part.
-     * @param vestingDurationInMonths Duration of the vesting period.
+     * @param vestingDurationInMonths Duration of the vesting period in months.
+     * @param unlockType Unlock type (DAILY or MONTHLY)
+     * @param totalPoolTokenAmount Total pool token amount in wei.
      */
     function addVestingPool(
         string calldata name,
@@ -222,6 +231,192 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
 
         // Effects: Emit event
         emit VestingPoolAdded(pid, totalPoolTokenAmount);
+    }
+
+    /**
+     * @notice Updates general pool data and transfers tokens to/from the contract.
+     * @param pid Index that refers to vesting pool object.
+     * @param name Vesting pool name.
+     * @param unlockType Unlock type (DAILY or MONTHLY)
+     * @param totalPoolTokenAmount New total pool token amount in wei.
+     */
+    function updateGeneralPoolData(
+        uint16 pid,
+        string calldata name,
+        UnlockTypes unlockType,
+        uint256 totalPoolTokenAmount
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) mZeroBeneficiaries(pid) {
+        // Checks: Validate pool name
+        _validatePoolName(pid, name);
+
+        // Get storage reference to the pool
+        Pool storage pool = s_vestingPools[pid];
+        uint256 currentTotalAmount = pool.totalPoolTokenAmount;
+
+        // Effects: Initialize pool variables with provided data
+        // We cannot use `pool = Pool(...)` because struct contains mapping
+        // Also, we
+        if (
+            keccak256(abi.encodePacked(pool.name)) !=
+            keccak256(abi.encodePacked(name))
+        ) {
+            pool.name = name;
+        }
+
+        if (pool.unlockType != unlockType) {
+            pool.unlockType = unlockType;
+        }
+
+        if (currentTotalAmount != totalPoolTokenAmount) {
+            pool.totalPoolTokenAmount = totalPoolTokenAmount;
+        }
+
+        // Transfer tokens to the contract or from the contract
+        // Depending on the new total pool token amount
+        // If the new amount is greater than the old one, transfer from sender to the contract
+        if (currentTotalAmount < totalPoolTokenAmount) {
+            // Interactions: Transfer tokens to the contract
+            s_token.safeTransferFrom(
+                msg.sender,
+                address(this),
+                totalPoolTokenAmount - currentTotalAmount
+            );
+        }
+        // If the new amount is less than the old one, transfer from the contract to the sender
+        else if (currentTotalAmount > totalPoolTokenAmount) {
+            // Interactions: Transfer tokens from the contract
+            s_token.safeTransfer(
+                msg.sender,
+                currentTotalAmount - totalPoolTokenAmount
+            );
+        }
+
+        // Effects: Emit event
+        emit GeneralPoolDataUpdated(
+            pid,
+            name,
+            unlockType,
+            totalPoolTokenAmount
+        );
+    }
+
+    /**
+     * @notice Updates pool listing data.
+     * @param pid Index that refers to vesting pool object.
+     * @param listingPercentageDividend Number from which listing amount will be calculated.
+     * @param listingPercentageDivisor Number by which listing amount will be divided.
+     */
+    function updatePoolListingData(
+        uint16 pid,
+        uint16 listingPercentageDividend,
+        uint16 listingPercentageDivisor
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) mZeroBeneficiaries(pid) {
+        Pool storage pool = s_vestingPools[pid];
+
+        // Checks: Validate dividends and divisors before updating
+        _validateDividendsAndDivisors(
+            listingPercentageDividend,
+            listingPercentageDivisor,
+            pool.cliffPercentageDividend,
+            pool.cliffPercentageDivisor
+        );
+
+        if (pool.listingPercentageDividend != listingPercentageDividend) {
+            pool.listingPercentageDividend = listingPercentageDividend;
+        }
+
+        if (pool.listingPercentageDivisor != listingPercentageDivisor) {
+            pool.listingPercentageDivisor = listingPercentageDivisor;
+        }
+
+        // Effects: Emit event
+        emit PoolListingDataUpdated(
+            pid,
+            listingPercentageDividend,
+            listingPercentageDivisor
+        );
+    }
+
+    /**
+     * @notice Updates pool cliff data.
+     * @param pid Index that refers to vesting pool object.
+     * @param cliffInDays Period of the lock (cliff) in days.
+     * @param cliffPercentageDividend Number from which cliff amount will be calculated.
+     * @param cliffPercentageDivisor Number by which cliff amount will be divided.
+     */
+    function updatePoolCliffData(
+        uint16 pid,
+        uint16 cliffInDays,
+        uint16 cliffPercentageDividend,
+        uint16 cliffPercentageDivisor
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) mZeroBeneficiaries(pid) {
+        Pool storage pool = s_vestingPools[pid];
+
+        // Checks: Validate dividends and divisors before updating
+        _validateDividendsAndDivisors(
+            pool.listingPercentageDividend,
+            pool.listingPercentageDivisor,
+            cliffPercentageDividend,
+            cliffPercentageDivisor
+        );
+
+        uint32 cliffEndDate = s_listingDate + (cliffInDays * DAY);
+        if (pool.cliffInDays != cliffInDays) {
+            pool.cliffInDays = cliffInDays;
+            pool.cliffEndDate = cliffEndDate;
+        }
+
+        if (pool.cliffPercentageDividend != cliffPercentageDividend) {
+            pool.cliffPercentageDividend = cliffPercentageDividend;
+        }
+
+        if (pool.cliffPercentageDivisor != cliffPercentageDivisor) {
+            pool.cliffPercentageDivisor = cliffPercentageDivisor;
+        }
+
+        // Effects: Emit event
+        emit PoolCliffDataUpdated(
+            pid,
+            cliffEndDate,
+            cliffInDays,
+            cliffPercentageDividend,
+            cliffPercentageDivisor
+        );
+    }
+
+    /**
+     * @notice Updates pool vesting duration data.
+     * @param pid Index that refers to vesting pool object.
+     * @param vestingDurationInMonths Duration of the vesting period in months.
+     */
+    function updatePoolVestingData(
+        uint16 pid,
+        uint16 vestingDurationInMonths
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) mZeroBeneficiaries(pid) {
+        // Checks: Validate that vesting is not less than 1 month
+        _validateVestingDuration(vestingDurationInMonths);
+
+        Pool storage pool = s_vestingPools[pid];
+
+        uint16 vestingDurationInDays = vestingDurationInMonths * 30;
+        if (pool.vestingDurationInMonths != vestingDurationInMonths) {
+            pool.vestingDurationInMonths = vestingDurationInMonths;
+            pool.vestingDurationInDays = vestingDurationInDays;
+        }
+
+        uint32 vestingEndDate = pool.cliffEndDate +
+            (vestingDurationInDays * DAY);
+        if (pool.vestingEndDate != vestingEndDate) {
+            pool.vestingEndDate = vestingEndDate;
+        }
+
+        // Effects: Emit event
+        emit PoolVestingDataUpdated(
+            pid,
+            vestingEndDate,
+            vestingDurationInMonths,
+            vestingDurationInDays
+        );
     }
 
     /**
@@ -574,58 +769,67 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      * @notice Get user details for pool.
      * @param pid Index that refers to vesting pool object.
      * @param user Address of the beneficiary wallet.
-     * @return Beneficiary structure information.
+     * @return beneficiary Beneficiary structure information.
      */
     function getBeneficiary(
         uint16 pid,
         address user
-    ) external view returns (Beneficiary memory) {
-        return s_vestingPools[pid].beneficiaries[user];
+    ) external view returns (Beneficiary memory beneficiary) {
+        beneficiary = s_vestingPools[pid].beneficiaries[user];
     }
 
     /**
      * @notice Return global listing date value (in epoch timestamp format).
-     * @return listing date.
+     * @return listingDate Listing date, when vesting starts.
      */
-    function getListingDate() external view returns (uint32) {
-        return s_listingDate;
+    function getListingDate() external view returns (uint32 listingDate) {
+        listingDate = s_listingDate;
     }
 
     /**
      * @notice Return number of pools in contract.
-     * @return pool count.
+     * @return poolCount Number of active pools.
      */
-    function getPoolCount() external view returns (uint16) {
-        return s_poolCount;
+    function getPoolCount() external view returns (uint16 poolCount) {
+        poolCount = s_poolCount;
     }
 
     /**
      * @notice Return claimable token address
-     * @return IERC20 token.
+     * @return token IERC20 token.
      */
-    function getToken() external view returns (IERC20) {
-        return s_token;
+    function getToken() external view returns (IERC20 token) {
+        token = s_token;
     }
 
     /**
      * @notice Return staking contract address
      * @return staking contract address.
      */
-    function getStakingContract() external view returns (IStaking) {
-        return s_staking;
+    function getStakingContract() external view returns (IStaking staking) {
+        staking = s_staking;
     }
 
     /**
      * @notice Return pool data.
      * @param pid Index that refers to vesting pool object.
-     * @return Pool name
-     * @return Unlock type
-     * @return Total pool token amount
-     * @return Locked pool token amount
+     * @return name Pool name
+     * @return unlockType Unlock type (DAILY or MONTHLY)
+     * @return totalTokensAmount Total pool tokens amount
+     * @return dedicatedTokensAmount Allocated pool tokens amount
      */
     function getGeneralPoolData(
         uint16 pid
-    ) external view returns (string memory, UnlockTypes, uint256, uint256) {
+    )
+        external
+        view
+        returns (
+            string memory name,
+            UnlockTypes unlockType,
+            uint256 totalTokensAmount,
+            uint256 dedicatedTokensAmount
+        )
+    {
         Pool storage pool = s_vestingPools[pid];
         return (
             pool.name,
@@ -638,12 +842,19 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     /**
      * @notice Return pool listing data.
      * @param pid Index that refers to vesting pool object.
-     * @return listing percentage dividend
-     * @return listing percentage divisor
+     * @return listingPercentageDividend Listing percentage dividend
+     * @return listingPercentageDivisor Listing percentage divisor
      */
     function getPoolListingData(
         uint16 pid
-    ) external view returns (uint16, uint16) {
+    )
+        external
+        view
+        returns (
+            uint16 listingPercentageDividend,
+            uint16 listingPercentageDivisor
+        )
+    {
         Pool storage pool = s_vestingPools[pid];
         return (pool.listingPercentageDividend, pool.listingPercentageDivisor);
     }
@@ -651,14 +862,23 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     /**
      * @notice Return pool cliff data.
      * @param pid Index that refers to vesting pool object.
-     * @return cliff end date
-     * @return cliff in days
-     * @return cliff percentage dividend
-     * @return cliff percentage divisor
+     * @return cliffEndDate Cliff end date
+     * @return cliffInDays Cliff in days
+     * @return cliffPercentageDividend Cliff percentage dividend
+     * @return cliffPercentageDivisor Cliff percentage divisor
      */
     function getPoolCliffData(
         uint16 pid
-    ) external view returns (uint32, uint16, uint16, uint16) {
+    )
+        external
+        view
+        returns (
+            uint32 cliffEndDate,
+            uint16 cliffInDays,
+            uint16 cliffPercentageDividend,
+            uint16 cliffPercentageDivisor
+        )
+    {
         Pool storage pool = s_vestingPools[pid];
         return (
             pool.cliffEndDate,
@@ -671,13 +891,21 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
     /**
      * @notice Return pool vesting data.
      * @param pid Index that refers to vesting pool object.
-     * @return vesting end date
-     * @return vesting duration in months
-     * @return vesting duration in days
+     * @return vestingEndDate Vesting end date
+     * @return vestingDurationInMonths Vesting duration in months
+     * @return vestingDurationInDays Vesting duration in days
      */
     function getPoolVestingData(
         uint16 pid
-    ) external view returns (uint32, uint16, uint16) {
+    )
+        external
+        view
+        returns (
+            uint32 vestingEndDate,
+            uint16 vestingDurationInMonths,
+            uint16 vestingDurationInDays
+        )
+    {
         Pool storage pool = s_vestingPools[pid];
         return (
             pool.vestingEndDate,
@@ -742,7 +970,6 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      * @return periodsPassed If unlock type is daily: number of days passed, else: number of months passed.
      * @return duration If unlock type is daily: vesting duration in days, else: in months.
      */
-
     function getVestingPeriodsPassed(
         uint16 pid
     ) public view returns (uint16 periodsPassed, uint16 duration) {
@@ -774,6 +1001,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      * @param cliffPercentageDivisor Percentage fractional form divisor part.
      * @param listingPercentageDividend Percentage fractional form dividend part.
      * @param cliffPercentageDividend Percentage fractional form dividend part.
+     * @param vestingDurationInMonths Duration of the vesting period in months.
      */
     function _validatePoolData(
         string calldata name,
@@ -783,6 +1011,31 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         uint16 cliffPercentageDividend,
         uint16 vestingDurationInMonths
     ) internal view {
+        // Checks: Validate pool name
+        _validatePoolName(s_poolCount, name);
+
+        // Checks: Validate dividends and divisors
+        _validateDividendsAndDivisors(
+            listingPercentageDividend,
+            listingPercentageDivisor,
+            cliffPercentageDividend,
+            cliffPercentageDivisor
+        );
+
+        // Checks: Validate vesting duration
+        _validateVestingDuration(vestingDurationInMonths);
+    }
+
+    /**
+     * @notice Checks whether the vesting pool name is valid
+     * @dev Reverts if the name is empty or already exists
+     * @param pid Index that refers to vesting pool object.
+     * When adding new pool, it is equal to pool count, which does not effect the logic.
+     * When updating existing pool, it is equal to pool index, which is used to skip the pool name check.
+     * @param name Vesting pool name.
+     */
+    function _validatePoolName(uint16 pid, string calldata name) internal view {
+        // Checks: Pool name should not be empty
         if (bytes(name).length == 0) {
             revert Errors.Vesting__EmptyName();
         }
@@ -790,18 +1043,47 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         uint16 poolCount = s_poolCount;
         bytes32 nameHash = keccak256(abi.encodePacked(name));
 
+        // Checks: Pool name should be unique
         for (uint16 i; i < poolCount; i++) {
-            if (
-                keccak256(abi.encodePacked(s_vestingPools[i].name)) == nameHash
-            ) {
+            bytes32 currentNameHash = keccak256(
+                abi.encodePacked(s_vestingPools[i].name)
+            );
+
+            // Skip the pool name check when updating existing pool
+            // Because pool name can be the same as the previous one
+            if (currentNameHash == nameHash && i != pid) {
                 revert Errors.Vesting__PoolWithThisNameExists();
             }
         }
+    }
 
+    /**
+     * @notice Checks if dividends and divisors are valid.
+     * @param listingPercentageDividend Number from which listing amount will be calculated.
+     * @param listingPercentageDivisor Maximum number that corresponds to 100% of all tokens.
+     * @param cliffPercentageDividend Number from which cliff amount will be calculated.
+     * @param cliffPercentageDivisor Maximum number that corresponds to 100% of all tokens.
+     */
+    function _validateDividendsAndDivisors(
+        uint16 listingPercentageDividend,
+        uint16 listingPercentageDivisor,
+        uint16 cliffPercentageDividend,
+        uint16 cliffPercentageDivisor
+    ) internal pure {
+        // Checks: Should not be zero as it will cause division by zero error
         if (listingPercentageDivisor == 0 || cliffPercentageDivisor == 0) {
             revert Errors.Vesting__PercentageDivisorZero();
         }
 
+        // Checks: Dividends should not be greater than divisors
+        if (
+            listingPercentageDividend > listingPercentageDivisor ||
+            cliffPercentageDividend > cliffPercentageDivisor
+        ) {
+            revert Errors.Vesting__PercentageOverflow();
+        }
+
+        // Checks: Listing and cliff percentage should not overflow
         if (
             (listingPercentageDividend * cliffPercentageDivisor) +
                 (cliffPercentageDividend * listingPercentageDivisor) >
@@ -809,7 +1091,16 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         ) {
             revert Errors.Vesting__ListingAndCliffPercentageOverflow();
         }
+    }
 
+    /**
+     * @notice Checks whether the duration is not zero.
+     * @param vestingDurationInMonths Duration of the vesting period in months.
+     */
+    function _validateVestingDuration(
+        uint16 vestingDurationInMonths
+    ) internal pure {
+        // Checks: Vesting duration should not be zero
         if (vestingDurationInMonths == 0) {
             revert Errors.Vesting__VestingDurationZero();
         }
@@ -819,12 +1110,12 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      * @notice Checks whether the beneficiary exists in the pool.
      * @param pid Index that refers to vesting pool object.
      * @param beneficiary Address of the user wallet.
-     * @return true if beneficiary exists in the pool, else false.
+     * @return exists True if beneficiary exists in the pool, else false.
      */
     function _isBeneficiaryAdded(
         uint16 pid,
         address beneficiary
-    ) internal view returns (bool) {
+    ) internal view returns (bool exists) {
         return
             s_vestingPools[pid].beneficiaries[beneficiary].totalTokenAmount !=
             0;
@@ -835,12 +1126,14 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
      * @param totalAmount Token amount which will be used for percentage calculation.
      * @param dividend The number from which total amount will be multiplied.
      * @param divisor The number from which total amount will be divided.
+     * @return amount Calculated token amount part.
      */
     function _getTokensByPercentage(
         uint256 totalAmount,
         uint16 dividend,
         uint16 divisor
-    ) internal pure returns (uint256) {
+    ) internal pure returns (uint256 amount) {
+        // Checks: Prevent division by zero
         if (divisor == 0) {
             revert Errors.Vesting__PercentageDivisorZero();
         }
