@@ -130,7 +130,17 @@
     },
     {
         "inputs": [],
+        "name": "Vesting__PercentageOverflow",
+        "type": "error"
+    },
+    {
+        "inputs": [],
         "name": "Vesting__PoolDoesNotExist",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "Vesting__PoolHasBeneficiaries",
         "type": "error"
     },
     {
@@ -261,6 +271,37 @@
         "anonymous": false,
         "inputs": [
             {
+                "indexed": true,
+                "internalType": "uint16",
+                "name": "poolIndex",
+                "type": "uint16"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "enum IVesting.UnlockTypes",
+                "name": "unlockType",
+                "type": "uint8"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "totalPoolTokenAmount",
+                "type": "uint256"
+            }
+        ],
+        "name": "GeneralPoolDataUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
                 "indexed": false,
                 "internalType": "uint64",
                 "name": "version",
@@ -287,6 +328,99 @@
             }
         ],
         "name": "ListingDateChanged",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint16",
+                "name": "poolIndex",
+                "type": "uint16"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint32",
+                "name": "cliffEndDate",
+                "type": "uint32"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint16",
+                "name": "cliffInDays",
+                "type": "uint16"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint16",
+                "name": "cliffPercentageDividend",
+                "type": "uint16"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint16",
+                "name": "cliffPercentageDivisor",
+                "type": "uint16"
+            }
+        ],
+        "name": "PoolCliffDataUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint16",
+                "name": "poolIndex",
+                "type": "uint16"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint16",
+                "name": "listingPercentageDividend",
+                "type": "uint16"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint16",
+                "name": "listingPercentageDivisor",
+                "type": "uint16"
+            }
+        ],
+        "name": "PoolListingDataUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint16",
+                "name": "poolIndex",
+                "type": "uint16"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint32",
+                "name": "vestingEndDate",
+                "type": "uint32"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint16",
+                "name": "vestingDurationInMonths",
+                "type": "uint16"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint16",
+                "name": "vestingDurationInDays",
+                "type": "uint16"
+            }
+        ],
+        "name": "PoolVestingDataUpdated",
         "type": "event"
     },
     {
@@ -716,7 +850,7 @@
                     }
                 ],
                 "internalType": "struct IVesting.Beneficiary",
-                "name": "",
+                "name": "beneficiary",
                 "type": "tuple"
             }
         ],
@@ -735,22 +869,22 @@
         "outputs": [
             {
                 "internalType": "string",
-                "name": "",
+                "name": "name",
                 "type": "string"
             },
             {
                 "internalType": "enum IVesting.UnlockTypes",
-                "name": "",
+                "name": "unlockType",
                 "type": "uint8"
             },
             {
                 "internalType": "uint256",
-                "name": "",
+                "name": "totalTokensAmount",
                 "type": "uint256"
             },
             {
                 "internalType": "uint256",
-                "name": "",
+                "name": "dedicatedTokensAmount",
                 "type": "uint256"
             }
         ],
@@ -763,7 +897,7 @@
         "outputs": [
             {
                 "internalType": "uint32",
-                "name": "",
+                "name": "listingDate",
                 "type": "uint32"
             }
         ],
@@ -782,22 +916,22 @@
         "outputs": [
             {
                 "internalType": "uint32",
-                "name": "",
+                "name": "cliffEndDate",
                 "type": "uint32"
             },
             {
                 "internalType": "uint16",
-                "name": "",
+                "name": "cliffInDays",
                 "type": "uint16"
             },
             {
                 "internalType": "uint16",
-                "name": "",
+                "name": "cliffPercentageDividend",
                 "type": "uint16"
             },
             {
                 "internalType": "uint16",
-                "name": "",
+                "name": "cliffPercentageDivisor",
                 "type": "uint16"
             }
         ],
@@ -810,7 +944,7 @@
         "outputs": [
             {
                 "internalType": "uint16",
-                "name": "",
+                "name": "poolCount",
                 "type": "uint16"
             }
         ],
@@ -829,12 +963,12 @@
         "outputs": [
             {
                 "internalType": "uint16",
-                "name": "",
+                "name": "listingPercentageDividend",
                 "type": "uint16"
             },
             {
                 "internalType": "uint16",
-                "name": "",
+                "name": "listingPercentageDivisor",
                 "type": "uint16"
             }
         ],
@@ -853,17 +987,17 @@
         "outputs": [
             {
                 "internalType": "uint32",
-                "name": "",
+                "name": "vestingEndDate",
                 "type": "uint32"
             },
             {
                 "internalType": "uint16",
-                "name": "",
+                "name": "vestingDurationInMonths",
                 "type": "uint16"
             },
             {
                 "internalType": "uint16",
-                "name": "",
+                "name": "vestingDurationInDays",
                 "type": "uint16"
             }
         ],
@@ -895,7 +1029,7 @@
         "outputs": [
             {
                 "internalType": "contract IStaking",
-                "name": "",
+                "name": "staking",
                 "type": "address"
             }
         ],
@@ -908,7 +1042,7 @@
         "outputs": [
             {
                 "internalType": "contract IERC20",
-                "name": "",
+                "name": "token",
                 "type": "address"
             }
         ],
@@ -1151,6 +1285,103 @@
             }
         ],
         "name": "unstakeVestedTokens",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint16",
+                "name": "pid",
+                "type": "uint16"
+            },
+            {
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "internalType": "enum IVesting.UnlockTypes",
+                "name": "unlockType",
+                "type": "uint8"
+            },
+            {
+                "internalType": "uint256",
+                "name": "totalPoolTokenAmount",
+                "type": "uint256"
+            }
+        ],
+        "name": "updateGeneralPoolData",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint16",
+                "name": "pid",
+                "type": "uint16"
+            },
+            {
+                "internalType": "uint16",
+                "name": "cliffInDays",
+                "type": "uint16"
+            },
+            {
+                "internalType": "uint16",
+                "name": "cliffPercentageDividend",
+                "type": "uint16"
+            },
+            {
+                "internalType": "uint16",
+                "name": "cliffPercentageDivisor",
+                "type": "uint16"
+            }
+        ],
+        "name": "updatePoolCliffData",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint16",
+                "name": "pid",
+                "type": "uint16"
+            },
+            {
+                "internalType": "uint16",
+                "name": "listingPercentageDividend",
+                "type": "uint16"
+            },
+            {
+                "internalType": "uint16",
+                "name": "listingPercentageDivisor",
+                "type": "uint16"
+            }
+        ],
+        "name": "updatePoolListingData",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint16",
+                "name": "pid",
+                "type": "uint16"
+            },
+            {
+                "internalType": "uint16",
+                "name": "vestingDurationInMonths",
+                "type": "uint16"
+            }
+        ],
+        "name": "updatePoolVestingData",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
