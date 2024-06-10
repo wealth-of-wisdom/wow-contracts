@@ -21,6 +21,7 @@ export const ARBITRUM_ONE_NETWORK: string = "arbitrum-one";
 export const TESTNET_NETWORKS: string[] = [SEPOLIA_NETWORK, ARBITRUM_SEPOLIA_NETWORK];
 export const MAINNET_NETWORKS: string[] = [ETH_MAINNET_NETWORK, ARBITRUM_ONE_NETWORK];
 
+export const DAY_IN_SECONDS: BigInt = BigInt.fromI32(24 * 60 * 60); // 1 day
 export const MONTH_IN_SECONDS: BigInt = BigInt.fromI32(30 * 24 * 60 * 60); // 30 days
 export const TEN_MINUTES_IN_SECONDS: BigInt = BigInt.fromI32(10 * 60); // 10 minutes
 export const TWELVE_HOURS_IN_SECONDS: BigInt = BigInt.fromI32(12 * 60 * 60); // 12 hours

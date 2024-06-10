@@ -1,6 +1,12 @@
-import { Address, BigInt } from "@graphprotocol/graph-ts";
-import { BIGINT_ZERO, BIGDEC_ZERO, UNLOCK_TYPE_DAILY } from "../utils/constants";
+import { Address, BigInt, BigDecimal } from "@graphprotocol/graph-ts";
+import { BIGINT_ZERO, BIGDEC_ZERO, BIGDEC_HUNDRED, UNLOCK_TYPE_DAILY, DAY_IN_SECONDS } from "../utils/constants";
 import { VestingContract, VestingPool, VestingPoolAllocation, Beneficiary } from "../../generated/schema";
+import { UnlockType } from "../utils/enums";
+import { stringifyUnlockType } from "../utils/utils";
+
+/*//////////////////////////////////////////////////////////////////////////
+                            GET OR INIT FUNCTIONS
+//////////////////////////////////////////////////////////////////////////*/
 
 /**
  * Retrieves or initializes a VestingContract entity.
@@ -117,4 +123,77 @@ export function getOrInitBeneficiary(beneficiaryAddress: Address): Beneficiary {
     }
 
     return beneficiary;
+}
+
+/*//////////////////////////////////////////////////////////////////////////
+                                OTHER FUNCTIONS
+//////////////////////////////////////////////////////////////////////////*/
+
+export function updateGeneralPoolData(
+    poolId: BigInt,
+    name: string,
+    unlockType: UnlockType,
+    totalPoolTokens: BigInt,
+): void {
+    // Get VestingPool entity
+    const vestingPool: VestingPool = getOrInitVestingPool(poolId);
+
+    // Update data
+    vestingPool.name = name;
+    vestingPool.unlockType = stringifyUnlockType(unlockType);
+    vestingPool.totalPoolTokens = totalPoolTokens;
+    vestingPool.save();
+}
+
+export function updatePoolListingData(
+    poolId: BigInt,
+    listingPercentageDividend: BigDecimal,
+    listingPercentageDivisor: BigDecimal,
+): void {
+    // Get VestingPool entity
+    const vestingPool: VestingPool = getOrInitVestingPool(poolId);
+
+    const listingPercentage: BigDecimal = listingPercentageDivisor.gt(BIGDEC_ZERO)
+        ? BIGDEC_HUNDRED.times(listingPercentageDividend).div(listingPercentageDivisor)
+        : BIGDEC_ZERO;
+    const vestingPercentage: BigDecimal = BIGDEC_HUNDRED.minus(listingPercentage).minus(vestingPool.cliffPercentage);
+
+    // Update data
+    vestingPool.listingPercentage = listingPercentage;
+    vestingPool.vestingPercentage = vestingPercentage;
+    vestingPool.save();
+}
+
+export function updatePoolCliffData(
+    poolId: BigInt,
+    cliffInDays: BigInt,
+    cliffEndDate: BigInt,
+    cliffPercentageDividend: BigDecimal,
+    cliffPercentageDivisor: BigDecimal,
+): void {
+    // Get VestingPool entity
+    const vestingPool: VestingPool = getOrInitVestingPool(poolId);
+
+    const cliffPercentage: BigDecimal = cliffPercentageDivisor.gt(BIGDEC_ZERO)
+        ? BIGDEC_HUNDRED.times(cliffPercentageDividend).div(cliffPercentageDivisor)
+        : BIGDEC_ZERO;
+    const vestingPercentage: BigDecimal = BIGDEC_HUNDRED.minus(vestingPool.listingPercentage).minus(cliffPercentage);
+
+    // Update data
+    vestingPool.cliffDuration = cliffInDays.times(DAY_IN_SECONDS);
+    vestingPool.cliffEndDate = cliffEndDate;
+    vestingPool.cliffPercentage = cliffPercentage;
+    vestingPool.vestingPercentage = vestingPercentage;
+    vestingPool.save();
+}
+
+export function updatePoolVestingData(poolId: BigInt, vestingDurationInDays: BigInt, vestingEndDate: BigInt): void {
+    // Get VestingPool entity
+    const vestingPool: VestingPool = getOrInitVestingPool(poolId);
+
+    const vestingDuration: BigInt = vestingDurationInDays.times(DAY_IN_SECONDS);
+
+    vestingPool.vestingDuration = vestingDuration;
+    vestingPool.vestingEndDate = vestingEndDate;
+    vestingPool.save();
 }
