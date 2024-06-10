@@ -17,6 +17,34 @@ interface IVestingEvents {
         uint256 totalPoolTokenAmount
     );
 
+    event GeneralPoolDataUpdated(
+        uint16 indexed poolIndex,
+        string name,
+        IVesting.UnlockTypes unlockType,
+        uint256 totalPoolTokenAmount
+    );
+
+    event PoolListingDataUpdated(
+        uint16 indexed poolIndex,
+        uint16 listingPercentageDividend,
+        uint16 listingPercentageDivisor
+    );
+
+    event PoolCliffDataUpdated(
+        uint16 indexed poolIndex,
+        uint32 cliffEndDate,
+        uint16 cliffInDays,
+        uint16 cliffPercentageDividend,
+        uint16 cliffPercentageDivisor
+    );
+
+    event PoolVestingDataUpdated(
+        uint16 indexed poolIndex,
+        uint32 vestingEndDate,
+        uint16 vestingDurationInMonths,
+        uint16 vestingDurationInDays
+    );
+
     event BeneficiaryAdded(
         uint16 indexed poolIndex,
         address indexed beneficiary,
@@ -120,6 +148,31 @@ interface IVesting is IVestingEvents {
         uint16 vestingDurationInMonths,
         UnlockTypes unlockType,
         uint256 totalPoolTokenAmount
+    ) external;
+
+    function updateGeneralPoolData(
+        uint16 pid,
+        string calldata name,
+        UnlockTypes unlockType,
+        uint256 totalPoolTokenAmount
+    ) external;
+
+    function updatePoolListingData(
+        uint16 pid,
+        uint16 listingPercentageDividend,
+        uint16 listingPercentageDivisor
+    ) external;
+
+    function updatePoolCliffData(
+        uint16 pid,
+        uint16 cliffInDays,
+        uint16 cliffPercentageDividend,
+        uint16 cliffPercentageDivisor
+    ) external;
+
+    function updatePoolVestingData(
+        uint16 pid,
+        uint16 vestingDurationInMonths
     ) external;
 
     function addBeneficiary(
