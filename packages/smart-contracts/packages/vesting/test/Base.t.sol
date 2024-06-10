@@ -129,6 +129,11 @@ contract Base_Test is
         _;
     }
 
+    modifier approveAndAddPoolWithName(string memory name) {
+        _approveAndAddPool(name);
+        _;
+    }
+
     modifier addBeneficiary(address beneficiary) {
         _addBeneficiary(beneficiary);
         _;
@@ -136,6 +141,11 @@ contract Base_Test is
 
     modifier stakeVestedTokens(address beneficiary) {
         _stakeVestedTokens(beneficiary);
+        _;
+    }
+
+    modifier updateVestingPool(uint256 pid) {
+        _updateVestingPool(pid);
         _;
     }
 
@@ -169,6 +179,25 @@ contract Base_Test is
             VESTING_DURATION_IN_MONTHS,
             MONTHLY_UNLOCK_TYPE,
             TOTAL_POOL_TOKEN_AMOUNT
+        );
+    }
+
+    function _updateVestingPool(uint256 pid) internal {
+        _updateVestingPool(pid);
+    }
+
+    function _updateVestingPool(uint256 pid) internal {
+        vesting.updateVestingPool(
+            pid,
+            POOL_NAME_2,
+            LISTING_PERCENTAGE_DIVIDEND_2,
+            LISTING_PERCENTAGE_DIVISOR_2,
+            CLIFF_IN_DAYS_2,
+            CLIFF_PERCENTAGE_DIVIDEND_2,
+            CLIFF_PERCENTAGE_DIVISOR_2,
+            VESTING_DURATION_IN_MONTHS_2,
+            DAILY_UNLOCK_TYPE,
+            TOTAL_POOL_TOKEN_AMOUNT_2
         );
     }
 
