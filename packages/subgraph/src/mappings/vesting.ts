@@ -10,6 +10,10 @@ import {
     VestedTokensStaked as VestedTokensStakedEvent,
     VestedTokensUnstaked as VestedTokensUnstakedEvent,
     VestingPoolAdded as VestingPoolAddedEvent,
+    GeneralPoolDataUpdated as GeneralPoolDataUpdatedEvent,
+    PoolListingDataUpdated as PoolListingDataUpdatedEvent,
+    PoolCliffDataUpdated as PoolCliffDataUpdatedEvent,
+    PoolVestingDataUpdated as PoolVestingDataUpdatedEvent,
     Vesting,
 } from "../../generated/Vesting/Vesting";
 import { getOrInitBand } from "../helpers/staking.helpers";
@@ -19,10 +23,13 @@ import {
     getOrInitVestingContract,
     getOrInitVestingPool,
     getOrInitVestingPoolAllocation,
+    updateGeneralPoolData,
+    updatePoolCliffData,
+    updatePoolListingData,
+    updatePoolVestingData,
 } from "../helpers/vesting.helpers";
-import { stringifyUnlockType } from "../utils/utils";
 import { Address, BigDecimal, BigInt, store } from "@graphprotocol/graph-ts";
-import { BIGDEC_HUNDRED, BIGDEC_ZERO, BIGINT_ZERO } from "../utils/constants";
+import { BIGINT_ZERO, DAY_IN_SECONDS } from "../utils/constants";
 
 /**
  * Handles the Initialized event triggered when the contract is initialized.
@@ -50,56 +57,77 @@ export function handleVestingPoolAdded(event: VestingPoolAddedEvent): void {
     const vestingData = vesting.getPoolVestingData(event.params.poolIndex);
     const listingData = vesting.getPoolListingData(event.params.poolIndex);
     const cliffData = vesting.getPoolCliffData(event.params.poolIndex);
-    const secondsInDay: BigInt = vesting.DAY();
 
-    // Extract data from Vesting contract getters
-    const poolName: string = generalData.getValue0();
-    const unlockTypeNum = generalData.getValue1();
-    const unlockTypeStr: string = stringifyUnlockType(unlockTypeNum);
-    const totalPoolTokensAmount: BigInt = generalData.getValue2();
-    const dedicatedPoolTokensAmount: BigInt = generalData.getValue3();
-
-    const listingPercentageDividend: BigDecimal = BigInt.fromI32(listingData.getValue0()).toBigDecimal();
-    const listingPercentageDivisor: BigDecimal = BigInt.fromI32(listingData.getValue1()).toBigDecimal();
-    const listingPercentage: BigDecimal = listingPercentageDivisor.notEqual(BIGDEC_ZERO)
-        ? BIGDEC_HUNDRED.times(listingPercentageDividend).div(listingPercentageDivisor)
-        : BIGDEC_ZERO;
-
-    const cliffEndDate: BigInt = cliffData.getValue0();
-    const cliffInDays: BigInt = BigInt.fromI32(cliffData.getValue1());
-    const cliffDuration: BigInt = cliffInDays.times(secondsInDay);
-    const cliffPercentageDividend: BigDecimal = BigInt.fromI32(cliffData.getValue2()).toBigDecimal();
-    const cliffPercentageDivisor: BigDecimal = BigInt.fromI32(cliffData.getValue3()).toBigDecimal();
-    const cliffPercentage: BigDecimal = cliffPercentageDivisor.notEqual(BIGDEC_ZERO)
-        ? BIGDEC_HUNDRED.times(cliffPercentageDividend).div(cliffPercentageDivisor)
-        : BIGDEC_ZERO;
-
-    const vestingEndDate: BigInt = vestingData.getValue0();
-    const vestingDurationInDays: BigInt = BigInt.fromI32(vestingData.getValue2());
-    const vestingDuration: BigInt = vestingDurationInDays.times(secondsInDay);
-    const vestingPercentage: BigDecimal = BIGDEC_HUNDRED.minus(listingPercentage).minus(cliffPercentage);
-
-    // Initialize VestingPool entity
+    // Get pool id in vesting contract
     const poolId: BigInt = BigInt.fromI32(event.params.poolIndex);
-    const vestingPool: VestingPool = getOrInitVestingPool(poolId);
 
-    vestingPool.name = poolName;
-    vestingPool.unlockType = unlockTypeStr;
-    vestingPool.totalPoolTokens = totalPoolTokensAmount; // Total tokens allocation in the pool
-    vestingPool.dedicatedPoolTokens = dedicatedPoolTokensAmount; // Assigned tokens in the pool
-    vestingPool.listingPercentage = listingPercentage;
-    vestingPool.cliffDuration = cliffDuration;
-    vestingPool.cliffEndDate = cliffEndDate;
-    vestingPool.cliffPercentage = cliffPercentage;
-    vestingPool.vestingDuration = vestingDuration;
-    vestingPool.vestingEndDate = vestingEndDate;
-    vestingPool.vestingPercentage = vestingPercentage;
-    vestingPool.save();
+    // Update general pool data
+    const poolName: string = generalData.getName();
+    const unlockTypeNum = generalData.getUnlockType();
+    const totalPoolTokensAmount: BigInt = generalData.getTotalTokensAmount();
+    updateGeneralPoolData(poolId, poolName, unlockTypeNum, totalPoolTokensAmount);
+
+    // Update pool listing data
+    const listingPercentageDividend: BigDecimal = BigInt.fromI32(
+        listingData.getListingPercentageDividend(),
+    ).toBigDecimal();
+    const listingPercentageDivisor: BigDecimal = BigInt.fromI32(
+        listingData.getListingPercentageDivisor(),
+    ).toBigDecimal();
+    updatePoolListingData(poolId, listingPercentageDividend, listingPercentageDivisor);
+
+    // Update pool cliff data
+    const cliffEndDate: BigInt = cliffData.getCliffEndDate();
+    const cliffInDays: BigInt = BigInt.fromI32(cliffData.getCliffInDays());
+    const cliffPercentageDividend: BigDecimal = BigInt.fromI32(cliffData.getCliffPercentageDividend()).toBigDecimal();
+    const cliffPercentageDivisor: BigDecimal = BigInt.fromI32(cliffData.getCliffPercentageDivisor()).toBigDecimal();
+    updatePoolCliffData(poolId, cliffInDays, cliffEndDate, cliffPercentageDividend, cliffPercentageDivisor);
+
+    // Update pool vesting data
+    const vestingEndDate: BigInt = vestingData.getVestingEndDate();
+    const vestingDurationInDays: BigInt = BigInt.fromI32(vestingData.getVestingDurationInDays());
+    updatePoolVestingData(poolId, vestingDurationInDays, vestingEndDate);
 
     // Increment total pool count in VestingContract entity
     const vestingContract: VestingContract = getOrInitVestingContract();
     vestingContract.totalAmountOfPools += 1;
     vestingContract.save();
+}
+
+export function handleGeneralPoolDataUpdated(event: GeneralPoolDataUpdatedEvent): void {
+    const poolId: BigInt = BigInt.fromI32(event.params.poolIndex);
+
+    updateGeneralPoolData(poolId, event.params.name, event.params.unlockType, event.params.totalPoolTokenAmount);
+}
+
+export function handlePoolListingDataUpdated(event: PoolListingDataUpdatedEvent): void {
+    const poolId: BigInt = BigInt.fromI32(event.params.poolIndex);
+    const listingPercentageDividend: BigDecimal = BigInt.fromI32(event.params.listingPercentageDividend).toBigDecimal();
+    const listingPercentageDivisor: BigDecimal = BigInt.fromI32(event.params.listingPercentageDivisor).toBigDecimal();
+
+    updatePoolListingData(poolId, listingPercentageDividend, listingPercentageDivisor);
+}
+
+export function handlePoolCliffDataUpdated(event: PoolCliffDataUpdatedEvent): void {
+    const poolId: BigInt = BigInt.fromI32(event.params.poolIndex);
+    const cliffPercentageDividend: BigDecimal = BigInt.fromI32(event.params.cliffPercentageDividend).toBigDecimal();
+    const cliffPercentageDivisor: BigDecimal = BigInt.fromI32(event.params.cliffPercentageDivisor).toBigDecimal();
+    const cliffInDays: BigInt = BigInt.fromI32(event.params.cliffInDays);
+
+    updatePoolCliffData(
+        poolId,
+        cliffInDays,
+        event.params.cliffEndDate,
+        cliffPercentageDividend,
+        cliffPercentageDivisor,
+    );
+}
+
+export function handlePoolVestingDataUpdated(event: PoolVestingDataUpdatedEvent): void {
+    const poolId: BigInt = BigInt.fromI32(event.params.poolIndex);
+    const vestingDurationInDays: BigInt = BigInt.fromI32(event.params.vestingDurationInDays);
+
+    updatePoolVestingData(poolId, vestingDurationInDays, event.params.vestingEndDate);
 }
 
 /**

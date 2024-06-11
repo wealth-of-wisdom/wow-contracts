@@ -29,6 +29,14 @@ dataSources:
                 handler: handleInitialized
               - event: VestingPoolAdded(indexed uint16,uint256)
                 handler: handleVestingPoolAdded
+              - event: GeneralPoolDataUpdated(indexed uint16,string,uint8,uint256)
+                handler: handleGeneralPoolDataUpdated
+              - event: PoolListingDataUpdated(indexed uint16,uint16,uint16)
+                handler: handlePoolListingDataUpdated
+              - event: PoolCliffDataUpdated(indexed uint16,uint32,uint16,uint16,uint16)
+                handler: handlePoolCliffDataUpdated
+              - event: PoolVestingDataUpdated(indexed uint16,uint32,uint16,uint16)
+                handler: handlePoolVestingDataUpdated
               - event: BeneficiaryAdded(indexed uint16,indexed address,uint256)
                 handler: handleBeneficiaryAdded
               - event: BeneficiaryRemoved(indexed uint16,indexed address,uint256)
