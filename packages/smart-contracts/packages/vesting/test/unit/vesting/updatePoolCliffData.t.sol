@@ -32,6 +32,17 @@ contract Vesting_UpdatePoolCliffData_Unit_Test is Unit_Test {
         _updatePoolCliffData();
     }
 
+    function test_updatePoolCliffData_RevertIf_ListingAndCliffPercentageOverflow()
+        external
+        approveAndAddPool
+    {
+        vm.expectRevert(
+            Errors.Vesting__ListingAndCliffPercentageOverflow.selector
+        );
+        vm.prank(admin);
+        vesting.updatePoolListingData(PRIMARY_POOL, 99, 100);
+    }
+
     function test_updatePoolCliffData_RevertIf_CliffDivisorZero()
         external
         approveAndAddPool
