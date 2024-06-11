@@ -71,18 +71,18 @@ abstract contract VestingConstants is StakingConstants {
 
     uint256 internal constant TOTAL_POOL_TOKEN_AMOUNT_2 = 10_000_000 ether;
 
-    uint16 internal constant LISTING_PERCENTAGE_DIVIDEND_2 = 15;
-    uint16 internal constant LISTING_PERCENTAGE_DIVISOR_2 = 40;
+    uint16 internal constant LISTING_PERCENTAGE_DIVIDEND_15 = 15;
+    uint16 internal constant LISTING_PERCENTAGE_DIVISOR_40 = 40;
 
-    uint16 internal constant CLIFF_IN_DAYS_2 = 1;
+    uint16 internal constant CLIFF_IN_DAYS_2 = 2;
     uint32 internal constant CLIFF_IN_SECONDS_2 = CLIFF_IN_DAYS_2 * DAY;
 
-    uint16 internal constant CLIFF_PERCENTAGE_DIVIDEND_2 = 3;
-    uint16 internal constant CLIFF_PERCENTAGE_DIVISOR_2 = 20;
+    uint16 internal constant CLIFF_PERCENTAGE_DIVIDEND_3 = 3;
+    uint16 internal constant CLIFF_PERCENTAGE_DIVISOR_20 = 20;
 
-    uint16 internal constant VESTING_DURATION_IN_MONTHS_2 = 5;
-    uint16 internal constant VESTING_DURATION_IN_DAYS_2 =
-        VESTING_DURATION_IN_MONTHS_2 * 30;
-    uint32 internal constant VESTING_DURATION_IN_SECONDS_2 =
-        VESTING_DURATION_IN_DAYS_2 * DAY;
+    uint16 internal constant VESTING_DURATION_IN_MONTHS_5 = 5;
+    uint16 internal constant VESTING_DURATION_IN_DAYS_5 =
+        VESTING_DURATION_IN_MONTHS_5 * 30;
+    uint32 internal constant VESTING_DURATION_IN_SECONDS_5 =
+        VESTING_DURATION_IN_DAYS_5 * DAY;
 }

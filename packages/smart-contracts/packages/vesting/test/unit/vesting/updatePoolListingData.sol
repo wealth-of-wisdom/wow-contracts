@@ -18,8 +18,8 @@ contract Vesting_UpdatePoolListingData_Unit_Test is Unit_Test {
         vm.prank(alice);
         vesting.updatePoolListingData(
             PRIMARY_POOL,
-            LISTING_PERCENTAGE_DIVIDEND_2,
-            LISTING_PERCENTAGE_DIVISOR_2
+            LISTING_PERCENTAGE_DIVIDEND_15,
+            LISTING_PERCENTAGE_DIVISOR_40
         );
     }
 
@@ -40,9 +40,20 @@ contract Vesting_UpdatePoolListingData_Unit_Test is Unit_Test {
         vm.prank(admin);
         vesting.updatePoolListingData(
             PRIMARY_POOL,
-            LISTING_PERCENTAGE_DIVIDEND_2,
+            LISTING_PERCENTAGE_DIVIDEND_15,
             0
         );
+    }
+
+    function test_updatePoolListingData_RevertIf_ListingAndCliffPercentageOverflow()
+        external
+        approveAndAddPool
+    {
+        vm.expectRevert(
+            Errors.Vesting__ListingAndCliffPercentageOverflow.selector
+        );
+        vm.prank(admin);
+        vesting.updatePoolListingData(PRIMARY_POOL, 99, 100);
     }
 
     function test_updatePoolListingData_RevertIf_ListingPercentageOverflow()
@@ -62,7 +73,7 @@ contract Vesting_UpdatePoolListingData_Unit_Test is Unit_Test {
         (uint16 dividend, ) = vesting.getPoolListingData(PRIMARY_POOL);
         assertEq(
             dividend,
-            LISTING_PERCENTAGE_DIVIDEND_2,
+            LISTING_PERCENTAGE_DIVIDEND_15,
             "Listing percentage dividend incorrect"
         );
     }
@@ -75,7 +86,7 @@ contract Vesting_UpdatePoolListingData_Unit_Test is Unit_Test {
         (, uint16 divisor) = vesting.getPoolListingData(PRIMARY_POOL);
         assertEq(
             divisor,
-            LISTING_PERCENTAGE_DIVISOR_2,
+            LISTING_PERCENTAGE_DIVISOR_40,
             "Listing percentage divisor incorrect"
         );
     }
@@ -87,8 +98,8 @@ contract Vesting_UpdatePoolListingData_Unit_Test is Unit_Test {
         vm.expectEmit(address(vesting));
         emit PoolListingDataUpdated(
             PRIMARY_POOL,
-            LISTING_PERCENTAGE_DIVIDEND_2,
-            LISTING_PERCENTAGE_DIVISOR_2
+            LISTING_PERCENTAGE_DIVIDEND_15,
+            LISTING_PERCENTAGE_DIVISOR_40
         );
 
         _updatePoolListingData();

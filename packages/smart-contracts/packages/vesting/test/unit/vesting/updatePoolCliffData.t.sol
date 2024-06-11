@@ -6,7 +6,7 @@ import {IVesting} from "../../../contracts/interfaces/IVesting.sol";
 import {Errors} from "../../../contracts/libraries/Errors.sol";
 import {Unit_Test} from "../Unit.t.sol";
 
-contract Vesting_UpdatePoolCliffgData_Unit_Test is Unit_Test {
+contract Vesting_UpdatePoolCliffData_Unit_Test is Unit_Test {
     function test_updatePoolCliffData_RevertIf_CallerNotAdmin() external {
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -18,8 +18,8 @@ contract Vesting_UpdatePoolCliffgData_Unit_Test is Unit_Test {
         vm.prank(alice);
         vesting.updatePoolListingData(
             PRIMARY_POOL,
-            LISTING_PERCENTAGE_DIVIDEND_2,
-            LISTING_PERCENTAGE_DIVISOR_2
+            LISTING_PERCENTAGE_DIVIDEND_15,
+            LISTING_PERCENTAGE_DIVISOR_40
         );
     }
 
@@ -41,7 +41,7 @@ contract Vesting_UpdatePoolCliffgData_Unit_Test is Unit_Test {
         vesting.updatePoolCliffData(
             PRIMARY_POOL,
             CLIFF_IN_DAYS_2,
-            CLIFF_PERCENTAGE_DIVIDEND_2,
+            CLIFF_PERCENTAGE_DIVIDEND_3,
             0
         );
     }
@@ -53,6 +53,19 @@ contract Vesting_UpdatePoolCliffgData_Unit_Test is Unit_Test {
         vm.expectRevert(Errors.Vesting__PercentageOverflow.selector);
         vm.prank(admin);
         vesting.updatePoolCliffData(PRIMARY_POOL, CLIFF_IN_DAYS_2, 100, 51);
+    }
+
+    function test_updatePoolCliffData_UpdatesCliffEndDateCorrectly()
+        external
+        approveAndAddPool
+        updatePoolCliffData
+    {
+        (uint32 cliffEndDate, , , ) = vesting.getPoolCliffData(PRIMARY_POOL);
+        assertEq(
+            cliffEndDate,
+            LISTING_DATE + CLIFF_IN_SECONDS_2,
+            "Cliff end date incorrect"
+        );
     }
 
     function test_updatePoolCliffData_UpdatesCliffInDaysCorrectly()
@@ -72,7 +85,7 @@ contract Vesting_UpdatePoolCliffgData_Unit_Test is Unit_Test {
         (, , uint16 dividend, ) = vesting.getPoolCliffData(PRIMARY_POOL);
         assertEq(
             dividend,
-            CLIFF_PERCENTAGE_DIVIDEND_2,
+            CLIFF_PERCENTAGE_DIVIDEND_3,
             "Listing percentage dividend incorrect"
         );
     }
@@ -85,7 +98,7 @@ contract Vesting_UpdatePoolCliffgData_Unit_Test is Unit_Test {
         (, , , uint16 divisor) = vesting.getPoolCliffData(PRIMARY_POOL);
         assertEq(
             divisor,
-            CLIFF_PERCENTAGE_DIVISOR_2,
+            CLIFF_PERCENTAGE_DIVISOR_20,
             "Listing percentage divisor incorrect"
         );
     }
@@ -94,13 +107,14 @@ contract Vesting_UpdatePoolCliffgData_Unit_Test is Unit_Test {
         external
         approveAndAddPool
     {
+        uint32 cliffEndDate = LISTING_DATE + CLIFF_IN_SECONDS_2;
         vm.expectEmit(address(vesting));
         emit PoolCliffDataUpdated(
             PRIMARY_POOL,
-            CLIFF_END_DATE,
+            cliffEndDate,
             CLIFF_IN_DAYS_2,
-            CLIFF_PERCENTAGE_DIVIDEND_2,
-            CLIFF_PERCENTAGE_DIVISOR_2
+            CLIFF_PERCENTAGE_DIVIDEND_3,
+            CLIFF_PERCENTAGE_DIVISOR_20
         );
 
         _updatePoolCliffData();

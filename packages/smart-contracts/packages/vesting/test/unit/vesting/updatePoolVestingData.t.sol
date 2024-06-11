@@ -18,7 +18,7 @@ contract Vesting_UpdateVestinData_Unit_Test is Unit_Test {
         vm.prank(alice);
         vesting.updatePoolVestingData(
             PRIMARY_POOL,
-            VESTING_DURATION_IN_MONTHS_2
+            VESTING_DURATION_IN_MONTHS_5
         );
     }
 
@@ -31,6 +31,15 @@ contract Vesting_UpdateVestinData_Unit_Test is Unit_Test {
         _updatePoolVestingData();
     }
 
+    function test_updateVestingData_RevertIf_VestingDurationZero()
+        external
+        approveAndAddPool
+    {
+        vm.expectRevert(Errors.Vesting__VestingDurationZero.selector);
+        vm.prank(admin);
+        vesting.updatePoolVestingData(PRIMARY_POOL, 0);
+    }
+
     function test_updateVestingData_UpdatesVestingDurationInDaysCorrectly()
         external
         approveAndAddPool
@@ -41,7 +50,7 @@ contract Vesting_UpdateVestinData_Unit_Test is Unit_Test {
         );
         assertEq(
             vestingDurationInDays,
-            VESTING_DURATION_IN_MONTHS_2 * 30,
+            VESTING_DURATION_IN_MONTHS_5 * 30,
             "Vesting duration in days incorrect"
         );
     }
@@ -56,7 +65,7 @@ contract Vesting_UpdateVestinData_Unit_Test is Unit_Test {
         );
         assertEq(
             vestingDurationInMonths,
-            VESTING_DURATION_IN_MONTHS_2,
+            VESTING_DURATION_IN_MONTHS_5,
             "Vesting duration in months incorrect"
         );
     }
@@ -68,7 +77,7 @@ contract Vesting_UpdateVestinData_Unit_Test is Unit_Test {
     {
         (uint32 endDate, , ) = vesting.getPoolVestingData(PRIMARY_POOL);
         uint32 actualEndDate = uint32(
-            LISTING_DATE + CLIFF_IN_SECONDS_2 + VESTING_DURATION_IN_SECONDS_2
+            LISTING_DATE + CLIFF_IN_SECONDS + VESTING_DURATION_IN_SECONDS_5
         );
 
         assertEq(endDate, actualEndDate, "Vesting end date incorrect");
@@ -80,12 +89,12 @@ contract Vesting_UpdateVestinData_Unit_Test is Unit_Test {
     {
         vm.expectEmit(address(vesting));
         uint32 newVestingEndDate = CLIFF_END_DATE +
-            VESTING_DURATION_IN_SECONDS_2;
+            VESTING_DURATION_IN_SECONDS_5;
         emit PoolVestingDataUpdated(
             PRIMARY_POOL,
             newVestingEndDate,
-            VESTING_DURATION_IN_MONTHS_2,
-            VESTING_DURATION_IN_DAYS_2
+            VESTING_DURATION_IN_MONTHS_5,
+            VESTING_DURATION_IN_DAYS_5
         );
 
         _updatePoolVestingData();

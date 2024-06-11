@@ -219,8 +219,8 @@ contract Base_Test is
         vm.prank(admin);
         vesting.updatePoolListingData(
             pid,
-            LISTING_PERCENTAGE_DIVIDEND_2,
-            LISTING_PERCENTAGE_DIVISOR_2
+            LISTING_PERCENTAGE_DIVIDEND_15,
+            LISTING_PERCENTAGE_DIVISOR_40
         );
     }
 
@@ -233,8 +233,8 @@ contract Base_Test is
         vesting.updatePoolCliffData(
             pid,
             CLIFF_IN_DAYS_2,
-            CLIFF_PERCENTAGE_DIVIDEND_2,
-            CLIFF_PERCENTAGE_DIVISOR_2
+            CLIFF_PERCENTAGE_DIVIDEND_3,
+            CLIFF_PERCENTAGE_DIVISOR_20
         );
     }
 
@@ -244,7 +244,7 @@ contract Base_Test is
 
     function _updatePoolVestingData(uint16 pid) internal {
         vm.prank(admin);
-        vesting.updatePoolVestingData(pid, VESTING_DURATION_IN_MONTHS_2);
+        vesting.updatePoolVestingData(pid, VESTING_DURATION_IN_MONTHS_5);
     }
 
     function _addBeneficiary(address beneficiary) internal {
