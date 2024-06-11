@@ -16,10 +16,7 @@ contract Vesting_UpdateVestinData_Unit_Test is Unit_Test {
             )
         );
         vm.prank(alice);
-        vesting.updatePoolVestingData(
-            PRIMARY_POOL,
-            VESTING_DURATION_IN_MONTHS_5
-        );
+        vesting.updatePoolVestingData(PRIMARY_POOL, DURATION_5_MONTHS);
     }
 
     function test_updateVestingData_RevertIf_BeneficiariesAdded()
@@ -50,7 +47,7 @@ contract Vesting_UpdateVestinData_Unit_Test is Unit_Test {
         );
         assertEq(
             vestingDurationInDays,
-            VESTING_DURATION_IN_MONTHS_5 * 30,
+            DURATION_5_MONTHS * 30,
             "Vesting duration in days incorrect"
         );
     }
@@ -65,7 +62,7 @@ contract Vesting_UpdateVestinData_Unit_Test is Unit_Test {
         );
         assertEq(
             vestingDurationInMonths,
-            VESTING_DURATION_IN_MONTHS_5,
+            DURATION_5_MONTHS,
             "Vesting duration in months incorrect"
         );
     }
@@ -77,7 +74,7 @@ contract Vesting_UpdateVestinData_Unit_Test is Unit_Test {
     {
         (uint32 endDate, , ) = vesting.getPoolVestingData(PRIMARY_POOL);
         uint32 actualEndDate = uint32(
-            LISTING_DATE + CLIFF_IN_SECONDS + VESTING_DURATION_IN_SECONDS_5
+            LISTING_DATE + CLIFF_IN_SECONDS + DURATION_5_MONTHS_IN_SECONDS
         );
 
         assertEq(endDate, actualEndDate, "Vesting end date incorrect");
@@ -89,12 +86,12 @@ contract Vesting_UpdateVestinData_Unit_Test is Unit_Test {
     {
         vm.expectEmit(address(vesting));
         uint32 newVestingEndDate = CLIFF_END_DATE +
-            VESTING_DURATION_IN_SECONDS_5;
+            DURATION_5_MONTHS_IN_SECONDS;
         emit PoolVestingDataUpdated(
             PRIMARY_POOL,
             newVestingEndDate,
-            VESTING_DURATION_IN_MONTHS_5,
-            VESTING_DURATION_IN_DAYS_5
+            DURATION_5_MONTHS,
+            DURATION_5_MONTHS_IN_DAYS
         );
 
         _updatePoolVestingData();

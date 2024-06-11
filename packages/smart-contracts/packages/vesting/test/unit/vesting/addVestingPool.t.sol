@@ -29,7 +29,7 @@ contract Vesting_AddVestingPool_Unit_Test is Unit_Test {
             CLIFF_IN_DAYS,
             CLIFF_PERCENTAGE_DIVIDEND,
             CLIFF_PERCENTAGE_DIVISOR,
-            VESTING_DURATION_IN_MONTHS,
+            DURATION_3_MONTHS,
             IVesting.UnlockTypes.MONTHLY,
             0
         );
@@ -45,7 +45,7 @@ contract Vesting_AddVestingPool_Unit_Test is Unit_Test {
             CLIFF_IN_DAYS,
             CLIFF_PERCENTAGE_DIVIDEND,
             CLIFF_PERCENTAGE_DIVISOR,
-            VESTING_DURATION_IN_MONTHS,
+            DURATION_3_MONTHS,
             IVesting.UnlockTypes.MONTHLY,
             TOTAL_POOL_TOKEN_AMOUNT
         );
@@ -70,7 +70,7 @@ contract Vesting_AddVestingPool_Unit_Test is Unit_Test {
             CLIFF_IN_DAYS,
             CLIFF_PERCENTAGE_DIVIDEND,
             CLIFF_PERCENTAGE_DIVISOR,
-            VESTING_DURATION_IN_MONTHS,
+            DURATION_3_MONTHS,
             IVesting.UnlockTypes.MONTHLY,
             TOTAL_POOL_TOKEN_AMOUNT
         );
@@ -86,7 +86,7 @@ contract Vesting_AddVestingPool_Unit_Test is Unit_Test {
             CLIFF_IN_DAYS,
             CLIFF_PERCENTAGE_DIVIDEND,
             0,
-            VESTING_DURATION_IN_MONTHS,
+            DURATION_3_MONTHS,
             IVesting.UnlockTypes.MONTHLY,
             TOTAL_POOL_TOKEN_AMOUNT
         );
@@ -106,7 +106,7 @@ contract Vesting_AddVestingPool_Unit_Test is Unit_Test {
             CLIFF_IN_DAYS,
             5,
             10,
-            VESTING_DURATION_IN_MONTHS,
+            DURATION_3_MONTHS,
             IVesting.UnlockTypes.MONTHLY,
             TOTAL_POOL_TOKEN_AMOUNT
         );
@@ -218,7 +218,7 @@ contract Vesting_AddVestingPool_Unit_Test is Unit_Test {
         );
         assertEq(
             vestingDurationInDays,
-            VESTING_DURATION_IN_MONTHS * 30,
+            DURATION_3_MONTHS * 30,
             "Vesting duration in days incorrect"
         );
     }
@@ -232,7 +232,7 @@ contract Vesting_AddVestingPool_Unit_Test is Unit_Test {
         );
         assertEq(
             vestingDurationInMonths,
-            VESTING_DURATION_IN_MONTHS,
+            DURATION_3_MONTHS,
             "Vesting duration in months incorrect"
         );
     }
@@ -243,7 +243,7 @@ contract Vesting_AddVestingPool_Unit_Test is Unit_Test {
     {
         (uint32 endDate, , ) = vesting.getPoolVestingData(PRIMARY_POOL);
         uint32 actualEndDate = uint32(
-            LISTING_DATE + CLIFF_IN_SECONDS + VESTING_DURATION_IN_SECONDS
+            LISTING_DATE + CLIFF_IN_SECONDS + DURATION_3_MONTHS_IN_SECONDS
         );
 
         assertEq(endDate, actualEndDate, "Vesting end date incorrect");

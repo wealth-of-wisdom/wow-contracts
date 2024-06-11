@@ -47,7 +47,7 @@ contract Base_Test is
     constructor() {
         LISTING_DATE = uint32(block.timestamp) + DAY;
         CLIFF_END_DATE = LISTING_DATE + CLIFF_IN_SECONDS;
-        VESTING_END_DATE = CLIFF_END_DATE + VESTING_DURATION_IN_SECONDS;
+        VESTING_END_DATE = CLIFF_END_DATE + DURATION_3_MONTHS_IN_SECONDS;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -191,7 +191,7 @@ contract Base_Test is
             CLIFF_IN_DAYS,
             CLIFF_PERCENTAGE_DIVIDEND,
             CLIFF_PERCENTAGE_DIVISOR,
-            VESTING_DURATION_IN_MONTHS,
+            DURATION_3_MONTHS,
             MONTHLY_UNLOCK_TYPE,
             TOTAL_POOL_TOKEN_AMOUNT
         );
@@ -244,7 +244,7 @@ contract Base_Test is
 
     function _updatePoolVestingData(uint16 pid) internal {
         vm.prank(admin);
-        vesting.updatePoolVestingData(pid, VESTING_DURATION_IN_MONTHS_5);
+        vesting.updatePoolVestingData(pid, DURATION_5_MONTHS);
     }
 
     function _addBeneficiary(address beneficiary) internal {

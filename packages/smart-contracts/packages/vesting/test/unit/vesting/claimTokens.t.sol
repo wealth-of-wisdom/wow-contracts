@@ -114,7 +114,7 @@ contract Vesting_ClaimTokens_Unit_Test is Unit_Test {
         approveAndAddPool
         addBeneficiary(alice)
     {
-        vm.warp(LISTING_DATE + CLIFF_IN_SECONDS + VESTING_DURATION_IN_SECONDS);
+        vm.warp(LISTING_DATE + CLIFF_IN_SECONDS + DURATION_3_MONTHS_IN_SECONDS);
         vm.prank(alice);
         vesting.claimTokens(PRIMARY_POOL);
 

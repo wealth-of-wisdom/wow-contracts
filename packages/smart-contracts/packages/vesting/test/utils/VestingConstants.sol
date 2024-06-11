@@ -29,10 +29,10 @@ abstract contract VestingConstants is StakingConstants {
     uint16 internal constant CLIFF_PERCENTAGE_DIVIDEND = 1;
     uint16 internal constant CLIFF_PERCENTAGE_DIVISOR = 10;
 
-    uint16 internal constant VESTING_DURATION_IN_MONTHS = 3;
-    uint16 internal constant VESTING_DURATION_IN_DAYS = 3 * 30;
-    uint32 internal constant VESTING_DURATION_IN_SECONDS =
-        VESTING_DURATION_IN_DAYS * DAY;
+    uint16 internal constant DURATION_3_MONTHS = 3;
+    uint16 internal constant DURATION_3_MONTHS_IN_DAYS = 3 * 30;
+    uint32 internal constant DURATION_3_MONTHS_IN_SECONDS =
+        DURATION_3_MONTHS_IN_DAYS * DAY;
 
     /*//////////////////////////////////////////////////////////////////////////
                                 VESTING AMOUNTS   
@@ -80,9 +80,8 @@ abstract contract VestingConstants is StakingConstants {
     uint16 internal constant CLIFF_PERCENTAGE_DIVIDEND_3 = 3;
     uint16 internal constant CLIFF_PERCENTAGE_DIVISOR_20 = 20;
 
-    uint16 internal constant VESTING_DURATION_IN_MONTHS_5 = 5;
-    uint16 internal constant VESTING_DURATION_IN_DAYS_5 =
-        VESTING_DURATION_IN_MONTHS_5 * 30;
-    uint32 internal constant VESTING_DURATION_IN_SECONDS_5 =
-        VESTING_DURATION_IN_DAYS_5 * DAY;
+    uint16 internal constant DURATION_5_MONTHS = 5;
+    uint16 internal constant DURATION_5_MONTHS_IN_DAYS = DURATION_5_MONTHS * 30;
+    uint32 internal constant DURATION_5_MONTHS_IN_SECONDS =
+        DURATION_5_MONTHS_IN_DAYS * DAY;
 }

@@ -154,7 +154,7 @@ contract Vesting_UpdateGeneralPoolData_Unit_Test is Unit_Test {
             CLIFF_IN_DAYS,
             CLIFF_PERCENTAGE_DIVIDEND,
             CLIFF_PERCENTAGE_DIVISOR,
-            VESTING_DURATION_IN_MONTHS,
+            DURATION_3_MONTHS,
             IVesting.UnlockTypes.MONTHLY,
             TOTAL_POOL_TOKEN_AMOUNT_2
         );
@@ -193,7 +193,7 @@ contract Vesting_UpdateGeneralPoolData_Unit_Test is Unit_Test {
             CLIFF_IN_DAYS,
             CLIFF_PERCENTAGE_DIVIDEND,
             CLIFF_PERCENTAGE_DIVISOR,
-            VESTING_DURATION_IN_MONTHS,
+            DURATION_3_MONTHS,
             IVesting.UnlockTypes.MONTHLY,
             TOTAL_POOL_TOKEN_AMOUNT_2
         );

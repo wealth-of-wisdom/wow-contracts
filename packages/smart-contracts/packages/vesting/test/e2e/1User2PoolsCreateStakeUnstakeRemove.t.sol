@@ -34,7 +34,7 @@ contract Vesting_E2E_Test is VestingAssertions {
                 CLIFF_IN_DAYS,
                 CLIFF_PERCENTAGE_DIVIDEND,
                 CLIFF_PERCENTAGE_DIVISOR,
-                VESTING_DURATION_IN_MONTHS,
+                DURATION_3_MONTHS,
                 MONTHLY_UNLOCK_TYPE,
                 TOTAL_POOL_TOKEN_AMOUNT
             );
@@ -46,7 +46,7 @@ contract Vesting_E2E_Test is VestingAssertions {
                 cliffInDays: CLIFF_IN_DAYS,
                 cliffPercentageDividend: CLIFF_PERCENTAGE_DIVIDEND,
                 cliffPercentageDivisor: CLIFF_PERCENTAGE_DIVISOR,
-                vestingDurationInMonths: VESTING_DURATION_IN_MONTHS,
+                vestingDurationInMonths: DURATION_3_MONTHS,
                 unlockType: MONTHLY_UNLOCK_TYPE,
                 totalPoolTokenAmount: TOTAL_POOL_TOKEN_AMOUNT,
                 vestingBalanceBefore: balances.vestingBalanceBefore,
@@ -68,7 +68,7 @@ contract Vesting_E2E_Test is VestingAssertions {
                 CLIFF_IN_DAYS_2,
                 CLIFF_PERCENTAGE_DIVIDEND_3,
                 CLIFF_PERCENTAGE_DIVISOR_20,
-                VESTING_DURATION_IN_MONTHS_5,
+                DURATION_5_MONTHS,
                 MONTHLY_UNLOCK_TYPE,
                 TOTAL_POOL_TOKEN_AMOUNT_2
             );
@@ -80,7 +80,7 @@ contract Vesting_E2E_Test is VestingAssertions {
                 cliffInDays: CLIFF_IN_DAYS_2,
                 cliffPercentageDividend: CLIFF_PERCENTAGE_DIVIDEND_3,
                 cliffPercentageDivisor: CLIFF_PERCENTAGE_DIVISOR_20,
-                vestingDurationInMonths: VESTING_DURATION_IN_MONTHS_5,
+                vestingDurationInMonths: DURATION_5_MONTHS,
                 unlockType: MONTHLY_UNLOCK_TYPE,
                 totalPoolTokenAmount: TOTAL_POOL_TOKEN_AMOUNT_2,
                 vestingBalanceBefore: balances.vestingBalanceBefore,
