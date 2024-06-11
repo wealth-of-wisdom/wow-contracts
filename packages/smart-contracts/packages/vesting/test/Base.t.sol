@@ -129,6 +129,11 @@ contract Base_Test is
         _;
     }
 
+    modifier approveAndAddPoolWithName(string memory name) {
+        _approveAndAddPool(name);
+        _;
+    }
+
     modifier addBeneficiary(address beneficiary) {
         _addBeneficiary(beneficiary);
         _;
@@ -136,6 +141,26 @@ contract Base_Test is
 
     modifier stakeVestedTokens(address beneficiary) {
         _stakeVestedTokens(beneficiary);
+        _;
+    }
+
+    modifier updateGeneralPoolData() {
+        _updateGeneralPoolData();
+        _;
+    }
+
+    modifier updatePoolListingData() {
+        _updatePoolListingData();
+        _;
+    }
+
+    modifier updatePoolCliffData() {
+        _updatePoolCliffData();
+        _;
+    }
+
+    modifier updatePoolVestingData() {
+        _updatePoolVestingData();
         _;
     }
 
@@ -169,6 +194,59 @@ contract Base_Test is
             VESTING_DURATION_IN_MONTHS,
             MONTHLY_UNLOCK_TYPE,
             TOTAL_POOL_TOKEN_AMOUNT
+        );
+    }
+
+    function _updateGeneralPoolData() internal {
+        _updateGeneralPoolData(PRIMARY_POOL);
+    }
+
+    function _updateGeneralPoolData(uint16 pid) internal {
+        vm.prank(admin);
+        vesting.updateGeneralPoolData(
+            pid,
+            POOL_NAME_2,
+            DAILY_UNLOCK_TYPE,
+            TOTAL_POOL_TOKEN_AMOUNT_2
+        );
+    }
+
+    function _updatePoolListingData() internal {
+        _updatePoolListingData(PRIMARY_POOL);
+    }
+
+    function _updatePoolListingData(uint16 pid) internal {
+        vm.prank(admin);
+        vesting.updatePoolListingData(
+            pid,
+            LISTING_PERCENTAGE_DIVIDEND_2,
+            LISTING_PERCENTAGE_DIVISOR_2
+        );
+    }
+
+    function _updatePoolCliffData() internal {
+        _updatePoolCliffData(PRIMARY_POOL);
+    }
+
+    function _updatePoolCliffData(uint16 pid) internal {
+        vm.prank(admin);
+        vesting.updatePoolCliffData(
+            pid,
+            CLIFF_IN_DAYS_2,
+            CLIFF_PERCENTAGE_DIVIDEND_2,
+            CLIFF_PERCENTAGE_DIVISOR_2
+        );
+    }
+
+    function _updatePoolVestingData() internal {
+        _updatePoolVestingData(PRIMARY_POOL);
+    }
+
+    function _updatePoolVestingData(uint16 pid) internal {
+        vm.prank(admin);
+        vesting.updatePoolVestingData(
+            PRIMARY_POOL,
+            VESTING_DURATION_IN_MONTHS_2
         );
     }
 
