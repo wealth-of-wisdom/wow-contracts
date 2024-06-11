@@ -160,8 +160,10 @@ contract Vesting_UpdateGeneralPoolData_Unit_Test is Unit_Test {
         );
 
         uint256 adminBalanceBefore = wowToken.balanceOf(admin);
+        uint256 tokenAmountTransferredBack = TOTAL_POOL_TOKEN_AMOUNT -
+            TOTAL_POOL_TOKEN_AMOUNT_2;
 
-        wowToken.approve(address(vesting), TOTAL_POOL_TOKEN_AMOUNT);
+        wowToken.approve(address(vesting), tokenAmountTransferredBack);
         vesting.updateGeneralPoolData(
             PRIMARY_POOL,
             POOL_NAME_2,
@@ -171,8 +173,6 @@ contract Vesting_UpdateGeneralPoolData_Unit_Test is Unit_Test {
         vm.stopPrank();
 
         uint256 adminBalanceAfter = wowToken.balanceOf(admin);
-        uint256 tokenAmountTransferredBack = TOTAL_POOL_TOKEN_AMOUNT -
-            TOTAL_POOL_TOKEN_AMOUNT_2;
 
         assertEq(
             adminBalanceBefore - tokenAmountTransferredBack,
@@ -199,8 +199,10 @@ contract Vesting_UpdateGeneralPoolData_Unit_Test is Unit_Test {
         );
 
         uint256 vestingBalanceBefore = wowToken.balanceOf(address(vesting));
+        uint256 tokenAmountTransferredBack = TOTAL_POOL_TOKEN_AMOUNT -
+            TOTAL_POOL_TOKEN_AMOUNT_2;
 
-        wowToken.approve(address(vesting), TOTAL_POOL_TOKEN_AMOUNT);
+        wowToken.approve(address(vesting), tokenAmountTransferredBack);
         vesting.updateGeneralPoolData(
             PRIMARY_POOL,
             POOL_NAME_2,
@@ -210,8 +212,6 @@ contract Vesting_UpdateGeneralPoolData_Unit_Test is Unit_Test {
         vm.stopPrank();
 
         uint256 vestingBalanceAfter = wowToken.balanceOf(address(vesting));
-        uint256 tokenAmountTransferredBack = TOTAL_POOL_TOKEN_AMOUNT -
-            TOTAL_POOL_TOKEN_AMOUNT_2;
 
         assertEq(
             vestingBalanceBefore + tokenAmountTransferredBack,

@@ -244,10 +244,7 @@ contract Base_Test is
 
     function _updatePoolVestingData(uint16 pid) internal {
         vm.prank(admin);
-        vesting.updatePoolVestingData(
-            PRIMARY_POOL,
-            VESTING_DURATION_IN_MONTHS_2
-        );
+        vesting.updatePoolVestingData(pid, VESTING_DURATION_IN_MONTHS_2);
     }
 
     function _addBeneficiary(address beneficiary) internal {
