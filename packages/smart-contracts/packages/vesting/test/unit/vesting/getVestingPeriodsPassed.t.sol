@@ -33,7 +33,7 @@ contract Vesting_GetVestingPeriodsPassed_Unit_Test is Unit_Test {
 
         assertEq(
             duration,
-            VESTING_DURATION_IN_DAYS,
+            DURATION_3_MONTHS_IN_DAYS,
             "Vesting duration incorrect"
         );
     }
@@ -49,7 +49,7 @@ contract Vesting_GetVestingPeriodsPassed_Unit_Test is Unit_Test {
 
         assertEq(
             duration,
-            VESTING_DURATION_IN_DAYS,
+            DURATION_3_MONTHS_IN_DAYS,
             "Vesting duration incorrect"
         );
     }
@@ -122,11 +122,7 @@ contract Vesting_GetVestingPeriodsPassed_Unit_Test is Unit_Test {
         vm.warp(CLIFF_END_DATE - 1 minutes);
         (, uint16 duration) = vesting.getVestingPeriodsPassed(PRIMARY_POOL);
 
-        assertEq(
-            duration,
-            VESTING_DURATION_IN_MONTHS,
-            "Vesting duration incorrect"
-        );
+        assertEq(duration, DURATION_3_MONTHS, "Vesting duration incorrect");
     }
 
     function test_getVestingPeriodsPassed_MonthlyUnlock_ReturnsVestingDurationOneMonthAfterCliff()
@@ -137,11 +133,7 @@ contract Vesting_GetVestingPeriodsPassed_Unit_Test is Unit_Test {
         vm.warp(CLIFF_END_DATE + MONTH);
         (, uint16 duration) = vesting.getVestingPeriodsPassed(PRIMARY_POOL);
 
-        assertEq(
-            duration,
-            VESTING_DURATION_IN_MONTHS,
-            "Vesting duration incorrect"
-        );
+        assertEq(duration, DURATION_3_MONTHS, "Vesting duration incorrect");
     }
 
     function test_getVestingPeriodsPassed_MonthlyUnlock_ReturnsZeroPeriodsPassedIfCliffNotReached()

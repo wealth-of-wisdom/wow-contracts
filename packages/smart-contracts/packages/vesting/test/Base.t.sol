@@ -47,7 +47,7 @@ contract Base_Test is
     constructor() {
         LISTING_DATE = uint32(block.timestamp) + DAY;
         CLIFF_END_DATE = LISTING_DATE + CLIFF_IN_SECONDS;
-        VESTING_END_DATE = CLIFF_END_DATE + VESTING_DURATION_IN_SECONDS;
+        VESTING_END_DATE = CLIFF_END_DATE + DURATION_3_MONTHS_IN_SECONDS;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -129,6 +129,11 @@ contract Base_Test is
         _;
     }
 
+    modifier approveAndAddPoolWithName(string memory name) {
+        _approveAndAddPool(name);
+        _;
+    }
+
     modifier addBeneficiary(address beneficiary) {
         _addBeneficiary(beneficiary);
         _;
@@ -136,6 +141,26 @@ contract Base_Test is
 
     modifier stakeVestedTokens(address beneficiary) {
         _stakeVestedTokens(beneficiary);
+        _;
+    }
+
+    modifier updateGeneralPoolData() {
+        _updateGeneralPoolData();
+        _;
+    }
+
+    modifier updatePoolListingData() {
+        _updatePoolListingData();
+        _;
+    }
+
+    modifier updatePoolCliffData() {
+        _updatePoolCliffData();
+        _;
+    }
+
+    modifier updatePoolVestingData() {
+        _updatePoolVestingData();
         _;
     }
 
@@ -166,10 +191,60 @@ contract Base_Test is
             CLIFF_IN_DAYS,
             CLIFF_PERCENTAGE_DIVIDEND,
             CLIFF_PERCENTAGE_DIVISOR,
-            VESTING_DURATION_IN_MONTHS,
+            DURATION_3_MONTHS,
             MONTHLY_UNLOCK_TYPE,
             TOTAL_POOL_TOKEN_AMOUNT
         );
+    }
+
+    function _updateGeneralPoolData() internal {
+        _updateGeneralPoolData(PRIMARY_POOL);
+    }
+
+    function _updateGeneralPoolData(uint16 pid) internal {
+        vm.prank(admin);
+        vesting.updateGeneralPoolData(
+            pid,
+            POOL_NAME_2,
+            DAILY_UNLOCK_TYPE,
+            TOTAL_POOL_TOKEN_AMOUNT_2
+        );
+    }
+
+    function _updatePoolListingData() internal {
+        _updatePoolListingData(PRIMARY_POOL);
+    }
+
+    function _updatePoolListingData(uint16 pid) internal {
+        vm.prank(admin);
+        vesting.updatePoolListingData(
+            pid,
+            LISTING_PERCENTAGE_DIVIDEND_15,
+            LISTING_PERCENTAGE_DIVISOR_40
+        );
+    }
+
+    function _updatePoolCliffData() internal {
+        _updatePoolCliffData(PRIMARY_POOL);
+    }
+
+    function _updatePoolCliffData(uint16 pid) internal {
+        vm.prank(admin);
+        vesting.updatePoolCliffData(
+            pid,
+            CLIFF_IN_DAYS_2,
+            CLIFF_PERCENTAGE_DIVIDEND_3,
+            CLIFF_PERCENTAGE_DIVISOR_20
+        );
+    }
+
+    function _updatePoolVestingData() internal {
+        _updatePoolVestingData(PRIMARY_POOL);
+    }
+
+    function _updatePoolVestingData(uint16 pid) internal {
+        vm.prank(admin);
+        vesting.updatePoolVestingData(pid, DURATION_5_MONTHS);
     }
 
     function _addBeneficiary(address beneficiary) internal {

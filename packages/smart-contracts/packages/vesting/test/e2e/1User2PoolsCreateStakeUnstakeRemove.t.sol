@@ -34,7 +34,7 @@ contract Vesting_E2E_Test is VestingAssertions {
                 CLIFF_IN_DAYS,
                 CLIFF_PERCENTAGE_DIVIDEND,
                 CLIFF_PERCENTAGE_DIVISOR,
-                VESTING_DURATION_IN_MONTHS,
+                DURATION_3_MONTHS,
                 MONTHLY_UNLOCK_TYPE,
                 TOTAL_POOL_TOKEN_AMOUNT
             );
@@ -46,7 +46,7 @@ contract Vesting_E2E_Test is VestingAssertions {
                 cliffInDays: CLIFF_IN_DAYS,
                 cliffPercentageDividend: CLIFF_PERCENTAGE_DIVIDEND,
                 cliffPercentageDivisor: CLIFF_PERCENTAGE_DIVISOR,
-                vestingDurationInMonths: VESTING_DURATION_IN_MONTHS,
+                vestingDurationInMonths: DURATION_3_MONTHS,
                 unlockType: MONTHLY_UNLOCK_TYPE,
                 totalPoolTokenAmount: TOTAL_POOL_TOKEN_AMOUNT,
                 vestingBalanceBefore: balances.vestingBalanceBefore,
@@ -63,24 +63,24 @@ contract Vesting_E2E_Test is VestingAssertions {
             wowToken.approve(address(vesting), TOTAL_POOL_TOKEN_AMOUNT_2);
             vesting.addVestingPool(
                 POOL_NAME_2,
-                LISTING_PERCENTAGE_DIVIDEND_2,
-                LISTING_PERCENTAGE_DIVISOR_2,
+                LISTING_PERCENTAGE_DIVIDEND_15,
+                LISTING_PERCENTAGE_DIVISOR_40,
                 CLIFF_IN_DAYS_2,
-                CLIFF_PERCENTAGE_DIVIDEND_2,
-                CLIFF_PERCENTAGE_DIVISOR_2,
-                VESTING_DURATION_IN_MONTHS_2,
+                CLIFF_PERCENTAGE_DIVIDEND_3,
+                CLIFF_PERCENTAGE_DIVISOR_20,
+                DURATION_5_MONTHS,
                 MONTHLY_UNLOCK_TYPE,
                 TOTAL_POOL_TOKEN_AMOUNT_2
             );
             poolData = PoolData({
                 pid: SECONDARY_POOL,
                 name: POOL_NAME_2,
-                listingPercentageDividend: LISTING_PERCENTAGE_DIVIDEND_2,
-                listingPercentageDivisor: LISTING_PERCENTAGE_DIVISOR_2,
+                listingPercentageDividend: LISTING_PERCENTAGE_DIVIDEND_15,
+                listingPercentageDivisor: LISTING_PERCENTAGE_DIVISOR_40,
                 cliffInDays: CLIFF_IN_DAYS_2,
-                cliffPercentageDividend: CLIFF_PERCENTAGE_DIVIDEND_2,
-                cliffPercentageDivisor: CLIFF_PERCENTAGE_DIVISOR_2,
-                vestingDurationInMonths: VESTING_DURATION_IN_MONTHS_2,
+                cliffPercentageDividend: CLIFF_PERCENTAGE_DIVIDEND_3,
+                cliffPercentageDivisor: CLIFF_PERCENTAGE_DIVISOR_20,
+                vestingDurationInMonths: DURATION_5_MONTHS,
                 unlockType: MONTHLY_UNLOCK_TYPE,
                 totalPoolTokenAmount: TOTAL_POOL_TOKEN_AMOUNT_2,
                 vestingBalanceBefore: balances.vestingBalanceBefore,
@@ -109,10 +109,10 @@ contract Vesting_E2E_Test is VestingAssertions {
                 0,
                 BAND_2_PRICE,
                 BAND_2_PRICE,
-                LISTING_PERCENTAGE_DIVIDEND_2,
-                LISTING_PERCENTAGE_DIVISOR_2,
-                CLIFF_PERCENTAGE_DIVIDEND_2,
-                CLIFF_PERCENTAGE_DIVISOR_2
+                LISTING_PERCENTAGE_DIVIDEND_15,
+                LISTING_PERCENTAGE_DIVISOR_40,
+                CLIFF_PERCENTAGE_DIVIDEND_3,
+                CLIFF_PERCENTAGE_DIVISOR_20
             );
             vm.stopPrank();
         }
@@ -153,10 +153,10 @@ contract Vesting_E2E_Test is VestingAssertions {
                 0,
                 0,
                 0,
-                LISTING_PERCENTAGE_DIVIDEND_2,
-                LISTING_PERCENTAGE_DIVISOR_2,
-                CLIFF_PERCENTAGE_DIVIDEND_2,
-                CLIFF_PERCENTAGE_DIVISOR_2
+                LISTING_PERCENTAGE_DIVIDEND_15,
+                LISTING_PERCENTAGE_DIVISOR_40,
+                CLIFF_PERCENTAGE_DIVIDEND_3,
+                CLIFF_PERCENTAGE_DIVISOR_20
             );
             VestingAssertions.assertBeneficiaryData(
                 SECONDARY_POOL,
@@ -165,10 +165,10 @@ contract Vesting_E2E_Test is VestingAssertions {
                 0,
                 BAND_2_PRICE,
                 BAND_2_PRICE,
-                LISTING_PERCENTAGE_DIVIDEND_2,
-                LISTING_PERCENTAGE_DIVISOR_2,
-                CLIFF_PERCENTAGE_DIVIDEND_2,
-                CLIFF_PERCENTAGE_DIVISOR_2
+                LISTING_PERCENTAGE_DIVIDEND_15,
+                LISTING_PERCENTAGE_DIVISOR_40,
+                CLIFF_PERCENTAGE_DIVIDEND_3,
+                CLIFF_PERCENTAGE_DIVISOR_20
             );
         }
     }

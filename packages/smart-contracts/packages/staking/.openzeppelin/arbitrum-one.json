@@ -1,0 +1,1407 @@
+{
+  "manifestVersion": "3.2",
+  "proxies": [
+    {
+      "address": "0x3d5f603c739C52D47D9691f885119F9bDC1699eB",
+      "txHash": "0x13a0179cbcca70f89beb90f3e9da7c8c7030a91784c0018737d150dd951272f3",
+      "kind": "uups"
+    },
+    {
+      "address": "0xd77447e7a8Da3ad6563E499DaFf299E05e7bE690",
+      "txHash": "0x95cd2ec1cad5a1c6fff33599076dc8c1e388c5e85cefa77918cb4b73c73e803b",
+      "kind": "uups"
+    },
+    {
+      "address": "0xfF441106225c180DafAf59C830B4930A99f2fdD7",
+      "txHash": "0xe8aaded39bfac569d507537946d1cc52f29b50a3f5fb40909fc4a34ac20d10dd",
+      "kind": "uups"
+    }
+  ],
+  "impls": {
+    "e30ecfa49df08667025431c9e273f940034265bda3d99bd3a017f933fd5c63f1": {
+      "address": "0x00F8b9910fec63212D40f4ca5d1b7F2c12063706",
+      "txHash": "0x8d1946f87a9c51aebb8c8fb4f62fcb4dd6671f276f604fa15c4b478d9998b4f2",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [
+          {
+            "label": "s_users",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_struct(AddressToUintMap)2753_storage",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:53"
+          },
+          {
+            "label": "s_stakerBands",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:56"
+          },
+          {
+            "label": "s_stakerRewards",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_mapping(t_bytes32,t_struct(StakerReward)6030_storage)",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:59"
+          },
+          {
+            "label": "s_bands",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_mapping(t_uint256,t_struct(StakerBand)6025_storage)",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:62"
+          },
+          {
+            "label": "s_poolData",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_mapping(t_uint16,t_struct(Pool)6039_storage)",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:65"
+          },
+          {
+            "label": "s_bandLevelData",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_mapping(t_uint16,t_struct(BandLevel)6036_storage)",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:68"
+          },
+          {
+            "label": "s_sharesInMonth",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_array(t_uint48)dyn_storage",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:74"
+          },
+          {
+            "label": "s_usdtToken",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_contract(IERC20)1372",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:77"
+          },
+          {
+            "label": "s_usdcToken",
+            "offset": 0,
+            "slot": "10",
+            "type": "t_contract(IERC20)1372",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:80"
+          },
+          {
+            "label": "s_wowToken",
+            "offset": 0,
+            "slot": "11",
+            "type": "t_contract(IERC20)1372",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:83"
+          },
+          {
+            "label": "s_nextBandId",
+            "offset": 0,
+            "slot": "12",
+            "type": "t_uint256",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:86"
+          },
+          {
+            "label": "s_totalPools",
+            "offset": 0,
+            "slot": "13",
+            "type": "t_uint16",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:89"
+          },
+          {
+            "label": "s_totalBandLevels",
+            "offset": 2,
+            "slot": "13",
+            "type": "t_uint16",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:92"
+          },
+          {
+            "label": "s_bandUpgradesEnabled",
+            "offset": 4,
+            "slot": "13",
+            "type": "t_bool",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:95"
+          },
+          {
+            "label": "s_distributionInProgress",
+            "offset": 5,
+            "slot": "13",
+            "type": "t_bool",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:100"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "14",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:108"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)25_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(AccessControlStorage)34_storage": {
+            "label": "struct AccessControlUpgradeable.AccessControlStorage",
+            "members": [
+              {
+                "label": "_roles",
+                "type": "t_mapping(t_bytes32,t_struct(RoleData)25_storage)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(InitializableStorage)93_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoleData)25_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "hasRole",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint16)dyn_storage": {
+            "label": "uint16[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint48)dyn_storage": {
+            "label": "uint48[]",
+            "numberOfBytes": "32"
+          },
+          "t_contract(IERC20)1372": {
+            "label": "contract IERC20",
+            "numberOfBytes": "20"
+          },
+          "t_enum(StakingTypes)6011": {
+            "label": "enum IStaking.StakingTypes",
+            "members": [
+              "FIX",
+              "FLEXI"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_array(t_uint256)dyn_storage)": {
+            "label": "mapping(address => uint256[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_bytes32)": {
+            "label": "mapping(bytes32 => bytes32)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(StakerReward)6030_storage)": {
+            "label": "mapping(bytes32 => struct IStaking.StakerReward)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint16,t_struct(BandLevel)6036_storage)": {
+            "label": "mapping(uint16 => struct IStaking.BandLevel)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint16,t_struct(Pool)6039_storage)": {
+            "label": "mapping(uint16 => struct IStaking.Pool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(StakerBand)6025_storage)": {
+            "label": "mapping(uint256 => struct IStaking.StakerBand)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(AddressToUintMap)2753_storage": {
+            "label": "struct EnumerableMap.AddressToUintMap",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Bytes32ToBytes32Map)2095_storage",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(BandLevel)6036_storage": {
+            "label": "struct IStaking.BandLevel",
+            "members": [
+              {
+                "label": "price",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "accessiblePools",
+                "type": "t_array(t_uint16)dyn_storage",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Bytes32Set)3393_storage": {
+            "label": "struct EnumerableSet.Bytes32Set",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)3199_storage",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Bytes32ToBytes32Map)2095_storage": {
+            "label": "struct EnumerableMap.Bytes32ToBytes32Map",
+            "members": [
+              {
+                "label": "_keys",
+                "type": "t_struct(Bytes32Set)3393_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_values",
+                "type": "t_mapping(t_bytes32,t_bytes32)",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(Pool)6039_storage": {
+            "label": "struct IStaking.Pool",
+            "members": [
+              {
+                "label": "distributionPercentage",
+                "type": "t_uint48",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(Set)3199_storage": {
+            "label": "struct EnumerableSet.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_positions",
+                "type": "t_mapping(t_bytes32,t_uint256)",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(StakerBand)6025_storage": {
+            "label": "struct IStaking.StakerBand",
+            "members": [
+              {
+                "label": "owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "stakingStartDate",
+                "type": "t_uint32",
+                "offset": 20,
+                "slot": "0"
+              },
+              {
+                "label": "bandLevel",
+                "type": "t_uint16",
+                "offset": 24,
+                "slot": "0"
+              },
+              {
+                "label": "fixedMonths",
+                "type": "t_uint8",
+                "offset": 26,
+                "slot": "0"
+              },
+              {
+                "label": "stakingType",
+                "type": "t_enum(StakingTypes)6011",
+                "offset": 27,
+                "slot": "0"
+              },
+              {
+                "label": "areTokensVested",
+                "type": "t_bool",
+                "offset": 28,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(StakerReward)6030_storage": {
+            "label": "struct IStaking.StakerReward",
+            "members": [
+              {
+                "label": "unclaimedAmount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "claimedAmount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint16": {
+            "label": "uint16",
+            "numberOfBytes": "2"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint32": {
+            "label": "uint32",
+            "numberOfBytes": "4"
+          },
+          "t_uint48": {
+            "label": "uint48",
+            "numberOfBytes": "6"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.AccessControl": [
+            {
+              "contract": "AccessControlUpgradeable",
+              "label": "_roles",
+              "type": "t_mapping(t_bytes32,t_struct(RoleData)25_storage)",
+              "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:61",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "b507a5cb1c5724343a7891ef05bd928bf805ef86def4eabac762809af328d946": {
+      "address": "0x7db3ee46BafEaC3e8439672339077B361b179037",
+      "txHash": "0x5e73b550abec5862809bb367d5d636e468916821e1031b417dd1d70b5a4243f0",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [
+          {
+            "label": "s_users",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_struct(AddressToUintMap)2753_storage",
+            "contract": "StakingV2",
+            "src": "contracts/StakingV2.sol:53"
+          },
+          {
+            "label": "s_stakerBands",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
+            "contract": "StakingV2",
+            "src": "contracts/StakingV2.sol:56"
+          },
+          {
+            "label": "s_stakerRewards",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_mapping(t_bytes32,t_struct(StakerReward)6030_storage)",
+            "contract": "StakingV2",
+            "src": "contracts/StakingV2.sol:59"
+          },
+          {
+            "label": "s_bands",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_mapping(t_uint256,t_struct(StakerBand)6025_storage)",
+            "contract": "StakingV2",
+            "src": "contracts/StakingV2.sol:62"
+          },
+          {
+            "label": "s_poolData",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_mapping(t_uint16,t_struct(Pool)6039_storage)",
+            "contract": "StakingV2",
+            "src": "contracts/StakingV2.sol:65"
+          },
+          {
+            "label": "s_bandLevelData",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_mapping(t_uint16,t_struct(BandLevel)6036_storage)",
+            "contract": "StakingV2",
+            "src": "contracts/StakingV2.sol:68"
+          },
+          {
+            "label": "s_sharesInMonth",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_array(t_uint48)dyn_storage",
+            "contract": "StakingV2",
+            "src": "contracts/StakingV2.sol:74"
+          },
+          {
+            "label": "s_usdtToken",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_contract(IERC20)1372",
+            "contract": "StakingV2",
+            "src": "contracts/StakingV2.sol:77"
+          },
+          {
+            "label": "s_usdcToken",
+            "offset": 0,
+            "slot": "10",
+            "type": "t_contract(IERC20)1372",
+            "contract": "StakingV2",
+            "src": "contracts/StakingV2.sol:80"
+          },
+          {
+            "label": "s_wowToken",
+            "offset": 0,
+            "slot": "11",
+            "type": "t_contract(IERC20)1372",
+            "contract": "StakingV2",
+            "src": "contracts/StakingV2.sol:83"
+          },
+          {
+            "label": "s_nextBandId",
+            "offset": 0,
+            "slot": "12",
+            "type": "t_uint256",
+            "contract": "StakingV2",
+            "src": "contracts/StakingV2.sol:86"
+          },
+          {
+            "label": "s_totalPools",
+            "offset": 0,
+            "slot": "13",
+            "type": "t_uint16",
+            "contract": "StakingV2",
+            "src": "contracts/StakingV2.sol:89"
+          },
+          {
+            "label": "s_totalBandLevels",
+            "offset": 2,
+            "slot": "13",
+            "type": "t_uint16",
+            "contract": "StakingV2",
+            "src": "contracts/StakingV2.sol:92"
+          },
+          {
+            "label": "s_bandUpgradesEnabled",
+            "offset": 4,
+            "slot": "13",
+            "type": "t_bool",
+            "contract": "StakingV2",
+            "src": "contracts/StakingV2.sol:95"
+          },
+          {
+            "label": "s_distributionInProgress",
+            "offset": 5,
+            "slot": "13",
+            "type": "t_bool",
+            "contract": "StakingV2",
+            "src": "contracts/StakingV2.sol:100"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "14",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "StakingV2",
+            "src": "contracts/StakingV2.sol:108"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)25_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(AccessControlStorage)34_storage": {
+            "label": "struct AccessControlUpgradeable.AccessControlStorage",
+            "members": [
+              {
+                "label": "_roles",
+                "type": "t_mapping(t_bytes32,t_struct(RoleData)25_storage)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(InitializableStorage)93_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoleData)25_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "hasRole",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint16)dyn_storage": {
+            "label": "uint16[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint48)dyn_storage": {
+            "label": "uint48[]",
+            "numberOfBytes": "32"
+          },
+          "t_contract(IERC20)1372": {
+            "label": "contract IERC20",
+            "numberOfBytes": "20"
+          },
+          "t_enum(StakingTypes)6011": {
+            "label": "enum IStaking.StakingTypes",
+            "members": [
+              "FIX",
+              "FLEXI"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_array(t_uint256)dyn_storage)": {
+            "label": "mapping(address => uint256[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_bytes32)": {
+            "label": "mapping(bytes32 => bytes32)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(StakerReward)6030_storage)": {
+            "label": "mapping(bytes32 => struct IStaking.StakerReward)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint16,t_struct(BandLevel)6036_storage)": {
+            "label": "mapping(uint16 => struct IStaking.BandLevel)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint16,t_struct(Pool)6039_storage)": {
+            "label": "mapping(uint16 => struct IStaking.Pool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(StakerBand)6025_storage)": {
+            "label": "mapping(uint256 => struct IStaking.StakerBand)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(AddressToUintMap)2753_storage": {
+            "label": "struct EnumerableMap.AddressToUintMap",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Bytes32ToBytes32Map)2095_storage",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(BandLevel)6036_storage": {
+            "label": "struct IStaking.BandLevel",
+            "members": [
+              {
+                "label": "price",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "accessiblePools",
+                "type": "t_array(t_uint16)dyn_storage",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Bytes32Set)3393_storage": {
+            "label": "struct EnumerableSet.Bytes32Set",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)3199_storage",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Bytes32ToBytes32Map)2095_storage": {
+            "label": "struct EnumerableMap.Bytes32ToBytes32Map",
+            "members": [
+              {
+                "label": "_keys",
+                "type": "t_struct(Bytes32Set)3393_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_values",
+                "type": "t_mapping(t_bytes32,t_bytes32)",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(Pool)6039_storage": {
+            "label": "struct IStaking.Pool",
+            "members": [
+              {
+                "label": "distributionPercentage",
+                "type": "t_uint48",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(Set)3199_storage": {
+            "label": "struct EnumerableSet.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_positions",
+                "type": "t_mapping(t_bytes32,t_uint256)",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(StakerBand)6025_storage": {
+            "label": "struct IStaking.StakerBand",
+            "members": [
+              {
+                "label": "owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "stakingStartDate",
+                "type": "t_uint32",
+                "offset": 20,
+                "slot": "0"
+              },
+              {
+                "label": "bandLevel",
+                "type": "t_uint16",
+                "offset": 24,
+                "slot": "0"
+              },
+              {
+                "label": "fixedMonths",
+                "type": "t_uint8",
+                "offset": 26,
+                "slot": "0"
+              },
+              {
+                "label": "stakingType",
+                "type": "t_enum(StakingTypes)6011",
+                "offset": 27,
+                "slot": "0"
+              },
+              {
+                "label": "areTokensVested",
+                "type": "t_bool",
+                "offset": 28,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(StakerReward)6030_storage": {
+            "label": "struct IStaking.StakerReward",
+            "members": [
+              {
+                "label": "unclaimedAmount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "claimedAmount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint16": {
+            "label": "uint16",
+            "numberOfBytes": "2"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint32": {
+            "label": "uint32",
+            "numberOfBytes": "4"
+          },
+          "t_uint48": {
+            "label": "uint48",
+            "numberOfBytes": "6"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.AccessControl": [
+            {
+              "contract": "AccessControlUpgradeable",
+              "label": "_roles",
+              "type": "t_mapping(t_bytes32,t_struct(RoleData)25_storage)",
+              "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:61",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "d1c219c02fe71c92c7a3db21bf3cc8d47568b120cead5fecfa65b2a01bbe8bd6": {
+      "address": "0xab5159612155af121C2867194386E5eB79729c99",
+      "txHash": "0xc437ae37ce4465165b7ad6b21ff10e1549aeab2d0f53f742edb3b3340263e6f4",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [
+          {
+            "label": "s_users",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_struct(AddressToUintMap)2753_storage",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:53"
+          },
+          {
+            "label": "s_stakerBands",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:56"
+          },
+          {
+            "label": "s_stakerRewards",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_mapping(t_bytes32,t_struct(StakerReward)6137_storage)",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:59"
+          },
+          {
+            "label": "s_bands",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_mapping(t_uint256,t_struct(StakerBand)6132_storage)",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:62"
+          },
+          {
+            "label": "s_poolDistributionPercentages",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_mapping(t_uint16,t_uint32)",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:65"
+          },
+          {
+            "label": "s_bandLevelPrice",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_mapping(t_uint16,t_uint256)",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:69"
+          },
+          {
+            "label": "s_sharesInMonth",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_array(t_uint48)dyn_storage",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:75"
+          },
+          {
+            "label": "s_usdtToken",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_contract(IERC20)1372",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:78"
+          },
+          {
+            "label": "s_usdcToken",
+            "offset": 0,
+            "slot": "10",
+            "type": "t_contract(IERC20)1372",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:81"
+          },
+          {
+            "label": "s_wowToken",
+            "offset": 0,
+            "slot": "11",
+            "type": "t_contract(IERC20)1372",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:84"
+          },
+          {
+            "label": "s_nextBandId",
+            "offset": 0,
+            "slot": "12",
+            "type": "t_uint256",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:87"
+          },
+          {
+            "label": "s_totalPools",
+            "offset": 0,
+            "slot": "13",
+            "type": "t_uint16",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:90"
+          },
+          {
+            "label": "s_totalBandLevels",
+            "offset": 2,
+            "slot": "13",
+            "type": "t_uint16",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:93"
+          },
+          {
+            "label": "s_bandUpgradesEnabled",
+            "offset": 4,
+            "slot": "13",
+            "type": "t_bool",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:96"
+          },
+          {
+            "label": "s_distributionInProgress",
+            "offset": 5,
+            "slot": "13",
+            "type": "t_bool",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:101"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "14",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "Staking",
+            "src": "contracts/Staking.sol:109"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)25_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(AccessControlStorage)34_storage": {
+            "label": "struct AccessControlUpgradeable.AccessControlStorage",
+            "members": [
+              {
+                "label": "_roles",
+                "type": "t_mapping(t_bytes32,t_struct(RoleData)25_storage)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(InitializableStorage)93_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoleData)25_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "hasRole",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint48)dyn_storage": {
+            "label": "uint48[]",
+            "numberOfBytes": "32"
+          },
+          "t_contract(IERC20)1372": {
+            "label": "contract IERC20",
+            "numberOfBytes": "20"
+          },
+          "t_enum(StakingTypes)6116": {
+            "label": "enum IStaking.StakingTypes",
+            "members": [
+              "FIX",
+              "FLEXI"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_array(t_uint256)dyn_storage)": {
+            "label": "mapping(address => uint256[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_bytes32)": {
+            "label": "mapping(bytes32 => bytes32)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(StakerReward)6137_storage)": {
+            "label": "mapping(bytes32 => struct IStaking.StakerReward)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint16,t_uint256)": {
+            "label": "mapping(uint16 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint16,t_uint32)": {
+            "label": "mapping(uint16 => uint32)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(StakerBand)6132_storage)": {
+            "label": "mapping(uint256 => struct IStaking.StakerBand)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(AddressToUintMap)2753_storage": {
+            "label": "struct EnumerableMap.AddressToUintMap",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Bytes32ToBytes32Map)2095_storage",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(Bytes32Set)3393_storage": {
+            "label": "struct EnumerableSet.Bytes32Set",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)3199_storage",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Bytes32ToBytes32Map)2095_storage": {
+            "label": "struct EnumerableMap.Bytes32ToBytes32Map",
+            "members": [
+              {
+                "label": "_keys",
+                "type": "t_struct(Bytes32Set)3393_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_values",
+                "type": "t_mapping(t_bytes32,t_bytes32)",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(Set)3199_storage": {
+            "label": "struct EnumerableSet.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_positions",
+                "type": "t_mapping(t_bytes32,t_uint256)",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(StakerBand)6132_storage": {
+            "label": "struct IStaking.StakerBand",
+            "members": [
+              {
+                "label": "purchasePrice",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "stakingStartDate",
+                "type": "t_uint32",
+                "offset": 20,
+                "slot": "1"
+              },
+              {
+                "label": "bandLevel",
+                "type": "t_uint16",
+                "offset": 24,
+                "slot": "1"
+              },
+              {
+                "label": "fixedMonths",
+                "type": "t_uint8",
+                "offset": 26,
+                "slot": "1"
+              },
+              {
+                "label": "stakingType",
+                "type": "t_enum(StakingTypes)6116",
+                "offset": 27,
+                "slot": "1"
+              },
+              {
+                "label": "areTokensVested",
+                "type": "t_bool",
+                "offset": 28,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(StakerReward)6137_storage": {
+            "label": "struct IStaking.StakerReward",
+            "members": [
+              {
+                "label": "unclaimedAmount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "claimedAmount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint16": {
+            "label": "uint16",
+            "numberOfBytes": "2"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint32": {
+            "label": "uint32",
+            "numberOfBytes": "4"
+          },
+          "t_uint48": {
+            "label": "uint48",
+            "numberOfBytes": "6"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.AccessControl": [
+            {
+              "contract": "AccessControlUpgradeable",
+              "label": "_roles",
+              "type": "t_mapping(t_bytes32,t_struct(RoleData)25_storage)",
+              "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:61",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

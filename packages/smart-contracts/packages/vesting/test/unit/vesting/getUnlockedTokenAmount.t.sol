@@ -313,7 +313,7 @@ contract Vesting_GetUnlockedTokenAmount_Unit_Test is Unit_Test {
         assertEq(
             unlockedAmount,
             LISTING_AND_CLIFF_TOKEN_AMOUNT +
-                (VESTING_TOKEN_AMOUNT / VESTING_DURATION_IN_MONTHS),
+                (VESTING_TOKEN_AMOUNT / DURATION_3_MONTHS),
             "Unlocked amount incorrect"
         );
     }
@@ -340,7 +340,7 @@ contract Vesting_GetUnlockedTokenAmount_Unit_Test is Unit_Test {
         assertEq(
             unlockedAmount,
             LISTING_AND_CLIFF_TOKEN_AMOUNT +
-                (VESTING_TOKEN_AMOUNT / VESTING_DURATION_IN_MONTHS) -
+                (VESTING_TOKEN_AMOUNT / DURATION_3_MONTHS) -
                 alreadyClaimedAmount,
             "Unlocked amount incorrect"
         );
@@ -361,7 +361,7 @@ contract Vesting_GetUnlockedTokenAmount_Unit_Test is Unit_Test {
         assertEq(
             unlockedAmount,
             LISTING_AND_CLIFF_TOKEN_AMOUNT +
-                ((VESTING_TOKEN_AMOUNT * 2) / VESTING_DURATION_IN_MONTHS),
+                ((VESTING_TOKEN_AMOUNT * 2) / DURATION_3_MONTHS),
             "Unlocked amount incorrect"
         );
     }
@@ -388,7 +388,7 @@ contract Vesting_GetUnlockedTokenAmount_Unit_Test is Unit_Test {
         assertEq(
             unlockedAmount,
             LISTING_AND_CLIFF_TOKEN_AMOUNT +
-                ((VESTING_TOKEN_AMOUNT * 2) / VESTING_DURATION_IN_MONTHS) -
+                ((VESTING_TOKEN_AMOUNT * 2) / DURATION_3_MONTHS) -
                 alreadyClaimedAmount,
             "Unlocked amount incorrect"
         );

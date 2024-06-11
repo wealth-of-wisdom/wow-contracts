@@ -85,7 +85,7 @@ contract Vesting_ChangeListingDate_Unit_Test is Unit_Test {
         (uint32 vestingEndDate, , ) = vesting.getPoolVestingData(PRIMARY_POOL);
         assertEq(
             vestingEndDate,
-            NEW_LISTING_DATE + CLIFF_IN_SECONDS + VESTING_DURATION_IN_SECONDS
+            NEW_LISTING_DATE + CLIFF_IN_SECONDS + DURATION_3_MONTHS_IN_SECONDS
         );
     }
 
@@ -101,13 +101,13 @@ contract Vesting_ChangeListingDate_Unit_Test is Unit_Test {
         (uint32 vestingEndDate, , ) = vesting.getPoolVestingData(PRIMARY_POOL);
         assertEq(
             vestingEndDate,
-            NEW_LISTING_DATE + CLIFF_IN_SECONDS + VESTING_DURATION_IN_SECONDS
+            NEW_LISTING_DATE + CLIFF_IN_SECONDS + DURATION_3_MONTHS_IN_SECONDS
         );
 
         (vestingEndDate, , ) = vesting.getPoolVestingData(SECONDARY_POOL);
         assertEq(
             vestingEndDate,
-            NEW_LISTING_DATE + CLIFF_IN_SECONDS + VESTING_DURATION_IN_SECONDS
+            NEW_LISTING_DATE + CLIFF_IN_SECONDS + DURATION_3_MONTHS_IN_SECONDS
         );
     }
 
