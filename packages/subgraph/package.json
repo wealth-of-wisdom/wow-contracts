@@ -11,10 +11,10 @@
         "create-local": "yarn graph create --node http://localhost:8020/ wealth-of-wisdom/vesting",
         "remove-local": "yarn graph remove --node http://localhost:8020/ wealth-of-wisdom/vesting",
         "deploy-local": "yarn graph deploy wow/subgraph --node https://deploy.stream.superhow.net --ipfs https://ipfs.stream.superhow.net --version-label 0.0.1 sepolia.subgraph.yaml",
-        "deploy:sepolia": "yarn graph deploy --product hosted-service wealth-of-wisdom/subgraph-sepolia sepolia.subgraph.yaml",
-        "deploy:mainnet": "yarn graph deploy --product hosted-service wealth-of-wisdom/subgraph-eth mainnet.subgraph.yaml",
-        "deploy:arbitrum-sepolia": "yarn graph deploy --product hosted-service wealth-of-wisdom/subgraph-arbitrum-sepolia arbitrum-sepolia.subgraph.yaml",
-        "deploy:arbitrum-one": "yarn graph deploy --product hosted-service wealth-of-wisdom/subgraph-arbitrum-one arbitrum-one.subgraph.yaml"
+        "deploy:sepolia": "yarn graph deploy --studio subgraph-arbitrum-sepolia sepolia.subgraph.yaml",
+        "deploy:mainnet": "yarn graph deploy --studio subgraph-arbitrum-one mainnet.subgraph.yaml",
+        "deploy:arbitrum-sepolia": "yarn graph deploy --studio subgraph-arbitrum-sepolia arbitrum-sepolia.subgraph.yaml",
+        "deploy:arbitrum-one": "yarn graph deploy --studio subgraph-arbitrum-one arbitrum-one.subgraph.yaml"
     },
     "dependencies": {
         "@graphprotocol/graph-cli": "^0.71.0",

@@ -29,7 +29,7 @@ import {
     updatePoolVestingData,
 } from "../helpers/vesting.helpers";
 import { Address, BigDecimal, BigInt, store } from "@graphprotocol/graph-ts";
-import { BIGINT_ZERO, DAY_IN_SECONDS } from "../utils/constants";
+import { BIGINT_ZERO } from "../utils/constants";
 
 /**
  * Handles the Initialized event triggered when the contract is initialized.
