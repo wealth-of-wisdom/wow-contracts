@@ -23,7 +23,9 @@
         "add-beneficiaries:ethereum": "npx hardhat run scripts/sub-tasks/addBeneficiaries.js --network ethereum",
         "add-beneficiaries:sepolia": "npx hardhat run scripts/sub-tasks/addBeneficiaries.js --network sepolia",
         "add-beneficiaries:arbitrum-one": "npx hardhat run scripts/sub-tasks/addBeneficiaries.js --network arbitrumOne",
-        "add-beneficiaries:arbitrum-sepolia": "npx hardhat run scripts/sub-tasks/addBeneficiaries.js --network arbitrumSepolia"
+        "add-beneficiaries:arbitrum-sepolia": "npx hardhat run scripts/sub-tasks/addBeneficiaries.js --network arbitrumSepolia",
+        "upgrade-vesting:arbitrum-one": "npx hardhat run scripts/sub-tasks/upgradeVesting.js --network arbitrumOne",
+        "upgrade-vesting:arbitrum-sepolia": "npx hardhat run scripts/sub-tasks/upgradeVesting.js --network arbitrumSepolia"
     },
     "dependencies": {
         "@wealth-of-wisdom/staking": "1.0.0"
