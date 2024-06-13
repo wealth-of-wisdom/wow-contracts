@@ -1,3 +1,4 @@
+// @ts-ignore
 const { ethers } = require("hardhat")
 
 async function setupVestingPermissions(vestingAddress, nftAddress) {

@@ -1,5 +1,5 @@
 const deployVesting = require("./helpers/deployVesting")
-const addVestingPools = require("./helpers/addVestingPools")
+const { addVestingPoolsFromFile } = require("./helpers/addVestingPools")
 const verifyVesting = require("./helpers/verifyVesting")
 const copyTokenContracts = require("./helpers/copyTokenContracts")
 const removeTokenContracts = require("./helpers/removeTokenContracts")
@@ -28,7 +28,7 @@ async function main() {
                                   ADD VESTING POOLS
     //////////////////////////////////////////////////////////////////////////*/
 
-    await addVestingPools(vestingToken, vestingAddress)
+    await addVestingPoolsFromFile(vestingToken, vestingAddress)
 
     /*//////////////////////////////////////////////////////////////////////////
                           SETUP VESTING ROLES & PERMISSIONS

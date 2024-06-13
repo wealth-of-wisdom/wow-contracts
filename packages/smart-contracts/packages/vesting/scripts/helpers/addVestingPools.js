@@ -1,3 +1,4 @@
+// @ts-ignore
 const { network, ethers } = require("hardhat")
 const poolsDataDev = require("../data/dev/vestingPools.json")
 const poolsDataProd = require("../data/prod/vestingPools.json")
@@ -11,12 +12,17 @@ const {
     MONTHLY_UNLOCK_TYPE_STR,
 } = require("./constants")
 
-async function addVestingPools(tokenAddress, vestingAddress) {
-    const token = await ethers.getContractAt("WOWToken", tokenAddress)
-    const vesting = await ethers.getContractAt("Vesting", vestingAddress)
+async function addVestingPoolsFromFile(tokenAddress, vestingAddress) {
     const poolsData = MAINNET_NETWORKS.includes(network.name)
         ? poolsDataProd
         : poolsDataDev
+
+    await addVestingPools(tokenAddress, vestingAddress, poolsData)
+}
+
+async function addVestingPools(tokenAddress, vestingAddress, poolsData) {
+    const token = await ethers.getContractAt("WOWToken", tokenAddress)
+    const vesting = await ethers.getContractAt("Vesting", vestingAddress)
 
     /*//////////////////////////////////////////////////////////////////////////
                                 VALIDATE ALL THE DATA
@@ -132,4 +138,4 @@ async function validateData(data, decimals) {
     return allPoolsTokens
 }
 
-module.exports = addVestingPools
+module.exports = { addVestingPoolsFromFile, addVestingPools }

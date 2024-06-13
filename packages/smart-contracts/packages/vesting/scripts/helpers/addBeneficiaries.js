@@ -1,15 +1,21 @@
-const { ethers } = require("hardhat")
+// @ts-ignore
+const { network, ethers } = require("hardhat")
 const beneficiariesDataDev = require("../data/dev/vestingBeneficiaries.json")
 const beneficiariesDataProd = require("../data/prod/vestingBeneficiaries.json")
 const { MAINNET_NETWORKS, WOW_TOKEN_DECIMALS } = require("./constants")
 require("dotenv").config()
 
-async function addBeneficiaries(vestingAddress) {
-    const vesting = await ethers.getContractAt("Vesting", vestingAddress)
-    const poolsCount = await vesting.getPoolCount()
+async function addBeneficiariesFromFile(vestingAddress) {
     const beneficiaries = MAINNET_NETWORKS.includes(network.name)
         ? beneficiariesDataProd
         : beneficiariesDataDev
+
+    await addBeneficiaries(vestingAddress, beneficiaries)
+}
+
+async function addBeneficiaries(vestingAddress, beneficiaries) {
+    const vesting = await ethers.getContractAt("Vesting", vestingAddress)
+    const poolsCount = await vesting.getPoolCount()
 
     /*//////////////////////////////////////////////////////////////////////////
                                 VALIDATE ALL THE DATA
@@ -106,4 +112,4 @@ async function validateData(vesting, data, poolsCount, decimals) {
     console.log("Beneficiaries validated!")
 }
 
-module.exports = addBeneficiaries
+module.exports = { addBeneficiariesFromFile, addBeneficiaries }

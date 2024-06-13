@@ -1,3 +1,4 @@
+// @ts-ignore
 const { ethers, upgrades } = require("hardhat")
 
 async function deployVesting(vestingToken, stakingContract, listingDate) {

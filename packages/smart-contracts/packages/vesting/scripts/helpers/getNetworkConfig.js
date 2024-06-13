@@ -1,3 +1,4 @@
+// @ts-ignore
 const { ethers, network } = require("hardhat")
 const networkConfig = require("../data/networkConfig.json")
 const { TESTNET_NETWORKS } = require("./constants")
