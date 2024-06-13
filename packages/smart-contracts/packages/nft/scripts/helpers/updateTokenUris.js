@@ -1,5 +1,5 @@
 const { ethers } = require("hardhat")
-const tokenData = require("../data/tokenUpdateData.json")
+const tokenData = require("../data/tokenUpdateDataV2.json")
 
 // Pre-load and map levels to URIs
 const levels = tokenData.levels
