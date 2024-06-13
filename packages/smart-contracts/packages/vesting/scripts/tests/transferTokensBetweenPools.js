@@ -15,9 +15,8 @@ async function main() {
     // Test flow:
     // 1. Create 3 new pools (without beneficiaries) (Treasury, Team, Advisors)
     // 2. Add beneficiary to a treasury pool
-    // 3. Create a new treasury V2 pool
-    // 4. Decrease tokens for team and advisors pools
-    // 5. Increase tokens for treasury V2 with amount that were previously in 2 other pools.
+    // 3. Decrease tokens for team and advisors pools
+    // 4. Create a new pool treasury V2 with amount that were previously in 2 other pools.
 
     /*//////////////////////////////////////////////////////////////////////////
                                 COPY TOKEN CONTRACT
