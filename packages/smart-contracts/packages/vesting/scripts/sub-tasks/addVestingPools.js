@@ -1,4 +1,4 @@
-const addVestingPools = require("../helpers/addVestingPools")
+const { addVestingPoolsFromFile } = require("../helpers/addVestingPools")
 const copyTokenContracts = require("../helpers/copyTokenContracts")
 const removeTokenContracts = require("../helpers/removeTokenContracts")
 require("dotenv").config()
@@ -8,7 +8,7 @@ async function main() {
     await copyTokenContracts()
 
     // Add vesting pools
-    await addVestingPools(
+    await addVestingPoolsFromFile(
         process.env.VESTING_TOKEN,
         process.env.VESTING_CONTRACT,
     )

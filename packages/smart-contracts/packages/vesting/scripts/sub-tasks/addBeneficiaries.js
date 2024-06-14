@@ -1,8 +1,8 @@
-const addBeneficiaries = require("../helpers/addBeneficiaries")
+const { addBeneficiariesFromFile } = require("../helpers/addBeneficiaries")
 require("dotenv").config()
 
 async function main() {
-    await addBeneficiaries(process.env.VESTING_CONTRACT)
+    await addBeneficiariesFromFile(process.env.VESTING_CONTRACT)
 }
 
 main().catch((error) => {
