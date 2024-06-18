@@ -1,37 +1,23 @@
 // @ts-ignore
 const { ethers } = require("hardhat")
-const {
-    PERCENTAGE_DIVISOR,
-    WOW_TOKEN_DECIMALS,
-    DAILY_UNLOCK_TYPE_NUM,
-    MONTHLY_UNLOCK_TYPE_NUM,
-    DAILY_UNLOCK_TYPE_STR,
-} = require("./constants")
+const { PERCENTAGE_DIVISOR } = require("./constants")
 
 async function updateGeneralPoolsData(vestingAddress, generalPoolData) {
     const vesting = await ethers.getContractAt("Vesting", vestingAddress)
 
     for (let pool of generalPoolData) {
-        const poolId = pool.pool_id
-        const tokenAmountInWei = ethers.parseUnits(
-            pool.tokens_amount_in_wow,
-            WOW_TOKEN_DECIMALS,
-        )
-        const unlockType =
-            pool.unlock_type === DAILY_UNLOCK_TYPE_STR
-                ? DAILY_UNLOCK_TYPE_NUM
-                : MONTHLY_UNLOCK_TYPE_NUM
-
         const tx = await vesting.updateGeneralPoolData(
-            poolId,
+            pool.pool_id,
             pool.name,
-            unlockType,
-            tokenAmountInWei,
+            pool.unlock_type,
+            pool.tokens_amount_in_wei,
         )
 
         await tx.wait()
 
-        console.log(`Vesting pool's general data with id ${poolId} updated!`)
+        console.log(
+            `Vesting pool's general data with id ${pool.pool_id} updated!`,
+        )
     }
 }
 
@@ -46,7 +32,6 @@ async function updatePoolsListingData(vestingAddress, poolListingData) {
             pool.listing_release_percentage,
             PERCENTAGE_DIVISOR,
         )
-
         await tx.wait()
 
         console.log(`Vesting pool's listing data with id ${poolId} updated!`)

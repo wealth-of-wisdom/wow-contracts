@@ -11,6 +11,10 @@ const {
 } = require("../helpers/constants")
 require("dotenv").config()
 
+/**
+ * @notice This test is not updated and should be used as a reference only.
+ */
+
 async function main() {
     // Test flow:
     // 1. Create 3 new pools (without beneficiaries) (Treasury, Team, Advisors)
@@ -69,7 +73,7 @@ async function main() {
                             CREATE 3 NEW VESTING POOLS
     //////////////////////////////////////////////////////////////////////////*/
 
-    // await addVestingPools(wowTokenAddress, vestingAddress, poolsData)
+    await addVestingPools(wowTokenAddress, vestingAddress, poolsData)
 
     const vesting = await ethers.getContractAt("Vesting", vestingAddress)
     const poolsCount = Number(await vesting.getPoolCount())
@@ -102,15 +106,11 @@ async function main() {
     const newGeneralPoolsData = [
         {
             pool_id: teamPoolId,
-            name: "Team",
             tokens_amount_in_wow: "1000000",
-            unlock_type: DAILY_UNLOCK_TYPE_STR,
         },
         {
             pool_id: advisorsPoolId,
-            name: "Advisors",
             tokens_amount_in_wow: "2500000",
-            unlock_type: DAILY_UNLOCK_TYPE_STR,
         },
     ]
 

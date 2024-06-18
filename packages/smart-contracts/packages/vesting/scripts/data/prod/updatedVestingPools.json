@@ -1,0 +1,61 @@
+[
+    {
+        "pool_id": 6,
+        "name": "Team",
+        "tokens_amount_in_wow": "210000000"
+    },
+    {
+        "pool_id": 7,
+        "name": "Advisors",
+        "tokens_amount_in_wow": "10500000"
+    },
+    {
+        "pool_id": 8,
+        "name": "Contingency",
+        "tokens_amount_in_wow": "0"
+    },
+    {
+        "pool_id": 9,
+        "name": "Charity",
+        "tokens_amount_in_wow": "21000000"
+    },
+    {
+        "pool_id": 10,
+        "name": "Exchange Liquidity",
+        "tokens_amount_in_wow": "94500000",
+        "listing_release_percentage": 50
+    },
+    {
+        "pool_id": 12,
+        "name": "Marketing",
+        "tokens_amount_in_wow": "168000000",
+        "listing_release_percentage": 25
+    },
+    {
+        "pool_id": 13,
+        "name": "Development",
+        "tokens_amount_in_wow": "63000000",
+        "listing_release_percentage": 10
+    },
+    {
+        "pool_id": 14,
+        "name": "Stakers",
+        "tokens_amount_in_wow": "0"
+    },
+    {
+        "pool_id": 15,
+        "name": "Legal",
+        "tokens_amount_in_wow": "42000000",
+        "listing_release_percentage": 20
+    },
+    {
+        "pool_id": 16,
+        "name": "Partnerships",
+        "tokens_amount_in_wow": "42000000"
+    },
+    {
+        "pool_id": 17,
+        "name": "Rewards & Incentives",
+        "tokens_amount_in_wow": "84000000"
+    }
+]
