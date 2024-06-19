@@ -60,5 +60,8 @@
         "@gelatonetwork/web3-functions-sdk": "^2.4.0",
         "@urql/core": "^4.3.0",
         "graphql": "^16.8.1"
+    },
+    "resolutions": {
+        "ws": "8.17.1"
     }
 }
