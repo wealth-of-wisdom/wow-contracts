@@ -686,6 +686,343 @@
           ]
         }
       }
+    },
+    "b90da671d0f3256482d30184bdaca7b2a4f157f2b22e5afb874f5b2f25047839": {
+      "address": "0xdc79BDA3b8Ec1a855d4785f254aEa25311eAf1d2",
+      "txHash": "0x06b3973e461df0bf68302c4b556c601a96ba55a98ee5d2377b309b5ba3af30d2",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [
+          {
+            "label": "s_token",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_contract(IERC20)867",
+            "contract": "Vesting",
+            "src": "contracts/Vesting.sol:35"
+          },
+          {
+            "label": "s_staking",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(IStaking)1947",
+            "contract": "Vesting",
+            "src": "contracts/Vesting.sol:37"
+          },
+          {
+            "label": "s_vestingPools",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_mapping(t_uint16,t_struct(Pool)4189_storage)",
+            "contract": "Vesting",
+            "src": "contracts/Vesting.sol:39"
+          },
+          {
+            "label": "s_stakedPools",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_mapping(t_uint256,t_uint16)",
+            "contract": "Vesting",
+            "src": "contracts/Vesting.sol:41"
+          },
+          {
+            "label": "s_listingDate",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_uint32",
+            "contract": "Vesting",
+            "src": "contracts/Vesting.sol:43"
+          },
+          {
+            "label": "s_poolCount",
+            "offset": 4,
+            "slot": "4",
+            "type": "t_uint16",
+            "contract": "Vesting",
+            "src": "contracts/Vesting.sol:45"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)25_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(AccessControlStorage)34_storage": {
+            "label": "struct AccessControlUpgradeable.AccessControlStorage",
+            "members": [
+              {
+                "label": "_roles",
+                "type": "t_mapping(t_bytes32,t_struct(RoleData)25_storage)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(InitializableStorage)93_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoleData)25_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "hasRole",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_contract(IERC20)867": {
+            "label": "contract IERC20",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IStaking)1947": {
+            "label": "contract IStaking",
+            "numberOfBytes": "20"
+          },
+          "t_enum(UnlockTypes)4143": {
+            "label": "enum IVesting.UnlockTypes",
+            "members": [
+              "DAILY",
+              "MONTHLY"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_struct(Beneficiary)4156_storage)": {
+            "label": "mapping(address => struct IVesting.Beneficiary)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint16,t_struct(Pool)4189_storage)": {
+            "label": "mapping(uint16 => struct IVesting.Pool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_uint16)": {
+            "label": "mapping(uint256 => uint16)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Beneficiary)4156_storage": {
+            "label": "struct IVesting.Beneficiary",
+            "members": [
+              {
+                "label": "totalTokenAmount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "listingTokenAmount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "cliffTokenAmount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "vestedTokenAmount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "stakedTokenAmount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "claimedTokenAmount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "5"
+              }
+            ],
+            "numberOfBytes": "192"
+          },
+          "t_struct(Pool)4189_storage": {
+            "label": "struct IVesting.Pool",
+            "members": [
+              {
+                "label": "name",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "listingPercentageDividend",
+                "type": "t_uint16",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "listingPercentageDivisor",
+                "type": "t_uint16",
+                "offset": 2,
+                "slot": "1"
+              },
+              {
+                "label": "cliffInDays",
+                "type": "t_uint16",
+                "offset": 4,
+                "slot": "1"
+              },
+              {
+                "label": "cliffEndDate",
+                "type": "t_uint32",
+                "offset": 6,
+                "slot": "1"
+              },
+              {
+                "label": "cliffPercentageDividend",
+                "type": "t_uint16",
+                "offset": 10,
+                "slot": "1"
+              },
+              {
+                "label": "cliffPercentageDivisor",
+                "type": "t_uint16",
+                "offset": 12,
+                "slot": "1"
+              },
+              {
+                "label": "vestingDurationInMonths",
+                "type": "t_uint16",
+                "offset": 14,
+                "slot": "1"
+              },
+              {
+                "label": "vestingDurationInDays",
+                "type": "t_uint16",
+                "offset": 16,
+                "slot": "1"
+              },
+              {
+                "label": "vestingEndDate",
+                "type": "t_uint32",
+                "offset": 18,
+                "slot": "1"
+              },
+              {
+                "label": "unlockType",
+                "type": "t_enum(UnlockTypes)4143",
+                "offset": 22,
+                "slot": "1"
+              },
+              {
+                "label": "beneficiaries",
+                "type": "t_mapping(t_address,t_struct(Beneficiary)4156_storage)",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "totalPoolTokenAmount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "dedicatedPoolTokenAmount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              }
+            ],
+            "numberOfBytes": "160"
+          },
+          "t_uint16": {
+            "label": "uint16",
+            "numberOfBytes": "2"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint32": {
+            "label": "uint32",
+            "numberOfBytes": "4"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.AccessControl": [
+            {
+              "contract": "AccessControlUpgradeable",
+              "label": "_roles",
+              "type": "t_mapping(t_bytes32,t_struct(RoleData)25_storage)",
+              "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:61",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
     }
   }
 }
