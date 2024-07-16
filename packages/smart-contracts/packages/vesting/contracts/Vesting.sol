@@ -607,19 +607,19 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
             user.claimedTokenAmount -
             user.stakedTokenAmount;
 
-        // Checks: Unlocked tokens are not withdrawing from staked token pool
-        if (unlockedTokens > availableTokens) {
-            revert Errors.Vesting__StakedTokensCanNotBeClaimed();
-        }
+        // Checks: Ensure the unlocked tokens do not exceed the available tokens
+        uint256 claimableTokens = unlockedTokens > availableTokens
+            ? availableTokens
+            : unlockedTokens;
 
-        // Effects: Update user claimed token amount
-        user.claimedTokenAmount += unlockedTokens;
+        // Effects: Update the user's claimed token amount
+        user.claimedTokenAmount += claimableTokens;
 
         // Interactions: Transfer tokens to the user
-        s_token.safeTransfer(msg.sender, unlockedTokens);
+        s_token.safeTransfer(msg.sender, claimableTokens);
 
-        // Effects: Emit event
-        emit TokensClaimed(pid, msg.sender, unlockedTokens);
+        // Effects: Emit the TokensClaimed event
+        emit TokensClaimed(pid, msg.sender, claimableTokens);
     }
 
     /**
@@ -650,19 +650,18 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
                 user.claimedTokenAmount -
                 user.stakedTokenAmount;
 
-            // Checks: Unlocked tokens are not withdrawing from staked token pool
-            // if withdrawn - continue to other pool
-            if (unlockedTokens > availableTokens) {
-                continue;
-            }
+            // Checks: Ensure the unlocked tokens do not exceed the available tokens
+            uint256 claimableTokens = unlockedTokens > availableTokens
+                ? availableTokens
+                : unlockedTokens;
 
-            // Effects: Update user claimed token amount
-            user.claimedTokenAmount += unlockedTokens;
+            // Effects: Update the user's claimed token amount
+            user.claimedTokenAmount += claimableTokens;
 
-            allTokensToClaim += unlockedTokens;
+            allTokensToClaim += claimableTokens;
 
             // Effects: Emit event
-            emit TokensClaimed(i, msg.sender, unlockedTokens);
+            emit TokensClaimed(i, msg.sender, claimableTokens);
         }
 
         // Checks: At least some tokens are unlocked

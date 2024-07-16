@@ -52,25 +52,6 @@ contract Vesting_ClaimTokens_Unit_Test is Unit_Test {
         vesting.claimTokens(PRIMARY_POOL);
     }
 
-    function test_claimTokens_RevertIf_UnlockedMoreTokensThanAvailable()
-        external
-        approveAndAddPool
-        addBeneficiary(alice)
-    {
-        vm.warp(LISTING_DATE + 1 minutes);
-        vm.prank(alice);
-        vesting.stakeVestedTokens(
-            STAKING_TYPE_FIX,
-            BAND_LEVEL_1,
-            MONTH_1,
-            PRIMARY_POOL
-        );
-
-        vm.expectRevert(Errors.Vesting__StakedTokensCanNotBeClaimed.selector);
-        vm.prank(alice);
-        vesting.claimTokens(PRIMARY_POOL);
-    }
-
     function test_claimTokens_IncreasesClaimedTokensAmountWhenClaimingAfterListingDate()
         external
         approveAndAddPool
