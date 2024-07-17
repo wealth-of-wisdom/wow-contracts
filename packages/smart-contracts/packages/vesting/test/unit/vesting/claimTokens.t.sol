@@ -106,7 +106,7 @@ contract Vesting_ClaimTokens_Unit_Test is Unit_Test {
         assertEq(beneficiary.claimedTokenAmount, beneficiary.totalTokenAmount);
     }
 
-    function test_claimTokens_TransferAccumulatedAmountWhenClaimingAfterStaking()
+    function test_claimTokens_ClaimingAfterStaking()
         external
         approveAndAddPool
         addBeneficiary(alice)
@@ -126,7 +126,7 @@ contract Vesting_ClaimTokens_Unit_Test is Unit_Test {
         );
     }
 
-    function test_claimTokens_TransferAccumulatedAmountWhenClaimingAfterStakingAndWaitingToClaimAgain()
+    function test_claimTokens_ClaimingAfterStakingAndWaitingToClaimAgain()
         external
         approveAndAddPool
         addBeneficiary(alice)
@@ -150,7 +150,7 @@ contract Vesting_ClaimTokens_Unit_Test is Unit_Test {
         );
     }
 
-    function test_claimTokens_TransferAccumulatedAmountWhenClaimingAfterUnstaking()
+    function test_claimTokens_ClaimingAfterUnstaking()
         external
         approveAndAddPool
         addBeneficiary(alice)
@@ -169,7 +169,7 @@ contract Vesting_ClaimTokens_Unit_Test is Unit_Test {
         assertEq(beneficiary.claimedTokenAmount, beneficiary.totalTokenAmount);
     }
 
-    function test_claimTokens_TransferAccumulatedAmountWhenClaimingBeforeUnstakingAndThenClaimAgain()
+    function test_claimTokens_ClaimingBeforeUnstakingAndThenClaimAgain()
         external
         approveAndAddPool
         addBeneficiary(alice)
