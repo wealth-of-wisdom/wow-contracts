@@ -27,4 +27,5 @@ library Errors {
     error Vesting__NotEnoughStakedTokensForUnstaking();
     error Vesting__PoolHasBeneficiaries();
     error Vesting__PercentageOverflow();
+    error Vesting__NoAvailableTokens();
 }

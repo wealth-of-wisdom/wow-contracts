@@ -606,6 +606,9 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
             user,
             unlockedTokens
         );
+
+        if (claimableTokens == 0) revert Errors.Vesting__NoAvailableTokens();
+
         // Effects: Update the user's claimed token amount
         user.claimedTokenAmount += claimableTokens;
 
@@ -643,6 +646,8 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
                 user,
                 unlockedTokens
             );
+
+            if (claimableTokens == 0) continue;
 
             // Effects: Update the user's claimed token amount
             user.claimedTokenAmount += claimableTokens;
