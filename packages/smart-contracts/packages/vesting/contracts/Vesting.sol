@@ -601,17 +601,11 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         Pool storage pool = s_vestingPools[pid];
         Beneficiary storage user = pool.beneficiaries[msg.sender];
 
-        // Available tokens are the maximum amount that user should be able claim
-        // if all tokens are unlocked for the user,
-        uint256 availableTokens = user.totalTokenAmount -
-            user.claimedTokenAmount -
-            user.stakedTokenAmount;
-
         // Checks: Ensure the unlocked tokens do not exceed the available tokens
-        uint256 claimableTokens = unlockedTokens >= availableTokens
-            ? availableTokens
-            : unlockedTokens;
-
+        uint256 claimableTokens = _calculateClaimableTokens(
+            user,
+            unlockedTokens
+        );
         // Effects: Update the user's claimed token amount
         user.claimedTokenAmount += claimableTokens;
 
@@ -644,16 +638,11 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
             Pool storage pool = s_vestingPools[i];
             Beneficiary storage user = pool.beneficiaries[msg.sender];
 
-            // Available tokens are the maximum amount that user should be able claim
-            // if all tokens are unlocked for the user,
-            uint256 availableTokens = user.totalTokenAmount -
-                user.claimedTokenAmount -
-                user.stakedTokenAmount;
-
             // Checks: Ensure the unlocked tokens do not exceed the available tokens
-            uint256 claimableTokens = unlockedTokens > availableTokens
-                ? availableTokens
-                : unlockedTokens;
+            uint256 claimableTokens = _calculateClaimableTokens(
+                user,
+                unlockedTokens
+            );
 
             // Effects: Update the user's claimed token amount
             user.claimedTokenAmount += claimableTokens;
@@ -1103,6 +1092,23 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
         if (vestingDurationInMonths == 0) {
             revert Errors.Vesting__VestingDurationZero();
         }
+    }
+
+    /**
+     * @dev Internal function to calculate the claimable tokens for a beneficiary in a pool.
+     * @param user Beneficiary used to calculate claimable tokens
+     * @param unlockedTokens Total beneficiary unlocked token amount
+     * @return claimableTokens The amount of claimable tokens.
+     */
+    function _calculateClaimableTokens(
+        Beneficiary memory user,
+        uint256 unlockedTokens
+    ) internal pure returns (uint256) {
+        uint256 availableTokens = user.totalTokenAmount -
+            user.claimedTokenAmount -
+            user.stakedTokenAmount;
+        return
+            unlockedTokens > availableTokens ? availableTokens : unlockedTokens;
     }
 
     /**

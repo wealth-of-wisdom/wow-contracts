@@ -106,7 +106,7 @@ contract Vesting_ClaimTokens_Unit_Test is Unit_Test {
         assertEq(beneficiary.claimedTokenAmount, beneficiary.totalTokenAmount);
     }
 
-    function test_claimTokens_ClaimingAfterStaking()
+    function test_claimTokens_ClaimsAfterStaking()
         external
         approveAndAddPool
         addBeneficiary(alice)
@@ -126,7 +126,7 @@ contract Vesting_ClaimTokens_Unit_Test is Unit_Test {
         );
     }
 
-    function test_claimTokens_ClaimingAfterStakingAndWaitingToClaimAgain()
+    function test_claimTokens_ClaimsAfterStakingAndWaitingToClaimAgain()
         external
         approveAndAddPool
         addBeneficiary(alice)

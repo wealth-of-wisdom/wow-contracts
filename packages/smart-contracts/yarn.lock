@@ -774,7 +774,7 @@
     axios "^1.6.7"
     lodash "^4.17.21"
 
-"@openzeppelin/hardhat-upgrades@^3.0.5", "@openzeppelin/hardhat-upgrades@^3.2.0":
+"@openzeppelin/hardhat-upgrades@^3.0.5":
   version "3.2.0"
   resolved "https://registry.npmjs.org/@openzeppelin/hardhat-upgrades/-/hardhat-upgrades-3.2.0.tgz"
   integrity sha512-xybXIHQIZK2a1HH7ukMToRbIcU9LHfL49gtB0KYptY6f/r9lqrFOupN8aOBueRZW4Ymhc6HGL9bvj7u7t5lDdQ==

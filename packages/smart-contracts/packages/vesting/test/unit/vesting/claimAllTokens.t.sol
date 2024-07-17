@@ -466,7 +466,7 @@ contract Vesting_ClaimAllTokens_Unit_Test is Unit_Test {
         assertEq(tokenData2.claimedTokenAmount, tokenData2.totalTokenAmount);
     }
 
-    function test_claimAllTokens_MultiplePools_ClaimInBoth_UnstakeInBoth_AndClaimInOne()
+    function test_claimAllTokens_MultiplePools_ClaimInBoth_UnstakeInOne_AndClaimInBoth()
         external
         approveAndAddTwoPools
         addBeneficiaryToTwoPools(alice)
