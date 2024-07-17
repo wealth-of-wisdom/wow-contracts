@@ -310,7 +310,7 @@ contract Vesting_ClaimAllTokens_Unit_Test is Unit_Test {
         vm.prank(alice);
         vesting.stakeVestedTokens(
             STAKING_TYPE_FIX,
-            BAND_LEVEL_1,
+            BAND_LEVEL_3,
             MONTH_1,
             PRIMARY_POOL
         );

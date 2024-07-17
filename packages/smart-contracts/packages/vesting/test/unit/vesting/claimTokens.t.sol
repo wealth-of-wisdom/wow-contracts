@@ -106,6 +106,91 @@ contract Vesting_ClaimTokens_Unit_Test is Unit_Test {
         assertEq(beneficiary.claimedTokenAmount, beneficiary.totalTokenAmount);
     }
 
+    function test_claimTokens_TransferAccumulatedAmountWhenClaimingAfterStaking()
+        external
+        approveAndAddPool
+        addBeneficiary(alice)
+        stakeVestedTokens(alice)
+    {
+        vm.warp(LISTING_DATE + CLIFF_IN_SECONDS);
+        vm.prank(alice);
+        vesting.claimTokens(PRIMARY_POOL);
+
+        IVesting.Beneficiary memory beneficiary = vesting.getBeneficiary(
+            PRIMARY_POOL,
+            alice
+        );
+        assertEq(
+            beneficiary.claimedTokenAmount,
+            beneficiary.listingTokenAmount + beneficiary.cliffTokenAmount
+        );
+    }
+
+    function test_claimTokens_TransferAccumulatedAmountWhenClaimingAfterStakingAndWaitingToClaimAgain()
+        external
+        approveAndAddPool
+        addBeneficiary(alice)
+        stakeVestedTokens(alice)
+    {
+        vm.warp(LISTING_DATE + CLIFF_IN_SECONDS);
+        vm.startPrank(alice);
+        vesting.claimTokens(PRIMARY_POOL);
+
+        vm.warp(LISTING_DATE + CLIFF_IN_SECONDS + DURATION_3_MONTHS_IN_SECONDS);
+        vesting.claimTokens(PRIMARY_POOL);
+        vm.stopPrank();
+
+        IVesting.Beneficiary memory beneficiary = vesting.getBeneficiary(
+            PRIMARY_POOL,
+            alice
+        );
+        assertEq(
+            beneficiary.claimedTokenAmount,
+            beneficiary.totalTokenAmount - beneficiary.stakedTokenAmount
+        );
+    }
+
+    function test_claimTokens_TransferAccumulatedAmountWhenClaimingAfterUnstaking()
+        external
+        approveAndAddPool
+        addBeneficiary(alice)
+        stakeVestedTokens(alice)
+    {
+        vm.warp(LISTING_DATE + CLIFF_IN_SECONDS + DURATION_3_MONTHS_IN_SECONDS);
+        vm.startPrank(alice);
+        vesting.unstakeVestedTokens(BAND_ID_0);
+        vesting.claimTokens(PRIMARY_POOL);
+        vm.stopPrank();
+
+        IVesting.Beneficiary memory beneficiary = vesting.getBeneficiary(
+            PRIMARY_POOL,
+            alice
+        );
+        assertEq(beneficiary.claimedTokenAmount, beneficiary.totalTokenAmount);
+    }
+
+    function test_claimTokens_TransferAccumulatedAmountWhenClaimingBeforeUnstakingAndThenClaimAgain()
+        external
+        approveAndAddPool
+        addBeneficiary(alice)
+        stakeVestedTokens(alice)
+    {
+        vm.warp(LISTING_DATE + CLIFF_IN_SECONDS);
+        vm.startPrank(alice);
+        vesting.claimTokens(PRIMARY_POOL);
+
+        vm.warp(LISTING_DATE + CLIFF_IN_SECONDS + DURATION_3_MONTHS_IN_SECONDS);
+        vesting.unstakeVestedTokens(BAND_ID_0);
+        vesting.claimTokens(PRIMARY_POOL);
+        vm.stopPrank();
+
+        IVesting.Beneficiary memory beneficiary = vesting.getBeneficiary(
+            PRIMARY_POOL,
+            alice
+        );
+        assertEq(beneficiary.claimedTokenAmount, beneficiary.totalTokenAmount);
+    }
+
     function test_claimTokens_TransfersTokensToSender()
         external
         approveAndAddPool

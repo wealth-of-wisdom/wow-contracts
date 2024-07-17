@@ -608,7 +608,7 @@ contract Vesting is IVesting, Initializable, AccessControlUpgradeable {
             user.stakedTokenAmount;
 
         // Checks: Ensure the unlocked tokens do not exceed the available tokens
-        uint256 claimableTokens = unlockedTokens > availableTokens
+        uint256 claimableTokens = unlockedTokens >= availableTokens
             ? availableTokens
             : unlockedTokens;
 
