@@ -52,23 +52,23 @@ contract Vesting_ClaimTokens_Unit_Test is Unit_Test {
         vesting.claimTokens(PRIMARY_POOL);
     }
 
-    function test_claimTokens_RevertIf_UnlockedMoreTokensThanAvailable()
+    function test_claimTokens_RevertIf_NoAvailableTokens()
         external
         approveAndAddPool
         addBeneficiary(alice)
     {
         vm.warp(LISTING_DATE + 1 minutes);
-        vm.prank(alice);
+
+        vm.startPrank(alice);
         vesting.stakeVestedTokens(
             STAKING_TYPE_FIX,
-            BAND_LEVEL_1,
+            BAND_LEVEL_3,
             MONTH_1,
             PRIMARY_POOL
         );
-
-        vm.expectRevert(Errors.Vesting__StakedTokensCanNotBeClaimed.selector);
-        vm.prank(alice);
+        vm.expectRevert(Errors.Vesting__NoAvailableTokens.selector);
         vesting.claimTokens(PRIMARY_POOL);
+        vm.stopPrank();
     }
 
     function test_claimTokens_IncreasesClaimedTokensAmountWhenClaimingAfterListingDate()
@@ -117,6 +117,91 @@ contract Vesting_ClaimTokens_Unit_Test is Unit_Test {
         vm.warp(LISTING_DATE + CLIFF_IN_SECONDS + DURATION_3_MONTHS_IN_SECONDS);
         vm.prank(alice);
         vesting.claimTokens(PRIMARY_POOL);
+
+        IVesting.Beneficiary memory beneficiary = vesting.getBeneficiary(
+            PRIMARY_POOL,
+            alice
+        );
+        assertEq(beneficiary.claimedTokenAmount, beneficiary.totalTokenAmount);
+    }
+
+    function test_claimTokens_ClaimsAfterStaking()
+        external
+        approveAndAddPool
+        addBeneficiary(alice)
+        stakeVestedTokens(alice)
+    {
+        vm.warp(LISTING_DATE + CLIFF_IN_SECONDS);
+        vm.prank(alice);
+        vesting.claimTokens(PRIMARY_POOL);
+
+        IVesting.Beneficiary memory beneficiary = vesting.getBeneficiary(
+            PRIMARY_POOL,
+            alice
+        );
+        assertEq(
+            beneficiary.claimedTokenAmount,
+            beneficiary.listingTokenAmount + beneficiary.cliffTokenAmount
+        );
+    }
+
+    function test_claimTokens_ClaimsAfterStakingAndWaitingToClaimAgain()
+        external
+        approveAndAddPool
+        addBeneficiary(alice)
+        stakeVestedTokens(alice)
+    {
+        vm.warp(LISTING_DATE + CLIFF_IN_SECONDS);
+        vm.startPrank(alice);
+        vesting.claimTokens(PRIMARY_POOL);
+
+        vm.warp(LISTING_DATE + CLIFF_IN_SECONDS + DURATION_3_MONTHS_IN_SECONDS);
+        vesting.claimTokens(PRIMARY_POOL);
+        vm.stopPrank();
+
+        IVesting.Beneficiary memory beneficiary = vesting.getBeneficiary(
+            PRIMARY_POOL,
+            alice
+        );
+        assertEq(
+            beneficiary.claimedTokenAmount,
+            beneficiary.totalTokenAmount - beneficiary.stakedTokenAmount
+        );
+    }
+
+    function test_claimTokens_ClaimingAfterUnstaking()
+        external
+        approveAndAddPool
+        addBeneficiary(alice)
+        stakeVestedTokens(alice)
+    {
+        vm.warp(LISTING_DATE + CLIFF_IN_SECONDS + DURATION_3_MONTHS_IN_SECONDS);
+        vm.startPrank(alice);
+        vesting.unstakeVestedTokens(BAND_ID_0);
+        vesting.claimTokens(PRIMARY_POOL);
+        vm.stopPrank();
+
+        IVesting.Beneficiary memory beneficiary = vesting.getBeneficiary(
+            PRIMARY_POOL,
+            alice
+        );
+        assertEq(beneficiary.claimedTokenAmount, beneficiary.totalTokenAmount);
+    }
+
+    function test_claimTokens_ClaimingBeforeUnstakingAndThenClaimAgain()
+        external
+        approveAndAddPool
+        addBeneficiary(alice)
+        stakeVestedTokens(alice)
+    {
+        vm.warp(LISTING_DATE + CLIFF_IN_SECONDS);
+        vm.startPrank(alice);
+        vesting.claimTokens(PRIMARY_POOL);
+
+        vm.warp(LISTING_DATE + CLIFF_IN_SECONDS + DURATION_3_MONTHS_IN_SECONDS);
+        vesting.unstakeVestedTokens(BAND_ID_0);
+        vesting.claimTokens(PRIMARY_POOL);
+        vm.stopPrank();
 
         IVesting.Beneficiary memory beneficiary = vesting.getBeneficiary(
             PRIMARY_POOL,
