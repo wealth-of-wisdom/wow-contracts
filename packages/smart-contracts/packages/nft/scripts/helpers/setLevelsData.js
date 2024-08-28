@@ -1,4 +1,4 @@
-const levelsData = require("../data/levelsData.json")
+const levelsData = require("../data/updatedLevelsData.json")
 const { ethers } = require("hardhat")
 
 async function setLevelsData(nftAddress) {
