@@ -1,0 +1,72 @@
+[
+    {
+        "level": 1,
+        "isGenesis": false,
+        "price_in_usd": "988",
+        "vesting_rewards_in_wow": "1250",
+        "lifecycle_duration_in_months": 12,
+        "extension_duration_in_months": 0,
+        "allocation_per_project_in_usd": "1000",
+        "supply_cap": -1,
+        "base_uri": "https://ipfs.io/ipfs/QmZqRt7r6FVg2UpoYLzJE4YDDH2HmHUvfzY5vydzDqmrMw/",
+        "standard_projects_quantity": -1,
+        "premium_projects_quantity": 0,
+        "limited_projects_quantity": 0
+    },
+    {
+        "level": 2,
+        "isGenesis": false,
+        "price_in_usd": "4988",
+        "vesting_rewards_in_wow": "8500",
+        "lifecycle_duration_in_months": 24,
+        "extension_duration_in_months": 15,
+        "allocation_per_project_in_usd": "10000",
+        "supply_cap": -1,
+        "base_uri": "https://ipfs.io/ipfs/QmdgTkNTJR4TwZFR7fWiC3gH2D7PhTrW83sKuVVNfBCock/",
+        "standard_projects_quantity": -1,
+        "premium_projects_quantity": -1,
+        "limited_projects_quantity": 0
+    },
+    {
+        "level": 3,
+        "isGenesis": false,
+        "price_in_usd": "9988",
+        "vesting_rewards_in_wow": "25000",
+        "lifecycle_duration_in_months": 42,
+        "extension_duration_in_months": 18,
+        "allocation_per_project_in_usd": "25000",
+        "supply_cap": -1,
+        "base_uri": "https://ipfs.io/ipfs/QmRxUMgi8hFaWn5QySXxgGKGBRUGJ2dgBbmsSG5T8nBTkR/",
+        "standard_projects_quantity": -1,
+        "premium_projects_quantity": -1,
+        "limited_projects_quantity": 0
+    },
+    {
+        "level": 4,
+        "isGenesis": false,
+        "price_in_usd": "32988",
+        "vesting_rewards_in_wow": "82500",
+        "lifecycle_duration_in_months": 60,
+        "extension_duration_in_months": -1,
+        "allocation_per_project_in_usd": "100000",
+        "supply_cap": -1,
+        "base_uri": "https://ipfs.io/ipfs/QmYu2MAUTZGsCg4LPF3oAfAY9mnyeuKfzUnnMKKqEZspqn/",
+        "standard_projects_quantity": -1,
+        "premium_projects_quantity": -1,
+        "limited_projects_quantity": -1
+    },
+    {
+        "level": 5,
+        "isGenesis": false,
+        "price_in_usd": "99988",
+        "vesting_rewards_in_wow": "250000",
+        "lifecycle_duration_in_months": -1,
+        "extension_duration_in_months": 0,
+        "allocation_per_project_in_usd": "500000",
+        "supply_cap": 17,
+        "base_uri": "https://ipfs.io/ipfs/QmTSLWHgUUtRNMgBvLEb7FiXXxHU5vo9p8vUbxEnRigciz/",
+        "standard_projects_quantity": -1,
+        "premium_projects_quantity": -1,
+        "limited_projects_quantity": -1
+    }
+]
